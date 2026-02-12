@@ -2,7 +2,6 @@
 description: >
   Use when you need to transform poorly structured, complex, or duplicated code
   into clean, maintainable systems while preserving all existing behavior.
-  Specifically:.
 mode: subagent
 permission:
   write: allow

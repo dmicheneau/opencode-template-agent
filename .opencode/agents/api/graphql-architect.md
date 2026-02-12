@@ -2,7 +2,7 @@
 description: >
   Use this agent when designing or evolving GraphQL schemas across
   microservices, implementing federation architectures, or optimizing query
-  performance in distributed graphs. Specifically:.
+  performance in distributed graphs.
 mode: subagent
 permission:
   write: allow

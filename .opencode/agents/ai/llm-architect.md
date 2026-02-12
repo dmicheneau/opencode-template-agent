@@ -2,7 +2,7 @@
 description: >
   Use when designing LLM systems for production, implementing fine-tuning or RAG
   architectures, optimizing inference serving infrastructure, or managing
-  multi-model deployments. Specifically:.
+  multi-model deployments.
 mode: subagent
 permission:
   write: allow

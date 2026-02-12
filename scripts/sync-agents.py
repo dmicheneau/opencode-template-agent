@@ -425,16 +425,15 @@ def extract_short_description(long_desc: str, name: str) -> str:
     if len(sentences) > 2:
         desc = " ".join(sentences[:2])
 
+    # Remove "Specifically:" trailing text BEFORE ensuring period
+    # (otherwise "Specifically:" gets a "." appended first, breaking the regex)
+    desc = re.sub(r"\s*Specifically:[\s\\.]*$", "", desc)
+    # Clean trailing backslashes, dots, and whitespace
+    desc = re.sub(r"[\s\\.]+$", "", desc)
+
     # Ensure it ends with a period
     if desc and not desc.endswith((".", "!", "?")):
         desc += "."
-
-    # Remove "Specifically:" trailing text (including with escaped whitespace)
-    desc = re.sub(r"\s*Specifically:[\s\\]*$", ".", desc)
-    # Clean trailing backslashes and dots
-    desc = re.sub(r"[\s\\.]+$", ".", desc)
-    # Ensure single trailing period
-    desc = re.sub(r"\.{2,}$", ".", desc)
 
     return desc
 
@@ -621,6 +620,13 @@ def discover_all_agents(repo: str) -> Dict[str, str]:
                 and fname.lower() != "readme.md"
             ):
                 agent_name = fname[:-3]  # strip .md
+                # Security: reject suspicious agent names (path traversal)
+                if ".." in agent_name or "/" in agent_name or "\\" in agent_name:
+                    print(
+                        f"  [SECURITY] Skipping suspicious agent name: {agent_name}",
+                        file=sys.stderr,
+                    )
+                    continue
                 all_agents[agent_name] = f"{cat_name}/{agent_name}"
 
     return all_agents
@@ -748,6 +754,15 @@ def sync_agent(
     oc_category = _get_opencode_category(category)
     mode = "primary" if name in PRIMARY_AGENTS else "subagent"
     out_path = output_dir / f"{relative_path}.md"
+
+    # Security: ensure the resolved path stays under the output directory
+    resolved_out = out_path.resolve()
+    resolved_base = output_dir.resolve()
+    if not str(resolved_out).startswith(str(resolved_base) + "/") and resolved_out != resolved_base:
+        raise ValueError(
+            f"[SECURITY] Path traversal detected: {out_path} resolves to "
+            f"{resolved_out}, which is outside {resolved_base}"
+        )
 
     # Build permission dict for manifest
     perms = build_permissions(meta.get("tools", ""))

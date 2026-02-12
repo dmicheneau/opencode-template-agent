@@ -2,7 +2,7 @@
 description: >
   Use this agent when building production ML systems requiring model training
   pipelines, model serving infrastructure, performance optimization, and
-  automated retraining. Specifically:.
+  automated retraining.
 mode: subagent
 permission:
   write: allow

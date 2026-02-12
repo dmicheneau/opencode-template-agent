@@ -1,7 +1,7 @@
 ---
 description: >
   Use this agent when you need to build complete features spanning database,
-  API, and frontend layers together as a cohesive unit. Specifically:.
+  API, and frontend layers together as a cohesive unit.
 mode: primary
 permission:
   write: allow

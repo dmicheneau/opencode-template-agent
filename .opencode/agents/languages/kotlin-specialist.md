@@ -2,7 +2,7 @@
 description: >
   Use when building Kotlin applications requiring advanced coroutine patterns,
   multiplatform code sharing, or Android/server-side development with functional
-  programming principles. Specifically:.
+  programming principles.
 mode: subagent
 permission:
   write: allow

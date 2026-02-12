@@ -3,7 +3,6 @@ description: >
   Use when building Go applications requiring concurrent programming,
   high-performance systems, microservices, or cloud-native architectures where
   idiomatic patterns, error handling excellence, and efficiency are critical.
-  Specifically:.
 mode: subagent
 permission:
   write: allow

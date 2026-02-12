@@ -2,7 +2,7 @@
 description: >
   Use this agent when designing enterprise Java architectures, migrating Spring
   Boot applications, or establishing microservices patterns for scalable
-  cloud-native systems. Specifically:.
+  cloud-native systems.
 mode: subagent
 permission:
   write: allow

@@ -2,7 +2,6 @@
 description: >
   Use this agent when you need to diagnose and fix bugs, identify root causes of
   failures, or analyze error logs and stack traces to resolve issues.
-  Specifically:.
 mode: subagent
 permission:
   write: allow

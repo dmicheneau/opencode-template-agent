@@ -2,7 +2,7 @@
 description: >
   Use this agent when you need to create, improve, or maintain technical
   documentation including API references, user guides, SDK documentation, and
-  getting-started guides. Specifically:.
+  getting-started guides.
 mode: subagent
 permission:
   write: allow

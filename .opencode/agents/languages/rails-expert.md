@@ -2,7 +2,7 @@
 description: >
   Use when building or modernizing Rails applications requiring full-stack
   development, Hotwire reactivity, real-time features, or Rails-idiomatic
-  patterns for maximum productivity. Specifically:.
+  patterns for maximum productivity.
 mode: subagent
 permission:
   write: allow

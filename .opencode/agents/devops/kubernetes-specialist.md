@@ -1,7 +1,7 @@
 ---
 description: >
   Use this agent when you need to design, deploy, configure, or troubleshoot
-  Kubernetes clusters and workloads in production environments. Specifically:.
+  Kubernetes clusters and workloads in production environments.
 mode: subagent
 permission:
   write: allow

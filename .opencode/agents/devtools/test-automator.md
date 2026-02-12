@@ -2,7 +2,6 @@
 description: >
   Use this agent when you need to build, implement, or enhance automated test
   frameworks, create test scripts, or integrate testing into CI/CD pipelines.
-  Specifically:.
 mode: subagent
 permission:
   write: allow

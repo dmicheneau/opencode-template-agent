@@ -1,0 +1,31 @@
+# Environment & secrets
+.env
+.env.*
+*.secret
+*.key
+credentials.*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# System
+.DS_Store
+Thumbs.db
+
+# Editor
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Cache
+.ruff_cache/
+
+# Node (si présent)
+node_modules/

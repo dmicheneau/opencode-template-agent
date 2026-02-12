@@ -2,7 +2,6 @@
 description: >
   Use this agent when you need to make product strategy decisions, prioritize
   features, or define roadmap plans based on user needs and business goals.
-  Specifically:.
 mode: subagent
 permission:
   write: allow

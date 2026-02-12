@@ -2,7 +2,7 @@
 description: >
   Use this agent when architecting, implementing, or optimizing end-to-end AI
   systems—from model selection and training pipelines to production deployment
-  and monitoring. Specifically:.
+  and monitoring.
 mode: subagent
 permission:
   write: allow

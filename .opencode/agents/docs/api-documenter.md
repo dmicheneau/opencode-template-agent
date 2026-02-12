@@ -2,7 +2,7 @@
 description: >
   Use this agent when creating or improving API documentation, writing OpenAPI
   specifications, building interactive documentation portals, or generating code
-  examples for APIs. Specifically:.
+  examples for APIs.
 mode: subagent
 permission:
   write: allow

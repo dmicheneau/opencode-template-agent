@@ -1,7 +1,7 @@
 ---
 description: >
   Use this agent when you need to conduct comprehensive code reviews focusing on
-  code quality, security vulnerabilities, and best practices. Specifically:.
+  code quality, security vulnerabilities, and best practices.
 mode: subagent
 permission:
   write: allow
