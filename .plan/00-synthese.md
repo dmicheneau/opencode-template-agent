@@ -8,7 +8,7 @@ Transformer le registre aitmpl.com (399 agents Claude Code) en une collection cu
 
 | Composant | État | Détails |
 |-----------|------|---------|
-| Registre d'agents | ✅ Fait | 43 agents (4 primary + 40 subagents) |
+| Registre d'agents | ✅ Fait | 44 agents (4 primary + 40 subagents) — 43 synchronisés + 1 custom |
 | Format moderne | ✅ Fait | `permission:` uniquement (pas `tools:` déprécié) |
 | Organisation par catégorie | ✅ Fait | 11 sous-répertoires (nested agents) |
 | Script de synchronisation | ✅ Fait | `sync-agents.py` — fetch GitHub → convert → write |
@@ -50,7 +50,7 @@ Tab                          → Naviguer entre les 4 agents principaux
 ## Chiffres clés
 
 - **Source** : 399 agents dans 27 catégories (davila7/claude-code-templates, 20k+ ⭐)
-- **Curés** : 43 agents dans 11 catégories
+- **Curés** : 44 agents dans 11 catégories (43 synchronisés + 1 custom)
 - **Taux de couverture** : ~11% des agents source (les plus pertinents pour le dev)
-- **Profils de permissions** : 4 (full-access, read-only, primary, docs/business)
+- **Profils de permissions** : 5 (full-access, read-only, analysis, content, primary)
 - **Format** : Markdown + YAML frontmatter, pur OpenCode natif

@@ -8,7 +8,7 @@ La stratégie adoptée est un système à **3 niveaux** (tiers) permettant de co
 
 ---
 
-## Tier 1 — Core (43 agents) ✅ Actif
+## Tier 1 — Core (43 agents synchronisés + 1 custom = 44 total) ✅ Actif
 
 ### Objectif
 Couvrir les besoins de développement les plus courants avec un ratio signal/bruit maximal.
@@ -34,8 +34,8 @@ Couvrir les besoins de développement les plus courants avec un ratio signal/bru
 | `api/` | 2 | api-architect, graphql-architect |
 | `docs/` | 3 | documentation-engineer, api-documenter, technical-writer |
 | `business/` | 3 | product-manager, scrum-master, project-manager |
-| `team/` | 2 | fullstack-developer (primary), ui-designer |
-| **Primary** | 3 | fullstack-developer, devops-engineer, cloud-architect |
+| `team/` | 2 | ui-designer, mobile-developer |
+| **Primary (racine)** | 4 | episode-orchestrator (custom), fullstack-developer, devops-engineer, cloud-architect |
 
 ### Commande
 ```bash

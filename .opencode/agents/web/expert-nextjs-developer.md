@@ -4,9 +4,14 @@ description: >
   Cache Components, Turbopack, and modern React patterns with TypeScript.
 mode: subagent
 permission:
-  write: deny
-  edit: deny
-  bash: deny
+  write: allow
+  edit: ask
+  bash:
+    "*": ask
+    git status: allow
+    "git diff*": allow
+    "git log*": allow
+  webfetch: allow
   task:
     "*": allow
 ---

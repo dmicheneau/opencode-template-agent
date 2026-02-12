@@ -116,7 +116,7 @@
 
 **Raison** :
 - Zéro dépendance = zéro installation
-- Fonctionne sur n'importe quel système avec Python 3.7+
+- Fonctionne sur n'importe quel système avec Python 3.8+
 - Pas besoin de virtualenv, pip, ou package manager
 - Le script reste un fichier unique auto-suffisant
 

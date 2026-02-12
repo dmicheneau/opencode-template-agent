@@ -1,12 +1,12 @@
 # 🤖 OpenCode Agent Template
 
-![Agents](https://img.shields.io/badge/agents-43-blue)
+![Agents](https://img.shields.io/badge/agents-44-blue)
 ![Primary](https://img.shields.io/badge/primary-4-green)
 ![Subagents](https://img.shields.io/badge/subagents-40-orange)
 ![OpenCode](https://img.shields.io/badge/OpenCode-compatible-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
-> Collection curée de **43 agents IA** pour [OpenCode](https://opencode.ai), convertis et adaptés depuis [aitmpl.com](https://www.aitmpl.com/agents) (399+ agents disponibles).
+> Collection curée de **44 agents IA** (43 synchronisés depuis [aitmpl.com](https://www.aitmpl.com/agents) + 1 custom) pour [OpenCode](https://opencode.ai), convertis et adaptés depuis le registre source (399+ agents disponibles).
 
 ## 📑 Table des matières
 
@@ -261,12 +261,13 @@ permission:
 
 ### Profils de permissions
 
-| Profil | write | edit | bash | Exemple |
-|--------|-------|------|------|---------|
-| **Full access** | `allow` | `ask` | `{*: ask, git: allow}` | `typescript-pro`, `python-pro` |
-| **Read-only** | `deny` | `deny` | `deny` | `security-auditor`, `search-specialist` |
-| **Primary** | `allow` | `ask` | `{*: ask}` | `fullstack-developer`, `cloud-architect` |
-| **Docs/Business** | `allow` | `ask` | `deny` | `product-manager`, `api-documenter` |
+| Profil | write | edit | bash | Autres | Exemple |
+|--------|-------|------|------|--------|---------|
+| **full-access** | `allow` | `ask` | `{*: ask, git: allow}` | `task: {*: allow}` | `typescript-pro`, `python-pro` |
+| **read-only** | `deny` | `deny` | `deny` | `task: {*: allow}` | `security-auditor` |
+| **analysis** | `deny` | `deny` | `{git: allow, *: ask}` | `task: {*: allow}` | `penetration-tester` |
+| **content** | `allow` | `ask` | `deny` | `webfetch: allow`, `task: {*: allow}` | `product-manager`, `technical-writer` |
+| **primary** | `allow` | `ask` | `{git: allow, *: ask}` | `task: {*: allow}` | `fullstack-developer`, `cloud-architect` |
 
 ### Ordre de fusion des permissions
 
@@ -277,6 +278,8 @@ Config Globale → Config Agent → Override Session → Flag Runtime
 ## 🔄 Synchronisation
 
 Le script `sync-agents.py` récupère les agents depuis GitHub et les convertit au format OpenCode.
+
+> **Prérequis** : Python 3.8+ (stdlib uniquement, aucune dépendance externe).
 
 ### Commandes
 

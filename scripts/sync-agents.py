@@ -39,6 +39,35 @@ AGENTS_BASE_PATH = "cli-tool/components/agents"
 GITHUB_API = "https://api.github.com"
 RAW_BASE = "https://raw.githubusercontent.com"
 
+
+# ---------------------------------------------------------------------------
+# Safe redirect handler — prevents leaking the auth token on cross-origin
+# redirects (urllib follows redirects and keeps all headers by default).
+# ---------------------------------------------------------------------------
+
+
+class SafeRedirectHandler(urllib.request.HTTPRedirectHandler):
+    """Block cross-origin redirects to protect the auth token."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        from urllib.parse import urlparse
+
+        original_host = urlparse(req.full_url).hostname
+        new_host = urlparse(newurl).hostname
+        if original_host != new_host:
+            raise urllib.error.HTTPError(
+                newurl,
+                code,
+                f"Cross-origin redirect blocked: {original_host} -> {new_host}",
+                headers,
+                fp,
+            )
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+_opener = urllib.request.build_opener(SafeRedirectHandler)
+
+
 # Agents that should run as primary (directly selectable) rather than subagent
 PRIMARY_AGENTS = frozenset(
     {
@@ -125,8 +154,6 @@ CURATED_AGENTS: Dict[str, str] = {
     "fullstack-developer": "development-team/fullstack-developer",
     "ui-designer": "development-team/ui-designer",
     "mobile-developer": "development-team/mobile-developer",
-    # Architecture
-    "architect-reviewer": "expert-advisors/architect-reviewer",
 }
 
 # ---------------------------------------------------------------------------
@@ -162,7 +189,7 @@ def _api_get(url: str, *, retries: int = 3, backoff: float = 2.0) -> Any:
     for attempt in range(1, retries + 1):
         req = urllib.request.Request(url, headers=headers)
         try:
-            with urllib.request.urlopen(req, timeout=30) as resp:
+            with _opener.open(req, timeout=30) as resp:
                 return json.loads(resp.read().decode("utf-8"))
         except urllib.error.HTTPError as exc:
             if exc.code == 403:
@@ -204,19 +231,58 @@ def _api_get(url: str, *, retries: int = 3, backoff: float = 2.0) -> Any:
     return None
 
 
-def _raw_get(url: str) -> Optional[str]:
-    """GET raw text content from a URL."""
+def _raw_get(url: str, *, retries: int = 3, backoff: float = 1.0) -> Optional[str]:
+    """GET raw text content from a URL.
+
+    Includes retry with exponential backoff, rate-limit handling (403 with
+    ``X-RateLimit-Reset``), 404 -> None, and a **1 MB download cap** to
+    prevent unbounded memory usage.
+    """
     headers = _get_headers()
     # Raw content uses a different Accept header
     headers["Accept"] = "text/plain"
-    req = urllib.request.Request(url, headers=headers)
-    try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            return resp.read().decode("utf-8")
-    except urllib.error.HTTPError as exc:
-        if exc.code == 404:
-            return None
-        raise
+    for attempt in range(1, retries + 1):
+        req = urllib.request.Request(url, headers=headers)
+        try:
+            with _opener.open(req, timeout=30) as resp:
+                return resp.read(1_048_576).decode("utf-8")
+        except urllib.error.HTTPError as exc:
+            if exc.code == 403:
+                reset = exc.headers.get("X-RateLimit-Reset")
+                remaining = exc.headers.get("X-RateLimit-Remaining", "?")
+                if reset:
+                    wait = max(int(reset) - int(time.time()), 1)
+                    print(
+                        f"  [rate-limit] Remaining: {remaining}. "
+                        f"Waiting {wait}s until reset...",
+                        file=sys.stderr,
+                    )
+                    time.sleep(wait + 1)
+                    continue
+            if exc.code == 404:
+                return None
+            if attempt < retries:
+                wait = backoff * (2 ** (attempt - 1))
+                print(
+                    f"  [retry] HTTP {exc.code} on attempt {attempt}/{retries}, "
+                    f"waiting {wait}s...",
+                    file=sys.stderr,
+                )
+                time.sleep(wait)
+                continue
+            raise
+        except urllib.error.URLError as exc:
+            if attempt < retries:
+                wait = backoff * (2 ** (attempt - 1))
+                print(
+                    f"  [retry] Network error on attempt {attempt}/{retries}: {exc.reason}, "
+                    f"waiting {wait}s...",
+                    file=sys.stderr,
+                )
+                time.sleep(wait)
+                continue
+            raise
+    return None
 
 
 def check_rate_limit() -> Tuple[int, int, int]:
@@ -313,10 +379,15 @@ def build_permissions(tools_str: str) -> Dict[str, PermissionValue]:
     """
     tools_list = [t.strip().lower() for t in tools_str.split(",")]
 
-    has_write = "write" in tools_list
-    has_edit = "edit" in tools_list
-    has_bash = "bash" in tools_list
-    has_webfetch = "webfetch" in tools_list or "websearch" in tools_list
+    # Detect capabilities — handles both OpenCode-style ("Write", "Edit",
+    # "Bash") and VS Code-style ("new", "edit/editFiles", "runCommands").
+    has_write = any("write" in t or t in ("new", "changes") for t in tools_list)
+    has_edit = any("edit" in t for t in tools_list)
+    has_bash = any("bash" in t or t.startswith("run") for t in tools_list)
+    has_webfetch = any(
+        "webfetch" in t or "websearch" in t or "fetch" in t or "opensimplebrowser" in t
+        for t in tools_list
+    )
 
     perms: Dict[str, PermissionValue] = {}
 
@@ -525,7 +596,7 @@ def build_opencode_agent(
     meta: Dict[str, str],
     body: str,
     category: str,
-    source_path: str,
+    permissions: Optional[Dict[str, PermissionValue]] = None,
 ) -> str:
     """
     Build an OpenCode agent markdown file from parsed source data.
@@ -540,7 +611,11 @@ def build_opencode_agent(
     mode = "primary" if name in PRIMARY_AGENTS else "subagent"
 
     # --- Permissions ---
-    perms = build_permissions(meta.get("tools", ""))
+    perms = (
+        permissions
+        if permissions is not None
+        else build_permissions(meta.get("tools", ""))
+    )
 
     # --- Build frontmatter ---
     lines: List[str] = []
@@ -746,8 +821,11 @@ def sync_agent(
         print(f"  [skip] {name}: empty body after parsing", file=sys.stderr)
         return None
 
+    # Build permission dict (used for both the agent file and the manifest)
+    perms = build_permissions(meta.get("tools", ""))
+
     # Build OpenCode agent
-    agent_md = build_opencode_agent(name, meta, body, category, source_path)
+    agent_md = build_opencode_agent(name, meta, body, category, permissions=perms)
 
     # Determine output path using category subdirectories
     relative_path = _get_agent_relative_path(name, category)
@@ -758,14 +836,14 @@ def sync_agent(
     # Security: ensure the resolved path stays under the output directory
     resolved_out = out_path.resolve()
     resolved_base = output_dir.resolve()
-    if not str(resolved_out).startswith(str(resolved_base) + "/") and resolved_out != resolved_base:
+    if (
+        not str(resolved_out).startswith(str(resolved_base) + "/")
+        and resolved_out != resolved_base
+    ):
         raise ValueError(
             f"[SECURITY] Path traversal detected: {out_path} resolves to "
             f"{resolved_out}, which is outside {resolved_base}"
         )
-
-    # Build permission dict for manifest
-    perms = build_permissions(meta.get("tools", ""))
 
     if dry_run:
         print(f"  [dry-run] Would write: {out_path} ({len(agent_md)} bytes)")

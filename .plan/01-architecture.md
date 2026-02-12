@@ -164,10 +164,11 @@ opencode-template-agent/
 
 | Profil | Condition source | Permission générée |
 |--------|-----------------|-------------------|
-| **full-access** | Write + Edit + Bash dans source | write:allow, edit:ask, bash:{*:ask, git:allow} |
-| **read-only** | Aucun Write/Edit/Bash | write:deny, edit:deny, bash:deny |
-| **analysis** | Bash mais pas Write/Edit | write:deny, edit:deny, bash:{*:ask} |
-| **primary** | Agent dans PRIMARY_AGENTS set | write:allow, edit:ask, bash:{*:ask} |
+| **full-access** | Write + Edit + Bash dans source | write:allow, edit:ask, bash:{*:ask, git:allow}, task:{*:allow} |
+| **read-only** | Aucun Write/Edit/Bash | write:deny, edit:deny, bash:deny, task:{*:allow} |
+| **analysis** | Bash mais pas Write/Edit | write:deny, edit:deny, bash:{git:allow, *:ask}, task:{*:allow} |
+| **content** | Write + Edit + WebFetch, pas Bash | write:allow, edit:ask, bash:deny, webfetch:allow, task:{*:allow} |
+| **primary** | Agent dans PRIMARY_AGENTS set | write:allow, edit:ask, bash:{git:allow, *:ask}, task:{*:allow} |
 
 ### Ordre de fusion
 
