@@ -1,0 +1,39 @@
+{
+  "name": "opencode-template-agent",
+  "version": "1.0.0",
+  "description": "A template for creating OpenCode agents that can function as both primary agents and subagents",
+  "type": "template",
+  "capabilities": {
+    "primaryAgent": true,
+    "subAgent": true,
+    "toolCalling": true,
+    "streaming": true
+  },
+  "agents": {
+    "primary": {
+      "name": "Primary Agent",
+      "description": "Main agent that coordinates tasks and delegates to subagents",
+      "systemPromptFile": "prompts/primary-system-prompt.md",
+      "tools": ["all"]
+    },
+    "subagent": {
+      "name": "SubAgent",
+      "description": "Specialized agent for focused tasks",
+      "systemPromptFile": "prompts/subagent-system-prompt.md",
+      "tools": ["limited"]
+    }
+  },
+  "tools": {
+    "all": [
+      "file_operations",
+      "code_search",
+      "git_operations",
+      "bash_execution",
+      "subagent_delegation"
+    ],
+    "limited": [
+      "file_operations",
+      "code_search"
+    ]
+  }
+}
