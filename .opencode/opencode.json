@@ -1,0 +1,95 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    // https://mcp.dev.memoai.azrod.me/
+    "memoai": {
+      "type": "remote",
+      "url": "https://mcp.dev.memoai.azrod.me/mcp",
+      "headers": {
+        "MEMOAI_PROJECT": "finder"
+      },
+      "enabled": false
+    },
+    // https://semgrep.dev/docs/mcp
+    "semgrep": {
+      "type": "local",
+      "command": [
+        "run",
+        "-i",
+        "--rm",
+        "semgrep/semgrep",
+        "semgrep",
+        "mcp",
+        "-t",
+        "stdio"
+      ],
+      "enabled": false
+    },
+    // https://playwright.dev/
+    "playwright": {
+      "type": "local",
+      "command": [
+        "npx",
+        "@playwright/mcp@latest"
+      ],
+      "enabled": false
+    },
+    // https://vitest.dev/
+    "vitest": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@djankies/vitest-mcp"
+      ],
+      "enabled": false
+    },
+    // https://github.com/modelcontextprotocol/servers/tree/main/src/sequentialthinking
+    "sequentialthinking": {
+      "type": "local",
+      "command": [
+        "docker",
+        "run",
+        "--name",
+        "opencode-template-ai-sequential-thinking",
+        "-i",
+        "--rm",
+        "mcp/sequentialthinking"
+      ],
+      "enabled": true
+    },
+    // https://github.com/modelcontextprotocol/servers/tree/main/src/memory
+    "memory": {
+      "type": "local",
+      "command": [
+        "docker",
+        "run",
+        "-i",
+        "-v",
+        "claude-memory-opencode-template-ai:/app/dist",
+        "--name",
+        "opencode-template-ai-memory",
+        "--rm",
+        "mcp/memory"
+      ],
+      "enabled": true
+    },
+    // https://browsermcp.io/
+    "browsermcp": {
+      "type": "local",
+      "command": [
+        "npx",
+        "@browsermcp/mcp@latest"
+       ],
+       "enabled": true
+     }
+  },
+  "permission": {
+    "skill": {
+      "*": "allow"
+    },
+    "bash": {
+      "*": "allow"
+    }
+  }
+}

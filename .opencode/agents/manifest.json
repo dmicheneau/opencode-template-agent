@@ -1,0 +1,904 @@
+{
+  "synced_at": "2026-02-12T18:35:01.648672+00:00",
+  "source_repo": "davila7/claude-code-templates",
+  "agent_count": 43,
+  "agents": [
+    {
+      "name": "ai-engineer",
+      "path": "ai/ai-engineer",
+      "category": "data-ai",
+      "opencode_category": "ai",
+      "mode": "subagent",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": {
+          "*": "ask",
+          "git status": "allow",
+          "git diff*": "allow",
+          "git log*": "allow"
+        },
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/data-ai/ai-engineer.md",
+      "status": "synced"
+    },
+    {
+      "name": "api-architect",
+      "path": "api/api-architect",
+      "category": "api-graphql",
+      "opencode_category": "api",
+      "mode": "subagent",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": {
+          "*": "ask",
+          "git status": "allow",
+          "git diff*": "allow",
+          "git log*": "allow"
+        },
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/api-graphql/api-architect.md",
+      "status": "synced"
+    },
+    {
+      "name": "api-documenter",
+      "path": "docs/api-documenter",
+      "category": "documentation",
+      "opencode_category": "docs",
+      "mode": "subagent",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": "deny",
+        "webfetch": "allow",
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/documentation/api-documenter.md",
+      "status": "synced"
+    },
+    {
+      "name": "cloud-architect",
+      "path": "cloud-architect",
+      "category": "devops-infrastructure",
+      "opencode_category": "devops",
+      "mode": "primary",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": {
+          "*": "ask",
+          "git status": "allow",
+          "git diff*": "allow",
+          "git log*": "allow"
+        },
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/devops-infrastructure/cloud-architect.md",
+      "status": "synced"
+    },
+    {
+      "name": "code-reviewer",
+      "path": "devtools/code-reviewer",
+      "category": "development-tools",
+      "opencode_category": "devtools",
+      "mode": "subagent",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": {
+          "*": "ask",
+          "git status": "allow",
+          "git diff*": "allow",
+          "git log*": "allow"
+        },
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/development-tools/code-reviewer.md",
+      "status": "synced"
+    },
+    {
+      "name": "cpp-pro",
+      "path": "languages/cpp-pro",
+      "category": "programming-languages",
+      "opencode_category": "languages",
+      "mode": "subagent",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": {
+          "*": "ask",
+          "git status": "allow",
+          "git diff*": "allow",
+          "git log*": "allow"
+        },
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/programming-languages/cpp-pro.md",
+      "status": "synced"
+    },
+    {
+      "name": "csharp-developer",
+      "path": "languages/csharp-developer",
+      "category": "programming-languages",
+      "opencode_category": "languages",
+      "mode": "subagent",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": {
+          "*": "ask",
+          "git status": "allow",
+          "git diff*": "allow",
+          "git log*": "allow"
+        },
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/programming-languages/csharp-developer.md",
+      "status": "synced"
+    },
+    {
+      "name": "data-scientist",
+      "path": "ai/data-scientist",
+      "category": "data-ai",
+      "opencode_category": "ai",
+      "mode": "subagent",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": {
+          "*": "ask",
+          "git status": "allow",
+          "git diff*": "allow",
+          "git log*": "allow"
+        },
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/data-ai/data-scientist.md",
+      "status": "synced"
+    },
+    {
+      "name": "database-architect",
+      "path": "database/database-architect",
+      "category": "database",
+      "opencode_category": "database",
+      "mode": "subagent",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": {
+          "*": "ask",
+          "git status": "allow",
+          "git diff*": "allow",
+          "git log*": "allow"
+        },
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/database/database-architect.md",
+      "status": "synced"
+    },
+    {
+      "name": "debugger",
+      "path": "devtools/debugger",
+      "category": "development-tools",
+      "opencode_category": "devtools",
+      "mode": "subagent",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": {
+          "*": "ask",
+          "git status": "allow",
+          "git diff*": "allow",
+          "git log*": "allow"
+        },
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/development-tools/debugger.md",
+      "status": "synced"
+    },
+    {
+      "name": "devops-engineer",
+      "path": "devops-engineer",
+      "category": "devops-infrastructure",
+      "opencode_category": "devops",
+      "mode": "primary",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": {
+          "*": "ask",
+          "git status": "allow",
+          "git diff*": "allow",
+          "git log*": "allow"
+        },
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/devops-infrastructure/devops-engineer.md",
+      "status": "synced"
+    },
+    {
+      "name": "documentation-engineer",
+      "path": "docs/documentation-engineer",
+      "category": "documentation",
+      "opencode_category": "docs",
+      "mode": "subagent",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": "deny",
+        "webfetch": "allow",
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/documentation/documentation-engineer.md",
+      "status": "synced"
+    },
+    {
+      "name": "expert-nextjs-developer",
+      "path": "web/expert-nextjs-developer",
+      "category": "web-tools",
+      "opencode_category": "web",
+      "mode": "subagent",
+      "permission": {
+        "write": "deny",
+        "edit": "deny",
+        "bash": "deny",
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/web-tools/expert-nextjs-developer.md",
+      "status": "synced"
+    },
+    {
+      "name": "expert-react-frontend-engineer",
+      "path": "web/expert-react-frontend-engineer",
+      "category": "web-tools",
+      "opencode_category": "web",
+      "mode": "subagent",
+      "permission": {
+        "write": "deny",
+        "edit": "deny",
+        "bash": "deny",
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/web-tools/expert-react-frontend-engineer.md",
+      "status": "synced"
+    },
+    {
+      "name": "fullstack-developer",
+      "path": "fullstack-developer",
+      "category": "development-team",
+      "opencode_category": "team",
+      "mode": "primary",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": {
+          "*": "ask",
+          "git status": "allow",
+          "git diff*": "allow",
+          "git log*": "allow"
+        },
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/development-team/fullstack-developer.md",
+      "status": "synced"
+    },
+    {
+      "name": "golang-pro",
+      "path": "languages/golang-pro",
+      "category": "programming-languages",
+      "opencode_category": "languages",
+      "mode": "subagent",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": {
+          "*": "ask",
+          "git status": "allow",
+          "git diff*": "allow",
+          "git log*": "allow"
+        },
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/programming-languages/golang-pro.md",
+      "status": "synced"
+    },
+    {
+      "name": "graphql-architect",
+      "path": "api/graphql-architect",
+      "category": "api-graphql",
+      "opencode_category": "api",
+      "mode": "subagent",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": {
+          "*": "ask",
+          "git status": "allow",
+          "git diff*": "allow",
+          "git log*": "allow"
+        },
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/api-graphql/graphql-architect.md",
+      "status": "synced"
+    },
+    {
+      "name": "java-architect",
+      "path": "languages/java-architect",
+      "category": "programming-languages",
+      "opencode_category": "languages",
+      "mode": "subagent",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": {
+          "*": "ask",
+          "git status": "allow",
+          "git diff*": "allow",
+          "git log*": "allow"
+        },
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/programming-languages/java-architect.md",
+      "status": "synced"
+    },
+    {
+      "name": "kotlin-specialist",
+      "path": "languages/kotlin-specialist",
+      "category": "programming-languages",
+      "opencode_category": "languages",
+      "mode": "subagent",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": {
+          "*": "ask",
+          "git status": "allow",
+          "git diff*": "allow",
+          "git log*": "allow"
+        },
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/programming-languages/kotlin-specialist.md",
+      "status": "synced"
+    },
+    {
+      "name": "kubernetes-specialist",
+      "path": "devops/kubernetes-specialist",
+      "category": "devops-infrastructure",
+      "opencode_category": "devops",
+      "mode": "subagent",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": {
+          "*": "ask",
+          "git status": "allow",
+          "git diff*": "allow",
+          "git log*": "allow"
+        },
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/devops-infrastructure/kubernetes-specialist.md",
+      "status": "synced"
+    },
+    {
+      "name": "llm-architect",
+      "path": "ai/llm-architect",
+      "category": "ai-specialists",
+      "opencode_category": "ai",
+      "mode": "subagent",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": {
+          "*": "ask",
+          "git status": "allow",
+          "git diff*": "allow",
+          "git log*": "allow"
+        },
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/ai-specialists/llm-architect.md",
+      "status": "synced"
+    },
+    {
+      "name": "ml-engineer",
+      "path": "ai/ml-engineer",
+      "category": "data-ai",
+      "opencode_category": "ai",
+      "mode": "subagent",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": {
+          "*": "ask",
+          "git status": "allow",
+          "git diff*": "allow",
+          "git log*": "allow"
+        },
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/data-ai/ml-engineer.md",
+      "status": "synced"
+    },
+    {
+      "name": "mobile-developer",
+      "path": "team/mobile-developer",
+      "category": "development-team",
+      "opencode_category": "team",
+      "mode": "subagent",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": {
+          "*": "ask",
+          "git status": "allow",
+          "git diff*": "allow",
+          "git log*": "allow"
+        },
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/development-team/mobile-developer.md",
+      "status": "synced"
+    },
+    {
+      "name": "penetration-tester",
+      "path": "security/penetration-tester",
+      "category": "security",
+      "opencode_category": "security",
+      "mode": "subagent",
+      "permission": {
+        "write": "deny",
+        "edit": "deny",
+        "bash": {
+          "*": "ask",
+          "git status": "allow",
+          "git diff*": "allow",
+          "git log*": "allow"
+        },
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/security/penetration-tester.md",
+      "status": "synced"
+    },
+    {
+      "name": "performance-engineer",
+      "path": "devtools/performance-engineer",
+      "category": "development-tools",
+      "opencode_category": "devtools",
+      "mode": "subagent",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": {
+          "*": "ask",
+          "git status": "allow",
+          "git diff*": "allow",
+          "git log*": "allow"
+        },
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/development-tools/performance-engineer.md",
+      "status": "synced"
+    },
+    {
+      "name": "php-pro",
+      "path": "languages/php-pro",
+      "category": "programming-languages",
+      "opencode_category": "languages",
+      "mode": "subagent",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": {
+          "*": "ask",
+          "git status": "allow",
+          "git diff*": "allow",
+          "git log*": "allow"
+        },
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/programming-languages/php-pro.md",
+      "status": "synced"
+    },
+    {
+      "name": "postgres-pro",
+      "path": "database/postgres-pro",
+      "category": "database",
+      "opencode_category": "database",
+      "mode": "subagent",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": {
+          "*": "ask",
+          "git status": "allow",
+          "git diff*": "allow",
+          "git log*": "allow"
+        },
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/database/postgres-pro.md",
+      "status": "synced"
+    },
+    {
+      "name": "product-manager",
+      "path": "business/product-manager",
+      "category": "business-marketing",
+      "opencode_category": "business",
+      "mode": "subagent",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": "deny",
+        "webfetch": "allow",
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/business-marketing/product-manager.md",
+      "status": "synced"
+    },
+    {
+      "name": "project-manager",
+      "path": "business/project-manager",
+      "category": "business-marketing",
+      "opencode_category": "business",
+      "mode": "subagent",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": "deny",
+        "webfetch": "allow",
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/business-marketing/project-manager.md",
+      "status": "synced"
+    },
+    {
+      "name": "prompt-engineer",
+      "path": "ai/prompt-engineer",
+      "category": "data-ai",
+      "opencode_category": "ai",
+      "mode": "subagent",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": {
+          "*": "ask",
+          "git status": "allow",
+          "git diff*": "allow",
+          "git log*": "allow"
+        },
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/data-ai/prompt-engineer.md",
+      "status": "synced"
+    },
+    {
+      "name": "python-pro",
+      "path": "languages/python-pro",
+      "category": "programming-languages",
+      "opencode_category": "languages",
+      "mode": "subagent",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": {
+          "*": "ask",
+          "git status": "allow",
+          "git diff*": "allow",
+          "git log*": "allow"
+        },
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/programming-languages/python-pro.md",
+      "status": "synced"
+    },
+    {
+      "name": "rails-expert",
+      "path": "languages/rails-expert",
+      "category": "programming-languages",
+      "opencode_category": "languages",
+      "mode": "subagent",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": {
+          "*": "ask",
+          "git status": "allow",
+          "git diff*": "allow",
+          "git log*": "allow"
+        },
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/programming-languages/rails-expert.md",
+      "status": "synced"
+    },
+    {
+      "name": "refactoring-specialist",
+      "path": "devtools/refactoring-specialist",
+      "category": "development-tools",
+      "opencode_category": "devtools",
+      "mode": "subagent",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": {
+          "*": "ask",
+          "git status": "allow",
+          "git diff*": "allow",
+          "git log*": "allow"
+        },
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/development-tools/refactoring-specialist.md",
+      "status": "synced"
+    },
+    {
+      "name": "rust-pro",
+      "path": "languages/rust-pro",
+      "category": "programming-languages",
+      "opencode_category": "languages",
+      "mode": "subagent",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": {
+          "*": "ask",
+          "git status": "allow",
+          "git diff*": "allow",
+          "git log*": "allow"
+        },
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/programming-languages/rust-pro.md",
+      "status": "synced"
+    },
+    {
+      "name": "scrum-master",
+      "path": "business/scrum-master",
+      "category": "business-marketing",
+      "opencode_category": "business",
+      "mode": "subagent",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": "deny",
+        "webfetch": "allow",
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/business-marketing/scrum-master.md",
+      "status": "synced"
+    },
+    {
+      "name": "search-specialist",
+      "path": "ai/search-specialist",
+      "category": "ai-specialists",
+      "opencode_category": "ai",
+      "mode": "subagent",
+      "permission": {
+        "write": "deny",
+        "edit": "deny",
+        "bash": "deny",
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/ai-specialists/search-specialist.md",
+      "status": "synced"
+    },
+    {
+      "name": "security-auditor",
+      "path": "security/security-auditor",
+      "category": "security",
+      "opencode_category": "security",
+      "mode": "subagent",
+      "permission": {
+        "write": "deny",
+        "edit": "deny",
+        "bash": "deny",
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/security/security-auditor.md",
+      "status": "synced"
+    },
+    {
+      "name": "smart-contract-auditor",
+      "path": "security/smart-contract-auditor",
+      "category": "blockchain-web3",
+      "opencode_category": "security",
+      "mode": "subagent",
+      "permission": {
+        "write": "deny",
+        "edit": "deny",
+        "bash": "deny",
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/blockchain-web3/smart-contract-auditor.md",
+      "status": "synced"
+    },
+    {
+      "name": "technical-writer",
+      "path": "docs/technical-writer",
+      "category": "documentation",
+      "opencode_category": "docs",
+      "mode": "subagent",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": "deny",
+        "webfetch": "allow",
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/documentation/technical-writer.md",
+      "status": "synced"
+    },
+    {
+      "name": "terraform-specialist",
+      "path": "devops/terraform-specialist",
+      "category": "devops-infrastructure",
+      "opencode_category": "devops",
+      "mode": "subagent",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": {
+          "*": "ask",
+          "git status": "allow",
+          "git diff*": "allow",
+          "git log*": "allow"
+        },
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/devops-infrastructure/terraform-specialist.md",
+      "status": "synced"
+    },
+    {
+      "name": "test-automator",
+      "path": "devtools/test-automator",
+      "category": "development-tools",
+      "opencode_category": "devtools",
+      "mode": "subagent",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": {
+          "*": "ask",
+          "git status": "allow",
+          "git diff*": "allow",
+          "git log*": "allow"
+        },
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/development-tools/test-automator.md",
+      "status": "synced"
+    },
+    {
+      "name": "typescript-pro",
+      "path": "languages/typescript-pro",
+      "category": "programming-languages",
+      "opencode_category": "languages",
+      "mode": "subagent",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": {
+          "*": "ask",
+          "git status": "allow",
+          "git diff*": "allow",
+          "git log*": "allow"
+        },
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/programming-languages/typescript-pro.md",
+      "status": "synced"
+    },
+    {
+      "name": "ui-designer",
+      "path": "team/ui-designer",
+      "category": "development-team",
+      "opencode_category": "team",
+      "mode": "subagent",
+      "permission": {
+        "write": "allow",
+        "edit": "ask",
+        "bash": {
+          "*": "ask",
+          "git status": "allow",
+          "git diff*": "allow",
+          "git log*": "allow"
+        },
+        "task": {
+          "*": "allow"
+        }
+      },
+      "source": "cli-tool/components/agents/development-team/ui-designer.md",
+      "status": "synced"
+    }
+  ]
+}
