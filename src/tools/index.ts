@@ -56,7 +56,7 @@ export const codeSearchTool: Tool = {
         description: 'File type filter (e.g., .ts, .js, .py)',
       },
       caseSensitive: {
-        type: 'string',
+        type: 'boolean',
         description: 'Whether search is case sensitive',
         default: false,
       },
