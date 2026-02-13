@@ -2,7 +2,7 @@
 # =============================================================================
 # install.sh — Intelligent installer for OpenCode Template Agents
 #
-# Installs 44 OpenCode agents into an existing or new OpenCode configuration
+# Installs OpenCode agents into an existing or new OpenCode configuration
 # without overwriting the user's existing setup.
 #
 # Usage:
@@ -33,7 +33,7 @@ readonly LOG_FILE="${REPO_INSTALL_DIR}/install.log"
 readonly MARKER_FILE=".opencode-agents-installed"
 
 # Agent subdirectories (categories containing .md agent files)
-readonly AGENT_SUBDIRS=(ai api business database devops devtools docs languages security team web)
+readonly AGENT_SUBDIRS=(ai api business database devops devtools docs languages mcp media security specialist team web)
 # Root-level agent files (agents not in a subdirectory)
 readonly AGENT_ROOT_FILES=(cloud-architect.md devops-engineer.md episode-orchestrator.md fullstack-developer.md)
 # Skills subdirectories
@@ -839,7 +839,7 @@ main() {
 
     printf '\n'
     printf '  %sOpenCode Template Agents%s — Installer v%s\n' "${BOLD}" "${RESET}" "${VERSION}"
-    printf '  %s44 specialized AI agents for OpenCode%s\n' "${DIM}" "${RESET}"
+    printf '  %sSpecialized AI agents for OpenCode%s\n' "${DIM}" "${RESET}"
     printf '\n'
 
     if [[ "${OPT_DRY_RUN}" == true ]]; then

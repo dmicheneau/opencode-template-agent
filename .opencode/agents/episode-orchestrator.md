@@ -8,7 +8,11 @@ permission:
   write: allow
   edit: ask
   bash:
-    "git *": allow
+    "git status": allow
+    "git diff*": allow
+    "git log*": allow
+    "git add*": allow
+    "git commit*": ask
     "*": ask
   task:
     "*": allow
@@ -92,7 +96,6 @@ categories. Below is the reference table of key agents available for dispatch.
 | `code-reviewer` | Architecture compliance review |
 | `test-automator` | Test strategy and bun:test suites |
 | `refactoring-specialist` | Code pattern enforcement |
-| `cli-developer` | Commander CLI design |
 | `debugger` | Bug diagnosis and root cause |
 | `performance-engineer` | Performance optimization |
 
@@ -100,7 +103,6 @@ categories. Below is the reference table of key agents available for dispatch.
 
 | Agent | Purpose |
 |-------|---------|
-| `frontend-developer` | UI components and state |
 | `fullstack-developer` | End-to-end feature design |
 | `ui-designer` | UX/UI design and accessibility |
 | `expert-nextjs-developer` | Next.js App Router expert |
@@ -110,7 +112,6 @@ categories. Below is the reference table of key agents available for dispatch.
 
 | Agent | Purpose |
 |-------|---------|
-| `sql-pro` | SQLite schema, migrations, queries |
 | `postgres-pro` | PostgreSQL optimization |
 | `database-architect` | Database design and modeling |
 | `data-scientist` | Data analysis and ML models |

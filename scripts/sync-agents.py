@@ -299,6 +299,7 @@ UNKNOWN_PERMISSIONS: Dict[str, PermissionValue] = {
     "edit": "deny",
     "bash": "deny",
     "mcp": "deny",
+    "task": "deny",
 }
 
 
@@ -319,108 +320,150 @@ def _get_headers() -> Dict[str, str]:
     return headers
 
 
-def _api_get(url: str, *, retries: int = 3, backoff: float = 2.0) -> Any:
+# Type alias for the result of _http_request: (body_bytes, response_headers, status_code)
+HttpResult = Tuple[bytes, Any, int]
+
+
+def _http_request(
+    url: str,
+    *,
+    headers: Optional[Dict[str, str]] = None,
+    max_retries: int = 3,
+    backoff: float = 1.0,
+    max_read_bytes: Optional[int] = None,
+) -> Optional[HttpResult]:
+    """Common HTTP GET helper with retries, exponential backoff, and rate-limit handling.
+
+    Consolidates the retry / rate-limit / redirect logic previously
+    duplicated across ``_api_get``, ``_raw_get``, and ``_cached_get``.
+
+    Args:
+        url: The URL to fetch.
+        headers: HTTP headers to send.  Defaults to :func:`_get_headers`.
+        max_retries: Maximum number of attempts (default 3).
+        backoff: Base delay in seconds for exponential backoff.
+        max_read_bytes: If set, cap the response body to this many bytes.
+
+    Returns:
+        ``(body_bytes, response_headers, status_code)`` on success
+        (including 304 Not Modified, where *body_bytes* is ``b""``).
+        ``None`` when the server returns 404.
+
+    Raises:
+        urllib.error.HTTPError: For non-retryable HTTP errors after all
+            retries are exhausted.
+        urllib.error.URLError: For non-retryable network errors after all
+            retries are exhausted.
     """
-    GET a URL and return parsed JSON. Handles rate limiting with retries.
-    """
-    headers = _get_headers()
-    for attempt in range(1, retries + 1):
+    if headers is None:
+        headers = _get_headers()
+
+    for attempt in range(1, max_retries + 1):
         req = urllib.request.Request(url, headers=headers)
         try:
             with _opener.open(req, timeout=30) as resp:
-                return json.loads(resp.read().decode("utf-8"))
+                if max_read_bytes is not None:
+                    body = resp.read(max_read_bytes)
+                else:
+                    body = resp.read()
+                return (body, resp.headers, resp.status)
         except urllib.error.HTTPError as exc:
-            if exc.code == 403:
-                # Rate limit - check reset header
+            # 304 Not Modified — used by _cached_get
+            if exc.code == 304:
+                return (b"", exc.headers, 304)
+
+            # Rate limiting (403 / 429) with Retry-After or X-RateLimit-Reset
+            if exc.code in (403, 429):
+                retry_after = exc.headers.get("Retry-After")
                 reset = exc.headers.get("X-RateLimit-Reset")
                 remaining = exc.headers.get("X-RateLimit-Remaining", "?")
+                if retry_after:
+                    wait = int(retry_after)
+                    logger.warning(
+                        "  [rate-limit] Retry-After: %ds. Remaining: %s.",
+                        wait,
+                        remaining,
+                    )
+                    time.sleep(wait)
+                    continue
                 if reset:
                     wait = max(int(reset) - int(time.time()), 1)
-                    print(
-                        f"  [rate-limit] Remaining: {remaining}. "
-                        f"Waiting {wait}s until reset...",
-                        file=sys.stderr,
+                    logger.warning(
+                        "  [rate-limit] Remaining: %s. Waiting %ds until reset...",
+                        remaining,
+                        wait,
                     )
                     time.sleep(wait + 1)
                     continue
+
+            # 404 — resource not found
             if exc.code == 404:
                 return None
-            if attempt < retries:
-                wait = backoff * attempt
-                print(
-                    f"  [retry] HTTP {exc.code} on attempt {attempt}/{retries}, "
-                    f"waiting {wait}s...",
-                    file=sys.stderr,
+
+            # Retryable error — exponential backoff
+            if attempt < max_retries:
+                wait = backoff * (2 ** (attempt - 1))
+                logger.debug(
+                    "  [retry] HTTP %d on attempt %d/%d, waiting %.1fs...",
+                    exc.code,
+                    attempt,
+                    max_retries,
+                    wait,
                 )
                 time.sleep(wait)
                 continue
             raise
+
         except urllib.error.URLError as exc:
-            if attempt < retries:
-                wait = backoff * attempt
-                print(
-                    f"  [retry] Network error on attempt {attempt}/{retries}: {exc.reason}, "
-                    f"waiting {wait}s...",
-                    file=sys.stderr,
+            if attempt < max_retries:
+                wait = backoff * (2 ** (attempt - 1))
+                logger.debug(
+                    "  [retry] Network error on attempt %d/%d: %s, waiting %.1fs...",
+                    attempt,
+                    max_retries,
+                    exc.reason,
+                    wait,
                 )
                 time.sleep(wait)
                 continue
             raise
+
     return None
+
+
+def _api_get(url: str, *, retries: int = 3, backoff: float = 2.0) -> Any:
+    """GET a URL and return parsed JSON.
+
+    Handles rate limiting and retries via :func:`_http_request`.
+    """
+    result = _http_request(
+        url, headers=_get_headers(), max_retries=retries, backoff=backoff
+    )
+    if result is None:
+        return None
+    body, _headers, _status = result
+    return json.loads(body.decode("utf-8"))
 
 
 def _raw_get(url: str, *, retries: int = 3, backoff: float = 1.0) -> Optional[str]:
     """GET raw text content from a URL.
 
-    Includes retry with exponential backoff, rate-limit handling (403 with
-    ``X-RateLimit-Reset``), 404 -> None, and a **1 MB download cap** to
-    prevent unbounded memory usage.
+    Uses :func:`_http_request` with exponential backoff, rate-limit handling,
+    404 -> None, and a **1 MB download cap**.
     """
     headers = _get_headers()
-    # Raw content uses a different Accept header
     headers["Accept"] = "text/plain"
-    for attempt in range(1, retries + 1):
-        req = urllib.request.Request(url, headers=headers)
-        try:
-            with _opener.open(req, timeout=30) as resp:
-                return resp.read(1_048_576).decode("utf-8")
-        except urllib.error.HTTPError as exc:
-            if exc.code == 403:
-                reset = exc.headers.get("X-RateLimit-Reset")
-                remaining = exc.headers.get("X-RateLimit-Remaining", "?")
-                if reset:
-                    wait = max(int(reset) - int(time.time()), 1)
-                    print(
-                        f"  [rate-limit] Remaining: {remaining}. "
-                        f"Waiting {wait}s until reset...",
-                        file=sys.stderr,
-                    )
-                    time.sleep(wait + 1)
-                    continue
-            if exc.code == 404:
-                return None
-            if attempt < retries:
-                wait = backoff * (2 ** (attempt - 1))
-                print(
-                    f"  [retry] HTTP {exc.code} on attempt {attempt}/{retries}, "
-                    f"waiting {wait}s...",
-                    file=sys.stderr,
-                )
-                time.sleep(wait)
-                continue
-            raise
-        except urllib.error.URLError as exc:
-            if attempt < retries:
-                wait = backoff * (2 ** (attempt - 1))
-                print(
-                    f"  [retry] Network error on attempt {attempt}/{retries}: {exc.reason}, "
-                    f"waiting {wait}s...",
-                    file=sys.stderr,
-                )
-                time.sleep(wait)
-                continue
-            raise
-    return None
+    result = _http_request(
+        url,
+        headers=headers,
+        max_retries=retries,
+        backoff=backoff,
+        max_read_bytes=1_048_576,
+    )
+    if result is None:
+        return None
+    body, _headers, _status = result
+    return body.decode("utf-8")
 
 
 # ---------------------------------------------------------------------------
@@ -464,7 +507,7 @@ def _remove_sync_cache(output_dir: Path, *, verbose: bool = False) -> bool:
     if cache_path.exists():
         cache_path.unlink()
         if verbose:
-            print(f"  [removed] {SYNC_CACHE_FILENAME}")
+            logger.debug("  [removed] %s", SYNC_CACHE_FILENAME)
         return True
     return False
 
@@ -498,65 +541,37 @@ def _cached_get(
         if entry.get("last_modified"):
             headers["If-Modified-Since"] = entry["last_modified"]
 
-    for attempt in range(1, retries + 1):
-        req = urllib.request.Request(url, headers=headers)
-        try:
-            with _opener.open(req, timeout=30) as resp:
-                content = resp.read(1_048_576).decode("utf-8")
-                # Update cache entry
-                resp_headers = resp.headers
-                new_entry: Dict[str, str] = {}
-                etag = resp_headers.get("ETag")
-                if etag:
-                    new_entry["etag"] = etag
-                last_mod = resp_headers.get("Last-Modified")
-                if last_mod:
-                    new_entry["last_modified"] = last_mod
-                new_entry["sha256"] = hashlib.sha256(
-                    content.encode("utf-8")
-                ).hexdigest()
-                cache[agent_name] = new_entry
-                return content
-        except urllib.error.HTTPError as exc:
-            if exc.code == 304:
-                # Not modified — content unchanged
-                return None
-            if exc.code == 403:
-                reset = exc.headers.get("X-RateLimit-Reset")
-                remaining = exc.headers.get("X-RateLimit-Remaining", "?")
-                if reset:
-                    wait = max(int(reset) - int(time.time()), 1)
-                    print(
-                        f"  [rate-limit] Remaining: {remaining}. "
-                        f"Waiting {wait}s until reset...",
-                        file=sys.stderr,
-                    )
-                    time.sleep(wait + 1)
-                    continue
-            if exc.code == 404:
-                return None
-            if attempt < retries:
-                wait = backoff * (2 ** (attempt - 1))
-                print(
-                    f"  [retry] HTTP {exc.code} on attempt {attempt}/{retries}, "
-                    f"waiting {wait}s...",
-                    file=sys.stderr,
-                )
-                time.sleep(wait)
-                continue
-            raise
-        except urllib.error.URLError as exc:
-            if attempt < retries:
-                wait = backoff * (2 ** (attempt - 1))
-                print(
-                    f"  [retry] Network error on attempt {attempt}/{retries}: {exc.reason}, "
-                    f"waiting {wait}s...",
-                    file=sys.stderr,
-                )
-                time.sleep(wait)
-                continue
-            raise
-    return None
+    result = _http_request(
+        url,
+        headers=headers,
+        max_retries=retries,
+        backoff=backoff,
+        max_read_bytes=1_048_576,
+    )
+
+    if result is None:
+        # 404 — not found
+        return None
+
+    body, resp_headers, status_code = result
+
+    if status_code == 304:
+        # Not modified — content unchanged
+        return None
+
+    content = body.decode("utf-8")
+
+    # Update cache entry
+    new_entry: Dict[str, str] = {}
+    etag = resp_headers.get("ETag")
+    if etag:
+        new_entry["etag"] = etag
+    last_mod = resp_headers.get("Last-Modified")
+    if last_mod:
+        new_entry["last_modified"] = last_mod
+    new_entry["sha256"] = hashlib.sha256(content.encode("utf-8")).hexdigest()
+    cache[agent_name] = new_entry
+    return content
 
 
 def check_rate_limit() -> Tuple[int, int, int]:
@@ -948,7 +963,7 @@ def discover_all_agents(repo: str) -> Dict[str, str]:
     url = f"{GITHUB_API}/repos/{repo}/contents/{AGENTS_BASE_PATH}"
     categories = _api_get(url)
     if not categories:
-        print("Error: Could not list agent categories from repo.", file=sys.stderr)
+        logger.error("Error: Could not list agent categories from repo.")
         return all_agents
 
     for entry in categories:
@@ -971,9 +986,9 @@ def discover_all_agents(repo: str) -> Dict[str, str]:
                 agent_name = fname[:-3]  # strip .md
                 # Security: reject suspicious agent names (path traversal)
                 if ".." in agent_name or "/" in agent_name or "\\" in agent_name:
-                    print(
-                        f"  [SECURITY] Skipping suspicious agent name: {agent_name}",
-                        file=sys.stderr,
+                    logger.warning(
+                        "  [SECURITY] Skipping suspicious agent name: %s",
+                        agent_name,
                     )
                     continue
                 all_agents[agent_name] = f"{cat_name}/{agent_name}"
@@ -1027,28 +1042,29 @@ def clean_synced_agents(
             continue
         if not _is_synced_agent(md_file):
             if verbose:
-                print(
-                    f"  [keep] {md_file.relative_to(output_dir)} (not a synced agent)"
+                logger.debug(
+                    "  [keep] %s (not a synced agent)",
+                    md_file.relative_to(output_dir),
                 )
             continue
 
         if dry_run:
-            print(f"  [dry-run] Would remove: {md_file.relative_to(output_dir)}")
+            logger.info("  [dry-run] Would remove: %s", md_file.relative_to(output_dir))
         else:
             md_file.unlink()
             if verbose:
-                print(f"  [removed] {md_file.relative_to(output_dir)}")
+                logger.debug("  [removed] %s", md_file.relative_to(output_dir))
         removed += 1
 
     # Remove the manifest too
     manifest_path = output_dir / "manifest.json"
     if manifest_path.exists():
         if dry_run:
-            print(f"  [dry-run] Would remove: manifest.json")
+            logger.info("  [dry-run] Would remove: manifest.json")
         else:
             manifest_path.unlink()
             if verbose:
-                print("  [removed] manifest.json")
+                logger.debug("  [removed] manifest.json")
 
     # Clean up empty subdirectories
     if not dry_run:
@@ -1056,7 +1072,10 @@ def clean_synced_agents(
             if subdir.is_dir() and not any(subdir.iterdir()):
                 subdir.rmdir()
                 if verbose:
-                    print(f"  [removed] empty dir: {subdir.relative_to(output_dir)}/")
+                    logger.debug(
+                        "  [removed] empty dir: %s/",
+                        subdir.relative_to(output_dir),
+                    )
 
     return removed
 
@@ -1097,7 +1116,7 @@ def sync_agent(
     raw_url = f"{RAW_BASE}/{repo}/{DEFAULT_BRANCH}/{AGENTS_BASE_PATH}/{source_path}.md"
 
     if verbose:
-        print(f"  Fetching: {raw_url}")
+        logger.debug("  Fetching: %s", raw_url)
 
     # Use incremental (cached) GET when possible
     use_cache = incremental and sync_cache is not None and not force
@@ -1107,7 +1126,7 @@ def sync_agent(
         if content is None and name in sync_cache:
             # 304 Not Modified — agent unchanged
             if verbose:
-                print(f"  [cached] {name}: unchanged (304 Not Modified)")
+                logger.debug("  [cached] %s: unchanged (304 Not Modified)", name)
             # Build a minimal manifest entry from previous data
             oc_category = _get_opencode_category(category)
             relative_path = _get_agent_relative_path(name, category)
@@ -1123,17 +1142,17 @@ def sync_agent(
             }
         elif content is None:
             # Truly not found (404)
-            print(f"  [skip] {name}: not found at {source_path}.md", file=sys.stderr)
+            logger.warning("  [skip] %s: not found at %s.md", name, source_path)
             return None
     else:
         content = _raw_get(raw_url)
         if content is None:
-            print(f"  [skip] {name}: not found at {source_path}.md", file=sys.stderr)
+            logger.warning("  [skip] %s: not found at %s.md", name, source_path)
             return None
 
     meta, body = parse_frontmatter(content)
     if not body.strip():
-        print(f"  [skip] {name}: empty body after parsing", file=sys.stderr)
+        logger.warning("  [skip] %s: empty body after parsing", name)
         return None
 
     # Build permission dict (used for both the agent file and the manifest)
@@ -1165,12 +1184,13 @@ def sync_agent(
         )
 
     if dry_run:
-        print(f"  [dry-run] Would write: {out_path} ({len(agent_md)} bytes)")
+        logger.info("  [dry-run] Would write: %s (%d bytes)", out_path, len(agent_md))
         if verbose:
-            print(
-                f"  Description: {extract_short_description(meta.get('description', ''), name)}"
+            logger.debug(
+                "  Description: %s",
+                extract_short_description(meta.get("description", ""), name),
             )
-            print(f"  Path: {relative_path}")
+            logger.debug("  Path: %s", relative_path)
         return {
             "name": name,
             "path": relative_path,
@@ -1183,7 +1203,7 @@ def sync_agent(
 
     # Check existing
     if out_path.exists() and not force:
-        print(f"  [skip] {name}: already exists (use --force to overwrite)")
+        logger.info("  [skip] %s: already exists (use --force to overwrite)", name)
         return {
             "name": name,
             "path": relative_path,
@@ -1199,7 +1219,7 @@ def sync_agent(
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(agent_md, encoding="utf-8")
     if verbose:
-        print(f"  [wrote] {out_path} ({len(agent_md)} bytes)")
+        logger.debug("  [wrote] %s (%d bytes)", out_path, len(agent_md))
 
     return {
         "name": name,
@@ -1230,7 +1250,7 @@ def write_manifest(
     manifest_path = output_dir / "manifest.json"
 
     if dry_run:
-        print(f"\n  [dry-run] Would write manifest: {manifest_path}")
+        logger.info("  [dry-run] Would write manifest: %s", manifest_path)
         return
 
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -1238,7 +1258,7 @@ def write_manifest(
         json.dumps(manifest, indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8",
     )
-    print(f"\nManifest written: {manifest_path}")
+    logger.info("Manifest written: %s", manifest_path)
 
 
 # ---------------------------------------------------------------------------
@@ -1290,7 +1310,7 @@ def build_parser() -> argparse.ArgumentParser:
         choices=["core", "extended", "all"],
         default="core",
         help=(
-            "Agent tier: core (43 curated), extended (core + ~90 additional), "
+            "Agent tier: core (curated), extended (core + additional), "
             "all (every agent from source)"
         ),
     )
@@ -1359,36 +1379,40 @@ def main() -> int:
         token_status = (
             "authenticated" if os.environ.get("GITHUB_TOKEN") else "unauthenticated"
         )
-        print(f"GitHub API ({token_status}): {remaining}/{limit} requests remaining")
+        logger.debug(
+            "GitHub API (%s): %d/%d requests remaining",
+            token_status,
+            remaining,
+            limit,
+        )
         if remaining < 10:
             reset_dt = datetime.fromtimestamp(reset_ts, tz=timezone.utc)
-            print(f"  Rate limit resets at: {reset_dt.isoformat()}")
+            logger.warning("  Rate limit resets at: %s", reset_dt.isoformat())
 
     # --- Clean mode ---
     if args.clean:
-        print(f"Cleaning previously synced agents from {output_dir}/...")
+        logger.info("Cleaning previously synced agents from %s/...", output_dir)
         removed = clean_synced_agents(
             output_dir, dry_run=args.dry_run, verbose=args.verbose
         )
         action = "Would remove" if args.dry_run else "Removed"
-        print(f"  {action} {removed} synced agent file(s).")
+        logger.info("  %s %d synced agent file(s).", action, removed)
         # Also remove the incremental sync cache
         if not args.dry_run:
             _remove_sync_cache(output_dir, verbose=args.verbose)
         else:
             cache_path = output_dir / SYNC_CACHE_FILENAME
             if cache_path.exists():
-                print(f"  [dry-run] Would remove: {SYNC_CACHE_FILENAME}")
-        print()
+                logger.info("  [dry-run] Would remove: %s", SYNC_CACHE_FILENAME)
 
     # --- Determine agent set ---
     if args.tier == "all":
-        print(f"Discovering all agents in {repo}...")
+        logger.info("Discovering all agents in %s...", repo)
         agents = discover_all_agents(repo)
         if not agents:
-            print("No agents found.", file=sys.stderr)
+            logger.error("No agents found.")
             return 1
-        print(f"Found {len(agents)} agents across all categories.\n")
+        logger.info("Found %d agents across all categories.", len(agents))
         logger.warning(
             "⚠️  --all/--tier=all: syncing ALL agents with default "
             "permissions for uncurated ones"
@@ -1409,17 +1433,14 @@ def main() -> int:
             if path.startswith(cat + "/") or path.split("/")[0] == cat
         }
         if not agents:
-            print(
-                f"No agents found matching category '{args.filter}'.",
-                file=sys.stderr,
-            )
+            logger.error("No agents found matching category '%s'.", args.filter)
             # List available categories
             if args.tier == "all":
                 all_agents = discover_all_agents(repo)
             else:
                 all_agents = CURATED_AGENTS
             categories = sorted({p.split("/")[0] for p in all_agents.values()})
-            print(f"Available categories: {', '.join(categories)}", file=sys.stderr)
+            logger.info("Available categories: %s", ", ".join(categories))
             return 1
 
     # --- List mode ---
@@ -1471,11 +1492,9 @@ def main() -> int:
         return 0
 
     # --- Sync ---
-    print(f"Syncing {len(agents)} agents from {repo} -> {output_dir}/")
+    logger.info("Syncing %d agents from %s -> %s/", len(agents), repo, output_dir)
     if args.dry_run:
-        print("  (dry-run mode: no files will be written)\n")
-    else:
-        print()
+        logger.info("  (dry-run mode: no files will be written)")
 
     # --- Incremental cache ---
     # Load the cache unless --force is used.  When --incremental is set or
@@ -1487,9 +1506,9 @@ def main() -> int:
         use_incremental = args.incremental or bool(sync_cache)
         if use_incremental and args.verbose:
             cached_count = len(sync_cache) if sync_cache else 0
-            print(f"  Incremental mode: {cached_count} agents in cache\n")
+            logger.debug("  Incremental mode: %d agents in cache", cached_count)
     elif args.verbose:
-        print("  Force mode: ignoring incremental cache\n")
+        logger.debug("  Force mode: ignoring incremental cache")
 
     # Determine which agents are curated vs discovered-only
     curated_names = set(CURATED_AGENTS.keys()) | set(EXTENDED_AGENTS.keys())
@@ -1545,7 +1564,7 @@ def main() -> int:
                 print(" not found")
         except Exception as exc:
             failed += 1
-            print(f" error: {exc}", file=sys.stderr)
+            logger.error(" error: %s", exc)
             if args.verbose:
                 import traceback
 
@@ -1568,18 +1587,18 @@ def main() -> int:
     if unchanged > 0:
         parts.append(f"{unchanged} unchanged")
     parts.extend([f"{skipped} skipped", f"{failed} failed"])
-    print(f"\nSync complete: {', '.join(parts)}")
+    logger.info("Sync complete: %s", ", ".join(parts))
 
     if uncurated_count > 0:
-        print(
-            f"⚠️  {uncurated_count} agents synced with read-only permissions (uncurated)"
+        logger.warning(
+            "%d agents synced with read-only permissions (uncurated)",
+            uncurated_count,
         )
 
     if not os.environ.get("GITHUB_TOKEN") and len(agents) > 30:
-        print(
-            "\nTip: Set GITHUB_TOKEN env var for higher rate limits "
-            "(5000 req/hr vs 60 req/hr).",
-            file=sys.stderr,
+        logger.info(
+            "Tip: Set GITHUB_TOKEN env var for higher rate limits "
+            "(5000 req/hr vs 60 req/hr)."
         )
 
     return 0 if failed == 0 else 1
