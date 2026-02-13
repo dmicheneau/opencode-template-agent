@@ -197,6 +197,97 @@ describe('CLI install', () => {
     // Primary agents should NOT be in a subdirectory
     assert.ok(output.includes('.opencode'));
   });
+
+  // ─── Multi-pack install ───────────────────────────────────────────────────────
+
+  it('should dry-run a multi-pack install', () => {
+    const output = run(['install', '--pack', 'backend', 'security', '--dry-run'], { cwd: TEMP_DIR });
+    assert.ok(output.includes('would install'));
+    assert.ok(output.includes('postgres-pro'));       // from backend
+    assert.ok(output.includes('security-auditor'));    // from security
+    assert.ok(output.includes('packs'));               // plural label
+  });
+
+  it('should error for any unknown pack in multi-pack', () => {
+    const output = run(['install', '--pack', 'backend', 'nonexistent', '--dry-run'], { expectError: true, cwd: TEMP_DIR });
+    assert.ok(output.includes('Unknown pack'));
+    assert.ok(output.includes('nonexistent'));
+  });
+
+  // ─── Multi-category install ───────────────────────────────────────────────────
+
+  it('should dry-run a multi-category install', () => {
+    const output = run(['install', '--category', 'database', 'security', '--dry-run'], { cwd: TEMP_DIR });
+    assert.ok(output.includes('would install'));
+    assert.ok(output.includes('postgres-pro'));        // from database
+    assert.ok(output.includes('security-auditor'));     // from security
+    assert.ok(output.includes('categories'));           // plural label
+  });
+
+  it('should error for any unknown category in multi-category', () => {
+    const output = run(['install', '--category', 'database', 'nonexistent', '--dry-run'], { expectError: true, cwd: TEMP_DIR });
+    assert.ok(output.includes('Unknown category'));
+    assert.ok(output.includes('nonexistent'));
+  });
+
+  // ─── Empty value guards ─────────────────────────────────────────────────────
+
+  it('should error when --pack has no value', () => {
+    const output = run(['install', '--pack'], { expectError: true, cwd: TEMP_DIR });
+    assert.ok(output.includes('Missing pack name'));
+  });
+
+  it('should error when --category has no value', () => {
+    const output = run(['install', '--category'], { expectError: true, cwd: TEMP_DIR });
+    assert.ok(output.includes('Missing category name'));
+  });
+
+  // ─── Comma-separated values ─────────────────────────────────────────────────
+
+  it('should support comma-separated packs', () => {
+    const output = run(['install', '--pack', 'backend,security', '--dry-run'], { cwd: TEMP_DIR });
+    assert.ok(output.includes('would install'));
+    assert.ok(output.includes('postgres-pro'));       // from backend
+    assert.ok(output.includes('security-auditor'));    // from security
+    assert.ok(output.includes('packs'));               // plural label
+  });
+
+  it('should support comma-separated categories', () => {
+    const output = run(['install', '--category', 'database,security', '--dry-run'], { cwd: TEMP_DIR });
+    assert.ok(output.includes('would install'));
+    assert.ok(output.includes('postgres-pro'));        // from database
+    assert.ok(output.includes('security-auditor'));     // from security
+    assert.ok(output.includes('categories'));           // plural label
+  });
+
+  // ─── Flag interaction ───────────────────────────────────────────────────────
+
+  it('should handle --pack followed by --force correctly', () => {
+    const output = run(['install', '--pack', 'security', '--force', '--dry-run'], { cwd: TEMP_DIR });
+    assert.ok(output.includes('security-auditor'));
+    assert.ok(output.includes('pack "security"'));
+  });
+
+  it('should deduplicate agents across overlapping packs', () => {
+    const output = run(['install', '--pack', 'backend,fullstack', '--dry-run'], { cwd: TEMP_DIR });
+    assert.ok(output.includes('would install'));
+    // typescript-pro appears in both packs — should appear only once in output
+    // Each install line contains the name twice (agent + path), so 2 matches = 1 line
+    const matches = output.match(/typescript-pro/g);
+    assert.equal(matches?.length, 2, 'Shared agents should not be duplicated in output');
+  });
+
+  // ─── Mutual exclusivity ─────────────────────────────────────────────────────
+
+  it('should error when combining --all and --pack', () => {
+    const output = run(['install', '--all', '--pack', 'backend', '--dry-run'], { expectError: true, cwd: TEMP_DIR });
+    assert.ok(output.includes('Cannot combine'));
+  });
+
+  it('should error when combining --pack and --category', () => {
+    const output = run(['install', '--pack', 'backend', '--category', 'database', '--dry-run'], { expectError: true, cwd: TEMP_DIR });
+    assert.ok(output.includes('Cannot combine'));
+  });
 });
 
 // ─── Unknown command ────────────────────────────────────────────────────────────
