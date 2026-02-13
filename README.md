@@ -1,5 +1,7 @@
 # 🤖 OpenCode Agent Template
 
+> 🇬🇧 **English version**: [README.en.md](README.en.md)
+
 ![Agents](https://img.shields.io/badge/agents-44-blue)
 ![Primary](https://img.shields.io/badge/primary-4-green)
 ![Subagents](https://img.shields.io/badge/subagents-40-orange)

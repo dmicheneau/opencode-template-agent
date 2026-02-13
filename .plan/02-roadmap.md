@@ -14,20 +14,20 @@
 - [x] Créer le plan de projet (.plan/)
 - [x] Documenter la stratégie 3 niveaux (04-agent-tiers.md)
 
-## Phase 1 — Stabilisation (Court terme)
+## Phase 1 — Stabilisation ✅ (Fait)
 
-- [ ] **Tests de validation** : vérifier que chaque agent se charge correctement dans OpenCode
-- [ ] **Tests d'invocation** : tester @category/agent-name pour chaque sous-agent
-- [ ] **Ajuster les permissions** selon les retours d'usage réel
-- [ ] **Nettoyer les system prompts** : certains contiennent encore des références à Claude Code
-- [ ] **Ajouter un .gitignore** approprié
-- [ ] **Premier commit + push** vers GitHub
-- [ ] **Valider `OPENCODE_CONFIG_DIR`** dans un environnement frais
-- [ ] **Revues par agents spécialisés** :
-  - [ ] Revue code (code-reviewer)
-  - [ ] Audit sécurité (security-auditor)
-  - [ ] Revue produit (product-manager)
-  - [ ] Revue documentation (documentation-engineer)
+- [x] **Tests de validation** : 70 tests (20 agents + 44 fonctions pures + 6 edge cases), tous verts
+- [x] **Tests d'invocation** : validé via tests + usage réel en session
+- [x] **Ajuster les permissions** : fix web agents (write:allow), migration permission: only, bash:ask
+- [x] **Nettoyer les system prompts** : fix artefact `Specifically:.` dans 27 agents
+- [x] **Ajouter un .gitignore** approprié
+- [x] **Premier commit + push** : 3 commits (initial + sprint 0 + sprint 1)
+- [x] **Valider `OPENCODE_CONFIG_DIR`** : install.sh avec --dry-run, détection config existante
+- [x] **Revues par agents spécialisés** :
+  - [x] Revue code (code-reviewer) — 7.5/10
+  - [x] Audit sécurité (security-auditor) — 5.5/10 risque → fixes appliqués
+  - [x] Revue produit (product-manager) — 5.9/10 → améliorations Sprint 1-2
+  - [x] Revue documentation (documentation-engineer) — 7.2/10 → fixes appliqués
 
 ## Phase 1.5 — Extension Tier 2 (Court-Moyen terme)
 

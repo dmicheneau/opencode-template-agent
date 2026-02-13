@@ -127,3 +127,26 @@
 | 🔴 | Critique |
 | 🟡 | Majeur |
 | 🟢 | Mineur |
+
+## Session 4 (suite) — Sprint 2 : Qualité & Distribution ✅
+
+**Date** : 2026-02-12
+**Statut** : Terminé
+**Agents délégués** : `test-automator` (tests), `documentation-engineer` (CONTRIBUTING, README.en), `python-pro` (install.sh)
+
+### Backlog Sprint 2
+| # | Action | Livrables | Effort | Statut |
+|---|--------|-----------|--------|--------|
+| S2.1 | Suite de tests unitaires complète | `tests/test_agents.py` (515L), `tests/test_sync_script.py` (448L), `tests/run_tests.py` (116L) | 2h | ✅ |
+| S2.2 | Guide de contribution + templates GitHub | `CONTRIBUTING.md` (174L), `.github/ISSUE_TEMPLATE/{bug_report,agent_request,improvement}.md`, `.github/PULL_REQUEST_TEMPLATE.md` | 1h | ✅ |
+| S2.3 | Script d'installation intelligent | `install.sh` (924L) — détection config, merge/symlink, `--dry-run`, `--uninstall`, shellcheck-clean | 2h | ✅ |
+| S2.4 | Documentation anglaise | `README.en.md` (412L) — version autonome, lien croisé FR↔EN dans `README.md` (411L) | 1h | ✅ |
+
+### Métriques post-Sprint 2
+- **Tests** : 70 / 70 ✅ (20 validation agents + 44 fonctions pures sync + 6 edge cases)
+- **Couverture fichiers** : `sync-agents.py` (toutes les fonctions pures testées), agents validés
+- **Documentation** : FR + EN, CONTRIBUTING, 3 issue templates, PR template
+- **Installation** : script shellcheck-clean avec 5 modes (install, uninstall, dry-run, merge, force)
+- **Commits** : 3 (commit Sprint 2 à venir)
+- **Fichiers ajoutés** : 9 nouveaux fichiers
+- **Score estimé** : ~9/10 (vs ~8.5 post-Sprint 1)
