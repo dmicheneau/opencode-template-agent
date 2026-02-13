@@ -18,6 +18,7 @@ Supports: GITHUB_TOKEN env var for higher rate limits (5000 req/hr vs 60 req/hr)
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import logging
 import os
@@ -291,6 +292,15 @@ EXTENDED_AGENTS: Dict[str, str] = {
 # Type alias for permission values: either a simple string or a nested dict
 PermissionValue = Union[str, Dict[str, str]]
 
+# Read-only permission profile for uncurated (discovered-only) agents.
+# Unknown agents must not get write/edit/bash access automatically.
+UNKNOWN_PERMISSIONS: Dict[str, PermissionValue] = {
+    "write": "deny",
+    "edit": "deny",
+    "bash": "deny",
+    "mcp": "deny",
+}
+
 
 # ---------------------------------------------------------------------------
 # GitHub API helpers
@@ -375,6 +385,142 @@ def _raw_get(url: str, *, retries: int = 3, backoff: float = 1.0) -> Optional[st
             with _opener.open(req, timeout=30) as resp:
                 return resp.read(1_048_576).decode("utf-8")
         except urllib.error.HTTPError as exc:
+            if exc.code == 403:
+                reset = exc.headers.get("X-RateLimit-Reset")
+                remaining = exc.headers.get("X-RateLimit-Remaining", "?")
+                if reset:
+                    wait = max(int(reset) - int(time.time()), 1)
+                    print(
+                        f"  [rate-limit] Remaining: {remaining}. "
+                        f"Waiting {wait}s until reset...",
+                        file=sys.stderr,
+                    )
+                    time.sleep(wait + 1)
+                    continue
+            if exc.code == 404:
+                return None
+            if attempt < retries:
+                wait = backoff * (2 ** (attempt - 1))
+                print(
+                    f"  [retry] HTTP {exc.code} on attempt {attempt}/{retries}, "
+                    f"waiting {wait}s...",
+                    file=sys.stderr,
+                )
+                time.sleep(wait)
+                continue
+            raise
+        except urllib.error.URLError as exc:
+            if attempt < retries:
+                wait = backoff * (2 ** (attempt - 1))
+                print(
+                    f"  [retry] Network error on attempt {attempt}/{retries}: {exc.reason}, "
+                    f"waiting {wait}s...",
+                    file=sys.stderr,
+                )
+                time.sleep(wait)
+                continue
+            raise
+    return None
+
+
+# ---------------------------------------------------------------------------
+# Incremental sync cache helpers
+# ---------------------------------------------------------------------------
+
+SYNC_CACHE_FILENAME = ".sync-cache.json"
+
+
+def _load_sync_cache(output_dir: Path) -> Dict[str, Any]:
+    """Load the sync cache from disk.
+
+    Returns an empty dict if the cache file is missing or corrupt.
+    """
+    cache_path = output_dir / SYNC_CACHE_FILENAME
+    if not cache_path.exists():
+        return {}
+    try:
+        data = json.loads(cache_path.read_text(encoding="utf-8"))
+        if not isinstance(data, dict):
+            return {}
+        return data
+    except (json.JSONDecodeError, OSError, UnicodeDecodeError):
+        logger.debug("Sync cache corrupt or unreadable, starting fresh")
+        return {}
+
+
+def _save_sync_cache(output_dir: Path, cache: Dict[str, Any]) -> None:
+    """Persist the sync cache to disk."""
+    cache_path = output_dir / SYNC_CACHE_FILENAME
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
+    cache_path.write_text(
+        json.dumps(cache, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+
+
+def _remove_sync_cache(output_dir: Path, *, verbose: bool = False) -> bool:
+    """Remove the sync cache file if it exists.  Returns True if removed."""
+    cache_path = output_dir / SYNC_CACHE_FILENAME
+    if cache_path.exists():
+        cache_path.unlink()
+        if verbose:
+            print(f"  [removed] {SYNC_CACHE_FILENAME}")
+        return True
+    return False
+
+
+def _cached_get(
+    url: str,
+    agent_name: str,
+    cache: Dict[str, Any],
+    *,
+    retries: int = 3,
+    backoff: float = 1.0,
+) -> Optional[str]:
+    """GET raw text content with conditional-request support.
+
+    If the cache contains an ETag or Last-Modified for *agent_name*, the
+    request is sent with ``If-None-Match`` / ``If-Modified-Since`` headers.
+
+    * **304 Not Modified** → returns ``None`` (caller should skip).
+    * **200 OK** → updates cache entry, returns content.
+    * **404 / error** → same behaviour as :func:`_raw_get`.
+
+    The cache entry is updated in-place so the caller can persist later.
+    """
+    headers = _get_headers()
+    headers["Accept"] = "text/plain"
+
+    entry = cache.get(agent_name)
+    if entry and isinstance(entry, dict):
+        if entry.get("etag"):
+            headers["If-None-Match"] = entry["etag"]
+        if entry.get("last_modified"):
+            headers["If-Modified-Since"] = entry["last_modified"]
+
+    for attempt in range(1, retries + 1):
+        req = urllib.request.Request(url, headers=headers)
+        try:
+            with _opener.open(req, timeout=30) as resp:
+                content = resp.read(1_048_576).decode("utf-8")
+                # Update cache entry
+                resp_headers = resp.headers
+                new_entry: Dict[str, str] = {}
+                etag = resp_headers.get("ETag")
+                if etag:
+                    new_entry["etag"] = etag
+                last_mod = resp_headers.get("Last-Modified")
+                if last_mod:
+                    new_entry["last_modified"] = last_mod
+                new_entry["sha256"] = hashlib.sha256(
+                    content.encode("utf-8")
+                ).hexdigest()
+                cache[agent_name] = new_entry
+                return content
+        except urllib.error.HTTPError as exc:
+            if exc.code == 304:
+                # Not modified — content unchanged
+                return None
             if exc.code == 403:
                 reset = exc.headers.get("X-RateLimit-Reset")
                 remaining = exc.headers.get("X-RateLimit-Remaining", "?")
@@ -929,9 +1075,23 @@ def sync_agent(
     dry_run: bool = False,
     force: bool = False,
     verbose: bool = False,
+    permissions: Optional[Dict[str, PermissionValue]] = None,
+    incremental: bool = False,
+    sync_cache: Optional[Dict[str, Any]] = None,
 ) -> Optional[Dict[str, Any]]:
     """
     Fetch, convert, and write a single agent. Returns manifest entry or None.
+
+    Args:
+        permissions: Optional permission dict override. When provided, this
+            is used instead of auto-detecting permissions from the source
+            ``tools:`` field.  Pass :data:`UNKNOWN_PERMISSIONS` for
+            uncurated agents.
+        incremental: When True and *sync_cache* is provided, use conditional
+            HTTP requests (ETag / If-Modified-Since) and skip unchanged
+            agents.
+        sync_cache: Mutable cache dict — updated in-place by
+            :func:`_cached_get`.  Ignored when *force* is True.
     """
     category = source_path.split("/")[0] if "/" in source_path else "unknown"
     raw_url = f"{RAW_BASE}/{repo}/{DEFAULT_BRANCH}/{AGENTS_BASE_PATH}/{source_path}.md"
@@ -939,10 +1099,37 @@ def sync_agent(
     if verbose:
         print(f"  Fetching: {raw_url}")
 
-    content = _raw_get(raw_url)
-    if content is None:
-        print(f"  [skip] {name}: not found at {source_path}.md", file=sys.stderr)
-        return None
+    # Use incremental (cached) GET when possible
+    use_cache = incremental and sync_cache is not None and not force
+    if use_cache:
+        assert sync_cache is not None  # narrowing for type checker
+        content = _cached_get(raw_url, name, sync_cache)
+        if content is None and name in sync_cache:
+            # 304 Not Modified — agent unchanged
+            if verbose:
+                print(f"  [cached] {name}: unchanged (304 Not Modified)")
+            # Build a minimal manifest entry from previous data
+            oc_category = _get_opencode_category(category)
+            relative_path = _get_agent_relative_path(name, category)
+            mode = "primary" if name in PRIMARY_AGENTS else "subagent"
+            return {
+                "name": name,
+                "path": relative_path,
+                "category": category,
+                "opencode_category": oc_category,
+                "mode": mode,
+                "source": f"{AGENTS_BASE_PATH}/{source_path}.md",
+                "status": "unchanged",
+            }
+        elif content is None:
+            # Truly not found (404)
+            print(f"  [skip] {name}: not found at {source_path}.md", file=sys.stderr)
+            return None
+    else:
+        content = _raw_get(raw_url)
+        if content is None:
+            print(f"  [skip] {name}: not found at {source_path}.md", file=sys.stderr)
+            return None
 
     meta, body = parse_frontmatter(content)
     if not body.strip():
@@ -950,7 +1137,11 @@ def sync_agent(
         return None
 
     # Build permission dict (used for both the agent file and the manifest)
-    perms = build_permissions(meta.get("tools", ""))
+    perms = (
+        permissions
+        if permissions is not None
+        else build_permissions(meta.get("tools", ""))
+    )
 
     # Build OpenCode agent
     agent_md = build_opencode_agent(name, meta, body, category, permissions=perms)
@@ -1118,14 +1309,24 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--force",
         action="store_true",
-        help="Overwrite existing agent files",
+        help="Overwrite existing agent files (ignores incremental cache)",
+    )
+    parser.add_argument(
+        "--incremental",
+        action="store_true",
+        help=(
+            "Only re-download agents whose source has changed "
+            "(uses ETag/If-Modified-Since). Enabled by default when "
+            "the cache exists."
+        ),
     )
     parser.add_argument(
         "--clean",
         action="store_true",
         help=(
-            "Remove all previously synced agent files before syncing. "
-            "Preserves non-synced agents (e.g. episode-orchestrator.md)."
+            "Remove all previously synced agent files and the sync cache "
+            "before syncing. Preserves non-synced agents "
+            "(e.g. episode-orchestrator.md)."
         ),
     )
     parser.add_argument(
@@ -1170,7 +1371,15 @@ def main() -> int:
             output_dir, dry_run=args.dry_run, verbose=args.verbose
         )
         action = "Would remove" if args.dry_run else "Removed"
-        print(f"  {action} {removed} synced agent file(s).\n")
+        print(f"  {action} {removed} synced agent file(s).")
+        # Also remove the incremental sync cache
+        if not args.dry_run:
+            _remove_sync_cache(output_dir, verbose=args.verbose)
+        else:
+            cache_path = output_dir / SYNC_CACHE_FILENAME
+            if cache_path.exists():
+                print(f"  [dry-run] Would remove: {SYNC_CACHE_FILENAME}")
+        print()
 
     # --- Determine agent set ---
     if args.tier == "all":
@@ -1268,14 +1477,41 @@ def main() -> int:
     else:
         print()
 
+    # --- Incremental cache ---
+    # Load the cache unless --force is used.  When --incremental is set or
+    # the cache file already exists, conditional HTTP requests are used.
+    sync_cache: Optional[Dict[str, Any]] = None
+    use_incremental = False
+    if not args.force:
+        sync_cache = _load_sync_cache(output_dir)
+        use_incremental = args.incremental or bool(sync_cache)
+        if use_incremental and args.verbose:
+            cached_count = len(sync_cache) if sync_cache else 0
+            print(f"  Incremental mode: {cached_count} agents in cache\n")
+    elif args.verbose:
+        print("  Force mode: ignoring incremental cache\n")
+
+    # Determine which agents are curated vs discovered-only
+    curated_names = set(CURATED_AGENTS.keys()) | set(EXTENDED_AGENTS.keys())
+
     manifest_entries: List[Dict[str, Any]] = []
     success = 0
     skipped = 0
     failed = 0
+    unchanged = 0
+    uncurated_count = 0
 
     for i, (name, path) in enumerate(sorted(agents.items()), 1):
         label = f"[{i}/{len(agents)}]"
         print(f"  {label} {name}...", end="", flush=True)
+
+        # Uncurated agents get locked-down read-only permissions
+        if name not in curated_names:
+            agent_permissions: Optional[Dict[str, PermissionValue]] = (
+                UNKNOWN_PERMISSIONS
+            )
+        else:
+            agent_permissions = None  # will use build_permissions() auto-detection
 
         try:
             entry = sync_agent(
@@ -1286,6 +1522,9 @@ def main() -> int:
                 dry_run=args.dry_run,
                 force=args.force,
                 verbose=args.verbose,
+                permissions=agent_permissions,
+                incremental=use_incremental,
+                sync_cache=sync_cache,
             )
             if entry:
                 manifest_entries.append(entry)
@@ -1293,8 +1532,13 @@ def main() -> int:
                 if status == "skipped":
                     skipped += 1
                     print(" skipped")
+                elif status == "unchanged":
+                    unchanged += 1
+                    print(" unchanged")
                 else:
                     success += 1
+                    if name not in curated_names:
+                        uncurated_count += 1
                     print(" done")
             else:
                 failed += 1
@@ -1311,12 +1555,25 @@ def main() -> int:
         if i < len(agents):
             time.sleep(0.3)
 
+    # --- Persist incremental cache ---
+    if sync_cache is not None and not args.dry_run:
+        _save_sync_cache(output_dir, sync_cache)
+
     # --- Write manifest ---
     if manifest_entries:
         write_manifest(output_dir, manifest_entries, dry_run=args.dry_run)
 
     # --- Summary ---
-    print(f"\nSync complete: {success} synced, {skipped} skipped, {failed} failed")
+    parts = [f"{success} synced"]
+    if unchanged > 0:
+        parts.append(f"{unchanged} unchanged")
+    parts.extend([f"{skipped} skipped", f"{failed} failed"])
+    print(f"\nSync complete: {', '.join(parts)}")
+
+    if uncurated_count > 0:
+        print(
+            f"⚠️  {uncurated_count} agents synced with read-only permissions (uncurated)"
+        )
 
     if not os.environ.get("GITHUB_TOKEN") and len(agents) > 30:
         print(

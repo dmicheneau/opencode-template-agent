@@ -42,7 +42,7 @@
 - [x] **Tests** : 10 nouveaux tests Tier 2 (80 total, tous verts)
 - [x] **Documentation** : README FR/EN, .plan/ mis à jour avec tiers
 
-## Phase 2 — Enrichissement (Moyen terme)
+## Phase 2 — Enrichissement (En cours)
 
 - [ ] **Ajouter des agents manquants** :
   - `docker-specialist` (absente de la source)
@@ -54,12 +54,12 @@
   - `finder-backend` — expert du projet Finder
   - `finder-frontend` — expert UI du projet Finder
   - `episode-pipeline` — spécialiste du pipeline épisodique
-- [ ] **Améliorer episode-orchestrator** : mettre à jour pour référencer les vrais noms d'agents `@category/name`
+- [x] **Améliorer episode-orchestrator** : 42 subagents référencés, invocation via Task(subagent_type=...)
 - [ ] **Ajouter des tests automatisés** :
   - Validation YAML frontmatter de chaque agent
   - Vérification des champs requis (description, mode, permission)
   - Lint des system prompts
-- [ ] **Script de mise à jour incrémentale** : ne re-télécharger que les agents modifiés depuis la dernière sync
+- [x] **Script de mise à jour incrémentale** : ETags/If-Modified-Since, cache JSON, --incremental flag
 
 ## Phase 3 — Distribution (Long terme)
 

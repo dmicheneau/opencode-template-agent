@@ -26,6 +26,7 @@ Thumbs.db
 
 # Cache
 .ruff_cache/
+.sync-cache.json
 
 # Node (si présent)
 node_modules/

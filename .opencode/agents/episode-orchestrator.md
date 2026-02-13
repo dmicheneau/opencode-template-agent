@@ -42,10 +42,15 @@ and dispatching work to specialized subagents in a controlled sequence.
 - **Error in payload**: return immediately with status `error` and a clear message.
 
 ### Agent Coordination via Task Tool
-- Invoke subagents using the Task tool. The subagent name uses the `@category/name`
-  format. Example:
+- Invoke subagents using the Task tool. The `subagent_type` value is the agent's
+  filename without the `.md` extension — just the name, NOT the full path.
   ```
-  Task(subagent_type="typescript-pro", prompt="<detailed prompt with payload>")
+  Task(subagent_type="agent-name", prompt="<detailed prompt with payload>")
+  ```
+  Example:
+  ```
+  Task(subagent_type="typescript-pro", prompt="Review the type design for ...")
+  Task(subagent_type="security-auditor", prompt="Audit external I/O in ...")
   ```
 - Preserve strict invocation order. Pass previous agent outputs forward when the
   next agent needs them.
@@ -61,21 +66,110 @@ and dispatching work to specialized subagents in a controlled sequence.
 
 ## Available Subagents
 
-| Agent | Category | Purpose |
-|-------|----------|---------|
-| `@languages/typescript-pro` | languages | Type design, strict mode, Result patterns |
-| `@devtools/code-reviewer` | devtools | Architecture compliance review |
-| `@devtools/test-automator` | devtools | Test strategy and bun:test suites |
-| `@security/security-auditor` | security | Security analysis of external I/O |
-| `@devtools/refactoring-specialist` | devtools | Code pattern enforcement |
-| `@languages/golang-pro` | languages | Go code and patterns |
-| `@languages/python-pro` | languages | Python scripts and automation |
-| `fullstack-developer` | primary | End-to-end feature design |
-| `@web/ui-designer` | web | UX/UI design and accessibility |
-| `@web/expert-nextjs-developer` | web | Next.js patterns and SSR |
-| `@ai/ai-engineer` | ai | LLM integration and RAG |
-| `@ai/prompt-engineer` | ai | Prompt design and optimization |
-| `@docs/documentation-engineer` | docs | Technical documentation |
+The project exposes **133 curated agents** (43 core + 90 extended) across 13 OpenCode
+categories. Below is the reference table of key agents available for dispatch.
+
+### Programming Languages
+
+| Agent | Purpose |
+|-------|---------|
+| `typescript-pro` | Type design, strict mode, Result patterns |
+| `golang-pro` | Go code and patterns |
+| `python-pro` | Python scripts and automation |
+| `csharp-developer` | .NET and C# applications |
+| `php-pro` | PHP 8.3+ and Laravel/Symfony |
+| `java-architect` | Enterprise Java and Spring Boot |
+| `kotlin-specialist` | Kotlin and Android |
+| `rust-pro` | Rust ownership and concurrency |
+| `cpp-pro` | C++ systems programming |
+| `nextjs-developer` | Next.js patterns and SSR |
+| `rails-expert` | Ruby on Rails full-stack |
+
+### Development Tools
+
+| Agent | Purpose |
+|-------|---------|
+| `code-reviewer` | Architecture compliance review |
+| `test-automator` | Test strategy and bun:test suites |
+| `refactoring-specialist` | Code pattern enforcement |
+| `cli-developer` | Commander CLI design |
+| `debugger` | Bug diagnosis and root cause |
+| `performance-engineer` | Performance optimization |
+
+### Web & Frontend
+
+| Agent | Purpose |
+|-------|---------|
+| `frontend-developer` | UI components and state |
+| `fullstack-developer` | End-to-end feature design |
+| `ui-designer` | UX/UI design and accessibility |
+| `expert-nextjs-developer` | Next.js App Router expert |
+| `expert-react-frontend-engineer` | React 19 expert |
+
+### Data & Databases
+
+| Agent | Purpose |
+|-------|---------|
+| `sql-pro` | SQLite schema, migrations, queries |
+| `postgres-pro` | PostgreSQL optimization |
+| `database-architect` | Database design and modeling |
+| `data-scientist` | Data analysis and ML models |
+
+### AI & Machine Learning
+
+| Agent | Purpose |
+|-------|---------|
+| `ai-engineer` | LLM integration and RAG |
+| `prompt-engineer` | Prompt design and optimization |
+| `llm-architect` | LLM systems and RAG |
+| `ml-engineer` | ML pipelines and model serving |
+
+### API & Architecture
+
+| Agent | Purpose |
+|-------|---------|
+| `api-architect` | API design guidance |
+| `graphql-architect` | GraphQL schema design |
+
+### Security
+
+| Agent | Purpose |
+|-------|---------|
+| `security-auditor` | Security analysis of external I/O |
+| `penetration-tester` | Offensive security testing |
+
+### Infrastructure & DevOps
+
+| Agent | Purpose |
+|-------|---------|
+| `kubernetes-specialist` | K8s clusters and workloads |
+| `terraform-specialist` | Infrastructure as Code |
+
+### Mobile
+
+| Agent | Purpose |
+|-------|---------|
+| `mobile-developer` | Cross-platform mobile apps |
+
+### Documentation
+
+| Agent | Purpose |
+|-------|---------|
+| `documentation-engineer` | Technical documentation |
+
+### Project & Product Management
+
+| Agent | Purpose |
+|-------|---------|
+| `product-manager` | Product strategy and roadmap |
+| `scrum-master` | Agile facilitation |
+| `project-manager` | Project planning and tracking |
+
+### Research
+
+| Agent | Purpose |
+|-------|---------|
+| `search-specialist` | Web research and synthesis |
 
 ## Output Format
 

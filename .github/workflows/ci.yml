@@ -1,0 +1,149 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.10", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Run tests
+        run: python3 tests/run_tests.py
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check Python syntax
+        run: python3 -c "import ast; ast.parse(open('scripts/sync-agents.py').read())"
+
+      - name: Install shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+
+      - name: Lint install.sh
+        run: shellcheck install.sh
+
+      - name: Validate agent YAML frontmatter
+        run: |
+          python3 -c "
+          import sys, os, re
+
+          errors = []
+          agents_dir = '.opencode/agents'
+
+          for root, dirs, files in os.walk(agents_dir):
+              for fname in files:
+                  if not fname.endswith('.md'):
+                      continue
+                  path = os.path.join(root, fname)
+                  with open(path, 'r', encoding='utf-8') as f:
+                      content = f.read().strip()
+
+                  if not content.startswith('---'):
+                      errors.append(f'{path}: missing YAML frontmatter (no opening ---)')
+                      continue
+
+                  end = content.find('\n---', 3)
+                  if end == -1:
+                      errors.append(f'{path}: missing closing --- in frontmatter')
+                      continue
+
+                  frontmatter = content[3:end].strip()
+                  if not frontmatter:
+                      errors.append(f'{path}: empty frontmatter')
+                      continue
+
+                  # Check that each non-indented line looks like a valid key: value
+                  for i, line in enumerate(frontmatter.split('\n'), 1):
+                      if not line.strip():
+                          continue
+                      if line.startswith(' ') or line.startswith('\t'):
+                          continue  # indented = nested value, skip
+                      if not re.match(r'^[\w][\w-]*\s*:', line):
+                          errors.append(f'{path}: line {i}: invalid frontmatter key: {line!r}')
+
+                  print(f'  OK: {path}')
+
+          if errors:
+              print('\nFrontmatter validation errors:', file=sys.stderr)
+              for e in errors:
+                  print(f'  {e}', file=sys.stderr)
+              sys.exit(1)
+          else:
+              print(f'\nAll agent files have valid YAML frontmatter.')
+          "
+
+  validate-agents:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Verify sync-agents --list
+        run: |
+          output=$(python3 scripts/sync-agents.py --list 2>&1)
+          echo "$output"
+          echo "$output" | grep -q "Listing.*agents"
+          echo "sync-agents --list succeeded."
+
+      - name: Verify sync-agents --list --tier=extended
+        run: |
+          output=$(python3 scripts/sync-agents.py --list --tier=extended 2>&1)
+          echo "$output"
+          count=$(echo "$output" | grep -oP 'Listing \K[0-9]+')
+          echo "Extended tier agent count: $count"
+          if [ -z "$count" ] || [ "$count" -lt 1 ]; then
+            echo "ERROR: Expected at least 1 agent in extended tier, got: $count"
+            exit 1
+          fi
+          echo "sync-agents --list --tier=extended succeeded with $count agents."
+
+      - name: "Check for deprecated tools: field"
+        run: |
+          found=0
+          for f in $(find .opencode/agents -name '*.md'); do
+            # Extract frontmatter only (between first --- and second ---)
+            frontmatter=$(sed -n '1,/^---$/!d; /^---$/d; p' "$f" | head -50)
+            if echo "$frontmatter" | grep -qP '^tools\s*:'; then
+              echo "ERROR: $f contains deprecated 'tools:' field (use 'permission:' instead)"
+              found=1
+            fi
+          done
+          if [ "$found" -eq 1 ]; then
+            exit 1
+          fi
+          echo "No deprecated tools: field found."
+
+      - name: "Check for artifact Specifically:."
+        run: |
+          found=0
+          for f in $(find .opencode/agents -name '*.md'); do
+            if grep -q 'Specifically:\.' "$f"; then
+              echo "ERROR: $f contains the artifact 'Specifically:.'"
+              found=1
+            fi
+          done
+          if [ "$found" -eq 1 ]; then
+            exit 1
+          fi
+          echo "No 'Specifically:.' artifacts found."

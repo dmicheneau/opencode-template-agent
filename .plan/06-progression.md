@@ -176,3 +176,28 @@
 - **Script sync** : 1332 lignes (était 1152)
 - **CLI** : nouveau flag `--tier core|extended|all`, backward-compatible avec `--all`
 - **Commits** : 5 (Sprint 2 + Phase 1.5)
+
+---
+
+## Session 5 (suite) — Phase 1.5b + Phase 2 partielles ✅
+
+**Date** : 2026-02-13
+**Statut** : Terminé
+**Agents délégués** : `python-pro` (unknown profile + sync incrémentale + CI/CD), `documentation-engineer` (episode-orchestrator)
+
+### Backlog
+| # | Action | Livrables | Effort | Statut |
+|---|--------|-----------|--------|--------|
+| P1.5b.1 | Profil permissions `unknown` (read-only) | `UNKNOWN_PERMISSIONS` dict, détection curated/uncurated dans sync loop | 1h | ✅ |
+| P2.1 | Sync incrémentale (ETags/If-Modified-Since) | `_cached_get()`, `.sync-cache.json`, `--incremental` flag | 2h | ✅ |
+| P2.2 | CI/CD GitHub Actions | `.github/workflows/ci.yml` — 3 jobs parallèles (test, lint, validate-agents) | 1h | ✅ |
+| P2.3 | Amélioration episode-orchestrator | Table de 42 subagents, invocation clarifiée, catégories à jour | 30min | ✅ |
+
+### Métriques post-Phase 2 partielle
+- **Script sync** : 1590 lignes (était 1332)
+- **Features ajoutées** : profil unknown, sync incrémentale (ETag/304), cache JSON, CI/CD
+- **CLI flags** : `--tier`, `--incremental`, `--force`, `--clean` (supprime aussi le cache)
+- **CI/CD** : 3 jobs parallèles × Python 3.8/3.10/3.12 matrix
+- **Episode orchestrator** : 42 subagents référencés (était 13)
+- **Tests** : 80 / 80 ✅
+- **Commits** : 6 (Phase 1.5b + Phase 2)
