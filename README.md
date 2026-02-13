@@ -8,7 +8,8 @@
 ![OpenCode](https://img.shields.io/badge/OpenCode-compatible-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 [![CI](https://github.com/dmicheneau/opencode-template-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/dmicheneau/opencode-template-agent/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-117%20passing-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/tests-164%20passing-brightgreen)](tests/)
+![npm](https://img.shields.io/npm/v/opencode-agents?label=npm&color=cb3837)
 
 > Collection curée de **134 agents IA** (133 synchronisés depuis [aitmpl.com](https://www.aitmpl.com/agents) — 43 core + 90 extended — + 1 custom) pour [OpenCode](https://opencode.ai), convertis et adaptés depuis le registre source (399+ agents disponibles).
 
@@ -16,6 +17,7 @@
 
 - [Qu'est-ce que c'est ?](#quest-ce-que-cest-)
 - [Installation rapide](#installation-rapide)
+- [Installation via npm (CLI)](#-installation-via-npm-cli)
 - [Utilisation](#utilisation)
 - [Agents disponibles](#agents-disponibles)
 - [Architecture](#architecture)
@@ -77,6 +79,47 @@ ln -s ~/.opencode-agents/.opencode/agents ~/.config/opencode/agents
 # Téléchargement automatique au lancement du terminal
 export OPENCODE_CONFIG_DIR=$(git clone --depth 1 -q https://github.com/dmicheneau/opencode-template-agent.git /tmp/oc-agents 2>/dev/null || true; echo /tmp/oc-agents)
 ```
+
+## 📦 Installation via npm (CLI)
+
+Le moyen le plus simple d'installer les agents est d'utiliser le CLI npm **zero-dependency** :
+
+```bash
+# Installer un agent spécifique
+npx opencode-agents install typescript-pro
+
+# Installer une catégorie entière
+npx opencode-agents install --category languages
+
+# Installer un pack prédéfini (8 packs disponibles)
+npx opencode-agents install --pack backend
+npx opencode-agents install --pack devops
+
+# Installer tous les agents (49)
+npx opencode-agents install --all
+
+# Parcourir le catalogue
+npx opencode-agents list
+npx opencode-agents list --packs
+
+# Rechercher un agent
+npx opencode-agents search "docker"
+```
+
+### Packs disponibles
+
+| Pack | Agents | Description |
+|------|--------|-------------|
+| `backend` | typescript-pro, golang-pro, python-pro, postgres-pro, api-architect | Stack backend |
+| `frontend` | expert-react-frontend-engineer, expert-nextjs-developer, ui-designer | Stack frontend |
+| `devops` | kubernetes-specialist, terraform-specialist, docker-specialist, ci-cd-engineer | Infrastructure |
+| `fullstack` | Backend + Frontend combinés | Full stack |
+| `ai` | ai-engineer, ml-engineer, llm-architect, prompt-engineer | Intelligence artificielle |
+| `security` | security-auditor, penetration-tester, smart-contract-auditor | Sécurité |
+| `quality` | code-reviewer, test-automator, refactoring-specialist, debugger | Qualité code |
+| `startup` | product-manager, scrum-master, project-manager, search-specialist | Équipe startup |
+
+> **Note** : Le CLI télécharge les agents directement depuis GitHub et les installe dans `.opencode/agents/`. Node.js 18+ requis.
 
 ## 💡 Utilisation
 
@@ -212,6 +255,13 @@ Task(subagent_type="devtools/code-reviewer", prompt="Revue de ce PR...")
 
 ```
 opencode-template-agent/
+├── bin/
+│   └── cli.mjs              # CLI entry point (npx opencode-agents)
+├── src/
+│   ├── registry.mjs          # Charge manifest, search, filtering
+│   ├── installer.mjs         # Download + install agents
+│   └── display.mjs           # ANSI output, NO_COLOR support
+├── manifest.json              # Manifest enrichi (49 agents, 12 catégories, 8 packs)
 ├── .opencode/
 │   ├── opencode.json                        # Configuration OpenCode
 │   ├── agents/
@@ -246,14 +296,18 @@ opencode-template-agent/
 
 ## 🧪 Tests
 
-Le projet inclut une suite de **117 tests** couvrant :
+Le projet inclut une suite de **164 tests au total** (47 CLI + 117 Python) couvrant :
 
+- **Tests CLI** : registry, installer, display, packs, sécurité (47 tests dont 17 tests de sécurité)
 - **Validation des agents** : format frontmatter, permissions, catégories (20 tests)
 - **Script de synchronisation** : API GitHub, transformation, cache, permissions (97 tests)
 
 ```bash
-# Lancer tous les tests
+# Lancer tous les tests Python
 python3 tests/run_tests.py
+
+# Lancer les tests CLI
+node --test tests/cli.test.mjs
 
 # Tests spécifiques
 python3 -m pytest tests/test_agents.py -v

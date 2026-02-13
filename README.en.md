@@ -9,7 +9,8 @@
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Synced from](https://img.shields.io/badge/synced%20from-aitmpl.com-purple)
 [![CI](https://github.com/dmicheneau/opencode-template-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/dmicheneau/opencode-template-agent/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-117%20passing-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/tests-164%20passing-brightgreen)](tests/)
+![npm](https://img.shields.io/npm/v/opencode-agents?label=npm&color=cb3837)
 
 > A curated collection of **134 AI agents** (133 synced from [aitmpl.com](https://www.aitmpl.com/agents) — 43 core + 90 extended — + 1 custom) for [OpenCode](https://opencode.ai), converted and adapted from the source registry (399+ agents available).
 
@@ -17,6 +18,7 @@
 
 - [What is this?](#what-is-this-)
 - [Quick Start](#quick-start)
+- [Install via npm (CLI)](#-install-via-npm-cli)
 - [Usage](#usage)
 - [Available Agents](#available-agents)
 - [Architecture](#architecture)
@@ -78,6 +80,47 @@ ln -s ~/.opencode-agents/.opencode/agents ~/.config/opencode/agents
 # Auto-download on terminal launch
 export OPENCODE_CONFIG_DIR=$(git clone --depth 1 -q https://github.com/dmicheneau/opencode-template-agent.git /tmp/oc-agents 2>/dev/null || true; echo /tmp/oc-agents)
 ```
+
+## 📦 Install via npm (CLI)
+
+The easiest way to install agents is using the **zero-dependency** npm CLI:
+
+```bash
+# Install a specific agent
+npx opencode-agents install typescript-pro
+
+# Install an entire category
+npx opencode-agents install --category languages
+
+# Install a predefined pack (8 packs available)
+npx opencode-agents install --pack backend
+npx opencode-agents install --pack devops
+
+# Install all agents (49)
+npx opencode-agents install --all
+
+# Browse the catalog
+npx opencode-agents list
+npx opencode-agents list --packs
+
+# Search for an agent
+npx opencode-agents search "docker"
+```
+
+### Available Packs
+
+| Pack | Agents | Description |
+|------|--------|-------------|
+| `backend` | typescript-pro, golang-pro, python-pro, postgres-pro, api-architect | Backend stack |
+| `frontend` | expert-react-frontend-engineer, expert-nextjs-developer, ui-designer | Frontend stack |
+| `devops` | kubernetes-specialist, terraform-specialist, docker-specialist, ci-cd-engineer | Infrastructure |
+| `fullstack` | Backend + Frontend combined | Full stack |
+| `ai` | ai-engineer, ml-engineer, llm-architect, prompt-engineer | Artificial intelligence |
+| `security` | security-auditor, penetration-tester, smart-contract-auditor | Security |
+| `quality` | code-reviewer, test-automator, refactoring-specialist, debugger | Code quality |
+| `startup` | product-manager, scrum-master, project-manager, search-specialist | Startup team |
+
+> **Note**: The CLI downloads agents directly from GitHub and installs them into `.opencode/agents/`. Requires Node.js 18+.
 
 ## 💡 Usage
 
@@ -213,6 +256,13 @@ Task(subagent_type="devtools/code-reviewer", prompt="Review this PR...")
 
 ```
 opencode-template-agent/
+├── bin/
+│   └── cli.mjs              # CLI entry point (npx opencode-agents)
+├── src/
+│   ├── registry.mjs          # Loads manifest, search, filtering
+│   ├── installer.mjs         # Download + install agents
+│   └── display.mjs           # ANSI output, NO_COLOR support
+├── manifest.json              # Enriched manifest (49 agents, 12 categories, 8 packs)
 ├── .opencode/
 │   ├── opencode.json                        # OpenCode configuration
 │   ├── agents/
@@ -247,14 +297,16 @@ opencode-template-agent/
 
 ## 🧪 Tests
 
-The project includes a suite of **117 tests** covering:
+The project includes a suite of **164 tests** (47 CLI + 117 Python) covering:
 
+- **CLI tests**: registry, installer, display, search, packs, security (47 tests, including 17 security tests)
 - **Agent validation**: frontmatter format, permissions, categories (20 tests)
 - **Sync script**: GitHub API, transformation, cache, permissions (97 tests)
 
 ```bash
 # Run all tests
-python3 tests/run_tests.py
+node --test tests/cli.test.mjs   # CLI tests (47)
+python3 tests/run_tests.py        # Python tests (117)
 
 # Specific tests
 python3 -m pytest tests/test_agents.py -v
