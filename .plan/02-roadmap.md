@@ -42,18 +42,18 @@
 - [x] **Tests** : 10 nouveaux tests Tier 2 (80 total, tous verts)
 - [x] **Documentation** : README FR/EN, .plan/ mis à jour avec tiers
 
-## Phase 2 — Enrichissement (En cours)
+## Phase 2 — Enrichissement ✅ (Fait — agents Finder reportés)
 
-- [ ] **Ajouter des agents manquants** :
-  - `docker-specialist` (absente de la source)
-  - `ci-cd-engineer` (absente de la source)
-  - `linux-admin` (absente de la source)
-  - `redis-specialist` (absente de la source)
-  - `aws-specialist` (absente de la source)
-- [ ] **Créer des agents personnalisés** spécifiques au projet :
-  - `finder-backend` — expert du projet Finder
-  - `finder-frontend` — expert UI du projet Finder
-  - `episode-pipeline` — spécialiste du pipeline épisodique
+- [x] **Ajouter des agents manquants** :
+  - `docker-specialist` ✅ (multi-stage builds, sécurité, Compose, BuildKit)
+  - `ci-cd-engineer` ✅ (GitHub Actions, GitLab CI, déploiement)
+  - `linux-admin` ✅ (systemd, réseau, hardening, scripting)
+  - `redis-specialist` ✅ (structures, clustering, caching)
+  - `aws-specialist` ✅ (services core, Well-Architected, coûts)
+- [ ] ~~**Créer des agents personnalisés** spécifiques au projet~~ — ⏭️ Reporté (pas nécessaire pour l'instant) :
+  - ~~`finder-backend` — expert du projet Finder~~
+  - ~~`finder-frontend` — expert UI du projet Finder~~
+  - ~~`episode-pipeline` — spécialiste du pipeline épisodique~~
 - [x] **Améliorer episode-orchestrator** : 42 subagents référencés, invocation via Task(subagent_type=...)
 - [x] **Ajouter des tests automatisés** :
   - Validation YAML frontmatter de chaque agent ✅ (`test_agents.py`)

@@ -252,3 +252,26 @@
 - Score sécurité : 4.0/10 risque → estimé **2.5/10** (3 fixes sécu)
 - Score produit : 8.2/10 → estimé **9.0/10** (LICENSE + qualité)
 - Commit : `e9cabff` — fix: sprint corrections — address review findings from session 5
+
+---
+
+### Phase 2 — Agents custom (Session 6c)
+
+**Date** : 2026-02-13
+**Statut** : ✅ Complété
+**Agents délégués** : `@kubernetes-specialist` (×4), `@database-architect` (×1)
+
+| # | Action | Effort | Statut |
+|---|--------|--------|--------|
+| 1 | Créer `devops/docker-specialist.md` — multi-stage builds, sécurité, Compose, BuildKit | 15 min | ✅ |
+| 2 | Créer `devops/ci-cd-engineer.md` — GitHub Actions, GitLab CI, déploiement | 15 min | ✅ |
+| 3 | Créer `devops/linux-admin.md` — systemd, réseau, hardening, scripting | 15 min | ✅ |
+| 4 | Créer `database/redis-specialist.md` — structures, clustering, caching | 15 min | ✅ |
+| 5 | Créer `devops/aws-specialist.md` — services core, Well-Architected, coûts | 15 min | ✅ |
+| 6 | Agents Finder custom (finder-backend, finder-frontend, episode-pipeline) | — | ⏭️ Reporté |
+
+**Métriques** :
+- Agents custom : 1 → **6** (+5 agents, 4 devops + 1 database)
+- Tests : 117/117 ✅ (pas de régression)
+- Commit : `60536a0` — feat: phase 2 — add 5 custom agents
+- **Phase 2 complétée** ✅
