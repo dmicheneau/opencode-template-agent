@@ -167,7 +167,7 @@ Avant d'ouvrir votre Pull Request, vérifiez les points suivants :
 
 ## Code de conduite
 
-Ce projet adhère au [Contributor Covenant](https://www.contributor-covenant.org/version/2/1/code_of_conduct/). En participant, vous vous engagez à respecter ses termes. Tout comportement inacceptable peut être signalé via les issues du projet.
+Ce projet adhère au [Contributor Covenant](CODE_OF_CONDUCT.md). En participant, vous vous engagez à respecter ses termes. Tout comportement inacceptable peut être signalé via les [issues du projet](https://github.com/dmicheneau/opencode-template-agent/issues).
 
 ---
 

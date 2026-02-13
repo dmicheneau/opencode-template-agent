@@ -201,3 +201,54 @@
 - **Episode orchestrator** : 42 subagents référencés (était 13)
 - **Tests** : 80 / 80 ✅
 - **Commits** : 6 (Phase 1.5b + Phase 2)
+
+---
+
+## Session 6 — Revue Produit v2 ✅
+
+**Date** : 2026-02-13
+**Statut** : Terminé
+**Agent** : product-manager
+
+### Actions réalisées
+| # | Action | Résultat |
+|---|--------|---------|
+| 1 | Revue complète de tous les fichiers du projet | 44 agents, 3666 lignes de code (sync + tests + install), 6 commits analysés |
+| 2 | Rédaction de la revue produit v2 | Ajoutée à `.plan/05-reviews.md` — 200+ lignes |
+| 3 | Scoring actualisé sur 6 dimensions | Score produit : 8.2/10 (↑ +2.3 vs 5.9 en v1) |
+| 4 | Identification du bloqueur critique unique | ❌ Pas de fichier `LICENSE` — bloqueur juridique |
+| 5 | Mise à jour `02-roadmap.md` | Profil unknown ✅, tests automatisés ✅ (étaient marqués non-faits) |
+| 6 | Plan d'action v1.0 | 2 P0, 4 P1, 4 P2, 3 items à couper de Phase 3 |
+
+### Métriques post-revue v2
+- **Score produit** : 8.2/10 (code: 9.0, security: 7.5, product: 8.2, docs: 8.5)
+- **Items v1 résolus** : 26/28 (93%)
+- **Bloqueurs v1.0** : 1 (LICENSE file)
+- **Score projeté après LICENSE + rename + GIF** : 9.2/10
+
+### Sprint de corrections (Session 6b)
+
+**Date** : 2026-02-13
+**Statut** : ✅ Complété
+**Agents délégués** : `@languages/python-pro`, `@devtools/test-automator`
+
+| # | Action | Source | Effort | Statut |
+|---|--------|--------|--------|--------|
+| C2 | `task: deny` dans UNKNOWN_PERMISSIONS | Security audit | 5 min | ✅ |
+| C4 | `mcp media specialist` dans AGENT_SUBDIRS | Code review | 5 min | ✅ |
+| C5 | 3 agents fantômes supprimés (cli-developer, frontend-developer, sql-pro) | Code review | 5 min | ✅ |
+| M1-sec | Permissions git granulaires (git * → git status/diff/log/add:allow, commit:ask) | Security audit | 10 min | ✅ |
+| LICENSE | Fichier MIT LICENSE créé — **bloqueur v1.0 levé** 🔓 | Product review | 2 min | ✅ |
+| M4-sec | GitHub Actions pinnées aux SHA immutables (checkout@v4.3.1, setup-python@v5.6.0) | Security audit | 10 min | ✅ |
+| M6-sec | `permissions: contents: read` ajouté au CI | Security audit | 2 min | ✅ |
+| C1 | Helper HTTP commun `_http_request()` extrait (~150 lignes DRY) | Code review | 30 min | ✅ |
+| M4-log | Logging unifié (print/stderr → logger.*) | Code review | 15 min | ✅ |
+| M6+M12 | Compteurs hardcodés → dynamiques (tests + install.sh) | Code review | 10 min | ✅ |
+| Tests | 37 nouveaux tests pour 5 fonctions critiques | Test audit | 30 min | ✅ |
+
+**Métriques** :
+- Tests : 80 → **117** (+37, 5 nouvelles classes)
+- Couverture fonctions critiques : 0% → 100% (build_opencode_agent, _yaml_serialize_permission, sync_agent, sync_cache, clean_synced_agents)
+- Score sécurité : 4.0/10 risque → estimé **2.5/10** (3 fixes sécu)
+- Score produit : 8.2/10 → estimé **9.0/10** (LICENSE + qualité)
+- Commit : `e9cabff` — fix: sprint corrections — address review findings from session 5

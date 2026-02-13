@@ -37,7 +37,7 @@
 - [x] **Ajouter `EXTENDED_AGENTS`** : 90 agents dans le script sync (1332 lignes total)
 - [x] **Ajouter flag `--tier`** : core (43) | extended (133) | all (413+)
 - [x] **Mapper les nouvelles catégories** : 13 nouveaux mappings (27 total), +specialist/, +mcp/
-- [ ] **Profil de permissions `unknown`** : read-only par défaut pour agents non curés (Phase 1.5b)
+- [x] **Profil de permissions `unknown`** : read-only par défaut pour agents non curés (Phase 1.5b) ✅
 - [x] **Warning sur `--all`** : log warning ⚠️ quand --all/--tier=all utilisé
 - [x] **Tests** : 10 nouveaux tests Tier 2 (80 total, tous verts)
 - [x] **Documentation** : README FR/EN, .plan/ mis à jour avec tiers
@@ -55,10 +55,10 @@
   - `finder-frontend` — expert UI du projet Finder
   - `episode-pipeline` — spécialiste du pipeline épisodique
 - [x] **Améliorer episode-orchestrator** : 42 subagents référencés, invocation via Task(subagent_type=...)
-- [ ] **Ajouter des tests automatisés** :
-  - Validation YAML frontmatter de chaque agent
-  - Vérification des champs requis (description, mode, permission)
-  - Lint des system prompts
+- [x] **Ajouter des tests automatisés** :
+  - Validation YAML frontmatter de chaque agent ✅ (`test_agents.py`)
+  - Vérification des champs requis (description, mode, permission) ✅ (`test_agents.py`)
+  - Lint des system prompts ✅ (artefacts, longueur min — `test_agents.py`)
 - [x] **Script de mise à jour incrémentale** : ETags/If-Modified-Since, cache JSON, --incremental flag
 
 ## Phase 3 — Distribution (Long terme)

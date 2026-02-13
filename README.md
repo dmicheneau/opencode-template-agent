@@ -7,6 +7,8 @@
 ![Subagents](https://img.shields.io/badge/subagents-130-orange)
 ![OpenCode](https://img.shields.io/badge/OpenCode-compatible-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
+[![CI](https://github.com/dmicheneau/opencode-template-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/dmicheneau/opencode-template-agent/actions/workflows/ci.yml)
+[![Tests](https://img.shields.io/badge/tests-117%20passing-brightgreen)](tests/)
 
 > Collection curée de **134 agents IA** (133 synchronisés depuis [aitmpl.com](https://www.aitmpl.com/agents) — 43 core + 90 extended — + 1 custom) pour [OpenCode](https://opencode.ai), convertis et adaptés depuis le registre source (399+ agents disponibles).
 
@@ -17,9 +19,11 @@
 - [Utilisation](#utilisation)
 - [Agents disponibles](#agents-disponibles)
 - [Architecture](#architecture)
+- [Tests](#-tests)
 - [Système de permissions](#système-de-permissions)
 - [Synchronisation](#synchronisation)
 - [Personnalisation](#personnalisation)
+- [Dépannage](#-dépannage)
 - [Sources et références](#sources-et-références)
 - [Licence](#licence)
 
@@ -240,6 +244,22 @@ opencode-template-agent/
 └── README.md
 ```
 
+## 🧪 Tests
+
+Le projet inclut une suite de **117 tests** couvrant :
+
+- **Validation des agents** : format frontmatter, permissions, catégories (20 tests)
+- **Script de synchronisation** : API GitHub, transformation, cache, permissions (97 tests)
+
+```bash
+# Lancer tous les tests
+python3 tests/run_tests.py
+
+# Tests spécifiques
+python3 -m pytest tests/test_agents.py -v
+python3 -m pytest tests/test_sync_script.py -v
+```
+
 ## 🔐 Système de permissions
 
 Les agents utilisent le format **`permission:`** moderne d'OpenCode (le champ `tools:` est déprécié).
@@ -403,6 +423,48 @@ mode: subagent
 model: anthropic/claude-sonnet-4-20250514
 ---
 ```
+
+## 🔧 Dépannage
+
+### La synchronisation échoue avec une erreur 403
+
+GitHub impose un rate limit de 60 requêtes/heure pour les requêtes non authentifiées. Solutions :
+
+```bash
+# Utiliser la synchronisation incrémentale (économise les requêtes)
+python3 scripts/sync-agents.py --incremental
+
+# Ou définir un token GitHub pour 5000 req/h
+export GITHUB_TOKEN=ghp_votre_token
+python3 scripts/sync-agents.py --force
+```
+
+### Les agents ne sont pas détectés par OpenCode
+
+Vérifiez que :
+1. Les fichiers sont dans `.opencode/agents/` (pas dans un autre répertoire)
+2. Le frontmatter YAML est valide (commence par `---`)
+3. Le champ `permission:` est présent (pas `tools:` qui est déprécié)
+
+```bash
+# Valider tous les agents
+python3 tests/run_tests.py
+```
+
+### L'installation échoue
+
+```bash
+# Lancer en mode diagnostic
+bash install.sh --dry-run
+
+# Vérifier les prérequis
+python3 --version  # Python 3.8+ requis
+git --version
+```
+
+### Comment ajouter un agent personnalisé
+
+Créez un fichier `.md` dans `.opencode/agents/` **sans** le commentaire `<!-- Synced from aitmpl.com` — il ne sera jamais écrasé par la synchronisation. Voir [Personnalisation](#-personnalisation).
 
 ## 📚 Sources et références
 
