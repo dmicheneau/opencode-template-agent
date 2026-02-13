@@ -1,0 +1,169 @@
+import { mkdirSync, existsSync, writeFileSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import https from 'node:https';
+import { loadManifest } from './registry.mjs';
+import {
+  installSuccess,
+  installSkipped,
+  installDryRun,
+  installError,
+  installSummary,
+  infoMessage,
+} from './display.mjs';
+
+// ─── Types ──────────────────────────────────────────────────────────────────────
+
+/**
+ * @typedef {{
+ *   force?: boolean;
+ *   dryRun?: boolean;
+ *   cwd?: string;
+ * }} InstallOptions
+ */
+
+// ─── HTTP Download ──────────────────────────────────────────────────────────────
+
+/**
+ * Download a file from a URL (HTTPS only).
+ * @param {string} url
+ * @returns {Promise<string>}
+ */
+function download(url) {
+  return new Promise((resolve, reject) => {
+    const request = https.get(url, { headers: { 'User-Agent': 'opencode-agents/1.0.0' } }, (res) => {
+      // Handle redirects
+      if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        download(res.headers.location).then(resolve, reject);
+        return;
+      }
+
+      if (res.statusCode !== 200) {
+        res.resume(); // Drain the response
+        reject(new Error(`HTTP ${res.statusCode} for ${url}`));
+        return;
+      }
+
+      /** @type {Buffer[]} */
+      const chunks = [];
+      res.on('data', (chunk) => chunks.push(chunk));
+      res.on('end', () => resolve(Buffer.concat(chunks).toString('utf-8')));
+      res.on('error', reject);
+    });
+
+    request.on('error', reject);
+    request.setTimeout(30_000, () => {
+      request.destroy(new Error(`Timeout downloading ${url}`));
+    });
+  });
+}
+
+// ─── Destination Path ───────────────────────────────────────────────────────────
+
+/**
+ * Compute the destination path for an agent.
+ * Primary agents go to `.opencode/agents/<name>.md`
+ * Subagents go to `.opencode/agents/<category>/<name>.md`
+ *
+ * @param {import('./registry.mjs').AgentEntry} agent
+ * @param {string} cwd
+ * @returns {{ absolute: string; relative: string }}
+ */
+function getDestination(agent, cwd) {
+  const basePath = loadManifest().base_path;
+  /** @type {string} */
+  let relative;
+
+  if (agent.mode === 'primary') {
+    // Primary agents sit at root of agents dir
+    relative = join(basePath, `${agent.name}.md`);
+  } else {
+    // Subagents go into category subdirectory
+    relative = join(basePath, agent.category, `${agent.name}.md`);
+  }
+
+  return {
+    absolute: join(cwd, relative),
+    relative,
+  };
+}
+
+/**
+ * Build the raw GitHub URL for an agent.
+ * @param {import('./registry.mjs').AgentEntry} agent
+ * @returns {string}
+ */
+function getDownloadUrl(agent) {
+  const manifest = loadManifest();
+  const filePath = `${manifest.base_path}/${agent.path}`;
+
+  // Ensure the path ends with the agent filename
+  const url = `https://raw.githubusercontent.com/${manifest.repo}/${manifest.branch}/${filePath}.md`;
+  return url;
+}
+
+// ─── Install Single Agent ───────────────────────────────────────────────────────
+
+/**
+ * Install a single agent file.
+ * @param {import('./registry.mjs').AgentEntry} agent
+ * @param {InstallOptions} options
+ * @returns {Promise<'installed' | 'skipped' | 'failed'>}
+ */
+async function installAgent(agent, options) {
+  const cwd = options.cwd ?? process.cwd();
+  const dest = getDestination(agent, cwd);
+
+  // Dry run: just show what would happen
+  if (options.dryRun) {
+    installDryRun(agent.name, dest.relative);
+    return 'installed';
+  }
+
+  // Check if file already exists
+  if (existsSync(dest.absolute) && !options.force) {
+    installSkipped(agent.name, dest.relative);
+    return 'skipped';
+  }
+
+  try {
+    const url = getDownloadUrl(agent);
+    const content = await download(url);
+
+    // Create directory structure
+    const dir = dirname(dest.absolute);
+    mkdirSync(dir, { recursive: true });
+
+    // Write the agent file
+    writeFileSync(dest.absolute, content, 'utf-8');
+    installSuccess(agent.name, dest.relative);
+    return 'installed';
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    installError(agent.name, message);
+    return 'failed';
+  }
+}
+
+// ─── Batch Install ──────────────────────────────────────────────────────────────
+
+/**
+ * Install multiple agents and print a summary.
+ * @param {import('./registry.mjs').AgentEntry[]} agents
+ * @param {InstallOptions} options
+ * @returns {Promise<{ installed: number; skipped: number; failed: number }>}
+ */
+export async function installAgents(agents, options = {}) {
+  if (options.dryRun) {
+    infoMessage('Dry run — no files will be written\n');
+  }
+
+  const counts = { installed: 0, skipped: 0, failed: 0 };
+
+  for (const agent of agents) {
+    const result = await installAgent(agent, options);
+    counts[result]++;
+  }
+
+  installSummary(counts);
+  return counts;
+}

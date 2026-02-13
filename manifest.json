@@ -1,0 +1,561 @@
+{
+  "version": "1.0.0",
+  "repo": "dmicheneau/opencode-template-agent",
+  "branch": "main",
+  "base_path": ".opencode/agents",
+  "agent_count": 49,
+  "categories": {
+    "ai": {
+      "label": "AI & Machine Learning",
+      "icon": "🤖",
+      "description": "AI systems, ML pipelines, data science, and LLM architecture"
+    },
+    "api": {
+      "label": "API & GraphQL",
+      "icon": "🔌",
+      "description": "REST API design, GraphQL schemas, and API architecture"
+    },
+    "database": {
+      "label": "Database",
+      "icon": "🗄️",
+      "description": "Database design, optimization, and administration"
+    },
+    "devops": {
+      "label": "DevOps & Infrastructure",
+      "icon": "⚙️",
+      "description": "CI/CD, containers, orchestration, and cloud infrastructure"
+    },
+    "devtools": {
+      "label": "Developer Tools",
+      "icon": "🛠️",
+      "description": "Code review, debugging, testing, and refactoring"
+    },
+    "docs": {
+      "label": "Documentation",
+      "icon": "📝",
+      "description": "Technical writing, API docs, and documentation engineering"
+    },
+    "languages": {
+      "label": "Programming Languages",
+      "icon": "💻",
+      "description": "Language-specific experts for TypeScript, Python, Go, Rust, and more"
+    },
+    "security": {
+      "label": "Security",
+      "icon": "🔒",
+      "description": "Security auditing, penetration testing, and smart contract analysis"
+    },
+    "web": {
+      "label": "Web & Frontend",
+      "icon": "🌐",
+      "description": "React, Next.js, and modern web development"
+    },
+    "business": {
+      "label": "Business & Management",
+      "icon": "📊",
+      "description": "Project management, product strategy, and agile practices"
+    },
+    "team": {
+      "label": "Development Team",
+      "icon": "👥",
+      "description": "Full-stack, mobile, and UI development roles"
+    }
+  },
+  "agents": [
+    {
+      "name": "ai-engineer",
+      "category": "ai",
+      "path": "ai/ai-engineer",
+      "mode": "subagent",
+      "description": "End-to-end AI systems from model selection to production deployment",
+      "tags": ["ai", "machine-learning", "model-training", "deployment", "mlops"]
+    },
+    {
+      "name": "data-scientist",
+      "category": "ai",
+      "path": "ai/data-scientist",
+      "mode": "subagent",
+      "description": "Data analysis, predictive modeling, and statistical insights",
+      "tags": ["data-science", "statistics", "machine-learning", "analytics", "modeling"]
+    },
+    {
+      "name": "ml-engineer",
+      "category": "ai",
+      "path": "ai/ml-engineer",
+      "mode": "subagent",
+      "description": "Production ML pipelines, model serving, and automated retraining",
+      "tags": ["machine-learning", "mlops", "model-serving", "pipelines", "training"]
+    },
+    {
+      "name": "llm-architect",
+      "category": "ai",
+      "path": "ai/llm-architect",
+      "mode": "subagent",
+      "description": "LLM system design, fine-tuning, RAG, and inference optimization",
+      "tags": ["llm", "rag", "fine-tuning", "inference", "nlp", "ai"]
+    },
+    {
+      "name": "prompt-engineer",
+      "category": "ai",
+      "path": "ai/prompt-engineer",
+      "mode": "subagent",
+      "description": "Prompt analysis, optimization, and improvement for LLM interactions",
+      "tags": ["prompts", "llm", "optimization", "ai", "prompt-engineering"]
+    },
+    {
+      "name": "search-specialist",
+      "category": "ai",
+      "path": "ai/search-specialist",
+      "mode": "subagent",
+      "description": "Advanced web research, search techniques, and multi-source synthesis",
+      "tags": ["search", "research", "web", "information-retrieval", "synthesis"]
+    },
+    {
+      "name": "api-architect",
+      "category": "api",
+      "path": "api/api-architect",
+      "mode": "subagent",
+      "description": "REST API architecture, design patterns, and developer guidance",
+      "tags": ["api", "rest", "architecture", "design", "http", "openapi"]
+    },
+    {
+      "name": "graphql-architect",
+      "category": "api",
+      "path": "api/graphql-architect",
+      "mode": "subagent",
+      "description": "GraphQL schema design, federation, and query performance optimization",
+      "tags": ["graphql", "federation", "schema", "api", "query-optimization"]
+    },
+    {
+      "name": "database-architect",
+      "category": "database",
+      "path": "database/database-architect",
+      "mode": "subagent",
+      "description": "Database design, data modeling, scalability, and technology selection",
+      "tags": ["database", "data-modeling", "scalability", "schema", "architecture"]
+    },
+    {
+      "name": "postgres-pro",
+      "category": "database",
+      "path": "database/postgres-pro",
+      "mode": "subagent",
+      "description": "PostgreSQL performance optimization, replication, and query tuning",
+      "tags": ["postgresql", "database", "sql", "replication", "performance", "query-tuning"]
+    },
+    {
+      "name": "redis-specialist",
+      "category": "database",
+      "path": "database/redis-specialist",
+      "mode": "subagent",
+      "description": "Redis caching, data structures, pub/sub, clustering, and performance",
+      "tags": ["redis", "caching", "pub-sub", "clustering", "streams", "performance"]
+    },
+    {
+      "name": "cloud-architect",
+      "category": "devops",
+      "path": "cloud-architect",
+      "mode": "primary",
+      "description": "Multi-cloud infrastructure design, migration, and cost optimization",
+      "tags": ["cloud", "architecture", "aws", "multi-cloud", "migration", "infrastructure"]
+    },
+    {
+      "name": "devops-engineer",
+      "category": "devops",
+      "path": "devops-engineer",
+      "mode": "primary",
+      "description": "Infrastructure automation, CI/CD pipelines, and deployment workflows",
+      "tags": ["devops", "ci-cd", "automation", "deployment", "infrastructure"]
+    },
+    {
+      "name": "docker-specialist",
+      "category": "devops",
+      "path": "devops/docker-specialist",
+      "mode": "subagent",
+      "description": "Docker containers, multi-stage builds, image optimization, and security",
+      "tags": ["docker", "containers", "docker-compose", "images", "security", "optimization"]
+    },
+    {
+      "name": "kubernetes-specialist",
+      "category": "devops",
+      "path": "devops/kubernetes-specialist",
+      "mode": "subagent",
+      "description": "Kubernetes cluster design, deployment, and production troubleshooting",
+      "tags": ["kubernetes", "k8s", "containers", "orchestration", "helm", "production"]
+    },
+    {
+      "name": "terraform-specialist",
+      "category": "devops",
+      "path": "devops/terraform-specialist",
+      "mode": "subagent",
+      "description": "Terraform modules, state management, and Infrastructure as Code",
+      "tags": ["terraform", "iac", "infrastructure", "state-management", "hcl", "providers"]
+    },
+    {
+      "name": "aws-specialist",
+      "category": "devops",
+      "path": "devops/aws-specialist",
+      "mode": "subagent",
+      "description": "AWS infrastructure, cost optimization, and Well-Architected compliance",
+      "tags": ["aws", "cloud", "iac", "cost-optimization", "security", "well-architected"]
+    },
+    {
+      "name": "linux-admin",
+      "category": "devops",
+      "path": "devops/linux-admin",
+      "mode": "subagent",
+      "description": "Linux server administration, systemd, networking, and security hardening",
+      "tags": ["linux", "sysadmin", "systemd", "networking", "shell", "security"]
+    },
+    {
+      "name": "ci-cd-engineer",
+      "category": "devops",
+      "path": "devops/ci-cd-engineer",
+      "mode": "subagent",
+      "description": "CI/CD pipeline design with GitHub Actions, GitLab CI, and Jenkins",
+      "tags": ["ci-cd", "github-actions", "gitlab-ci", "jenkins", "deployment", "automation"]
+    },
+    {
+      "name": "code-reviewer",
+      "category": "devtools",
+      "path": "devtools/code-reviewer",
+      "mode": "subagent",
+      "description": "Code quality reviews, security vulnerability detection, and best practices",
+      "tags": ["code-review", "quality", "security", "best-practices", "linting"]
+    },
+    {
+      "name": "debugger",
+      "category": "devtools",
+      "path": "devtools/debugger",
+      "mode": "subagent",
+      "description": "Bug diagnosis, root cause analysis, and error log investigation",
+      "tags": ["debugging", "diagnostics", "root-cause", "errors", "stack-traces"]
+    },
+    {
+      "name": "performance-engineer",
+      "category": "devtools",
+      "path": "devtools/performance-engineer",
+      "mode": "subagent",
+      "description": "Performance bottleneck identification and optimization across systems",
+      "tags": ["performance", "optimization", "profiling", "bottlenecks", "benchmarking"]
+    },
+    {
+      "name": "refactoring-specialist",
+      "category": "devtools",
+      "path": "devtools/refactoring-specialist",
+      "mode": "subagent",
+      "description": "Code restructuring into clean, maintainable systems preserving behavior",
+      "tags": ["refactoring", "clean-code", "maintainability", "patterns", "architecture"]
+    },
+    {
+      "name": "test-automator",
+      "category": "devtools",
+      "path": "devtools/test-automator",
+      "mode": "subagent",
+      "description": "Automated test frameworks, test scripts, and CI/CD test integration",
+      "tags": ["testing", "automation", "ci-cd", "test-frameworks", "coverage", "e2e"]
+    },
+    {
+      "name": "api-documenter",
+      "category": "docs",
+      "path": "docs/api-documenter",
+      "mode": "subagent",
+      "description": "API documentation, OpenAPI specs, and interactive documentation portals",
+      "tags": ["api-docs", "openapi", "swagger", "documentation", "code-examples"]
+    },
+    {
+      "name": "documentation-engineer",
+      "category": "docs",
+      "path": "docs/documentation-engineer",
+      "mode": "subagent",
+      "description": "Documentation systems architecture including guides, tutorials, and APIs",
+      "tags": ["documentation", "architecture", "tutorials", "guides", "developer-docs"]
+    },
+    {
+      "name": "technical-writer",
+      "category": "docs",
+      "path": "docs/technical-writer",
+      "mode": "subagent",
+      "description": "Technical documentation, API references, user guides, and SDK docs",
+      "tags": ["technical-writing", "documentation", "api-reference", "user-guides", "sdk"]
+    },
+    {
+      "name": "cpp-pro",
+      "category": "languages",
+      "path": "languages/cpp-pro",
+      "mode": "subagent",
+      "description": "Modern C++20/23, template metaprogramming, and systems programming",
+      "tags": ["cpp", "c++", "systems", "templates", "performance", "embedded"]
+    },
+    {
+      "name": "csharp-developer",
+      "category": "languages",
+      "path": "languages/csharp-developer",
+      "mode": "subagent",
+      "description": "ASP.NET Core, modern C#, Entity Framework, and clean architecture",
+      "tags": ["csharp", "dotnet", "asp-net", "entity-framework", "azure"]
+    },
+    {
+      "name": "golang-pro",
+      "category": "languages",
+      "path": "languages/golang-pro",
+      "mode": "subagent",
+      "description": "Go concurrency, microservices, and cloud-native application development",
+      "tags": ["go", "golang", "concurrency", "microservices", "cloud-native"]
+    },
+    {
+      "name": "java-architect",
+      "category": "languages",
+      "path": "languages/java-architect",
+      "mode": "subagent",
+      "description": "Enterprise Java, Spring Boot, and scalable microservices architecture",
+      "tags": ["java", "spring-boot", "microservices", "enterprise", "jvm"]
+    },
+    {
+      "name": "kotlin-specialist",
+      "category": "languages",
+      "path": "languages/kotlin-specialist",
+      "mode": "subagent",
+      "description": "Kotlin coroutines, multiplatform, and Android/server-side development",
+      "tags": ["kotlin", "android", "coroutines", "multiplatform", "jvm"]
+    },
+    {
+      "name": "php-pro",
+      "category": "languages",
+      "path": "languages/php-pro",
+      "mode": "subagent",
+      "description": "PHP 8.3+, Laravel, Symfony, and modern async/Fiber patterns",
+      "tags": ["php", "laravel", "symfony", "composer", "async"]
+    },
+    {
+      "name": "python-pro",
+      "category": "languages",
+      "path": "languages/python-pro",
+      "mode": "subagent",
+      "description": "Type-safe Python for web APIs, async patterns, and production systems",
+      "tags": ["python", "fastapi", "async", "typing", "django", "flask"]
+    },
+    {
+      "name": "rails-expert",
+      "category": "languages",
+      "path": "languages/rails-expert",
+      "mode": "subagent",
+      "description": "Ruby on Rails full-stack, Hotwire, and real-time feature development",
+      "tags": ["rails", "ruby", "hotwire", "turbo", "active-record", "full-stack"]
+    },
+    {
+      "name": "rust-pro",
+      "category": "languages",
+      "path": "languages/rust-pro",
+      "mode": "subagent",
+      "description": "Idiomatic Rust with ownership, lifetimes, async, and zero-cost abstractions",
+      "tags": ["rust", "ownership", "lifetimes", "async", "concurrency", "systems"]
+    },
+    {
+      "name": "typescript-pro",
+      "category": "languages",
+      "path": "languages/typescript-pro",
+      "mode": "subagent",
+      "description": "Advanced TypeScript type system, generics, and full-stack type safety",
+      "tags": ["typescript", "types", "generics", "full-stack", "node", "react"]
+    },
+    {
+      "name": "penetration-tester",
+      "category": "security",
+      "path": "security/penetration-tester",
+      "mode": "subagent",
+      "description": "Offensive security testing, vulnerability exploitation, and risk demos",
+      "tags": ["penetration-testing", "security", "exploitation", "vulnerabilities", "offensive"]
+    },
+    {
+      "name": "security-auditor",
+      "category": "security",
+      "path": "security/security-auditor",
+      "mode": "subagent",
+      "description": "Security audits, compliance assessments, and risk evaluations",
+      "tags": ["security-audit", "compliance", "risk", "vulnerabilities", "assessment"]
+    },
+    {
+      "name": "smart-contract-auditor",
+      "category": "security",
+      "path": "security/smart-contract-auditor",
+      "mode": "subagent",
+      "description": "Smart contract security audits, vulnerability detection, and attack analysis",
+      "tags": ["smart-contracts", "blockchain", "solidity", "security", "web3", "audit"]
+    },
+    {
+      "name": "expert-nextjs-developer",
+      "category": "web",
+      "path": "web/expert-nextjs-developer",
+      "mode": "subagent",
+      "description": "Next.js App Router, Server Components, Turbopack, and modern React",
+      "tags": ["nextjs", "react", "server-components", "app-router", "turbopack", "ssr"]
+    },
+    {
+      "name": "expert-react-frontend-engineer",
+      "category": "web",
+      "path": "web/expert-react-frontend-engineer",
+      "mode": "subagent",
+      "description": "React 19 hooks, Server Components, Actions, and performance optimization",
+      "tags": ["react", "hooks", "server-components", "typescript", "frontend", "performance"]
+    },
+    {
+      "name": "product-manager",
+      "category": "business",
+      "path": "business/product-manager",
+      "mode": "subagent",
+      "description": "Product strategy, feature prioritization, and roadmap planning",
+      "tags": ["product", "strategy", "roadmap", "prioritization", "user-research"]
+    },
+    {
+      "name": "project-manager",
+      "category": "business",
+      "path": "business/project-manager",
+      "mode": "subagent",
+      "description": "Project planning, risk management, and stakeholder coordination",
+      "tags": ["project-management", "planning", "risk", "stakeholders", "budget"]
+    },
+    {
+      "name": "scrum-master",
+      "category": "business",
+      "path": "business/scrum-master",
+      "mode": "subagent",
+      "description": "Agile facilitation, sprint planning, and team velocity improvement",
+      "tags": ["scrum", "agile", "sprint", "retrospective", "kanban", "facilitation"]
+    },
+    {
+      "name": "episode-orchestrator",
+      "category": "team",
+      "path": "episode-orchestrator",
+      "mode": "primary",
+      "description": "Workflow orchestrator coordinating specialized subagents in sequence",
+      "tags": ["orchestration", "workflow", "coordination", "subagents", "automation"]
+    },
+    {
+      "name": "fullstack-developer",
+      "category": "team",
+      "path": "fullstack-developer",
+      "mode": "primary",
+      "description": "End-to-end full-stack development spanning database, API, and frontend",
+      "tags": ["fullstack", "web", "frontend", "backend", "api", "database"]
+    },
+    {
+      "name": "mobile-developer",
+      "category": "team",
+      "path": "team/mobile-developer",
+      "mode": "subagent",
+      "description": "Cross-platform mobile apps with React Native and Flutter",
+      "tags": ["mobile", "react-native", "flutter", "ios", "android", "cross-platform"]
+    },
+    {
+      "name": "ui-designer",
+      "category": "team",
+      "path": "team/ui-designer",
+      "mode": "subagent",
+      "description": "Visual interface design, design systems, and component libraries",
+      "tags": ["ui", "design", "design-systems", "components", "accessibility", "ux"]
+    }
+  ],
+  "packs": {
+    "backend": {
+      "label": "Backend Essentials",
+      "description": "Core agents for backend development",
+      "agents": [
+        "postgres-pro",
+        "redis-specialist",
+        "database-architect",
+        "api-architect",
+        "python-pro",
+        "typescript-pro",
+        "debugger",
+        "test-automator"
+      ]
+    },
+    "frontend": {
+      "label": "Frontend Stack",
+      "description": "Everything you need for modern frontend development",
+      "agents": [
+        "expert-react-frontend-engineer",
+        "expert-nextjs-developer",
+        "typescript-pro",
+        "ui-designer",
+        "performance-engineer",
+        "test-automator"
+      ]
+    },
+    "devops": {
+      "label": "DevOps Toolkit",
+      "description": "Complete DevOps and infrastructure agents",
+      "agents": [
+        "devops-engineer",
+        "cloud-architect",
+        "docker-specialist",
+        "kubernetes-specialist",
+        "terraform-specialist",
+        "aws-specialist",
+        "ci-cd-engineer",
+        "linux-admin"
+      ]
+    },
+    "fullstack": {
+      "label": "Full-Stack Developer",
+      "description": "End-to-end development from database to UI",
+      "agents": [
+        "fullstack-developer",
+        "typescript-pro",
+        "expert-react-frontend-engineer",
+        "expert-nextjs-developer",
+        "postgres-pro",
+        "api-architect",
+        "debugger",
+        "test-automator",
+        "code-reviewer"
+      ]
+    },
+    "ai": {
+      "label": "AI & ML Suite",
+      "description": "All AI and machine learning agents",
+      "agents": [
+        "ai-engineer",
+        "data-scientist",
+        "ml-engineer",
+        "llm-architect",
+        "prompt-engineer",
+        "search-specialist"
+      ]
+    },
+    "security": {
+      "label": "Security Team",
+      "description": "Comprehensive security auditing agents",
+      "agents": [
+        "security-auditor",
+        "penetration-tester",
+        "smart-contract-auditor"
+      ]
+    },
+    "quality": {
+      "label": "Code Quality",
+      "description": "Code quality, testing, and performance agents",
+      "agents": [
+        "code-reviewer",
+        "test-automator",
+        "debugger",
+        "performance-engineer",
+        "refactoring-specialist"
+      ]
+    },
+    "startup": {
+      "label": "Startup Kit",
+      "description": "Essential agents for a lean startup team",
+      "agents": [
+        "fullstack-developer",
+        "typescript-pro",
+        "expert-nextjs-developer",
+        "postgres-pro",
+        "docker-specialist",
+        "product-manager",
+        "ui-designer",
+        "test-automator"
+      ]
+    }
+  }
+}
