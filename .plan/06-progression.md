@@ -275,3 +275,57 @@
 - Tests : 117/117 ✅ (pas de régression)
 - Commit : `60536a0` — feat: phase 2 — add 5 custom agents
 - **Phase 2 complétée** ✅
+
+---
+
+## Session 7 — Phase 3 : CLI npm `npx opencode-agents` ✅
+
+**Date** : 2026-02-12  
+**Objectif** : Créer un CLI npm zero-dependency pour installer les agents à la carte
+
+### Réalisations
+
+| # | Tâche | Tests | État |
+|---|-------|-------|------|
+| 1 | Architecture CLI ESM (bin/cli.mjs, src/{registry,installer,display}.mjs) | 30 tests | ✅ |
+| 2 | Manifest enrichi (49 agents, 12 catégories, 8 packs, tags) | — | ✅ |
+| 3 | Commandes : install, list, search avec options --category, --pack, --all | 30 tests | ✅ |
+| 4 | ANSI display avec NO_COLOR support | 2 tests | ✅ |
+| 5 | Download sécurisé (HTTPS only, User-Agent, error handling) | — | ✅ |
+| 6 | Documentation : CODE_OF_CONDUCT.md, README polish | — | ✅ |
+
+**Métriques** :
+- CLI : 4 fichiers, ~800 lignes, zero npm dependencies
+- Tests CLI : 30/30 ✅
+- Tests Python : 117/117 ✅ (pas de régression)
+- Commits : `6245015` (CLI), `3632c83` (roadmap), `8047b41` (docs)
+- **Phase 3 (CLI) complétée** ✅
+
+---
+
+## Session 8 — Sprint corrections CLI (double revue sécurité) ✅
+
+**Date** : 2026-02-13  
+**Objectif** : Corriger les findings de la double revue code-reviewer (7.4/10) + security-auditor (7/10 risque)
+
+### Corrections appliquées
+
+| # | Finding | Sévérité | Correction | Tests |
+|---|---------|----------|------------|-------|
+| C1 | Path traversal dans installer | 🔴 Critique | `resolve()` + `startsWith(safeBase + sep)` guard | 3 tests |
+| C2 | Redirections HTTP illimitées | 🔴 Critique | Max 5 redirects + domain allowlist | 2 tests |
+| C3 | Pas de limite taille réponse | 🔴 Critique | Cap 1MB avec destruction requête | 1 test |
+| M1 | `NO_COLOR` non respecté | 🟡 Majeur | Support `NO_COLOR` env + `TERM=dumb` | 2 tests |
+| M2 | User-Agent hardcodé `1.0.0` | 🟡 Majeur | Version dynamique depuis package.json | 1 test |
+| M3 | Imports/exports inutilisés | 🟡 Majeur | Supprimé `red`, `boldRed`, 17 exports | — |
+| M4 | Pas de validation manifest | 🟡 Majeur | `validateManifest()` avec regex + checks | 5 tests |
+| M5 | Tests sécurité manquants | 🟡 Majeur | +17 tests sécurité et I/O | 17 tests |
+| M6 | package.json incomplet | 🟡 Majeur | author, homepage, bugs, prepublishOnly | 1 test |
+
+**Métriques** :
+- Score code-reviewer estimé : 7.4 → **9+/10**
+- Score security-auditor estimé : 7/10 risque → **3/10 risque**
+- Tests CLI : 30 → **47** (+17 sécurité/I/O)
+- Tests totaux : **164/164** ✅ (47 CLI + 117 Python)
+- Commit : `1052113` — fix: security hardening
+- **Sprint corrections complété** ✅

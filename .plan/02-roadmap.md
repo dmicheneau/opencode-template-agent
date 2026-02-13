@@ -61,18 +61,29 @@
   - Lint des system prompts ✅ (artefacts, longueur min — `test_agents.py`)
 - [x] **Script de mise à jour incrémentale** : ETags/If-Modified-Since, cache JSON, --incremental flag
 
-## Phase 3 — Distribution (Long terme)
+## Phase 3 — Distribution ✅ (CLI) / 🔄 (API, Web)
 
-- [ ] **Plugin OpenCode natif** :
-  - Créer un plugin npm `opencode-agent-registry`
-  - Chargement d'agents depuis une URL HTTP directe
-  - Cache local avec TTL configurable
-  - Commande `opencode agent install @registry/typescript-pro`
+### 3a — CLI npm `npx opencode-agents` ✅
+
+- [x] **CLI zero-dependency** (Node 18+ ESM) :
+  - `npx opencode-agents install <agent>` — installation à la carte
+  - `npx opencode-agents install --category <cat>` — par catégorie
+  - `npx opencode-agents install --pack <pack>` — 8 packs prédéfinis
+  - `npx opencode-agents install --all` — 49 agents
+  - `npx opencode-agents list` / `list --packs` — catalogue
+  - `npx opencode-agents search <query>` — recherche
+- [x] **Manifest enrichi** : 49 agents, 12 catégories, 8 packs, tags
+- [x] **Sécurité CLI** : path traversal guard, redirect limit, response cap, domain allowlist
+- [x] **47 tests CLI** + 117 tests Python = 164 tests, tous verts
+- [x] **CI/CD** : GitHub Actions (test + lint + validate-agents), SHA-pinned
+
+### 3b — Distribution avancée (Long terme)
+
+- [ ] **Publication npm** : `npm publish` de `opencode-agents`
 - [ ] **API REST** :
   - Endpoint `/api/agents` → liste JSON de tous les agents
   - Endpoint `/api/agents/{category}/{name}` → contenu markdown
   - Hébergé sur Cloudflare Workers ou Vercel Edge
-  - Permet le chargement dynamique sans cloner le repo
 - [ ] **Interface web** :
   - Catalogue navigable des agents
   - Aperçu du system prompt
