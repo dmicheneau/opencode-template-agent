@@ -1,5 +1,6 @@
-import { mkdirSync, existsSync, writeFileSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { mkdirSync, existsSync, writeFileSync, readFileSync } from 'node:fs';
+import { join, dirname, resolve, sep } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import https from 'node:https';
 import { loadManifest } from './registry.mjs';
 import {
@@ -10,6 +11,16 @@ import {
   installSummary,
   infoMessage,
 } from './display.mjs';
+
+// ─── Constants ───────────────────────────────────────────────────────────────────
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'));
+const USER_AGENT = `opencode-agents/${pkg.version}`;
+
+const ALLOWED_HOSTS = ['raw.githubusercontent.com', 'objects.githubusercontent.com', 'github.com'];
+const MAX_REDIRECTS = 5;
+const MAX_RESPONSE_SIZE = 1024 * 1024; // 1 MB
 
 // ─── Types ──────────────────────────────────────────────────────────────────────
 
@@ -24,16 +35,31 @@ import {
 // ─── HTTP Download ──────────────────────────────────────────────────────────────
 
 /**
- * Download a file from a URL (HTTPS only).
+ * Download a file from a URL (HTTPS only, with redirect limit and domain allowlist).
  * @param {string} url
+ * @param {number} [_redirectCount=0]
  * @returns {Promise<string>}
  */
-function download(url) {
+function download(url, _redirectCount = 0) {
+  if (_redirectCount > MAX_REDIRECTS) {
+    return Promise.reject(new Error(`Too many redirects (>${MAX_REDIRECTS})`));
+  }
+
+  const parsed = new URL(url);
+
+  if (parsed.protocol !== 'https:') {
+    return Promise.reject(new Error(`Refusing non-HTTPS URL: ${url}`));
+  }
+
+  if (!ALLOWED_HOSTS.includes(parsed.hostname)) {
+    return Promise.reject(new Error(`Refusing untrusted host: ${parsed.hostname}`));
+  }
+
   return new Promise((resolve, reject) => {
-    const request = https.get(url, { headers: { 'User-Agent': 'opencode-agents/1.0.0' } }, (res) => {
+    const request = https.get(url, { headers: { 'User-Agent': USER_AGENT } }, (res) => {
       // Handle redirects
       if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-        download(res.headers.location).then(resolve, reject);
+        download(res.headers.location, _redirectCount + 1).then(resolve, reject);
         return;
       }
 
@@ -45,7 +71,16 @@ function download(url) {
 
       /** @type {Buffer[]} */
       const chunks = [];
-      res.on('data', (chunk) => chunks.push(chunk));
+      let totalSize = 0;
+
+      res.on('data', (chunk) => {
+        totalSize += chunk.length;
+        if (totalSize > MAX_RESPONSE_SIZE) {
+          request.destroy(new Error(`Response exceeds ${MAX_RESPONSE_SIZE} bytes`));
+          return;
+        }
+        chunks.push(chunk);
+      });
       res.on('end', () => resolve(Buffer.concat(chunks).toString('utf-8')));
       res.on('error', reject);
     });
@@ -81,8 +116,15 @@ function getDestination(agent, cwd) {
     relative = join(basePath, agent.category, `${agent.name}.md`);
   }
 
+  const absolute = resolve(cwd, relative);
+  const safeBase = resolve(cwd, basePath);
+
+  if (!absolute.startsWith(safeBase + sep) && absolute !== safeBase) {
+    throw new Error(`Security: path "${relative}" escapes agents directory. Agent "${agent.name}" rejected.`);
+  }
+
   return {
-    absolute: join(cwd, relative),
+    absolute,
     relative,
   };
 }

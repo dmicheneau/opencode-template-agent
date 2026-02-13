@@ -25,10 +25,8 @@ import { installAgents } from '../src/installer.mjs';
 import {
   bold,
   dim,
-  red,
   cyan,
   boldCyan,
-  boldRed,
   errorMessage,
   printAgentList,
   printPacksList,

@@ -1,35 +1,37 @@
 // ─── ANSI Color Helpers (zero dependencies) ────────────────────────────────────
 
+const NO_COLOR = 'NO_COLOR' in process.env || process.env.TERM === 'dumb';
+
 const ESC = '\x1b[';
 const RESET = `${ESC}0m`;
 
 /** @param {string} code */
-const wrap = (code) => (/** @type {string} */ text) => `${ESC}${code}m${text}${RESET}`;
+const wrap = (code) => (/** @type {string} */ text) => NO_COLOR ? String(text) : `${ESC}${code}m${text}${RESET}`;
 
 export const bold    = wrap('1');
 export const dim     = wrap('2');
-export const italic  = wrap('3');
-export const red     = wrap('31');
-export const green   = wrap('32');
-export const yellow  = wrap('33');
-export const blue    = wrap('34');
-export const magenta = wrap('35');
+const italic  = wrap('3');
+const red     = wrap('31');
+const green   = wrap('32');
+const yellow  = wrap('33');
+const blue    = wrap('34');
+const magenta = wrap('35');
 export const cyan    = wrap('36');
-export const white   = wrap('37');
+const white   = wrap('37');
 
 // Combined helpers
-export const boldGreen  = (/** @type {string} */ t) => bold(green(t));
+const boldGreen  = (/** @type {string} */ t) => bold(green(t));
 export const boldCyan   = (/** @type {string} */ t) => bold(cyan(t));
-export const boldRed    = (/** @type {string} */ t) => bold(red(t));
-export const boldYellow = (/** @type {string} */ t) => bold(yellow(t));
+const boldRed    = (/** @type {string} */ t) => bold(red(t));
+const boldYellow = (/** @type {string} */ t) => bold(yellow(t));
 
 // ─── Status Icons ───────────────────────────────────────────────────────────────
 
-export const CHECK = green('✓');
-export const CROSS = red('✗');
-export const WARN  = yellow('⚠');
-export const INFO  = cyan('ℹ');
-export const ARROW = dim('→');
+const CHECK = green('✓');
+const CROSS = red('✗');
+const WARN  = yellow('⚠');
+const INFO  = cyan('ℹ');
+const ARROW = dim('→');
 
 // ─── Category Icons ─────────────────────────────────────────────────────────────
 
@@ -53,7 +55,7 @@ const CATEGORY_ICONS = {
  * @param {string} category
  * @returns {string}
  */
-export function categoryIcon(category) {
+function categoryIcon(category) {
   return CATEGORY_ICONS[category] ?? '📦';
 }
 
@@ -65,7 +67,7 @@ export function categoryIcon(category) {
  * @param {number} width
  * @returns {string}
  */
-export function padEnd(str, width) {
+function padEnd(str, width) {
   // Strip ANSI codes for length calculation
   const stripped = str.replace(/\x1b\[[0-9;]*m/g, '');
   const padding = Math.max(0, width - stripped.length);

@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "description": "Curated AI agent registry for OpenCode — install expert agents in seconds",
   "license": "MIT",
+  "author": "dmicheneau",
+  "homepage": "https://github.com/dmicheneau/opencode-template-agent#readme",
+  "bugs": {
+    "url": "https://github.com/dmicheneau/opencode-template-agent/issues"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/dmicheneau/opencode-template-agent"
@@ -28,6 +33,7 @@
   ],
   "scripts": {
     "test": "node --test tests/cli.test.mjs",
-    "lint": "node --check bin/cli.mjs src/*.mjs"
+    "lint": "node --check bin/cli.mjs src/*.mjs",
+    "prepublishOnly": "npm test"
   }
 }

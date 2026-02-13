@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
+import { dirname, join, isAbsolute } from 'node:path';
 
 // ─── Types (JSDoc) ──────────────────────────────────────────────────────────────
 
@@ -53,6 +53,33 @@ const MANIFEST_PATH = join(__dirname, '..', 'manifest.json');
 /** @type {Manifest | null} */
 let _cached = null;
 
+const SAFE_NAME_RE = /^[a-z0-9][a-z0-9._-]*$/i;
+
+/**
+ * Validate manifest schema for security-sensitive fields.
+ * @param {Manifest} manifest
+ */
+function validateManifest(manifest) {
+  // Validate base_path
+  if (typeof manifest.base_path !== 'string' || manifest.base_path.includes('..') || isAbsolute(manifest.base_path)) {
+    throw new Error(`Invalid manifest base_path: "${manifest.base_path}"`);
+  }
+
+  // Validate agents
+  const agents = manifest.agents;
+  for (const agent of agents) {
+    if (!SAFE_NAME_RE.test(agent.name || '')) {
+      throw new Error(`Invalid agent name: "${agent.name}"`);
+    }
+    if (agent.category && !SAFE_NAME_RE.test(agent.category)) {
+      throw new Error(`Invalid category for "${agent.name}": "${agent.category}"`);
+    }
+    if (agent.path && agent.path.includes('..')) {
+      throw new Error(`Agent path contains "..": "${agent.path}"`);
+    }
+  }
+}
+
 /**
  * Load and cache the manifest.
  * @returns {Manifest}
@@ -62,8 +89,10 @@ export function loadManifest() {
 
   try {
     const raw = readFileSync(MANIFEST_PATH, 'utf-8');
-    _cached = JSON.parse(raw);
-    return /** @type {Manifest} */ (_cached);
+    const manifest = /** @type {Manifest} */ (JSON.parse(raw));
+    validateManifest(manifest);
+    _cached = manifest;
+    return _cached;
   } catch (err) {
     throw new Error(
       `Failed to load manifest at ${MANIFEST_PATH}: ${/** @type {Error} */ (err).message}`

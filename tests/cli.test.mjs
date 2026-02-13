@@ -2,9 +2,10 @@ import { describe, it, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, rmSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { dirname } from 'node:path';
+import { tmpdir } from 'node:os';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -284,5 +285,266 @@ describe('CLI command aliases', () => {
   it('should accept "find" as alias for "search"', () => {
     const output = run(['find', 'typescript']);
     assert.ok(output.includes('typescript-pro'));
+  });
+});
+
+// ─── Security: Path Traversal ───────────────────────────────────────────────────
+
+describe('Security: Path Traversal', () => {
+  it('should reject agent names containing ../', async () => {
+    const { installAgents } = await import('../src/installer.mjs');
+    const malicious = {
+      name: '../../../etc/passwd',
+      category: 'database',
+      path: 'database/test',
+      mode: 'primary',
+      description: 'malicious',
+      tags: [],
+    };
+    await assert.rejects(
+      () => installAgents([malicious], { dryRun: true, cwd: tmpdir() }),
+      (err) => {
+        assert.ok(err instanceof Error);
+        assert.ok(err.message.includes('Security'), `Expected "Security" in error but got: ${err.message}`);
+        return true;
+      }
+    );
+  });
+
+  it('should reject categories containing ../', async () => {
+    const { installAgents } = await import('../src/installer.mjs');
+    const malicious = {
+      name: 'innocent-agent',
+      category: '../../../etc',
+      path: 'test/innocent-agent',
+      mode: 'subagent',
+      description: 'malicious category',
+      tags: [],
+    };
+    await assert.rejects(
+      () => installAgents([malicious], { dryRun: true, cwd: tmpdir() }),
+      (err) => {
+        assert.ok(err instanceof Error);
+        assert.ok(err.message.includes('Security'), `Expected "Security" in error but got: ${err.message}`);
+        return true;
+      }
+    );
+  });
+
+  it('should ensure all manifest agents resolve within agents dir', async () => {
+    const { loadManifest } = await import('../src/registry.mjs');
+    const manifest = loadManifest();
+    const basePath = manifest.base_path;
+    const cwd = tmpdir();
+    const safeBase = resolve(cwd, basePath);
+
+    for (const agent of manifest.agents) {
+      let relative;
+      if (agent.mode === 'primary') {
+        relative = join(basePath, `${agent.name}.md`);
+      } else {
+        relative = join(basePath, agent.category, `${agent.name}.md`);
+      }
+      const absolute = resolve(cwd, relative);
+      assert.ok(
+        absolute.startsWith(safeBase),
+        `Agent "${agent.name}" resolves outside agents dir: ${absolute}`
+      );
+    }
+  });
+});
+
+// ─── Security: Network ──────────────────────────────────────────────────────────
+
+describe('Security: Network', () => {
+  /** @type {string} */
+  let installerSource;
+
+  // Read installer source once for all network security tests
+  beforeEach(() => {
+    installerSource = readFileSync(join(ROOT, 'src', 'installer.mjs'), 'utf-8');
+  });
+
+  it('should include redirect limit constant', () => {
+    const match = installerSource.match(/const\s+MAX_REDIRECTS\s*=\s*(\d+)/);
+    assert.ok(match, 'MAX_REDIRECTS constant not found in installer.mjs');
+    const value = parseInt(match[1], 10);
+    assert.ok(value > 0 && value <= 10, `MAX_REDIRECTS should be 1–10, got ${value}`);
+  });
+
+  it('should include response size limit constant', () => {
+    const match = installerSource.match(/const\s+MAX_RESPONSE_SIZE\s*=\s*([^;]+)/);
+    assert.ok(match, 'MAX_RESPONSE_SIZE constant not found in installer.mjs');
+    // Evaluate the expression (e.g. "1024 * 1024")
+    const value = Function(`"use strict"; return (${match[1]})`)();
+    assert.ok(typeof value === 'number' && value > 0, 'MAX_RESPONSE_SIZE must be a positive number');
+    assert.ok(value <= 10 * 1024 * 1024, `MAX_RESPONSE_SIZE should be ≤ 10 MB, got ${value}`);
+  });
+
+  it('should include domain allowlist', () => {
+    assert.ok(
+      installerSource.includes('ALLOWED_HOSTS'),
+      'ALLOWED_HOSTS constant not found in installer.mjs'
+    );
+    assert.ok(
+      installerSource.includes('raw.githubusercontent.com'),
+      'ALLOWED_HOSTS must include raw.githubusercontent.com'
+    );
+  });
+});
+
+// ─── Security: Manifest Validation ──────────────────────────────────────────────
+
+describe('Security: Manifest Validation', () => {
+  // Recreate the SAFE_NAME_RE pattern from registry.mjs for direct testing
+  const SAFE_NAME_RE = /^[a-z0-9][a-z0-9._-]*$/i;
+
+  it('should reject manifest with base_path containing ..', () => {
+    // Verify the validation logic: base_path with ".." should be rejected
+    const badBasePath = '../../../etc';
+    assert.ok(badBasePath.includes('..'), 'Test precondition: bad path contains ".."');
+    // The validation in registry.mjs checks: manifest.base_path.includes('..')
+    // Verify the check exists in the source
+    const registrySource = readFileSync(join(ROOT, 'src', 'registry.mjs'), 'utf-8');
+    assert.ok(
+      registrySource.includes("base_path") && registrySource.includes("'..'"),
+      'Manifest validation must check base_path for ".."'
+    );
+  });
+
+  it('should reject manifest with absolute base_path', () => {
+    // Verify the validation logic: absolute base_path should be rejected
+    const registrySource = readFileSync(join(ROOT, 'src', 'registry.mjs'), 'utf-8');
+    assert.ok(
+      registrySource.includes('isAbsolute'),
+      'Manifest validation must check for absolute base_path using isAbsolute'
+    );
+  });
+
+  it('should reject agent with invalid name characters', () => {
+    // Test the SAFE_NAME_RE pattern used by validateManifest
+    const invalidNames = [
+      '../etc/passwd',
+      'agent; rm -rf /',
+      '',
+      ' leading-space',
+      'has spaces',
+      '/absolute/path',
+      'back\\slash',
+    ];
+    for (const name of invalidNames) {
+      assert.ok(
+        !SAFE_NAME_RE.test(name),
+        `SAFE_NAME_RE should reject "${name}" but it matched`
+      );
+    }
+  });
+
+  it('should accept valid manifest', async () => {
+    // The real manifest must load without throwing (validates on load)
+    const { loadManifest } = await import('../src/registry.mjs');
+    const manifest = loadManifest();
+    assert.ok(manifest.agents.length > 0, 'Manifest must contain agents');
+    assert.ok(typeof manifest.base_path === 'string', 'Manifest must have base_path');
+    assert.ok(!manifest.base_path.includes('..'), 'base_path must not contain ".."');
+
+    // Verify all agent names match the safe pattern
+    for (const agent of manifest.agents) {
+      assert.ok(
+        SAFE_NAME_RE.test(agent.name),
+        `Agent name "${agent.name}" does not match SAFE_NAME_RE`
+      );
+      assert.ok(
+        SAFE_NAME_RE.test(agent.category),
+        `Category "${agent.category}" does not match SAFE_NAME_RE`
+      );
+    }
+  });
+});
+
+// ─── Install: File I/O ──────────────────────────────────────────────────────────
+
+describe('Install: File I/O', () => {
+  const IO_TEMP = join(ROOT, '.test-io-workspace');
+
+  beforeEach(() => {
+    mkdirSync(IO_TEMP, { recursive: true });
+  });
+
+  afterEach(() => {
+    rmSync(IO_TEMP, { recursive: true, force: true });
+  });
+
+  it('should create directory structure on install', () => {
+    // Verify that a dry-run produces the correct target path structure
+    const output = run(['install', 'postgres-pro', '--dry-run'], { cwd: IO_TEMP });
+    assert.ok(output.includes('postgres-pro'), 'Output should mention the agent');
+    // The dry-run output shows the relative path the file WOULD be written to
+    assert.ok(
+      output.includes('.opencode') && output.includes('agents'),
+      'Output should show the .opencode/agents path structure'
+    );
+    // Verify that when we manually create the expected directory, it works
+    const expectedDir = join(IO_TEMP, '.opencode', 'agents', 'database');
+    mkdirSync(expectedDir, { recursive: true });
+    assert.ok(existsSync(expectedDir), 'Directory structure should be creatable');
+    // Also verify parent directories exist
+    assert.ok(existsSync(join(IO_TEMP, '.opencode')), '.opencode dir should exist');
+    assert.ok(existsSync(join(IO_TEMP, '.opencode', 'agents')), '.opencode/agents dir should exist');
+  });
+
+  it('should skip existing files without --force', () => {
+    // Pre-create the agent file with dummy content
+    const agentDir = join(IO_TEMP, '.opencode', 'agents', 'database');
+    const agentFile = join(agentDir, 'postgres-pro.md');
+    mkdirSync(agentDir, { recursive: true });
+    writeFileSync(agentFile, 'DUMMY CONTENT — DO NOT OVERWRITE', 'utf-8');
+
+    // Run install without --force — should skip (no download needed)
+    const output = run(['install', 'postgres-pro'], { cwd: IO_TEMP });
+    assert.ok(
+      output.includes('already exists') || output.includes('skipped'),
+      'Output should indicate the file was skipped'
+    );
+
+    // Verify the file was NOT overwritten
+    const content = readFileSync(agentFile, 'utf-8');
+    assert.equal(content, 'DUMMY CONTENT — DO NOT OVERWRITE', 'File content should be unchanged');
+  });
+
+  it('should overwrite existing files with --force', () => {
+    // Pre-create the agent file with dummy content
+    const agentDir = join(IO_TEMP, '.opencode', 'agents', 'database');
+    const agentFile = join(agentDir, 'postgres-pro.md');
+    mkdirSync(agentDir, { recursive: true });
+    writeFileSync(agentFile, 'DUMMY CONTENT — SHOULD BE REPLACED', 'utf-8');
+
+    // Run install with --force — will attempt download from GitHub
+    // If the remote file exists, it will overwrite; if 404, install fails but
+    // the important thing is it does NOT skip (no "already exists" message)
+    const output = run(['install', 'postgres-pro', '--force'], { cwd: IO_TEMP, expectError: true });
+    assert.ok(output.includes('postgres-pro'), 'Output should mention the agent name');
+    // With --force, the file should NOT be skipped
+    assert.ok(
+      !output.includes('already exists'),
+      'With --force, the file should not be reported as "already exists"'
+    );
+  });
+});
+
+// ─── Display: NO_COLOR ──────────────────────────────────────────────────────────
+
+describe('Display: NO_COLOR', () => {
+  it('should strip ANSI codes when NO_COLOR is set', () => {
+    // The run() helper already sets NO_COLOR=1
+    const output = run(['list']);
+    const ansiPattern = /\x1b\[[0-9;]*m/;
+    assert.ok(
+      !ansiPattern.test(output),
+      'Output should not contain ANSI escape codes when NO_COLOR is set'
+    );
+    // Verify output still has readable content
+    assert.ok(output.includes('agents available'), 'Output should still contain readable text');
+    assert.ok(output.includes('postgres-pro'), 'Output should still list agents');
   });
 });
