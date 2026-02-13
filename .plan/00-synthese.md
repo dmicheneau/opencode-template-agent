@@ -8,11 +8,12 @@ Transformer le registre aitmpl.com (399 agents Claude Code) en une collection cu
 
 | Composant | État | Détails |
 |-----------|------|---------|
-| Registre d'agents | ✅ Fait | 44 agents (4 primary + 40 subagents) — 43 synchronisés + 1 custom |
+| Registre d'agents | ✅ Fait | 134 agents (4 primary + 130 subagents) — 133 synchronisés (43 core + 90 extended) + 1 custom |
 | Format moderne | ✅ Fait | `permission:` uniquement (pas `tools:` déprécié) |
-| Organisation par catégorie | ✅ Fait | 11 sous-répertoires (nested agents) |
+| Organisation par catégorie | ✅ Fait | 13 sous-répertoires (nested agents) |
 | Script de synchronisation | ✅ Fait | `sync-agents.py` — fetch GitHub → convert → write |
-| Documentation | ✅ Fait | README.md complet en français |
+| Système de tiers | ✅ Fait | `--tier core\|extended\|all` — synchronisation sélective |
+| Documentation | ✅ Fait | README.md (FR) + README.en.md (EN) |
 | Skills intégrés | ✅ Fait | brainstormai, browser-mcp, memory, sequential-thinking |
 
 ## Flux de fonctionnement
@@ -50,7 +51,10 @@ Tab                          → Naviguer entre les 4 agents principaux
 ## Chiffres clés
 
 - **Source** : 399 agents dans 27 catégories (davila7/claude-code-templates, 20k+ ⭐)
-- **Curés** : 44 agents dans 11 catégories (43 synchronisés + 1 custom)
-- **Taux de couverture** : ~11% des agents source (les plus pertinents pour le dev)
+- **Curés** : 134 agents dans 13 catégories (133 synchronisés + 1 custom)
+  - **Tier 1 (Core)** : 43 agents — sélection originale
+  - **Tier 2 (Extended)** : 90 agents — ajoutés en Phase 1.5a
+- **Taux de couverture** : ~33% des agents source
+- **Catégories source mappées** : 27 → 13 catégories OpenCode
 - **Profils de permissions** : 5 (full-access, read-only, analysis, content, primary)
 - **Format** : Markdown + YAML frontmatter, pur OpenCode natif

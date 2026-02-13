@@ -1,5 +1,15 @@
 # 🏗️ Architecture technique
 
+## Vue d'ensemble
+
+Le projet gère **134 agents** (133 synchronisés + 1 custom) organisés en **deux tiers** :
+
+- **Tier 1 — Core** : 43 agents essentiels, sélection originale
+- **Tier 2 — Extended** : 90 agents supplémentaires ajoutés en Phase 1.5a
+
+Le flag `--tier core|extended|all` permet de synchroniser sélectivement un tier.
+Les 27 catégories source sont mappées vers 13 catégories OpenCode.
+
 ## Arborescence du projet
 
 ```
@@ -61,10 +71,14 @@ opencode-template-agent/
 │   │   │   ├── rust-pro.md
 │   │   │   └── typescript-pro.md
 │   │   │
+│   │   ├── mcp/                         # 🔧 MCP (Model Context Protocol)
+│   │   │
 │   │   ├── security/                    # 🔒 Sécurité
 │   │   │   ├── penetration-tester.md
 │   │   │   ├── security-auditor.md
 │   │   │   └── smart-contract-auditor.md
+│   │   │
+│   │   ├── specialist/                  # 🎯 Spécialistes
 │   │   │
 │   │   ├── team/                        # 🏗️ Équipe
 │   │   │   ├── mobile-developer.md

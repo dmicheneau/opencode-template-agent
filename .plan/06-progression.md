@@ -150,3 +150,29 @@
 - **Commits** : 3 (commit Sprint 2 à venir)
 - **Fichiers ajoutés** : 9 nouveaux fichiers
 - **Score estimé** : ~9/10 (vs ~8.5 post-Sprint 1)
+
+---
+
+## Session 5 — Phase 1.5a : Extension Tier 2 ✅
+
+**Date** : 2026-02-13
+**Statut** : Terminé
+**Agents délégués** : `python-pro` (implémentation), `test-automator` (tests), `documentation-engineer` (docs)
+
+### Backlog Phase 1.5a
+| # | Action | Livrables | Effort | Statut |
+|---|--------|-----------|--------|--------|
+| P1.5.1 | Curation de 90 agents Tier 2 | Selection parmi 413 agents source, 27 catégories | 1h | ✅ |
+| P1.5.2 | EXTENDED_AGENTS dict + --tier flag | `sync-agents.py` (+180L, 1332L total) | 2h | ✅ |
+| P1.5.3 | 13 nouveaux mappings catégories | 27 mappings total (était 14) + 2 nouvelles catégories OpenCode (specialist/, mcp/) | 30min | ✅ |
+| P1.5.4 | Tests Phase 1.5 | 10 nouveaux tests (80 total, tous verts) | 1h | ✅ |
+| P1.5.5 | Documentation mise à jour | README FR/EN, .plan/00, .plan/01 | 1h | ✅ |
+
+### Métriques post-Phase 1.5a
+- **Agents curés** : 133 (43 core + 90 extended) sur 413 disponibles (32% de couverture)
+- **Catégories OpenCode** : 13 (était 11, +specialist/, +mcp/)
+- **Catégories mappées** : 27 source → 13 OpenCode
+- **Tests** : 80 / 80 ✅ (20 validation agents + 50 sync fonctions + 10 tier 2)
+- **Script sync** : 1332 lignes (était 1152)
+- **CLI** : nouveau flag `--tier core|extended|all`, backward-compatible avec `--all`
+- **Commits** : 5 (Sprint 2 + Phase 1.5)

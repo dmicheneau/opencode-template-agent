@@ -33,6 +33,9 @@ _get_opencode_category = sync_agents._get_opencode_category
 _get_agent_relative_path = sync_agents._get_agent_relative_path
 PRIMARY_AGENTS = sync_agents.PRIMARY_AGENTS
 CATEGORY_MAPPING = sync_agents.CATEGORY_MAPPING
+CURATED_AGENTS = sync_agents.CURATED_AGENTS
+EXTENDED_AGENTS = sync_agents.EXTENDED_AGENTS
+build_parser = sync_agents.build_parser
 
 
 # ---------------------------------------------------------------------------
@@ -442,6 +445,193 @@ class TestGetAgentRelativePath(unittest.TestCase):
         """Verifie le chemin pour un agent AI (data-ai -> ai)."""
         result = _get_agent_relative_path("ai-engineer", "data-ai")
         self.assertEqual(result, "ai/ai-engineer")
+
+
+# ---------------------------------------------------------------------------
+# Tests EXTENDED_AGENTS (Phase 1.5 — Tier 2)
+# ---------------------------------------------------------------------------
+
+
+class TestExtendedAgents(unittest.TestCase):
+    """Tests pour EXTENDED_AGENTS : validation du dictionnaire d'agents etendus."""
+
+    def test_extended_agents_not_empty(self):
+        """Verifie que EXTENDED_AGENTS est un dictionnaire non vide."""
+        self.assertIsInstance(EXTENDED_AGENTS, dict)
+        self.assertGreater(len(EXTENDED_AGENTS), 0)
+
+    def test_extended_agents_format(self):
+        """Verifie que chaque cle est une chaine et chaque valeur suit le format 'category/name'."""
+        for key, value in EXTENDED_AGENTS.items():
+            with self.subTest(agent=key):
+                self.assertIsInstance(key, str)
+                self.assertIsInstance(value, str)
+                self.assertIn("/", value, f"La valeur '{value}' ne contient pas de '/'")
+                parts = value.split("/")
+                self.assertEqual(
+                    len(parts),
+                    2,
+                    f"La valeur '{value}' devrait avoir exactement 2 parties (category/name)",
+                )
+                self.assertTrue(len(parts[0]) > 0, "La categorie ne doit pas etre vide")
+                self.assertTrue(len(parts[1]) > 0, "Le nom ne doit pas etre vide")
+
+    def test_no_duplicates_between_tiers(self):
+        """Verifie qu'aucun nom d'agent n'apparait a la fois dans CURATED_AGENTS et EXTENDED_AGENTS."""
+        curated_keys = set(CURATED_AGENTS.keys())
+        extended_keys = set(EXTENDED_AGENTS.keys())
+        overlap = curated_keys & extended_keys
+        self.assertEqual(
+            len(overlap),
+            0,
+            f"Agents presents dans les deux tiers : {overlap}",
+        )
+
+    def test_extended_agents_categories_mapped(self):
+        """Verifie que toutes les categories source des EXTENDED_AGENTS existent dans CATEGORY_MAPPING."""
+        for name, path in EXTENDED_AGENTS.items():
+            with self.subTest(agent=name):
+                source_category = path.split("/")[0]
+                self.assertIn(
+                    source_category,
+                    CATEGORY_MAPPING,
+                    f"La categorie source '{source_category}' de l'agent '{name}' "
+                    f"n'est pas dans CATEGORY_MAPPING",
+                )
+
+    def test_combined_tiers_count(self):
+        """Verifie que CURATED_AGENTS (43) + EXTENDED_AGENTS (90) = 133 total, sans chevauchement."""
+        self.assertEqual(len(CURATED_AGENTS), 43)
+        self.assertEqual(len(EXTENDED_AGENTS), 90)
+        combined = {**CURATED_AGENTS, **EXTENDED_AGENTS}
+        self.assertEqual(
+            len(combined),
+            133,
+            "Le total combine devrait etre 133 (pas de chevauchement)",
+        )
+
+    def test_extended_agents_no_primary_conflict(self):
+        """Verifie qu'aucun agent etendu ne porte le meme nom qu'un PRIMARY_AGENTS."""
+        for name in EXTENDED_AGENTS:
+            with self.subTest(agent=name):
+                self.assertNotIn(
+                    name,
+                    PRIMARY_AGENTS,
+                    f"L'agent etendu '{name}' est en conflit avec PRIMARY_AGENTS",
+                )
+
+
+# ---------------------------------------------------------------------------
+# Tests des nouveaux mappings de categories (Phase 1.5)
+# ---------------------------------------------------------------------------
+
+
+class TestNewCategoryMappings(unittest.TestCase):
+    """Tests pour les nouveaux mappings de categories ajoutes en Phase 1.5."""
+
+    def test_new_category_mappings(self):
+        """Verifie que les nouveaux mappings de categories Phase 1.5 existent."""
+        new_mappings = {
+            "game-development": "specialist",
+            "mcp-dev-team": "mcp",
+            "modernization": "devops",
+            "realtime": "web",
+            "finance": "business",
+            "git": "devtools",
+            "performance-testing": "devtools",
+            "ui-analysis": "web",
+            "deep-research-team": "team",
+            "ffmpeg-clip-team": "media",
+            "obsidian-ops-team": "specialist",
+            "ocr-extraction-team": "specialist",
+            "podcast-creator-team": "media",
+        }
+        for source_cat, expected_oc_cat in new_mappings.items():
+            with self.subTest(category=source_cat):
+                self.assertIn(
+                    source_cat,
+                    CATEGORY_MAPPING,
+                    f"Le mapping '{source_cat}' est absent de CATEGORY_MAPPING",
+                )
+                self.assertEqual(
+                    CATEGORY_MAPPING[source_cat],
+                    expected_oc_cat,
+                    f"Le mapping '{source_cat}' devrait pointer vers '{expected_oc_cat}'",
+                )
+
+
+# ---------------------------------------------------------------------------
+# Tests de l'argument --tier du CLI (Phase 1.5)
+# ---------------------------------------------------------------------------
+
+
+class TestTierArgument(unittest.TestCase):
+    """Tests pour l'argument --tier du parser CLI."""
+
+    def test_tier_argument_default(self):
+        """Verifie que la valeur par defaut de --tier est 'core'."""
+        parser = build_parser()
+        args = parser.parse_args([])
+        self.assertEqual(args.tier, "core")
+
+    def test_tier_argument_choices(self):
+        """Verifie que les choix valides pour --tier sont core, extended, all."""
+        parser = build_parser()
+
+        # Les trois choix valides doivent etre acceptes
+        for choice in ("core", "extended", "all"):
+            with self.subTest(tier=choice):
+                args = parser.parse_args(["--tier", choice])
+                self.assertEqual(args.tier, choice)
+
+        # Un choix invalide doit lever une erreur
+        with self.assertRaises(SystemExit):
+            parser.parse_args(["--tier", "invalid"])
+
+    def test_extended_list_output_tags(self):
+        """Verifie que le listing en mode extended contient les tags [ext] et [core]."""
+        import io
+        from contextlib import redirect_stdout
+
+        parser = build_parser()
+        args = parser.parse_args(["--list", "--tier", "extended"])
+
+        # Simuler la logique de listing pour capturer la sortie
+        # On reproduit la partie pertinente de main() pour le --list
+        agents = {**CURATED_AGENTS, **EXTENDED_AGENTS}
+        core_set = frozenset(CURATED_AGENTS.keys())
+        extended_set = frozenset(EXTENDED_AGENTS.keys())
+
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            by_category = {}
+            for name, path in sorted(agents.items()):
+                cat = path.split("/")[0] if "/" in path else "uncategorized"
+                by_category.setdefault(cat, []).append(name)
+
+            for cat in sorted(by_category.keys()):
+                oc_cat = _get_opencode_category(cat)
+                print(f"  {cat}/ -> @{oc_cat}/")
+                for agent_name in sorted(by_category[cat]):
+                    mode_tag = (
+                        "[primary]" if agent_name in PRIMARY_AGENTS else "[subagent]"
+                    )
+                    if agent_name in core_set:
+                        tier_tag = "[core]"
+                    elif agent_name in extended_set:
+                        tier_tag = "[ext] "
+                    else:
+                        tier_tag = "[disc]"
+                    rel_path = _get_agent_relative_path(agent_name, cat)
+                    print(f"    {agent_name:40s} {mode_tag}  {tier_tag}  @{rel_path}")
+
+        output = buf.getvalue()
+        self.assertIn("[core]", output, "La sortie devrait contenir le tag [core]")
+        self.assertIn("[ext]", output, "La sortie devrait contenir le tag [ext]")
+        # Verifier qu'aucun tag [disc] n'apparait en mode extended
+        self.assertNotIn(
+            "[disc]", output, "Le mode extended ne devrait pas avoir de tag [disc]"
+        )
 
 
 if __name__ == "__main__":

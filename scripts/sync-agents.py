@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import os
 import re
 import sys
@@ -38,6 +39,8 @@ DEFAULT_BRANCH = "main"
 AGENTS_BASE_PATH = "cli-tool/components/agents"
 GITHUB_API = "https://api.github.com"
 RAW_BASE = "https://raw.githubusercontent.com"
+
+logger = logging.getLogger("sync-agents")
 
 
 # ---------------------------------------------------------------------------
@@ -93,6 +96,20 @@ CATEGORY_MAPPING: Dict[str, str] = {
     "business-marketing": "business",
     "development-team": "team",
     "expert-advisors": "devtools",
+    # Phase 1.5 — Tier 2 source categories
+    "game-development": "specialist",
+    "mcp-dev-team": "mcp",
+    "modernization": "devops",
+    "realtime": "web",
+    "finance": "business",
+    "git": "devtools",
+    "performance-testing": "devtools",
+    "ui-analysis": "web",
+    "deep-research-team": "team",
+    "ffmpeg-clip-team": "media",
+    "obsidian-ops-team": "specialist",
+    "ocr-extraction-team": "specialist",
+    "podcast-creator-team": "media",
 }
 
 # ---------------------------------------------------------------------------
@@ -154,6 +171,117 @@ CURATED_AGENTS: Dict[str, str] = {
     "fullstack-developer": "development-team/fullstack-developer",
     "ui-designer": "development-team/ui-designer",
     "mobile-developer": "development-team/mobile-developer",
+}
+
+# ---------------------------------------------------------------------------
+# Extended agent list (Phase 1.5 — Tier 2): additional ~90 agents
+# Same format as CURATED_AGENTS: 'agent-name': 'source-category/agent-name'
+# ---------------------------------------------------------------------------
+
+EXTENDED_AGENTS: Dict[str, str] = {
+    # Programming Languages (languages/)
+    "angular-architect": "programming-languages/angular-architect",
+    "c-pro": "programming-languages/c-pro",
+    "django-developer": "programming-languages/django-developer",
+    "dotnet-core-expert": "programming-languages/dotnet-core-expert",
+    "elixir-expert": "programming-languages/elixir-expert",
+    "embedded-systems": "programming-languages/embedded-systems",
+    "flutter-expert": "programming-languages/flutter-expert",
+    "javascript-pro": "programming-languages/javascript-pro",
+    "laravel-specialist": "programming-languages/laravel-specialist",
+    "nextjs-developer": "programming-languages/nextjs-developer",
+    "powershell-7-expert": "programming-languages/powershell-7-expert",
+    "react-specialist": "programming-languages/react-specialist",
+    "rust-engineer": "programming-languages/rust-engineer",
+    "shell-scripting-pro": "programming-languages/shell-scripting-pro",
+    "spring-boot-engineer": "programming-languages/spring-boot-engineer",
+    "swift-expert": "programming-languages/swift-expert",
+    "vue-expert": "programming-languages/vue-expert",
+    "ruby-mcp-expert": "programming-languages/ruby-mcp-expert",
+    # DevOps & Infrastructure (devops/)
+    "deployment-engineer": "devops-infrastructure/deployment-engineer",
+    "devops-expert": "devops-infrastructure/devops-expert",
+    "devops-troubleshooter": "devops-infrastructure/devops-troubleshooter",
+    "microservices-architect": "devops-infrastructure/microservices-architect",
+    "monitoring-specialist": "devops-infrastructure/monitoring-specialist",
+    "network-engineer": "devops-infrastructure/network-engineer",
+    "platform-engineer": "devops-infrastructure/platform-engineer",
+    "sre-engineer": "devops-infrastructure/sre-engineer",
+    "terraform-engineer": "devops-infrastructure/terraform-engineer",
+    "vercel-deployment-specialist": "devops-infrastructure/vercel-deployment-specialist",
+    "cloud-migration-specialist": "modernization/cloud-migration-specialist",
+    "legacy-modernizer": "modernization/legacy-modernizer",
+    # Data & AI (ai/)
+    "ai-ethics-advisor": "ai-specialists/ai-ethics-advisor",
+    "computer-vision-engineer": "data-ai/computer-vision-engineer",
+    "data-analyst": "data-ai/data-analyst",
+    "data-engineer": "data-ai/data-engineer",
+    "mlops-engineer": "data-ai/mlops-engineer",
+    "nlp-engineer": "data-ai/nlp-engineer",
+    "machine-learning-engineer": "data-ai/machine-learning-engineer",
+    "task-decomposition-expert": "ai-specialists/task-decomposition-expert",
+    "llms-maintainer": "ai-specialists/llms-maintainer",
+    "model-evaluator": "ai-specialists/model-evaluator",
+    # Development Tools (devtools/)
+    "build-engineer": "development-tools/build-engineer",
+    "chaos-engineer": "development-tools/chaos-engineer",
+    "codebase-pattern-finder": "development-tools/codebase-pattern-finder",
+    "dependency-manager": "development-tools/dependency-manager",
+    "dx-optimizer": "development-tools/dx-optimizer",
+    "error-detective": "development-tools/error-detective",
+    "general-purpose": "development-tools/general-purpose",
+    "mcp-expert": "development-tools/mcp-expert",
+    "performance-profiler": "development-tools/performance-profiler",
+    "qa-expert": "development-tools/qa-expert",
+    "technical-debt-manager": "development-tools/technical-debt-manager",
+    "test-engineer": "development-tools/test-engineer",
+    # Security (security/)
+    "compliance-auditor": "security/compliance-auditor",
+    "compliance-specialist": "security/compliance-specialist",
+    "incident-responder": "security/incident-responder",
+    "security-engineer": "security/security-engineer",
+    "se-security-reviewer": "security/se-security-reviewer",
+    "github-actions-expert": "security/github-actions-expert",
+    # Database (database/)
+    "database-admin": "database/database-admin",
+    "database-optimizer": "database/database-optimizer",
+    "nosql-specialist": "database/nosql-specialist",
+    "supabase-schema-architect": "database/supabase-schema-architect",
+    # Web & Frontend (web/)
+    "accessibility": "web-tools/accessibility",
+    "nextjs-architecture-expert": "web-tools/nextjs-architecture-expert",
+    "react-performance-optimizer": "web-tools/react-performance-optimizer",
+    "seo-analyzer": "web-tools/seo-analyzer",
+    "web-accessibility-checker": "web-tools/web-accessibility-checker",
+    "websocket-engineer": "realtime/websocket-engineer",
+    # Documentation (docs/)
+    "changelog-generator": "documentation/changelog-generator",
+    "diagram-architect": "documentation/diagram-architect",
+    "docusaurus-expert": "documentation/docusaurus-expert",
+    "arch": "documentation/arch",
+    # Business & Marketing (business/)
+    "business-analyst": "business-marketing/business-analyst",
+    "competitive-analyst": "business-marketing/competitive-analyst",
+    "ux-researcher": "business-marketing/ux-researcher",
+    "market-researcher": "business-marketing/market-researcher",
+    "sales-engineer": "business-marketing/sales-engineer",
+    "fintech-engineer": "finance/fintech-engineer",
+    # API & GraphQL (api/)
+    "api-designer": "api-graphql/api-designer",
+    "graphql-performance-optimizer": "api-graphql/graphql-performance-optimizer",
+    # Development Team (team/)
+    "backend-architect": "development-team/backend-architect",
+    "code-architect": "development-team/code-architect",
+    "code-explorer": "development-team/code-explorer",
+    # Specialist (specialist/)
+    "game-developer": "game-development/game-developer",
+    "unity-game-developer": "game-development/unity-game-developer",
+    "blockchain-developer": "blockchain-web3/blockchain-developer",
+    # MCP (mcp/)
+    "mcp-server-architect": "mcp-dev-team/mcp-server-architect",
+    "mcp-developer": "mcp-dev-team/mcp-developer",
+    "mcp-integration-engineer": "mcp-dev-team/mcp-integration-engineer",
+    "mcp-protocol-specialist": "mcp-dev-team/mcp-protocol-specialist",
 }
 
 # ---------------------------------------------------------------------------
@@ -967,6 +1095,15 @@ def build_parser() -> argparse.ArgumentParser:
         help="Sync ALL agents from the repo (not just the curated list)",
     )
     parser.add_argument(
+        "--tier",
+        choices=["core", "extended", "all"],
+        default="core",
+        help=(
+            "Agent tier: core (43 curated), extended (core + ~90 additional), "
+            "all (every agent from source)"
+        ),
+    )
+    parser.add_argument(
         "--source",
         type=str,
         default=DEFAULT_REPO,
@@ -1004,6 +1141,14 @@ def main() -> int:
     parser = build_parser()
     args = parser.parse_args()
 
+    # --all is a shorthand for --tier=all
+    if args.all:
+        args.tier = "all"
+
+    # Configure logging level based on verbosity
+    log_level = logging.DEBUG if args.verbose else logging.INFO
+    logging.basicConfig(level=log_level, format="%(message)s", stream=sys.stderr)
+
     repo = args.source
     output_dir = Path(args.output_dir)
 
@@ -1028,15 +1173,23 @@ def main() -> int:
         print(f"  {action} {removed} synced agent file(s).\n")
 
     # --- Determine agent set ---
-    if args.all:
+    if args.tier == "all":
         print(f"Discovering all agents in {repo}...")
         agents = discover_all_agents(repo)
         if not agents:
             print("No agents found.", file=sys.stderr)
             return 1
         print(f"Found {len(agents)} agents across all categories.\n")
+        logger.warning(
+            "⚠️  --all/--tier=all: syncing ALL agents with default "
+            "permissions for uncurated ones"
+        )
+    elif args.tier == "extended":
+        agents = {**CURATED_AGENTS, **EXTENDED_AGENTS}
+        logger.info(f"📦 Tier extended: {len(agents)} agents (core + extended)")
     else:
         agents = dict(CURATED_AGENTS)
+        logger.info(f"📦 Tier core: {len(agents)} agents")
 
     # --- Apply category filter ---
     if args.filter:
@@ -1052,7 +1205,7 @@ def main() -> int:
                 file=sys.stderr,
             )
             # List available categories
-            if args.all:
+            if args.tier == "all":
                 all_agents = discover_all_agents(repo)
             else:
                 all_agents = CURATED_AGENTS
@@ -1062,6 +1215,28 @@ def main() -> int:
 
     # --- List mode ---
     if args.list:
+        # Tier summary header
+        core_count = len(CURATED_AGENTS)
+        extended_count = len(EXTENDED_AGENTS)
+        combined_count = len({**CURATED_AGENTS, **EXTENDED_AGENTS})
+        tier_label = {
+            "core": "Core",
+            "extended": "Extended (core + extended)",
+            "all": "All (discovered)",
+        }.get(args.tier, args.tier)
+
+        print(f"Agent tier: {tier_label}")
+        print(f"  Core agents:     {core_count}")
+        print(f"  Extended agents: {extended_count}")
+        print(f"  Combined total:  {combined_count}")
+        if args.tier == "all":
+            print(f"  Discovered:      {len(agents)}")
+        print()
+
+        # Build sets for tier tagging
+        core_set = frozenset(CURATED_AGENTS.keys())
+        extended_set = frozenset(EXTENDED_AGENTS.keys())
+
         # Group by category
         by_category: Dict[str, List[str]] = {}
         for name, path in sorted(agents.items()):
@@ -1069,14 +1244,20 @@ def main() -> int:
             by_category.setdefault(cat, []).append(name)
 
         total = len(agents)
-        print(f"{'Curated' if not args.all else 'All'} agents ({total} total):\n")
+        print(f"Listing {total} agents ({tier_label}):\n")
         for cat in sorted(by_category.keys()):
             oc_cat = _get_opencode_category(cat)
             print(f"  {cat}/ -> @{oc_cat}/")
             for agent_name in sorted(by_category[cat]):
                 mode_tag = "[primary]" if agent_name in PRIMARY_AGENTS else "[subagent]"
+                if agent_name in core_set:
+                    tier_tag = "[core]"
+                elif agent_name in extended_set:
+                    tier_tag = "[ext] "
+                else:
+                    tier_tag = "[disc]"
                 rel_path = _get_agent_relative_path(agent_name, cat)
-                print(f"    {agent_name:40s} {mode_tag}  @{rel_path}")
+                print(f"    {agent_name:40s} {mode_tag}  {tier_tag}  @{rel_path}")
             print()
         return 0
 

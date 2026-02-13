@@ -2,14 +2,14 @@
 
 > 🇫🇷 **Version française** : [README.md](README.md)
 
-![Agents](https://img.shields.io/badge/agents-44-blue)
+![Agents](https://img.shields.io/badge/agents-134-blue)
 ![Primary](https://img.shields.io/badge/primary-4-green)
-![Subagents](https://img.shields.io/badge/subagents-40-orange)
+![Subagents](https://img.shields.io/badge/subagents-130-orange)
 ![OpenCode](https://img.shields.io/badge/OpenCode-compatible-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Synced from](https://img.shields.io/badge/synced%20from-aitmpl.com-purple)
 
-> A curated collection of **44 AI agents** (43 synced from [aitmpl.com](https://www.aitmpl.com/agents) + 1 custom) for [OpenCode](https://opencode.ai), converted and adapted from the source registry (399+ agents available).
+> A curated collection of **134 AI agents** (133 synced from [aitmpl.com](https://www.aitmpl.com/agents) — 43 core + 90 extended — + 1 custom) for [OpenCode](https://opencode.ai), converted and adapted from the source registry (399+ agents available).
 
 ## 📑 Table of Contents
 
@@ -29,7 +29,7 @@
 This repository is an **agent registry** for OpenCode. It provides:
 
 - **4 primary agents** — switchable with `Tab`
-- **40 subagents** — invocable via `@category/name` or the `Task` tool
+- **130 subagents** — invocable via `@category/name` or the `Task` tool
 - **Category-based organization** using OpenCode's [nested agents](https://deepwiki.com/anomalyco/opencode/3.3-agent-system)
 - **Modern `permission:` format** (not the deprecated `tools:` field)
 - **Sync script** to fetch agents from a remote URL (GitHub)
@@ -224,7 +224,9 @@ opencode-template-agent/
 │   │   ├── devtools/                        # 🛠️ 5 DevTools subagents
 │   │   ├── docs/                            # 📝 3 Docs subagents
 │   │   ├── languages/                       # 🖥️ 10 Language subagents
+│   │   ├── mcp/                              # 🔧 MCP subagents
 │   │   ├── security/                        # 🔒 3 Security subagents
+│   │   ├── specialist/                      # 🎯 Specialist subagents
 │   │   ├── team/                            # 🏗️ 2 Team subagents
 │   │   ├── web/                             # 🌐 2 Web subagents
 │   │   └── manifest.json                    # Sync metadata
@@ -287,11 +289,17 @@ The `sync-agents.py` script fetches agents from GitHub and converts them to the 
 ### Commands
 
 ```bash
-# List available agents
+# List available agents (shows [core] and [ext] tags)
 python3 scripts/sync-agents.py --list
 
-# Sync all 43 curated agents
+# Sync all 133 curated agents (43 core + 90 extended)
 python3 scripts/sync-agents.py --force
+
+# Sync only the 43 core agents
+python3 scripts/sync-agents.py --tier core --force
+
+# Sync only the 90 extended agents
+python3 scripts/sync-agents.py --tier extended --force
 
 # Clean and re-sync
 python3 scripts/sync-agents.py --clean --force
@@ -312,7 +320,7 @@ python3 scripts/sync-agents.py --verbose --force
 ### GitHub Authentication
 
 ```bash
-# Without token: 60 requests/hour (enough for the 43 curated agents)
+# Without token: 60 requests/hour (enough for the 133 curated agents)
 python3 scripts/sync-agents.py --force
 
 # With token: 5,000 requests/hour (required for --all)

@@ -29,18 +29,18 @@
   - [x] Revue produit (product-manager) — 5.9/10 → améliorations Sprint 1-2
   - [x] Revue documentation (documentation-engineer) — 7.2/10 → fixes appliqués
 
-## Phase 1.5 — Extension Tier 2 (Court-Moyen terme)
+## Phase 1.5 — Extension Tier 2 ✅ (Fait — Phase 1.5a)
 
 > Voir [04-agent-tiers.md](04-agent-tiers.md) pour le détail de la stratégie 3 niveaux.
 
-- [ ] **Curation Tier 2** : identifier ~120-150 agents supplémentaires pertinents
-- [ ] **Ajouter `EXTENDED_AGENTS`** dans le script sync
-- [ ] **Ajouter flag `--tier`** : core (défaut) | extended | all
-- [ ] **Mapper les nouvelles catégories** : cloud/, data/, gaming/, monitoring/, testing/, misc/
-- [ ] **Profil de permissions `unknown`** : read-only par défaut pour agents non curés
-- [ ] **Warning sur `--all`** : avertissement + confirmation interactive
-- [ ] **Tests** : valider la sync Tier 2 en dry-run puis en réel
-- [ ] **Documentation** : mettre à jour README avec les 3 tiers
+- [x] **Curation Tier 2** : 90 agents sélectionnés parmi 413 (27 catégories source)
+- [x] **Ajouter `EXTENDED_AGENTS`** : 90 agents dans le script sync (1332 lignes total)
+- [x] **Ajouter flag `--tier`** : core (43) | extended (133) | all (413+)
+- [x] **Mapper les nouvelles catégories** : 13 nouveaux mappings (27 total), +specialist/, +mcp/
+- [ ] **Profil de permissions `unknown`** : read-only par défaut pour agents non curés (Phase 1.5b)
+- [x] **Warning sur `--all`** : log warning ⚠️ quand --all/--tier=all utilisé
+- [x] **Tests** : 10 nouveaux tests Tier 2 (80 total, tous verts)
+- [x] **Documentation** : README FR/EN, .plan/ mis à jour avec tiers
 
 ## Phase 2 — Enrichissement (Moyen terme)
 
