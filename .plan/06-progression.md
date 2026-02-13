@@ -329,3 +329,32 @@
 - Tests totaux : **164/164** ✅ (47 CLI + 117 Python)
 - Commit : `1052113` — fix: security hardening
 - **Sprint corrections complété** ✅
+
+---
+
+## Session 9 — Multi-pack, README rewrite, CI Node.js ✅
+
+**Date** : 2026-02-13  
+**Objectif** : Améliorer le CLI (multi-pack), réécrire les README, compléter la CI
+
+### Réalisations
+
+| # | Tâche | Tests | État |
+|---|-------|-------|------|
+| 1 | Multi-pack/multi-category install (`--pack backend,devops`) | +8 tests | ✅ |
+| 2 | Support virgules + espaces pour multi-value flags | — | ✅ |
+| 3 | Gardes : flags vides, exclusivité mutuelle --all/--pack/--category | +4 tests | ✅ |
+| 4 | Helpers DRY : `deduplicateAgents()`, `formatLabel()` | — | ✅ |
+| 5 | Revue de code (6/10 → 9+/10) — 9 findings corrigés | — | ✅ |
+| 6 | Réécriture README FR + EN (536 → 174 lignes, user-focused) | — | ✅ |
+| 7 | CI : ajout job test-cli (Node 18/20/22) | — | ✅ |
+| 8 | Repo passé en public | — | ✅ |
+| 9 | Tag v1.1.0 | — | ✅ |
+
+**Métriques** :
+- Tests CLI : 47 → **59** (+12 : multi-pack, edge-cases, exclusivité)
+- Tests totaux : **176/176** ✅ (59 CLI + 117 Python)
+- README : **-67%** de lignes (536 → 174)
+- CI : **4 jobs** (test Python, test-cli Node, lint, validate-agents)
+- Commits : 3 (feat multi-pack, docs README, ci test-cli)
+- Tags : v1.0.0, **v1.1.0**
