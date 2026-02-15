@@ -146,24 +146,20 @@ les skills).
 
 ---
 
-## D9 — Fichiers `scripts/` compagnons ⚡ NOUVELLE
+## D9 — Traitement des fichiers compagnons (scripts/) des skills syncées
 
-**Date** : 2026-02-13 | **Statut** : 🟡 À décider (P3 pré-requis)
+**Date** : 2026-02-13 | **Statut** : ✅ Décidé (P3)
 
-**Contexte** : Les skills upstream contiennent parfois des répertoires `scripts/` avec
-du code Python exécutable. Copier des scripts depuis une source non contrôlée est un
-risque de sécurité (C4).
+**Décision** : Option E — Copier les fichiers compagnons (scripts/) tels quels en préservant les chemins relatifs, avec des gardes de sécurité légères : suppression du bit exécutable, limite de 5 Mo par skill, rejet des liens symboliques, et ajout d'un en-tête d'avertissement dans les fichiers texte.
 
-**Options** :
-| Option | Sécurité | Utilité | Complexité |
-|--------|----------|---------|------------|
-| A. Copier tel quel | 🔴 Risque élevé | ✅ Maximale | Faible |
-| B. Renommer en `.py.txt` | 🟡 Moyen (dissuade l'exécution) | 🟡 Réduite | Faible |
-| C. Copier dans `reference/` | 🟡 Moyen (séparation) | 🟡 Réduite | Faible |
-| D. Exclure les scripts | ✅ Aucun risque | 🔴 Perte de contenu | Faible |
-| E. Copier + warning header | 🟡 Moyen | ✅ Maximale | Faible |
+**Justification** : Les utilisateurs sont des développeurs qui choisissent activement d'installer une skill depuis un registre curé — le risque réel n'est pas le code malveillant (problème de curation amont) mais l'exécution accidentelle et la consommation de ressources non bornée. Renommer ou déplacer les fichiers casse le contrat entre SKILL.md et ses scripts compagnons. Les gardes légères (suppression de +x, plafond de taille, rejet des symlinks) couvrent les risques réels avec un coût de maintenance minimal.
 
-**Décision recommandée** : Option E — copier avec warning header + cap 5MB total par skill + guard anti-symlink.
+**Implications** :
+- Les fichiers `scripts/` sont copiés avec leurs chemins relatifs préservés — les références depuis SKILL.md fonctionnent sans modification
+- Le bit exécutable est supprimé à la sync : les développeurs doivent explicitement `chmod +x` avant d'exécuter, ce qui force une revue consciente
+- Un en-tête `# ⚠️ AUTO-SYNCED from aitmpl.com — Review before executing` est ajouté aux fichiers texte (.py, .sh, .js) pour signaler clairement l'origine externe
+- Les liens symboliques sont rejetés et une limite de 5 Mo par skill est appliquée pour éviter les abus de ressources
+- Les fichiers compagnons syncés sont listés dans le résumé de sync pour visibilité
 
 ---
 
