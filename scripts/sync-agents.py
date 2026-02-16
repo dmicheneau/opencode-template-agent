@@ -34,10 +34,7 @@ from sync_common import (
     GITHUB_API,
     RAW_BASE,
     SYNC_CACHE_FILENAME,
-    SafeRedirectHandler,
-    _opener,
     _get_headers,
-    HttpResult,
     _http_request,
     _api_get,
     _raw_get,
@@ -993,10 +990,10 @@ def main() -> int:
         )
     elif args.tier == "extended":
         agents = {**CURATED_AGENTS, **EXTENDED_AGENTS}
-        logger.info(f"📦 Tier extended: {len(agents)} agents (core + extended)")
+        logger.info("📦 Tier extended: %d agents (core + extended)", len(agents))
     else:
         agents = dict(CURATED_AGENTS)
-        logger.info(f"📦 Tier core: {len(agents)} agents")
+        logger.info("📦 Tier core: %d agents", len(agents))
 
     # --- Apply category filter ---
     if args.filter:
