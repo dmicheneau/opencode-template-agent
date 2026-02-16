@@ -87,43 +87,53 @@ CURATED_SKILLS: Dict[str, Dict[str, str]] = {
         "category": "development",
         "upstream_path": "development/clean-code",
     },
-    "task-execution-engine": {
-        "category": "development",
-        "upstream_path": "development/task-execution-engine",
-    },
     "mcp-builder": {
         "category": "development",
         "upstream_path": "development/mcp-builder",
     },
-    "sequential-thinking": {
+    "task-execution-engine": {
         "category": "development",
-        "upstream_path": "development/sequential-thinking",
-    },
-    "memory": {"category": "development", "upstream_path": "development/memory"},
-    "brainstormai": {
-        "category": "development",
-        "upstream_path": "development/brainstormai",
-    },
-    "feature-design-assistant": {
-        "category": "development",
-        "upstream_path": "development/feature-design-assistant",
+        "upstream_path": "development/task-execution-engine",
     },
     "code-reviewer": {
         "category": "development",
         "upstream_path": "development/code-reviewer",
     },
-    "test-automator": {
+    "systematic-debugging": {
         "category": "development",
-        "upstream_path": "development/test-automator",
+        "upstream_path": "development/systematic-debugging",
     },
-    "refactoring-specialist": {
+    "react-best-practices": {
         "category": "development",
-        "upstream_path": "development/refactoring-specialist",
+        "upstream_path": "development/react-best-practices",
     },
-    "debugger": {"category": "development", "upstream_path": "development/debugger"},
-    "performance-engineer": {
+    "python-patterns": {
         "category": "development",
-        "upstream_path": "development/performance-engineer",
+        "upstream_path": "development/python-patterns",
+    },
+    # AI/Research skills
+    "rag-engineer": {
+        "category": "ai-research",
+        "upstream_path": "ai-research/rag-engineer",
+    },
+    "prompt-engineer": {
+        "category": "ai-research",
+        "upstream_path": "ai-research/prompt-engineer",
+    },
+    # Database skills
+    "using-neon": {
+        "category": "database",
+        "upstream_path": "database/using-neon",
+    },
+    # Security skills
+    "security-best-practices": {
+        "category": "security",
+        "upstream_path": "security/security-best-practices",
+    },
+    # Productivity skills
+    "brainstorming": {
+        "category": "productivity",
+        "upstream_path": "productivity/brainstorming",
     },
 }
 

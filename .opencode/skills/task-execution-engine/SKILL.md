@@ -1,10 +1,10 @@
 ---
-name: task-execution-engine
-description: Execute implementation tasks from design documents using markdown checkboxes. Use when (1) implementing features from feature-design-assistant output, (2) resuming interrupted work, (3) batch executing tasks. Triggers on 'start implementation', 'run tasks', 'resume'.
-metadata:
-  category: development
+name: "task-execution-engine"
+description: "Execute implementation tasks from design documents using markdown checkboxes. Use when (1) implementing features from feature-design-assistant outp..."
+metadata.category: "development"
 ---
-<!-- Synced from aitmpl.com — source: davila7/claude-code-templates/skills/development/task-execution-engine -->
+
+<!-- Synced from aitmpl.com | source: davila7/claude-code-templates | category: development -->
 
 # Feature Pipeline
 

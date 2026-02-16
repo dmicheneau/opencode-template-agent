@@ -1,0 +1,19 @@
+{
+  "synced_at": "2026-02-16T11:06:34.991223+00:00",
+  "source_repo": "davila7/claude-code-templates",
+  "skill_count": 12,
+  "skills": [
+    "brainstorming",
+    "clean-code",
+    "code-reviewer",
+    "mcp-builder",
+    "prompt-engineer",
+    "python-patterns",
+    "rag-engineer",
+    "react-best-practices",
+    "security-best-practices",
+    "systematic-debugging",
+    "task-execution-engine",
+    "using-neon"
+  ]
+}
