@@ -400,7 +400,7 @@ def _extract_category_from_path(path: str) -> str:
     # Path format: cli-tool/components/skills/{category}/{skill_name}/...
     parts = path.split("/")
     if len(parts) >= 5:
-        return parts[4]  # Category is at index 4
+        return parts[3]  # Category is at index 3
     return "unknown"
 
 

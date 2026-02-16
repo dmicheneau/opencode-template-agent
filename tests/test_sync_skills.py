@@ -317,21 +317,20 @@ class TestCheckSymlink(unittest.TestCase):
 class TestExtractCategoryFromPath(unittest.TestCase):
     """Tests for _extract_category_from_path(): category extraction."""
 
-    def test_extracts_skill_name_from_standard_path(self):
-        """Extract skill name (at index 4) from standard GitHub content path."""
-        # Note: The implementation extracts parts[4] which is the skill name, not category
+    def test_extracts_category_from_standard_path(self):
+        """Extract category (at index 3) from standard GitHub content path."""
         path = "cli-tool/components/skills/development/clean-code/SKILL.md"
         result = _extract_category_from_path(path)
-        self.assertEqual(result, "clean-code")
+        self.assertEqual(result, "development")
 
-    def test_extracts_different_skill_names(self):
-        """Extract different skill names correctly."""
+    def test_extracts_different_categories(self):
+        """Extract different categories correctly."""
         test_cases = [
-            ("cli-tool/components/skills/ai/ml-expert/guide.md", "ml-expert"),
-            ("cli-tool/components/skills/security/audit-tool/SKILL.md", "audit-tool"),
+            ("cli-tool/components/skills/ai/ml-expert/guide.md", "ai"),
+            ("cli-tool/components/skills/security/audit-tool/SKILL.md", "security"),
             (
                 "cli-tool/components/skills/database/postgres-utils/helper.py",
-                "postgres-utils",
+                "database",
             ),
         ]
         for path, expected in test_cases:
