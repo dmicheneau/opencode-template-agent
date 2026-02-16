@@ -58,12 +58,12 @@ scripts/
 | **Total** | **~430 lignes** | |
 
 **Critères d'acceptation** :
-- [ ] `sync_common.py` créé avec toutes les fonctions listées ci-dessus
-- [ ] `sync-agents.py` refactoré pour importer depuis `sync_common`
-- [ ] Les 117 tests Python existants (`test_sync_script.py`) passent sans régression
-- [ ] Les tests adaptés pour mocker les imports depuis `sync_common` si nécessaire
-- [ ] Ajout du lint AST dans CI : `python3 -c "import ast; ast.parse(open('scripts/sync_common.py').read())"`
-- [ ] Python stdlib only — aucune dépendance externe
+- [x] `sync_common.py` créé avec toutes les fonctions listées ci-dessus
+- [x] `sync-agents.py` refactoré pour importer depuis `sync_common`
+- [x] Les 117 tests Python existants (`test_sync_script.py`) passent sans régression
+- [x] Les tests adaptés pour mocker les imports depuis `sync_common` si nécessaire
+- [x] Ajout du lint AST dans CI : `python3 -c "import ast; ast.parse(open('scripts/sync_common.py').read())"`
+- [x] Python stdlib only — aucune dépendance externe
 
 ---
 
@@ -99,10 +99,10 @@ if exc.code in (403, 429):
 ```
 
 **Critères d'acceptation** :
-- [ ] Backoff exponentiel 1s → 2s → 4s sur 429 sans headers
-- [ ] Log warning avec le temps d'attente
-- [ ] Test unitaire couvrant le cas 429 sans Retry-After
-- [ ] Comportement existant (429 avec Retry-After) inchangé
+- [x] Backoff exponentiel 1s → 2s → 4s sur 429 sans headers
+- [x] Log warning avec le temps d'attente
+- [x] Test unitaire couvrant le cas 429 sans Retry-After
+- [x] Comportement existant (429 avec Retry-After) inchangé
 
 ---
 
@@ -134,8 +134,8 @@ Warning header à insérer en tête de chaque script copié :
 ```
 
 **Critères d'acceptation** :
-- [ ] Option choisie et documentée dans `02-decisions-v2.md` (D9)
-- [ ] Implémentation définie pour T4.1
+- [x] Option choisie et documentée dans `02-decisions-v2.md` (D9)
+- [x] Implémentation définie pour T4.1
 
 ---
 
@@ -285,15 +285,15 @@ Pour éviter le throttling de `raw.githubusercontent.com` (pas de rate limit API
 - Délai inter-skill : **300ms** (cohérent avec `sync-agents.py` L1575)
 
 **Critères d'acceptation** :
-- [ ] Script `sync-skills.py` fonctionnel avec `CURATED_SKILLS` manuelle
-- [ ] Importe toute l'infra depuis `sync_common.py` (0 duplication)
-- [ ] 10-15 skills core synced dans `.opencode/skills/`
-- [ ] 4 gardes de sécurité implémentés (A2, A3, A4, A5)
-- [ ] Fichiers compagnons copiés avec warning header (si option E retenue pour P3)
-- [ ] Délais inter-fichier et inter-skill respectés
-- [ ] 4 skills hand-written (`brainstormai`, `browser-mcp`, `memory`, `sequential-thinking`) jamais touchés (protection D8)
-- [ ] Mode `--clean` pour supprimer les skills synced (comme `sync-agents.py`)
-- [ ] Mode `--dry-run` pour prévisualiser sans écrire
+- [x] Script `sync-skills.py` fonctionnel avec `CURATED_SKILLS` manuelle
+- [x] Importe toute l'infra depuis `sync_common.py` (0 duplication)
+- [x] 10-15 skills core synced dans `.opencode/skills/`
+- [x] 4 gardes de sécurité implémentés (A2, A3, A4, A5)
+- [x] Fichiers compagnons copiés avec warning header (si option E retenue pour P3)
+- [x] Délais inter-fichier et inter-skill respectés
+- [x] 4 skills hand-written (`brainstormai`, `browser-mcp`, `memory`, `sequential-thinking`) jamais touchés (protection D8)
+- [x] Mode `--clean` pour supprimer les skills synced (comme `sync-agents.py`)
+- [x] Mode `--dry-run` pour prévisualiser sans écrire
 
 ---
 
@@ -358,11 +358,11 @@ tests/fixtures/skills/
 - [ ] Budget contexte : ≤ 15 skills × 4 lignes = ~60 lignes dans `available_skills`
 
 **Critères d'acceptation** :
-- [ ] 3 fixtures d'archétypes créées
-- [ ] Tests unitaires pour `sync-skills.py` (minimum 30 tests)
-- [ ] Tests de validation structurelle pour les skills produits
-- [ ] Tests de sécurité pour les fichiers compagnons
-- [ ] Tous les tests verts, 0 régression sur les 176 tests existants
+- [x] 3 fixtures d'archétypes créées
+- [x] Tests unitaires pour `sync-skills.py` (minimum 30 tests)
+- [x] Tests de validation structurelle pour les skills produits
+- [x] Tests de sécurité pour les fichiers compagnons
+- [x] Tous les tests verts, 0 régression sur les 176 tests existants
 
 ---
 
@@ -415,10 +415,10 @@ Générer un fichier `skills-manifest.json` à la racine du projet. Ce manifest 
 - `schema_version` pour faciliter les migrations futures (recommandation revue technique §10)
 
 **Critères d'acceptation** :
-- [ ] Manifest généré automatiquement par `sync-skills.py`
-- [ ] Chaque skill a la liste complète de ses fichiers avec taille et SHA
-- [ ] Champ `schema_version` présent
-- [ ] Test de validation du schema du manifest
+- [x] Manifest généré automatiquement par `sync-skills.py`
+- [x] Chaque skill a la liste complète de ses fichiers avec taille et SHA
+- [x] Champ `schema_version` présent
+- [x] Test de validation du schema du manifest
 
 ---
 
@@ -449,10 +449,10 @@ Pour chaque skill testé :
 - 1 skill de chaque grande catégorie : development, architecture, devops
 
 **Livrables** :
-- [ ] 5 skills testés en sessions réelles
-- [ ] Document de retour : ce qui fonctionne, ce qui ne fonctionne pas
-- [ ] Corrections appliquées si nécessaire avant de passer à Phase 6
-- [ ] Décision go/no-go pour le scaling
+- [x] 5 skills testés en sessions réelles
+- [x] Document de retour : ce qui fonctionne, ce qui ne fonctionne pas
+- [x] Corrections appliquées si nécessaire avant de passer à Phase 6
+- [x] Décision go/no-go pour le scaling
 
 ---
 
