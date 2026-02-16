@@ -166,9 +166,9 @@ Convertir manuellement 3 skills upstream pour valider les hypothèses de convers
 5. Le skill est reconnu par OpenCode (`skill` tool dans une session réelle)
 
 **Critères d'acceptation** :
-- [ ] 3 skills convertis manuellement dans `.opencode/skills/`
-- [ ] Document de retour d'expérience : cas limites découverts
-- [ ] Validation que le format est reconnu par OpenCode
+- [x] 3 skills convertis manuellement dans `.opencode/skills/` (clean-code, task-execution-engine, mcp-builder)
+- [x] Document de retour d'expérience : cas limites découverts → `.plan/05-t40-retex.md`
+- [x] Validation que le format est reconnu par OpenCode (6/6 checks pass)
 
 ---
 
