@@ -6,10 +6,10 @@
 
 | Métrique | Valeur |
 |----------|--------|
-| Agents | 50 installés \| 6 en attente d'intégration \| 56 cible |
+| Agents | 56 installés \| 0 en attente \| 56 cible ✅ |
 | Tests | 117 Python \| 59 CLI |
-| Commits | ~20 |
-| Version du plan | v3 |
+| Commits | ~25 |
+| Version du plan | v3 (terminé) |
 
 ## Historique des versions
 
@@ -26,22 +26,22 @@
   - T4.0 ❌ : Prototype conversion skills — annulé (sera repris plus tard)
   - Revue de code P1+P2 ✅ : 9 corrections appliquées (C1, C2, M1, M2/S1, m1, m2, m4, S2, S3)
 
-### v3 (en cours — .plan/00-plan-v3.md)
+### v3 (terminé — .plan/00-plan-v3.md)
 - 2 workstreams : intégration de 6 agents + TUI
-- Estimé 7-9 sessions
+- **Cible atteinte : 56 agents, 12 catégories, 9 packs**
 
 ## Suivi v3
 
 | # | Tâche | Statut | Session | Notes |
 |---|-------|--------|---------|-------|
-| A1 | Créer catégorie mcp/ + 3 agents simples | ⬜ À faire | - | mcp-protocol-specialist, mcp-server-architect, mcp-security-auditor |
-| A2 | Convertir mcp-developer + platform-engineer | ⬜ À faire | - | Standard complexity |
-| A3 | Convertir prd (remapping outils) | ⬜ À faire | - | Complex — Claude Code tools → gh CLI |
-| A4 | Mettre à jour manifest + packs + tests | ⬜ À faire | - | Dépend de A1-A3 |
-| TUI-1 | TUI MVP (readline/promises) | ⬜ À faire | - | ~250 lignes, 3 modules |
-| TUI-2 | Navigation (écrans + state machine) | ⬜ À faire | - | Dépend de TUI-1 |
-| TUI-3 | Recherche + confirmation | ⬜ À faire | - | Dépend de TUI-2 |
-| TUI-4 | Polish + tests TUI | ⬜ À faire | - | Dépend de TUI-3 |
+| A1 | Créer catégorie mcp/ + 3 agents simples | ✅ Terminé | S4 | mcp-protocol-specialist, mcp-server-architect, mcp-security-auditor |
+| A2 | Convertir mcp-developer + platform-engineer | ✅ Terminé | S4 | Standard complexity |
+| A3 | Convertir prd (remapping outils) | ✅ Terminé | S4 | Scope réduit — PRD only (D13) |
+| A4 | Mettre à jour manifest + packs + tests | ✅ Terminé | S4-S5 | 56 agents, 12 catégories, 9 packs |
+| TUI-1 | TUI MVP (readline/promises) | ✅ Terminé | S4 | 6 modules dans src/tui/ |
+| TUI-2 | Navigation (écrans + state machine) | ✅ Terminé | S4 | state.mjs + screen.mjs |
+| TUI-3 | Recherche + confirmation | ✅ Terminé | S4 | input.mjs + renderer.mjs |
+| TUI-4 | Polish + tests TUI | ✅ Terminé | S5 | Tests CLI passent |
 
 **Légende** : ⬜ À faire | 🔄 En cours | ✅ Terminé | ❌ Annulé | ⏸️ En pause
 

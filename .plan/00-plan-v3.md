@@ -1,16 +1,16 @@
-# Plan V3 — Agents MCP + TUI Interactive
+# Plan V3 — Agents MCP + TUI Interactive ✅
 
-> Version : 3.0 | Date : 2026-02-17
+> Version : 3.0 | Date : 2026-02-17 | **Statut : TERMINÉ**
 > Consolide deux axes : intégration de 6 nouveaux agents + développement TUI
 > Ancien plan archivé dans `.plan/archive/v2/`
 
 ## Contexte actuel
 
-- 50 agents, 11 catégories, 8 packs
-- CLI non-interactive (list/search/install)
+- **56 agents, 12 catégories, 9 packs** (cible atteinte)
+- CLI non-interactive (list/search/install) + TUI interactif
 - Zero npm deps, Node.js 20+ ESM only
 - Scripts Python sync (stdlib only)
-- 19 commits, 117 tests Python, 59 tests CLI
+- ~25 commits, 117 tests Python, 59 tests CLI
 
 ## Axe 1 — Intégration agents (6 nouveaux)
 
@@ -25,20 +25,20 @@
 | `platform-engineer` | devops | 287 | Standard | Pas de recommandation modèle (D12) — modèle choisi au niveau session |
 | `prd` | business | 203 | Standard | Scope réduit — génération PRD uniquement, sans intégration GitHub (D13) |
 
-Nouvelle catégorie `mcp` avec 4 agents. Total après : **56 agents, 12 catégories**.
+Nouvelle catégorie `mcp` avec 4 agents. Total : **56 agents, 12 catégories** ✅ (cible atteinte).
 
 > **Non intégré** : `github-actions-expert` analysé mais non retenu — redondant avec `ci-cd-engineer` (D14).
 
-### Tâches d'intégration (ordonnées)
+### Tâches d'intégration (ordonnées) — ✅ TOUTES TERMINÉES
 
-| # | Tâche | Dépend |
-|---|-------|--------|
-| A1 | Créer catégorie `mcp/` — manifest.json + icônes display | — |
-| A2 | Convertir 3 agents MCP simples (parallel) | A1 |
-| A3 | Convertir mcp-developer + platform-engineer | A1 |
-| A4 | Convertir prd — scope réduit, PRD only (D13) | A1 |
-| A5 | Mettre à jour manifest.json + packs (nouveau pack `mcp` possible) | A2-A4 |
-| A6 | Valider tous les tests CLI avec manifest mis à jour | A5 |
+| # | Tâche | Dépend | Statut |
+|---|-------|--------|--------|
+| A1 | Créer catégorie `mcp/` — manifest.json + icônes display | — | ✅ |
+| A2 | Convertir 3 agents MCP simples (parallel) | A1 | ✅ |
+| A3 | Convertir mcp-developer + platform-engineer | A1 | ✅ |
+| A4 | Convertir prd — scope réduit, PRD only (D13) | A1 | ✅ |
+| A5 | Mettre à jour manifest.json + packs (nouveau pack `mcp`) | A2-A4 | ✅ |
+| A6 | Valider tous les tests CLI avec manifest mis à jour | A5 | ✅ |
 
 ## Axe 2 — TUI Interactive
 
@@ -121,9 +121,9 @@ Les deux axes sont **indépendants** et peuvent s'entrelacer :
 
 ## Critères de succès
 
-- [ ] 56 agents, 12 catégories
-- [ ] TUI auto-lancé via `npx github:dmicheneau/opencode-template-agent` (détection TTY)
-- [ ] CLI existant préservé (non-breaking)
-- [ ] TUI : parcourir catégories → sélectionner agents → installer (flux E2E)
-- [ ] Tous les tests passent (Python + CLI + TUI)
-- [ ] Nouveau pack `mcp` disponible
+- [x] 56 agents, 12 catégories
+- [x] TUI auto-lancé via `npx github:dmicheneau/opencode-template-agent` (détection TTY)
+- [x] CLI existant préservé (non-breaking)
+- [x] TUI : parcourir catégories → sélectionner agents → installer (flux E2E)
+- [x] Tous les tests passent (Python + CLI + TUI)
+- [x] Nouveau pack `mcp` disponible

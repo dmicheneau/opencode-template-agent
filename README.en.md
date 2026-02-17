@@ -3,19 +3,20 @@
 > 🇫🇷 [Version française](README.md)
 
 [![CI](https://github.com/dmicheneau/opencode-template-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/dmicheneau/opencode-template-agent/actions/workflows/ci.yml)
-![Agents](https://img.shields.io/badge/agents-49-blue)
+![Agents](https://img.shields.io/badge/agents-56-blue)
 ![Tests](https://img.shields.io/badge/tests-176%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Node](https://img.shields.io/badge/node-18%2B-green)
 ![npm](https://img.shields.io/npm/v/opencode-agents?label=npm&color=cb3837)
 
-Curated registry of **49 AI agents** for [OpenCode](https://opencode.ai), distributed via a zero-dependency CLI. Agents are `.md` files containing system prompts that configure AI assistants for specific roles.
+Curated registry of **56 AI agents** for [OpenCode](https://opencode.ai), distributed via a zero-dependency CLI and interactive TUI. Agents are `.md` files containing system prompts that configure AI assistants for specific roles.
 
-Source: [aitmpl.com](https://www.aitmpl.com/agents) (413+ agents available) + 5 custom agents.
+Source: [aitmpl.com](https://www.aitmpl.com/agents) (413+ agents available) + 8 custom agents.
 
 ## 🚀 Quickstart
 
 ```bash
+npx github:dmicheneau/opencode-template-agent                            # Interactive TUI (auto-detects TTY)
 npx github:dmicheneau/opencode-template-agent list                       # Browse the catalog
 npx github:dmicheneau/opencode-template-agent install --pack backend     # Install a pack
 npx github:dmicheneau/opencode-template-agent install typescript-pro     # Install an agent
@@ -48,6 +49,15 @@ source ~/.zshrc
 ```
 
 ## 💡 Commands
+
+### tui (interactive mode)
+
+```bash
+npx github:dmicheneau/opencode-template-agent                # Auto-detects TTY and launches TUI
+npx github:dmicheneau/opencode-template-agent tui             # Explicitly launch the TUI
+```
+
+Browse categories, search agents, and install directly from the interactive interface.
 
 ### install
 
@@ -87,18 +97,19 @@ npx github:dmicheneau/opencode-template-agent search "machine learning"
 
 ## 📋 Available agents
 
-49 agents — 4 primary (`Tab` in OpenCode) + 45 subagents (`@category/name`).
+56 agents — 4 primary (`Tab` in OpenCode) + 52 subagents (`@category/name`).
 
 | Category | # | Agents |
 |----------|---|--------|
 | 💻 `languages` | 10 | typescript-pro, python-pro, golang-pro, rust-pro, java-architect, cpp-pro, php-pro, kotlin-specialist, csharp-developer, rails-expert |
-| ⚙️ `devops` | 8 | cloud-architect ⭐, devops-engineer ⭐, docker-specialist, kubernetes-specialist, terraform-specialist, aws-specialist, linux-admin, ci-cd-engineer |
+| ⚙️ `devops` | 9 | cloud-architect ⭐, devops-engineer ⭐, docker-specialist, kubernetes-specialist, terraform-specialist, aws-specialist, linux-admin, ci-cd-engineer, platform-engineer |
 | 🤖 `ai` | 6 | ai-engineer, data-scientist, ml-engineer, llm-architect, prompt-engineer, search-specialist |
 | 🛠️ `devtools` | 5 | code-reviewer, debugger, performance-engineer, refactoring-specialist, test-automator |
-| 👥 `team` | 4 | episode-orchestrator ⭐, fullstack-developer ⭐, mobile-developer, ui-designer |
+| 👥 `team` | 5 | episode-orchestrator ⭐, fullstack-developer ⭐, mobile-developer, ui-designer, screenshot-ui-analyzer |
+| 🔌 `mcp` | 4 | mcp-protocol-specialist, mcp-server-architect, mcp-developer, mcp-security-auditor |
+| 📊 `business` | 4 | product-manager, project-manager, scrum-master, prd |
 | 🗄️ `database` | 3 | database-architect, postgres-pro, redis-specialist |
 | 📝 `docs` | 3 | api-documenter, documentation-engineer, technical-writer |
-| 📊 `business` | 3 | product-manager, project-manager, scrum-master |
 | 🔒 `security` | 3 | penetration-tester, security-auditor, smart-contract-auditor |
 | 🔌 `api` | 2 | api-architect, graphql-architect |
 | 🌐 `web` | 2 | expert-nextjs-developer, expert-react-frontend-engineer |
@@ -107,16 +118,17 @@ npx github:dmicheneau/opencode-template-agent search "machine learning"
 
 ## 🎒 Packs
 
-8 predefined packs for installing coherent groups of agents.
+9 predefined packs for installing coherent groups of agents.
 
 | Pack | Agents | Description |
 |------|--------|-------------|
 | `backend` | postgres-pro, redis-specialist, database-architect, api-architect, python-pro, typescript-pro, debugger, test-automator | Backend stack |
 | `frontend` | expert-react-frontend-engineer, expert-nextjs-developer, typescript-pro, ui-designer, performance-engineer, test-automator | Frontend stack |
-| `devops` | devops-engineer, cloud-architect, docker-specialist, kubernetes-specialist, terraform-specialist, aws-specialist, ci-cd-engineer, linux-admin | Infrastructure |
+| `devops` | devops-engineer, cloud-architect, docker-specialist, kubernetes-specialist, terraform-specialist, aws-specialist, ci-cd-engineer, linux-admin, platform-engineer | Infrastructure |
 | `fullstack` | fullstack-developer, typescript-pro, expert-react-frontend-engineer, expert-nextjs-developer, postgres-pro, api-architect, debugger, test-automator, code-reviewer | Full stack |
 | `ai` | ai-engineer, data-scientist, ml-engineer, llm-architect, prompt-engineer, search-specialist | AI & ML |
 | `security` | security-auditor, penetration-tester, smart-contract-auditor | Security |
+| `mcp` | mcp-protocol-specialist, mcp-server-architect, mcp-developer, mcp-security-auditor | MCP servers |
 | `quality` | code-reviewer, test-automator, debugger, performance-engineer, refactoring-specialist | Code quality |
 | `startup` | fullstack-developer, typescript-pro, expert-nextjs-developer, postgres-pro, docker-specialist, product-manager, ui-designer, test-automator | Startup kit |
 
@@ -128,22 +140,30 @@ opencode-template-agent/
 ├── src/
 │   ├── registry.mjs         # Manifest, search, filtering
 │   ├── installer.mjs        # Download + install
-│   └── display.mjs          # ANSI output
-├── manifest.json            # 49 agents, 11 categories, 8 packs
+│   ├── display.mjs          # ANSI output
+│   └── tui/                 # Interactive TUI (6 modules)
+│       ├── index.mjs        # Entry point + TTY detection
+│       ├── state.mjs        # State machine
+│       ├── screen.mjs       # Screen rendering
+│       ├── renderer.mjs     # Layout + formatting
+│       ├── input.mjs        # User input handling
+│       └── ansi.mjs         # ANSI escape sequences
+├── manifest.json            # 56 agents, 12 categories, 9 packs
 ├── install.sh               # Bash install script
 ├── .opencode/agents/        # Agent files (.md)
 │   ├── *.md                 # 4 primary agents
 │   ├── languages/           # 10 agents
-│   ├── devops/              # 6 subagents
+│   ├── devops/              # 7 subagents
 │   ├── ai/                  # 6 agents
 │   ├── devtools/            # 5 agents
+│   ├── team/                # 3 subagents
+│   ├── mcp/                 # 4 agents
+│   ├── business/            # 4 agents
 │   ├── database/            # 3 agents
 │   ├── docs/                # 3 agents
-│   ├── business/            # 3 agents
 │   ├── security/            # 3 agents
 │   ├── api/                 # 2 agents
-│   ├── web/                 # 2 agents
-│   └── team/                # 2 subagents
+│   └── web/                 # 2 agents
 └── tests/
 ```
 
