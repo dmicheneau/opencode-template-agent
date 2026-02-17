@@ -2,7 +2,7 @@
 description: >
   Product Requirements Document specialist — transforms ideas into structured,
   measurable, actionable PRDs grounded in project context and stakeholder needs.
-mode: all
+mode: byline
 permission:
   read: allow
   write: allow
