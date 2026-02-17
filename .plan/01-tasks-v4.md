@@ -6,11 +6,11 @@
 
 ### S1 — Vérification et push
 
-- [ ] S1.1 Vérification visuelle du TUI (10 onglets, scrolling, packs, recherche)
-- [ ] S1.2 Push sur GitHub (branche main)
-- [ ] S1.3 Validation des 4 jobs CI (test, test-cli, lint, validate-agents)
-- [ ] S1.4 Correction des erreurs CI éventuelles
-- [ ] S1.5 Vérifier que le workflow sync-agents.yml est syntaxiquement valide (actionlint)
+- [x] S1.1 Vérification visuelle du TUI (10 onglets, scrolling, packs, recherche)
+- [x] S1.2 Push sur GitHub (branche main)
+- [x] S1.3 Validation des 4 jobs CI (test, test-cli, lint, validate-agents)
+- [x] S1.4 Correction des erreurs CI éventuelles
+- [x] S1.5 Vérifier que le workflow sync-agents.yml est syntaxiquement valide (actionlint)
 
 ## Axe 2 — Pipeline d'alimentation continue (priorité haute)
 

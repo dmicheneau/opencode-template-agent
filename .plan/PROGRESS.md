@@ -54,7 +54,7 @@
 
 | # | Tâche | Statut | Session | Notes |
 |---|-------|--------|---------|-------|
-| S1 | Stabilisation & push CI | ⬜ À faire | — | TUI visuel + 4 jobs CI |
+| S1 | Stabilisation & push CI | ✅ Terminé | 6 | CI verte, TUI 10 tabs OK, prd.md fix |
 | S2 | Workflow sync-agents.yml | ⬜ À faire | — | Cron hebdo + PR auto |
 | S3 | Curation & permissions | ⬜ À faire | — | Critères C1-C6, labels |
 | S4 | Expansion vague 1 (→70) | ⬜ À faire | — | 14 agents candidats |
@@ -85,6 +85,9 @@
 - Création plan v4 + workflow sync-agents.yml (commit 7d18dd8)
 - Archivage fichiers plan v3 dans .plan/archive/v3/
 - Création 01-tasks-v4.md avec 25 tâches détaillées
+- Fix prd.md mode `all` → `byline` (commit post-push)
+- Push 32 commits to GitHub, CI verte (4/4 jobs)
+- S1 terminé : TUI vérifié (12 tabs OK), workflow sync validé (16/16 checks)
 
 ### Session 5 — Réorganisation des catégories ✅
 
