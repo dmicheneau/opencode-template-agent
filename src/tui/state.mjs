@@ -29,7 +29,7 @@ const MIN_VIEWPORT = 5;
  * @property {{ active: boolean, query: string }} search
  * @property {{ ids: string[], items: PackDef[] }} packs
  * @property {Object|null} packDetail
- * @property {{ agents: AgentEntry[], progress: number, results: string[], error: string|null, doneCursor: number, forceSelection: Set<string> }|null} install
+ * @property {{ agents: AgentEntry[], progress: number, current: number, results: Array<{name: string, status: string}>, error: string|null, doneCursor: number, forceSelection: Set<string>, forceMode?: boolean }|null} install
  * @property {{ cols: number, rows: number }} terminal
  * @property {Manifest} manifest
  * @property {AgentEntry[]} allAgents
@@ -102,8 +102,10 @@ export function update(state, parsed) {
 
 /**
  * Compute the filtered agent list based on current tab and search query.
+ * When the active tab is 'packs', returns PackDef[] (with id property).
+ * For all other tabs, returns AgentEntry[] optionally filtered by search query.
  * @param {TuiState} state
- * @returns {AgentEntry[]}
+ * @returns {AgentEntry[] | PackDef[]}
  */
 export function computeFilteredList(state) {
   const tabId = state.tabs.ids[state.tabs.activeIndex];

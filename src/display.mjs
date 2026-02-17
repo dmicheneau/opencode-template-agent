@@ -1,24 +1,12 @@
-// ─── ANSI Color Helpers (zero dependencies) ────────────────────────────────────
+// ─── ANSI Color Helpers (imported from shared module) ───────────────────────────
 
-import { padEnd as ansiPadEnd } from './tui/ansi.mjs';
+import { padEnd as ansiPadEnd, bold, dim, red, green, yellow, cyan } from './tui/ansi.mjs';
 
-const NO_COLOR = 'NO_COLOR' in process.env || process.env.TERM === 'dumb';
+// Re-export for consumers (e.g. bin/cli.mjs)
+export { bold, dim, red, green, yellow, cyan };
 
-const ESC = '\x1b[';
-const RESET = `${ESC}0m`;
-
-/** @param {string} code */
-const wrap = (code) => (/** @type {string} */ text) => NO_COLOR ? String(text) : `${ESC}${code}m${text}${RESET}`;
-
-export const bold    = wrap('1');
-export const dim     = wrap('2');
-export const red     = wrap('31');
-export const green   = wrap('32');
-export const yellow  = wrap('33');
-export const cyan    = wrap('36');
-
-// Combined helpers
-export const boldCyan   = (/** @type {string} */ t) => bold(cyan(t));
+// Combined helper
+export const boldCyan = (/** @type {string} */ t) => bold(cyan(t));
 
 // ─── Status Icons ───────────────────────────────────────────────────────────────
 
@@ -134,6 +122,7 @@ export function printAgentList(manifest) {
 
   // Determine max agent name length for alignment
   const maxNameLen = manifest.agents.reduce((max, a) => Math.max(max, a.name.length), 0);
+  const ANSI_PAD_OVERHEAD = 10; // Extra padding to compensate for ANSI escape codes in cyan()
 
   for (const [catId, catMeta] of Object.entries(manifest.categories)) {
     const agents = byCategory[catId];
@@ -143,7 +132,7 @@ export function printAgentList(manifest) {
     console.log(`${catMeta.icon} ${bold(catMeta.label)} ${dim(`(${agents.length})`)}`);
 
     for (const agent of agents) {
-      const name = ansiPadEnd(cyan(agent.name), maxNameLen + 10); // +10 for ANSI codes
+      const name = ansiPadEnd(cyan(agent.name), maxNameLen + ANSI_PAD_OVERHEAD);
       const mode = agent.mode === 'primary' ? yellow(' ★') : '';
       console.log(`  ${name} ${dim(agent.description)}${mode}`);
     }
@@ -190,9 +179,10 @@ export function printSearchResults(results, query) {
   console.log();
 
   const maxNameLen = results.reduce((max, a) => Math.max(max, a.name.length), 0);
+  const ANSI_PAD_OVERHEAD = 10; // Extra padding to compensate for ANSI escape codes in cyan()
 
   for (const agent of results) {
-    const name = ansiPadEnd(cyan(agent.name), maxNameLen + 10);
+    const name = ansiPadEnd(cyan(agent.name), maxNameLen + ANSI_PAD_OVERHEAD);
     const cat = dim(`(${agent.category})`);
     console.log(`  ${name} ${cat}  ${dim(agent.description)}`);
   }

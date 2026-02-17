@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { parseKey, Action } from '../src/tui/input.mjs';
 import { createInitialState, update, computeFilteredList, getViewportHeight } from '../src/tui/state.mjs';
 import { visibleLength, truncate, padEnd, charWidth, stripAnsi } from '../src/tui/ansi.mjs';
+import { render } from '../src/tui/renderer.mjs';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -1222,5 +1223,267 @@ describe('padEnd', () => {
   it('handles empty string', () => {
     const result = padEnd('', 3);
     assert.equal(result, '   ');
+  });
+});
+
+// ─── renderer.mjs — render() ────────────────────────────────────────────────
+
+describe('render — browse mode', () => {
+  it('returns a string', () => {
+    const state = makeState();
+    const output = render(state);
+    assert.equal(typeof output, 'string');
+    assert.ok(output.length > 0);
+  });
+
+  it('contains border characters', () => {
+    const state = makeState();
+    const output = render(state);
+    assert.ok(output.includes('┌'), 'missing top-left border');
+    assert.ok(output.includes('┘'), 'missing bottom-right border');
+    assert.ok(output.includes('│'), 'missing vertical border');
+  });
+
+  it('contains OPENCODE AGENTS title', () => {
+    const state = makeState();
+    const output = render(state);
+    assert.ok(stripAnsi(output).includes('OPENCODE AGENTS'));
+  });
+
+  it('contains tab labels', () => {
+    const state = makeState();
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('ALL('), 'missing ALL tab');
+    assert.ok(plain.includes('Packs('), 'missing Packs tab');
+  });
+
+  it('contains agent names in browse mode', () => {
+    const state = makeState();
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('ai-engineer'), 'missing agent name ai-engineer');
+    assert.ok(plain.includes('postgres-pro'), 'missing agent name postgres-pro');
+  });
+
+  it('contains column headers', () => {
+    const state = makeState();
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('CATEGORY'), 'missing CATEGORY header');
+    assert.ok(plain.includes('NAME'), 'missing NAME header');
+    assert.ok(plain.includes('DESCRIPTION'), 'missing DESCRIPTION header');
+  });
+
+  it('shows cursor indicator on current item', () => {
+    const state = makeState();
+    const output = render(state);
+    assert.ok(output.includes('▸'), 'missing cursor indicator');
+  });
+
+  it('shows selection count when agents are selected', () => {
+    let state = makeState();
+    state = update(state, { action: Action.SELECT });
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('1 selected'), 'missing selection count');
+  });
+
+  it('shows status bar with key hints', () => {
+    const state = makeState();
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('Search') || plain.includes('[/]'), 'missing search hint');
+    assert.ok(plain.includes('Quit') || plain.includes('[q]'), 'missing quit hint');
+  });
+});
+
+describe('render — too small terminal', () => {
+  it('shows warning when terminal is too small', () => {
+    const state = makeState({}, { cols: 40, rows: 10 });
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('TERMINAL TOO SMALL'), 'missing too-small message');
+  });
+
+  it('shows current and minimum dimensions', () => {
+    const state = makeState({}, { cols: 40, rows: 10 });
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('40×10'), 'missing current dimensions');
+    assert.ok(plain.includes('60×15'), 'missing minimum dimensions');
+  });
+});
+
+describe('render — confirm mode', () => {
+  it('shows install confirmation dialog', () => {
+    let state = makeState();
+    state = update(state, { action: Action.SELECT }); // select first
+    state = update(state, { action: Action.CONFIRM }); // enter confirm
+    assert.equal(state.mode, 'confirm');
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('Install'), 'missing Install in dialog');
+    assert.ok(plain.includes('[y]') || plain.includes('Yes'), 'missing Yes option');
+    assert.ok(plain.includes('[n]') || plain.includes('No'), 'missing No option');
+  });
+});
+
+describe('render — installing mode (viewport scrolling)', () => {
+  it('renders progress for a small agent list without overflow indicators', () => {
+    let state = makeState();
+    state = {
+      ...state,
+      mode: 'installing',
+      install: {
+        agents: state.allAgents.slice(0, 2),
+        progress: 0,
+        current: 0,
+        results: [],
+        error: null,
+        doneCursor: 0,
+        forceSelection: new Set(),
+      },
+    };
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('Installing 2 agent(s)'), 'missing installing header');
+    assert.ok(plain.includes('ai-engineer'), 'missing first agent');
+    assert.ok(!plain.includes('more above'), 'should not show "more above" for small list');
+    assert.ok(!plain.includes('more below'), 'should not show "more below" for small list');
+  });
+
+  it('shows progress bar with counts', () => {
+    let state = makeState();
+    const agents = state.allAgents.slice(0, 2);
+    state = {
+      ...state,
+      mode: 'installing',
+      install: {
+        agents,
+        progress: 1,
+        current: 1,
+        results: [{ name: agents[0].name, status: 'installed' }],
+        error: null,
+        doneCursor: 0,
+        forceSelection: new Set(),
+      },
+    };
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('[1/2]'), 'missing progress count');
+    assert.ok(plain.includes('50%'), 'missing percentage');
+  });
+
+  it('shows scroll indicators for large agent lists', () => {
+    // Create a state with many agents and a small terminal to force scrolling
+    const manyAgents = [];
+    for (let i = 0; i < 50; i++) {
+      manyAgents.push({
+        name: `agent-${i}`,
+        category: 'ai',
+        path: `ai/agent-${i}`,
+        mode: 'subagent',
+        description: `Agent ${i}`,
+        tags: ['ai'],
+      });
+    }
+    const manifest = makeManifest({
+      agents: manyAgents,
+    });
+    let state = createInitialState(manifest, { cols: 80, rows: 20 });
+    state = {
+      ...state,
+      mode: 'installing',
+      install: {
+        agents: manyAgents,
+        progress: 25,
+        current: 25,
+        results: manyAgents.slice(0, 25).map(a => ({ name: a.name, status: 'installed' })),
+        error: null,
+        doneCursor: 0,
+        forceSelection: new Set(),
+      },
+    };
+    const output = render(state);
+    const plain = stripAnsi(output);
+    // With 50 agents and rows=20, viewport is small, so we should see scroll indicators
+    assert.ok(plain.includes('more above') || plain.includes('more below'),
+      'missing scroll indicators for large agent list in progress view');
+  });
+});
+
+describe('render — done mode', () => {
+  it('shows installation complete message', () => {
+    let state = makeState();
+    state = {
+      ...state,
+      mode: 'done',
+      install: {
+        agents: state.allAgents.slice(0, 1),
+        progress: 1,
+        current: 1,
+        results: [{ name: 'ai-engineer', status: 'installed' }],
+        error: null,
+        done: true,
+        doneCursor: 0,
+        forceSelection: new Set(),
+      },
+    };
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('Installation complete'), 'missing completion message');
+    assert.ok(plain.includes('Installed:'), 'missing Installed count');
+  });
+
+  it('shows force reinstall option when there are skipped agents', () => {
+    let state = makeState();
+    state = {
+      ...state,
+      mode: 'done',
+      install: {
+        agents: state.allAgents.slice(0, 2),
+        progress: 2,
+        current: 2,
+        results: [
+          { name: 'ai-engineer', status: 'installed' },
+          { name: 'ml-engineer', status: 'skipped' },
+        ],
+        error: null,
+        done: true,
+        doneCursor: 0,
+        forceSelection: new Set(),
+      },
+    };
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('Force reinstall') || plain.includes('[f]'),
+      'missing force reinstall hint for skipped agents');
+  });
+});
+
+describe('render — search mode', () => {
+  it('shows search input field', () => {
+    let state = makeState();
+    state = update(state, { action: Action.SEARCH });
+    assert.equal(state.mode, 'search');
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('Search:'), 'missing search prompt');
+  });
+});
+
+describe('render — pack detail mode', () => {
+  it('shows pack detail with agent list', () => {
+    let state = makeState();
+    // Navigate to packs tab
+    state = update(state, { action: Action.TAB }); // packs
+    // Open pack detail
+    state = update(state, { action: Action.CONFIRM });
+    assert.equal(state.mode, 'pack_detail');
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('Back to Packs'), 'missing back navigation');
+    assert.ok(plain.includes('Backend Essentials'), 'missing pack label');
   });
 });

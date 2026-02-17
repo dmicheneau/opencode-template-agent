@@ -1,5 +1,5 @@
 import { mkdirSync, existsSync, writeFileSync } from 'node:fs';
-import { join, dirname, resolve, sep } from 'node:path';
+import { join, dirname, resolve as pathResolve, sep } from 'node:path';
 import https from 'node:https';
 import { loadManifest } from './registry.mjs';
 import {
@@ -113,8 +113,8 @@ function getDestination(agent, cwd) {
     relative = join(basePath, agent.category, `${agent.name}.md`);
   }
 
-  const absolute = resolve(cwd, relative);
-  const safeBase = resolve(cwd, basePath);
+  const absolute = pathResolve(cwd, relative);
+  const safeBase = pathResolve(cwd, basePath);
 
   if (!absolute.startsWith(safeBase + sep) && absolute !== safeBase) {
     throw new Error(`Security: path "${relative}" escapes agents directory. Agent "${agent.name}" rejected.`);

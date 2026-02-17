@@ -114,7 +114,13 @@ export function padEnd(str, width) {
   return gap > 0 ? str + ' '.repeat(gap) : str;
 }
 
-/** Truncate to `maxWidth` visible chars, appending '…' if truncated. Single-pass. */
+/**
+ * Truncate to `maxWidth` visible chars, appending '…' if truncated. Single-pass.
+ * NOTE: When truncation occurs, ANSI formatting is stripped from the truncated result.
+ * This is a known limitation — preserving ANSI codes through truncation would require
+ * tracking open/close escape sequences, which adds significant complexity.
+ * The original string (with ANSI intact) is returned when no truncation is needed.
+ */
 export function truncate(str, maxWidth) {
   if (maxWidth < 1) return '';
   const stripped = stripAnsi(str);

@@ -18,6 +18,9 @@ import {
 /** Guard to make exit() idempotent. */
 let active = false;
 
+/** Saved stdin encoding to restore on exit. */
+let savedEncoding = null;
+
 // ─── Public API ─────────────────────────────────────────────────────────────
 
 /**
@@ -35,6 +38,7 @@ export function enter() {
 
   process.stdin.setRawMode(true);
   process.stdin.resume();
+  savedEncoding = process.stdin.readableEncoding;
   process.stdin.setEncoding('utf-8');
   process.stdout.write(ALT_SCREEN_ON + CURSOR_HIDE + CLEAR_SCREEN + CURSOR_HOME);
 
@@ -53,6 +57,10 @@ export function exit() {
 
   if (process.stdin.isTTY) {
     process.stdin.setRawMode(false);
+  }
+  if (savedEncoding !== null) {
+    process.stdin.setEncoding(savedEncoding || 'utf-8');
+    savedEncoding = null;
   }
   process.stdin.pause();
 }

@@ -1,6 +1,6 @@
 // ─── renderer.mjs ── Pure frame-buffer builder ──────────────────────────────
-// state → string. Zero side effects. Commander / hacker-news terminal style.
-// Zero npm deps, Node 20+ ESM.
+// state → string. Zero side effects except Date.now() for spinner animation.
+// Commander / hacker-news terminal style. Zero npm deps, Node 20+ ESM.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import {
@@ -25,8 +25,8 @@ const icon = (s, id) => s.manifest?.categories?.[id]?.icon || '📦';
 
 /** Wrap content inside │ ... │ padded to full width, prefixed with CLEAR_LINE. */
 function bdr(content, W) {
-  const iw = W - 4;
-  const gap = Math.max(0, iw - visibleLength(content));
+  const innerWidth = W - 4;
+  const gap = Math.max(0, innerWidth - visibleLength(content));
   return `${CLEAR_LINE}${cyan(BOX.vertical)} ${content}${' '.repeat(gap)} ${cyan(BOX.vertical)}`;
 }
 
@@ -46,7 +46,7 @@ function botBorder(W) {
 
 // ─── Tab Bar ────────────────────────────────────────────────────────────────
 
-function buildTabs(state, iw) {
+function buildTabs(state, innerWidth) {
   const { tabs } = state;
   const parts = tabs.labels.map((l, i) => {
     if (i === tabs.activeIndex) return bold(inverse(`[${l}]`));
@@ -55,14 +55,14 @@ function buildTabs(state, iw) {
     return white(colored);
   });
   const full = ' ' + parts.join(' ');
-  if (visibleLength(full) <= iw) return [full];
+  if (visibleLength(full) <= innerWidth) return [full];
 
   // Wrap to 2 rows
   const r1 = [], r2 = [];
   let w = 1, split = false;
   for (const p of parts) {
     const pw = visibleLength(p);
-    if (!split && w + pw + 1 <= iw) { r1.push(p); w += pw + 1; }
+    if (!split && w + pw + 1 <= innerWidth) { r1.push(p); w += pw + 1; }
     else { split = true; r2.push(p); }
   }
   const lines = [' ' + r1.join(' ')];
@@ -73,7 +73,7 @@ function buildTabs(state, iw) {
 // ─── Agent List ─────────────────────────────────────────────────────────────
 
 function renderAgentList(state, out, W) {
-  const iw = W - 4;
+  const innerWidth = W - 4;
   if (state.tabs.ids[state.tabs.activeIndex] === 'packs') { renderPacks(state, out, W); return; }
 
   // Headers + separator
@@ -81,11 +81,11 @@ function renderAgentList(state, out, W) {
     + bold(brightCyan(padEnd('NAME', COL_NAME))) + bold(brightCyan('DESCRIPTION')), W));
   out.push(bdr('  ' + cyan(padEnd('─'.repeat(COL_CAT), COL_CAT + COL_ICON)
     + padEnd('─'.repeat(COL_NAME - 2), COL_NAME)
-    + '─'.repeat(Math.min(20, Math.max(5, iw - COL_CAT - COL_ICON - COL_NAME - 4)))), W));
+    + '─'.repeat(Math.min(20, Math.max(5, innerWidth - COL_CAT - COL_ICON - COL_NAME - 4)))), W));
 
   const vh = getViewportHeight(state);
   const { items, cursor, scrollOffset } = state.list;
-  const dw = Math.max(10, iw - COL_ICON - COL_CAT - COL_NAME - 6);
+  const descWidth = Math.max(10, innerWidth - COL_ICON - COL_CAT - COL_NAME - 6);
 
   if (items.length === 0) {
     renderEmpty(state, out, W, vh);
@@ -96,8 +96,8 @@ function renderAgentList(state, out, W) {
       const a = items[idx], cur = idx === cursor, sel = state.selection.has(a.name);
       const mk = cur ? bold(brightCyan('▸')) : sel ? bold(brightGreen('✓')) : ' ';
       const nameCol = sel ? green(padEndAscii(a.name, COL_NAME)) : brightWhite(padEndAscii(a.name, COL_NAME));
-      let row = ` ${mk} ${icon(state, a.category)} ${yellow(padEndAscii(a.category, COL_CAT))}${nameCol}${cyan(truncate(a.description, dw))}`;
-      if (cur) row = inverse(padEnd(row, iw));
+      let row = ` ${mk} ${icon(state, a.category)} ${yellow(padEndAscii(a.category, COL_CAT))}${nameCol}${cyan(truncate(a.description, descWidth))}`;
+      if (cur) row = inverse(padEnd(row, innerWidth));
       out.push(bdr(row, W));
     }
   }
@@ -109,22 +109,22 @@ function renderAgentList(state, out, W) {
 // ─── Packs List ─────────────────────────────────────────────────────────────
 
 function renderPacks(state, out, W) {
-  const iw = W - 4, cP = 20, cA = 8;
-  out.push(bdr('  ' + bold(brightCyan(padEnd('PACK', cP))) + bold(brightCyan(padEnd('AGENTS', cA))) + bold(brightCyan('DESCRIPTION')), W));
-  out.push(bdr('  ' + cyan(padEnd('─'.repeat(cP - 2), cP) + padEnd('─'.repeat(cA - 2), cA)
-    + '─'.repeat(Math.min(15, iw - cP - cA - 4))), W));
+  const innerWidth = W - 4, colPack = 20, colAgents = 8;
+  out.push(bdr('  ' + bold(brightCyan(padEnd('PACK', colPack))) + bold(brightCyan(padEnd('AGENTS', colAgents))) + bold(brightCyan('DESCRIPTION')), W));
+  out.push(bdr('  ' + cyan(padEnd('─'.repeat(colPack - 2), colPack) + padEnd('─'.repeat(colAgents - 2), colAgents)
+    + '─'.repeat(Math.min(15, innerWidth - colPack - colAgents - 4))), W));
 
   const vh = getViewportHeight(state), pk = state.packs?.items || [];
   const { cursor, scrollOffset } = state.list;
-  const dw = Math.max(10, iw - cP - cA - 6);
+  const descWidth = Math.max(10, innerWidth - colPack - colAgents - 6);
 
   for (let i = 0; i < vh; i++) {
     const idx = scrollOffset + i;
     if (idx >= pk.length) { out.push(bdr('', W)); continue; }
     const p = pk[idx], cur = idx === cursor;
     const ptr = cur ? bold(brightCyan('▸')) : ' ';
-    let row = ` ${ptr} ${brightWhite(padEnd(p.label || p.id, cP - 2))}${brightCyan(padEnd(String(p.agents?.length || 0), cA))}${cyan(truncate(p.description || '', dw))}`;
-    if (cur) row = inverse(padEnd(row, iw));
+    let row = ` ${ptr} ${brightWhite(padEnd(p.label || p.id, colPack - 2))}${brightCyan(padEnd(String(p.agents?.length || 0), colAgents))}${cyan(truncate(p.description || '', descWidth))}`;
+    if (cur) row = inverse(padEnd(row, innerWidth));
     out.push(bdr(row, W));
   }
 
@@ -135,18 +135,18 @@ function renderPacks(state, out, W) {
 // ─── Pack Detail ────────────────────────────────────────────────────────────
 
 function renderPackDetail(state, out, W) {
-  const iw = W - 4, pd = state.packDetail;
+  const innerWidth = W - 4, pd = state.packDetail;
   if (!pd) return;
 
   out.push(bdr(`  ${white('◀ Back to Packs')}  ${cyan(BOX.vertical)}  Pack: ${bold(brightCyan(pd.packLabel))} (${pd.agents.length} agents)`, W));
   out.push(bdr('', W));
   out.push(bdr('  ' + bold(brightCyan(padEnd('NAME', COL_NAME))) + bold(brightCyan('DESCRIPTION')), W));
   out.push(bdr('  ' + cyan(padEnd('─'.repeat(COL_NAME - 2), COL_NAME)
-    + '─'.repeat(Math.min(20, Math.max(5, iw - COL_NAME - 6)))), W));
+    + '─'.repeat(Math.min(20, Math.max(5, innerWidth - COL_NAME - 6)))), W));
 
   const vh = Math.max(1, getViewportHeight(state) - 2);
   const { agents, cursor, scrollOffset } = pd;
-  const dw = Math.max(10, iw - COL_NAME - 6);
+  const descWidth = Math.max(10, innerWidth - COL_NAME - 6);
 
   for (let i = 0; i < vh; i++) {
     const idx = scrollOffset + i;
@@ -154,8 +154,8 @@ function renderPackDetail(state, out, W) {
     const a = agents[idx], cur = idx === cursor, sel = state.selection.has(a.name);
     const mk = sel && cur ? bold(brightGreen('✓')) + bold(brightCyan('▸'))
       : cur ? ' ' + bold(brightCyan('▸')) : sel ? bold(brightGreen('✓')) + ' ' : '  ';
-    let row = ` ${mk} ${sel ? green(padEnd(a.name, COL_NAME)) : brightWhite(padEnd(a.name, COL_NAME))}${cyan(truncate(a.description, dw))}`;
-    if (cur) row = inverse(padEnd(row, iw));
+    let row = ` ${mk} ${sel ? green(padEnd(a.name, COL_NAME)) : brightWhite(padEnd(a.name, COL_NAME))}${cyan(truncate(a.description, descWidth))}`;
+    if (cur) row = inverse(padEnd(row, innerWidth));
     out.push(bdr(row, W));
   }
 
@@ -189,27 +189,27 @@ function renderStatus(state, out, W) {
 // ─── Confirm Dialog ─────────────────────────────────────────────────────────
 
 function renderConfirm(state, out, W) {
-  const iw = W - 4, agents = state.install?.agents || [];
-  const dw = Math.min(50, iw - 10), pad = ' '.repeat(Math.max(0, Math.floor((iw - dw) / 2)));
-  const di = dw - 4;
-  const dl = (c) => {
-    const g = Math.max(0, di - visibleLength(c));
+  const innerWidth = W - 4, agents = state.install?.agents || [];
+  const dialogWidth = Math.min(50, innerWidth - 10), pad = ' '.repeat(Math.max(0, Math.floor((innerWidth - dialogWidth) / 2)));
+  const dialogInner = dialogWidth - 4;
+  const dialogLine = (c) => {
+    const g = Math.max(0, dialogInner - visibleLength(c));
     return `${pad}${cyan(BOX.vertical)} ${c}${' '.repeat(g)} ${cyan(BOX.vertical)}`;
   };
-  const dTop = `${pad}${cyan(BOX.topLeft + BOX.horizontal)} ${boldCyan('Install')} ${cyan(BOX.horizontal.repeat(Math.max(0, dw - 12)) + BOX.topRight)}`;
-  const dBot = `${pad}${cyan(BOX.bottomLeft + BOX.horizontal.repeat(Math.max(0, dw - 2)) + BOX.bottomRight)}`;
+  const dTop = `${pad}${cyan(BOX.topLeft + BOX.horizontal)} ${boldCyan('Install')} ${cyan(BOX.horizontal.repeat(Math.max(0, dialogWidth - 12)) + BOX.topRight)}`;
+  const dBot = `${pad}${cyan(BOX.bottomLeft + BOX.horizontal.repeat(Math.max(0, dialogWidth - 2)) + BOX.bottomRight)}`;
 
   out.push(bdr('', W));
   out.push(bdr(dTop, W));
-  out.push(bdr(dl(''), W));
-  out.push(bdr(dl(bold(`Install ${agents.length} agent(s)?`)), W));
+  out.push(bdr(dialogLine(''), W));
+  out.push(bdr(dialogLine(bold(`Install ${agents.length} agent(s)?`)), W));
   // Clamp maxShow based on viewport height (leave room for dialog chrome)
   const maxShow = Math.max(1, getViewportHeight(state) - 6);
   const show = agents.slice(0, maxShow);
-  for (const a of show) out.push(bdr(dl(`  - ${white(a.name)}`), W));
-  if (agents.length > maxShow) out.push(bdr(dl(white(`  ... and ${agents.length - maxShow} more`)), W));
-  out.push(bdr(dl(''), W));
-  out.push(bdr(dl(`  ${green('[y]')} Yes  ${red('[n]')} No`), W));
+  for (const a of show) out.push(bdr(dialogLine(`  - ${white(a.name)}`), W));
+  if (agents.length > maxShow) out.push(bdr(dialogLine(white(`  ... and ${agents.length - maxShow} more`)), W));
+  out.push(bdr(dialogLine(''), W));
+  out.push(bdr(dialogLine(`  ${green('[y]')} Yes  ${red('[n]')} No`), W));
   out.push(bdr(dBot, W));
   out.push(bdr('', W));
 }
@@ -219,19 +219,32 @@ function renderConfirm(state, out, W) {
 function renderProgress(state, out, W) {
   const inst = state.install;
   if (!inst) return;
-  const { agents, current, results } = inst, total = agents.length, iw = W - 4;
+  const { agents, current, results } = inst, total = agents.length, innerWidth = W - 4;
 
   out.push(bdr('', W));
   out.push(bdr(`  ${bold(brightCyan(`Installing ${total} agent(s)...`))}`, W));
   out.push(bdr('', W));
 
-  for (let i = 0; i < agents.length; i++) {
+  // Viewport-limited scrolling centered on current agent
+  const vh = Math.max(1, getViewportHeight(state) - 6); // leave room for header, progress bar, padding
+  let scrollOffset = 0;
+  if (agents.length > vh) {
+    // Center on current agent
+    scrollOffset = Math.max(0, Math.min(current - Math.floor(vh / 2), agents.length - vh));
+  }
+
+  if (scrollOffset > 0) {
+    out.push(bdr(cyan(`  ↑ ${scrollOffset} more above`), W));
+  }
+
+  const end = Math.min(agents.length, scrollOffset + vh);
+  for (let i = scrollOffset; i < end; i++) {
     const a = agents[i], r = results[i];
     if (r) {
       const st = r.status === 'installed' ? bold(brightGreen('✓')) : r.status === 'skipped' ? yellow('⚠') : red('✗');
       const dt = r.status === 'installed' ? cyan(` → .opencode/agents/${a.category}/${a.name}.md`)
         : r.status === 'skipped' ? yellow(' (skipped)') : red(' (failed)');
-      out.push(bdr(`  ${st} ${white(a.name)}${truncate(dt, Math.max(10, iw - visibleLength(a.name) - 6))}`, W));
+      out.push(bdr(`  ${st} ${white(a.name)}${truncate(dt, Math.max(10, innerWidth - visibleLength(a.name) - 6))}`, W));
     } else if (i === current) {
       const fr = SPINNER[Math.floor(Date.now() / 80) % SPINNER.length];
       out.push(bdr(`  ${cyan(fr)} ${brightWhite(a.name)} ${yellow('(installing...)')}`, W));
@@ -240,8 +253,13 @@ function renderProgress(state, out, W) {
     }
   }
 
+  const remaining = agents.length - end;
+  if (remaining > 0) {
+    out.push(bdr(cyan(`  ↓ ${remaining} more below`), W));
+  }
+
   out.push(bdr('', W));
-  const done = results.length, bw = Math.min(30, iw - 20);
+  const done = results.length, bw = Math.min(30, innerWidth - 20);
   const filled = total > 0 ? Math.round((done / total) * bw) : 0;
   const pct = total > 0 ? Math.round((done / total) * 100) : 0;
   out.push(bdr(`  [${done}/${total}] ${cyan('█'.repeat(filled))}${white('░'.repeat(bw - filled))} ${pct}%`, W));
@@ -293,8 +311,8 @@ function renderDone(state, out, W) {
 // ─── Empty State ────────────────────────────────────────────────────────────
 
 function renderEmpty(state, out, W, vh) {
-  const q = state.search?.query || '', mid = Math.floor(vh / 2), iw = W - 4;
-  const center = (txt) => ' '.repeat(Math.max(0, Math.floor((iw - visibleLength(txt)) / 2))) + yellow(txt);
+  const q = state.search?.query || '', mid = Math.floor(vh / 2), innerWidth = W - 4;
+  const center = (txt) => ' '.repeat(Math.max(0, Math.floor((innerWidth - visibleLength(txt)) / 2))) + yellow(txt);
   for (let i = 0; i < vh; i++) {
     if (i === mid - 1) out.push(bdr(center(q ? `No agents match "${q}"` : 'No agents to display'), W));
     else if (i === mid && q) out.push(bdr(center('Try a different search term'), W));
@@ -306,12 +324,12 @@ function renderEmpty(state, out, W, vh) {
 
 function renderTooSmall(cols, rows) {
   const w = Math.max(cols, 30), lines = [];
-  const iw = w - 4; // inner width between borders
+  const innerWidth = w - 4; // inner width between borders
 
   const center = (txt) => {
     const vl = visibleLength(txt);
-    const left = Math.max(0, Math.floor((iw - vl) / 2));
-    const right = Math.max(0, iw - vl - left);
+    const left = Math.max(0, Math.floor((innerWidth - vl) / 2));
+    const right = Math.max(0, innerWidth - vl - left);
     return ' '.repeat(left) + txt + ' '.repeat(right);
   };
 
@@ -331,7 +349,7 @@ function renderTooSmall(cols, rows) {
     lines.push(`${cyan(BOX.vertical)} ${center(m)} ${cyan(BOX.vertical)}`);
   }
   lines.push(cyan(BOX.bottomLeft + BOX.horizontal.repeat(Math.max(0, w - 2)) + BOX.bottomRight));
-  while (lines.length < rows) lines.push(CLEAR_LINE);
+  while (lines.length < rows) lines.push('');
   return lines.map(l => CLEAR_LINE + l).join('\n');
 }
 
@@ -339,7 +357,7 @@ function renderTooSmall(cols, rows) {
 
 /**
  * Render the complete frame from state.
- * Pure function: no side effects, returns a string ready for flush().
+ * Deterministic except for Date.now() used by the spinner animation.
  * @param {object} state - TuiState
  * @returns {string}
  */
@@ -347,7 +365,7 @@ export function render(state) {
   const { cols, rows } = state.terminal;
   if (cols < MIN_COLS || rows < MIN_ROWS) return renderTooSmall(cols, rows);
 
-  const iw = cols - 4, out = [];
+  const innerWidth = cols - 4, out = [];
 
   // Top border
   out.push(topBorder(cols, state));
@@ -356,7 +374,7 @@ export function render(state) {
   out.push(bdr('', cols));
 
   // Tab bar (1 or 2 rows)
-  const tabs = buildTabs(state, iw);
+  const tabs = buildTabs(state, innerWidth);
   for (const t of tabs) out.push(bdr(t, cols));
   if (tabs.length < 2) out.push(bdr('', cols));
 

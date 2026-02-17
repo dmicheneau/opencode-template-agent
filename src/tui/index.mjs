@@ -109,7 +109,7 @@ export async function launchTUI(options = {}) {
     const unsubResize = onResize((size) => {
       state = { ...state, terminal: size };
       // Adjust scroll to keep cursor in viewport
-      const vh = Math.max(5, size.rows - 8);
+      const vh = getViewportHeight({ ...state, terminal: size });
       if (state.list.cursor >= state.list.scrollOffset + vh) {
         state = { ...state, list: { ...state.list, scrollOffset: state.list.cursor - vh + 1 } };
       }
@@ -184,10 +184,12 @@ export async function launchTUI(options = {}) {
     // S1: uncaughtException / unhandledRejection handlers
     const onUncaughtException = (err) => {
       cleanup();
+      console.error('Fatal error:', err?.message || err);
       process.exit(1);
     };
     const onUnhandledRejection = (reason) => {
       cleanup();
+      console.error('Fatal error:', reason?.message || reason);
       process.exit(1);
     };
 
