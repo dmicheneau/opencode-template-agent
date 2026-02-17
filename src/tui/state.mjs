@@ -18,6 +18,7 @@ const MIN_VIEWPORT = 5;
  * @typedef {import('../registry.mjs').AgentEntry} AgentEntry
  * @typedef {import('../registry.mjs').PackDef} PackDef
  * @typedef {import('../registry.mjs').Manifest} Manifest
+ * @typedef {AgentEntry & { _searchStr: string }} TuiAgentEntry
  */
 
 /**
@@ -196,9 +197,7 @@ function updateConfirm(state, { action }) {
   switch (action) {
     case Action.YES:
     case Action.CONFIRM: {
-      const agents = state.selection.size > 0
-        ? state.allAgents.filter(a => state.selection.has(a.name))
-        : [];
+      const agents = state.install?.agents || [];
       return {
         ...state,
         mode: 'installing',

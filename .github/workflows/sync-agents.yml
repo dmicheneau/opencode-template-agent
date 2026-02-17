@@ -40,11 +40,9 @@ on:
         type: boolean
 
 # ---------------------------------------------------------------------------
-# Permissions — least privilege principle
+# Permissions — least privilege at workflow level, grant at job level
 # ---------------------------------------------------------------------------
-permissions:
-  contents: write        # Push sync branch
-  pull-requests: write   # Create/update PR
+permissions: {}
 
 # ---------------------------------------------------------------------------
 # Concurrency — only one sync at a time, cancel stale runs
@@ -55,6 +53,9 @@ concurrency:
 
 jobs:
   sync:
+    permissions:
+      contents: write        # Push sync branch
+      pull-requests: write   # Create/update PR
     runs-on: ubuntu-latest
     timeout-minutes: 15
 

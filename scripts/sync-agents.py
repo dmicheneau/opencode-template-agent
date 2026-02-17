@@ -23,6 +23,7 @@ import logging
 import os
 import re
 import sys
+import tempfile
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -568,7 +569,8 @@ def build_opencode_agent(
         if current_line.strip():
             lines.append(current_line.rstrip())
     else:
-        lines.append(f'description: "{short_desc}"')
+        escaped_desc = short_desc.replace("\\", "\\\\").replace('"', '\\"')
+        lines.append(f'description: "{escaped_desc}"')
 
     lines.append(f"mode: {mode}")
 
@@ -736,6 +738,12 @@ def sync_agent(
         return None
 
     # Build permission dict (used for both the agent file and the manifest)
+    #
+    # SECURITY NOTE: Curated agent permissions are derived from the upstream
+    # 'tools:' frontmatter field. If the upstream repository is compromised,
+    # permissions could be silently escalated. Reviewers MUST check permission
+    # diffs carefully in sync PRs. Consider hardcoding permissions in a future
+    # version (see SEC-M1 in code review).
     perms = (
         permissions
         if permissions is not None
@@ -788,7 +796,19 @@ def sync_agent(
 
     # Ensure parent directory exists (handles category subdirs)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(agent_md, encoding="utf-8")
+    tmp_fd, tmp_path = tempfile.mkstemp(
+        dir=str(out_path.parent), suffix=".tmp", prefix=".sync-"
+    )
+    try:
+        with os.fdopen(tmp_fd, "w", encoding="utf-8") as tmp:
+            tmp.write(agent_md)
+        os.replace(tmp_path, str(out_path))
+    except BaseException:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+        raise
     if verbose:
         logger.debug("  [wrote] %s (%d bytes)", out_path, len(agent_md))
 

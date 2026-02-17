@@ -1202,5 +1202,68 @@ class TestCleanSyncedAgents(unittest.TestCase):
         self.assertFalse(manifest.exists(), "manifest.json should be removed")
 
 
+# ---------------------------------------------------------------------------
+# Tests validate_output_path()
+# ---------------------------------------------------------------------------
+
+# Import validate_output_path from sync_common (already on sys.path via SCRIPTS_DIR)
+import sync_common
+
+validate_output_path = sync_common.validate_output_path
+
+
+class TestValidateOutputPath(unittest.TestCase):
+    """Tests for validate_output_path security function."""
+
+    def setUp(self) -> None:
+        """Create a temporary base directory for each test."""
+        self.tmpdir = tempfile.mkdtemp(prefix="test_validate_path_")
+        self.base_dir = Path(self.tmpdir)
+
+    def tearDown(self) -> None:
+        """Clean up the temporary directory."""
+        shutil.rmtree(self.tmpdir, ignore_errors=True)
+
+    def test_normal_path(self) -> None:
+        """Valid path within base directory should be accepted."""
+        file_path = self.base_dir / "category" / "agent.md"
+        # Should not raise
+        validate_output_path(file_path, self.base_dir)
+
+    def test_traversal_attack(self) -> None:
+        """Path with .. should be rejected."""
+        file_path = self.base_dir / ".." / ".." / "etc" / "passwd"
+        with self.assertRaises(ValueError) as ctx:
+            validate_output_path(file_path, self.base_dir)
+        self.assertIn("SECURITY", str(ctx.exception))
+
+    def test_absolute_path_attack(self) -> None:
+        """Absolute path outside base should be rejected."""
+        file_path = Path("/etc/passwd")
+        with self.assertRaises(ValueError) as ctx:
+            validate_output_path(file_path, self.base_dir)
+        self.assertIn("SECURITY", str(ctx.exception))
+
+    def test_sibling_directory_attack(self) -> None:
+        """Path escaping to sibling directory should be rejected."""
+        file_path = self.base_dir / ".." / "sibling" / "file.md"
+        with self.assertRaises(ValueError) as ctx:
+            validate_output_path(file_path, self.base_dir)
+        self.assertIn("SECURITY", str(ctx.exception))
+
+    def test_null_byte_injection(self) -> None:
+        """Path with null byte should be rejected."""
+        file_path = self.base_dir / "agent\x00.md"
+        # Null bytes in paths raise ValueError on resolve() (Python 3.8+)
+        with self.assertRaises((ValueError, OSError)):
+            validate_output_path(file_path, self.base_dir)
+
+    def test_nested_valid_path(self) -> None:
+        """Deeply nested valid path should be accepted."""
+        file_path = self.base_dir / "cat" / "sub" / "agent.md"
+        # Should not raise
+        validate_output_path(file_path, self.base_dir)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

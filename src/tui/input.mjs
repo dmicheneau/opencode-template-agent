@@ -24,8 +24,6 @@ export const Action = Object.freeze({
   ESCAPE:      'ESCAPE',
   QUIT:        'QUIT',
   SELECT_ALL:  'SELECT_ALL',
-  HELP:        'HELP',
-
   // Editing
   BACKSPACE:   'BACKSPACE',
   DELETE_WORD: 'DELETE_WORD',
@@ -85,7 +83,6 @@ const R_DELETE_W   = Object.freeze({ action: Action.DELETE_WORD });
 const R_SELECT     = Object.freeze({ action: Action.SELECT });
 const R_SEARCH     = Object.freeze({ action: Action.SEARCH });
 const R_SELECT_ALL = Object.freeze({ action: Action.SELECT_ALL });
-const R_HELP       = Object.freeze({ action: Action.HELP });
 const R_YES        = Object.freeze({ action: Action.YES });
 const R_NO         = Object.freeze({ action: Action.NO });
 const R_FORCE      = Object.freeze({ action: Action.FORCE });
@@ -166,7 +163,6 @@ export function parseKey(data, mode) {
   if (raw === '/')   return R_SEARCH;
   if (raw === 'q' || raw === 'Q') return R_QUIT;
   if (raw === 'a' || raw === 'A') return R_SELECT_ALL;
-  if (raw === '?')   return R_HELP;
 
   return R_NONE;
 }

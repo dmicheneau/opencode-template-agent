@@ -242,7 +242,8 @@ function renderProgress(state, out, W) {
     const a = agents[i], r = results[i];
     if (r) {
       const st = r.status === 'installed' ? bold(brightGreen('✓')) : r.status === 'skipped' ? yellow('⚠') : red('✗');
-      const dt = r.status === 'installed' ? cyan(` → .opencode/agents/${a.category}/${a.name}.md`)
+      const agentPath = a.mode === 'primary' ? `${a.name}.md` : `${a.category}/${a.name}.md`;
+      const dt = r.status === 'installed' ? cyan(` → .opencode/agents/${agentPath}`)
         : r.status === 'skipped' ? yellow(' (skipped)') : red(' (failed)');
       out.push(bdr(`  ${st} ${white(a.name)}${truncate(dt, Math.max(10, innerWidth - visibleLength(a.name) - 6))}`, W));
     } else if (i === current) {

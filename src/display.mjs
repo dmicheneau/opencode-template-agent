@@ -8,6 +8,9 @@ export { bold, dim, red, green, yellow, cyan };
 // Combined helper
 export const boldCyan = (/** @type {string} */ t) => bold(cyan(t));
 
+/** ANSI escape overhead for a single color wrap (e.g. cyan). Resolves to 0 when NO_COLOR is set. */
+const ANSI_PAD_OVERHEAD = cyan('').length;
+
 // ─── Status Icons ───────────────────────────────────────────────────────────────
 
 const CHECK = green('✓');
@@ -120,7 +123,6 @@ export function printAgentList(manifest) {
 
   // Determine max agent name length for alignment
   const maxNameLen = manifest.agents.reduce((max, a) => Math.max(max, a.name.length), 0);
-  const ANSI_PAD_OVERHEAD = 10; // Extra padding to compensate for ANSI escape codes in cyan()
 
   for (const [catId, catMeta] of Object.entries(manifest.categories)) {
     const agents = byCategory[catId];
@@ -177,7 +179,6 @@ export function printSearchResults(results, query) {
   console.log();
 
   const maxNameLen = results.reduce((max, a) => Math.max(max, a.name.length), 0);
-  const ANSI_PAD_OVERHEAD = 10; // Extra padding to compensate for ANSI escape codes in cyan()
 
   for (const agent of results) {
     const name = ansiPadEnd(cyan(agent.name), maxNameLen + ANSI_PAD_OVERHEAD);

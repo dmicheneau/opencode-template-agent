@@ -99,7 +99,7 @@ export function onResize(callback) {
 
 /**
  * Register a stdin data handler. Returns an unsubscribe function.
- * @param {(data: Buffer) => void} callback
+ * @param {(data: string) => void} callback
  * @returns {() => void} Unsubscribe function.
  */
 export function onInput(callback) {

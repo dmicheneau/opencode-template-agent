@@ -1,0 +1,14 @@
+# Automated dependency updates for GitHub Actions
+# Monitors pinned action SHAs for new versions and security advisories
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    commit-message:
+      prefix: "ci"
+    labels:
+      - "dependencies"
+      - "ci"

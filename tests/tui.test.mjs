@@ -100,8 +100,8 @@ describe('parseKey', () => {
       assert.deepStrictEqual(parseKey(buf('A'), mode), { action: 'SELECT_ALL' });
     });
 
-    it('? → HELP', () => {
-      assert.deepStrictEqual(parseKey(buf('?'), mode), { action: 'HELP' });
+    it('? → NONE (no HELP action)', () => {
+      assert.deepStrictEqual(parseKey(buf('?'), mode), { action: 'NONE' });
     });
 
     it('Page Up → PAGE_UP', () => {

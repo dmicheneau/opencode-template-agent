@@ -15,6 +15,7 @@ import json
 import logging
 import os
 import re
+import tempfile
 import time
 import urllib.error
 import urllib.request
@@ -444,10 +445,20 @@ def _save_sync_cache(
     """Persist the sync cache to disk."""
     cache_path = output_dir / cache_filename
     cache_path.parent.mkdir(parents=True, exist_ok=True)
-    cache_path.write_text(
-        json.dumps(cache, indent=2, ensure_ascii=False) + "\n",
-        encoding="utf-8",
+    cache_data = json.dumps(cache, indent=2, ensure_ascii=False) + "\n"
+    tmp_fd, tmp_path = tempfile.mkstemp(
+        dir=str(cache_path.parent), suffix=".tmp", prefix=".sync-cache-"
     )
+    try:
+        with os.fdopen(tmp_fd, "w", encoding="utf-8") as tmp:
+            tmp.write(cache_data)
+        os.replace(tmp_path, str(cache_path))
+    except BaseException:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+        raise
 
 
 def _remove_sync_cache(
