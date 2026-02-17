@@ -7,7 +7,7 @@
 | Métrique | Valeur |
 |----------|--------|
 | Agents | 56 installés \| 14 candidats vague 1 \| 70 cible v4 |
-| Tests | 241 JS + 117 Python = 358 tests |
+| Tests | 241 JS + 160 Python = 401 tests |
 | Commits | ~25 + 15 session commits |
 | Version du plan | v4 (en cours) — v3 terminé, archivé |
 
@@ -55,7 +55,7 @@
 | # | Tâche | Statut | Session | Notes |
 |---|-------|--------|---------|-------|
 | S1 | Stabilisation & push CI | ✅ Terminé | 6 | CI verte, TUI 10 tabs OK, prd.md fix |
-| S2 | Workflow sync-agents.yml | ⬜ À faire | — | Cron hebdo + PR auto |
+| S2 | Workflow sync-agents.yml | 🔄 En cours | 7 | S2.1-S2.4 ✅, S2.5-S2.7 restants |
 | S3 | Curation & permissions | ⬜ À faire | — | Critères C1-C6, labels |
 | S4 | Expansion vague 1 (→70) | ⬜ À faire | — | 14 agents candidats |
 
@@ -75,7 +75,7 @@
 - **D17** ⬜ : Scope du sync automatique (core seul vs core+extended)
 - **D18** ⬜ : Auto-merge pour mises à jour d'agents existants ?
 - **D19** ⬜ : Seuil pour créer de nouvelles catégories
-- **D20** ⬜ : Architecture update-manifest.py (patch vs rebuild)
+- **D20** ✅ : Architecture update-manifest.py — patch incrémental (préserve curated, ajoute nouveaux, détecte stale)
 
 ## Notes de session
 
@@ -88,6 +88,26 @@
 - Fix prd.md mode `all` → `byline` (commit post-push)
 - Push 32 commits to GitHub, CI verte (4/4 jobs)
 - S1 terminé : TUI vérifié (12 tabs OK), workflow sync validé (16/16 checks)
+- Code review triple (JS, Python, sécurité) + 12 fixes appliqués
+- 3 PRs Dependabot mergées (checkout v6.0.2, setup-python v6.2.0, setup-node v6.2.0)
+
+### Session 7 (2026-02-17)
+- S2.1 ✅ : Revue workflow sync-agents.yml — 3 MAJOR + 6 MINOR identifiés et corrigés
+  - GITHUB_TOKEN scopé au step-level uniquement (pas job-level)
+  - ${{ }} injection patterns éliminés de tous les run: blocks
+  - defaults.run.shell: bash ajouté
+  - fetch-depth: 0 → 1 (optimisation)
+  - Label fallback ajouté pour les repos neufs
+- S2.2 ✅ : Créé scripts/update-manifest.py (321 lignes, stdlib only)
+  - Fusion manifest sync/root avec préservation des champs manuels
+  - Détection d'agents obsolètes (source aitmpl absents du sync)
+  - Écritures atomiques, CLI complet, exit codes structurés
+- S2.3 ✅ : 37 tests dans tests/test_update_manifest.py (5 classes)
+- S2.4 ✅ : Simulation locale bout en bout réussie
+- S2.8 ✅ : Intégré dans S2.1 (injection-safe, token scoping)
+- D20 ✅ : Architecture update-manifest.py = patch incrémental
+- Workflow réduit de 703 → 614 lignes (extraction code inline step 6)
+- Tests : 241 JS + 160 Python = **401 tests** (vs 364 précédemment)
 
 ### Session 5 — Réorganisation des catégories ✅
 

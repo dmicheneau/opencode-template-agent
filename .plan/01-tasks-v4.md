@@ -16,25 +16,30 @@
 
 ### S2 — Workflow de synchronisation automatique
 
-- [ ] S2.1 Revue et finalisation du workflow `.github/workflows/sync-agents.yml`
-  - Vérifier les SHA pins des actions
-  - Vérifier les permissions (contents: write, pull-requests: write)
-  - Tester le workflow en mode dry-run manuellement
-- [ ] S2.2 Créer `scripts/update-manifest.py` — pont entre le manifest sync et le manifest.json projet
-  - Lire le manifest généré par sync-agents.py
-  - Fusionner avec le manifest.json principal (préserver tags, descriptions, packs manuels)
-  - Ajouter les nouveaux agents avec marqueur `[NEEDS_REVIEW]`
-  - Ne jamais écraser les champs manuels (tags, packs, descriptions enrichies)
-- [ ] S2.3 Ajouter des tests pour `update-manifest.py`
-  - Test de fusion sans conflit
-  - Test de détection de nouveaux agents
-  - Test de préservation des champs manuels
-  - Test de marqueur `[NEEDS_REVIEW]`
-- [ ] S2.4 Tester le workflow complet en local (act ou simulation)
+- [x] S2.1 Revue et finalisation du workflow `.github/workflows/sync-agents.yml`
+  - SHA pins vérifiés (checkout v6.0.2, setup-python v6.2.0 via Dependabot)
+  - Permissions contents:write + pull-requests:write au job-level ✅
+  - 3 MAJOR fixes appliqués : GITHUB_TOKEN scopé, ${{ }} injection removed, defaults.run.shell
+  - 6 MINOR fixes : fetch-depth:1, label fallback, args quoting, concurrency repo-scoped
+- [x] S2.2 Créer `scripts/update-manifest.py` (321 lignes, stdlib only)
+  - Lit manifest sync (.opencode/agents/manifest.json) + root (manifest.json)
+  - Fusionne avec préservation totale des champs manuels (tags, description, packs)
+  - Nouveaux agents marqués `[NEEDS_REVIEW]`, source `aitmpl`
+  - Détection agents obsolètes (source aitmpl absents du sync)
+  - CLI complet : --root-manifest, --sync-manifest, --dry-run, -v, --metadata-output
+  - Écritures atomiques (tempfile + os.replace)
+  - Exit codes : 0=success, 1=error, 2=sync manifest not found
+- [x] S2.3 Tests pour `update-manifest.py` — **37 tests** dans `tests/test_update_manifest.py`
+  - TestCategoryMap (5) : direct, remap, unknown, completeness, logging
+  - TestJsonIO (8) : load/save, atomic, unicode, dirs creation
+  - TestMergeManifests (13) : empty, new, preserve, remap, sort, count, stale detection
+  - TestUpdateManifest (8) : basic, exit codes, dry-run, idempotent, preserves metadata
+  - TestCLI (3) : dry-run, no-metadata, missing sync
+- [x] S2.4 Test local du workflow (simulation bout en bout réussie)
 - [ ] S2.5 Premier run du workflow sur GitHub (workflow_dispatch manuel)
 - [ ] S2.6 Activer le cron (hebdomadaire lundi 06h UTC)
 - [ ] S2.7 Documenter le processus de revue des PRs de sync dans le README
-- [ ] S2.8 Revue sécurité du workflow (token scope, UNKNOWN_PERMISSIONS, path traversal)
+- [x] S2.8 Revue sécurité du workflow intégrée dans S2.1 (injection-safe, token scoping, fork detection)
 
 ### S3 — Gestion des permissions et curation
 
@@ -72,7 +77,7 @@
 - [ ] D17 Scope du sync automatique (core seul vs core+extended)
 - [ ] D18 Auto-merge pour mises à jour d'agents existants ?
 - [ ] D19 Seuil pour créer de nouvelles catégories (>15 agents ?)
-- [ ] D20 Architecture update-manifest.py (patch incrémental vs rebuild complet)
+- [x] D20 Architecture update-manifest.py — patch incrémental (préserve curated, ajoute nouveaux, détecte stale)
 
 ## Séquencement
 

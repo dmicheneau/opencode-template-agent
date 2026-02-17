@@ -64,9 +64,11 @@ jobs:
       github.event_name == 'workflow_dispatch' ||
       github.repository == 'dmicheneau/opencode-template-agent'
 
+    defaults:
+      run:
+        shell: bash
+
     env:
-      # Authenticated API gives 5000 req/hr vs 60 for anonymous
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       SYNC_BRANCH: sync/agents-latest
       # Resolve inputs with defaults for scheduled runs
       SYNC_TIER: ${{ inputs.tier || 'core' }}
@@ -75,13 +77,13 @@ jobs:
 
     steps:
       # -----------------------------------------------------------------------
-      # 1. Checkout with full history (needed for branch operations)
+      # 1. Checkout main
       # -----------------------------------------------------------------------
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: main
-          fetch-depth: 0
+          fetch-depth: 1
 
       # -----------------------------------------------------------------------
       # 2. Setup Python (stdlib-only script, no pip install needed)
@@ -111,6 +113,8 @@ jobs:
       # 4. Run the sync script
       # -----------------------------------------------------------------------
       - name: Sync agents from source repository
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "::group::Sync configuration"
           echo "  Tier:  $SYNC_TIER"
@@ -119,14 +123,14 @@ jobs:
           echo "::endgroup::"
 
           # Build command arguments
-          SYNC_ARGS="--tier $SYNC_TIER --verbose"
+          SYNC_ARGS=("--tier" "$SYNC_TIER" "--verbose")
 
           if [ "$SYNC_FORCE" = "true" ]; then
-            SYNC_ARGS="$SYNC_ARGS --force"
+            SYNC_ARGS+=("--force")
           fi
 
           echo "::group::Running sync-agents.py"
-          python3 scripts/sync-agents.py $SYNC_ARGS
+          python3 scripts/sync-agents.py "${SYNC_ARGS[@]}"
           echo "::endgroup::"
 
       # -----------------------------------------------------------------------
@@ -181,108 +185,11 @@ jobs:
       - name: Update root manifest.json
         if: steps.changes.outputs.has_changes == 'true'
         run: |
-          python3 << 'PYEOF'
-          import json
-          import os
-          import re
-          import sys
-
-          # Load both manifests
-          with open("manifest.json", "r") as f:
-              root = json.load(f)
-
-          sync_manifest_path = ".opencode/agents/manifest.json"
-          if not os.path.exists(sync_manifest_path):
-              print("No sync manifest generated — skipping root manifest update")
-              sys.exit(0)
-
-          with open(sync_manifest_path, "r") as f:
-              sync = json.load(f)
-
-          # Build lookup of existing agents in root manifest
-          existing = {a["name"]: a for a in root.get("agents", [])}
-          sync_agents = {a["name"]: a for a in sync.get("agents", [])}
-
-          added = []
-          updated = []
-
-          for name, sa in sorted(sync_agents.items()):
-              if name not in existing:
-                  # New agent — add with minimal metadata and flag for review
-                  oc_cat = sa.get("opencode_category", sa.get("category", "uncategorized"))
-
-                  # Map path from sync manifest (which may differ from root convention)
-                  path = sa.get("path", f"{oc_cat}/{name}")
-
-                  # Determine mode
-                  mode = sa.get("mode", "subagent")
-
-                  # Generate a placeholder description from the agent name
-                  human_name = name.replace("-", " ").title()
-                  description = f"[NEEDS_REVIEW] {human_name} agent — auto-synced, needs description"
-
-                  # Determine root manifest category from opencode_category
-                  # Map sync categories to root manifest categories
-                  category_map = {
-                      "languages": "languages",
-                      "ai": "ai",
-                      "web": "web",
-                      "team": "web",
-                      "devops": "devops",
-                      "devtools": "devtools",
-                      "security": "security",
-                      "mcp": "mcp",
-                      "business": "business",
-                      "docs": "docs",
-                      "database": "data-api",
-                      "data-api": "data-api",
-                      "api": "data-api",
-                      "specialist": "devtools",
-                      "media": "devtools",
-                  }
-                  root_category = category_map.get(oc_cat, "devtools")
-
-                  new_entry = {
-                      "name": name,
-                      "category": root_category,
-                      "path": path,
-                      "mode": mode,
-                      "description": description,
-                      "source": "aitmpl",
-                      "tags": [],
-                  }
-                  root["agents"].append(new_entry)
-                  added.append(name)
-              else:
-                  # Existing agent — don't overwrite curated metadata in root manifest
-                  updated.append(name)
-
-          if added:
-              # Update agent count
-              root["agent_count"] = len(root["agents"])
-
-              # Sort agents by name for consistent diffs
-              root["agents"].sort(key=lambda a: a["name"])
-
-              with open("manifest.json", "w") as f:
-                  json.dump(root, f, indent=2, ensure_ascii=False)
-                  f.write("\n")
-
-              print(f"Root manifest updated: {len(added)} new agent(s) added")
-              for name in added:
-                  print(f"  + {name}")
-          else:
-              print("No new agents to add to root manifest")
-
-          # Write metadata for PR description
-          with open("/tmp/sync-metadata.json", "w") as f:
-              json.dump({
-                  "added": added,
-                  "updated": updated,
-                  "tier": os.environ.get("SYNC_TIER", "core"),
-                  "total_synced": len(sync_agents),
-              }, f)
-          PYEOF
+          python3 scripts/update-manifest.py \
+            --root-manifest manifest.json \
+            --sync-manifest .opencode/agents/manifest.json \
+            --metadata-output /tmp/sync-metadata.json \
+            --verbose
 
       # -----------------------------------------------------------------------
       # 7. Validate — run the same checks as CI before creating the PR
@@ -386,15 +293,19 @@ jobs:
       # -----------------------------------------------------------------------
       - name: Dry-run summary
         if: steps.changes.outputs.has_changes == 'true' && env.SYNC_DRY_RUN == 'true'
+        env:
+          NEW_COUNT: ${{ steps.changes.outputs.new_count }}
+          MOD_COUNT: ${{ steps.changes.outputs.modified_count }}
+          DEL_COUNT: ${{ steps.changes.outputs.deleted_count }}
         run: |
           echo "============================================"
           echo "  DRY RUN — No PR will be created"
           echo "============================================"
           echo ""
           echo "Changes detected:"
-          echo "  New:      ${{ steps.changes.outputs.new_count }} file(s)"
-          echo "  Modified: ${{ steps.changes.outputs.modified_count }} file(s)"
-          echo "  Deleted:  ${{ steps.changes.outputs.deleted_count }} file(s)"
+          echo "  New:      $NEW_COUNT file(s)"
+          echo "  Modified: $MOD_COUNT file(s)"
+          echo "  Deleted:  $DEL_COUNT file(s)"
           echo ""
           echo "Files that would be included:"
           git status --short .opencode/agents/ manifest.json
@@ -410,6 +321,10 @@ jobs:
 
       - name: Create sync branch and commit
         if: steps.changes.outputs.has_changes == 'true' && env.SYNC_DRY_RUN != 'true'
+        env:
+          NEW_COUNT: ${{ steps.changes.outputs.new_count }}
+          MOD_COUNT: ${{ steps.changes.outputs.modified_count }}
+          DEL_COUNT: ${{ steps.changes.outputs.deleted_count }}
         run: |
           # Delete local branch if it exists from a previous run
           git branch -D "$SYNC_BRANCH" 2>/dev/null || true
@@ -422,14 +337,10 @@ jobs:
           git add manifest.json
 
           # Build commit message
-          NEW="${{ steps.changes.outputs.new_count }}"
-          MOD="${{ steps.changes.outputs.modified_count }}"
-          DEL="${{ steps.changes.outputs.deleted_count }}"
-
           COMMIT_MSG="sync: update agents from davila7/claude-code-templates
 
           Tier: ${SYNC_TIER}
-          New: ${NEW} | Updated: ${MOD} | Deleted: ${DEL}
+          New: ${NEW_COUNT} | Updated: ${MOD_COUNT} | Deleted: ${DEL_COUNT}
           Source: davila7/claude-code-templates (main)"
 
           git commit -m "$COMMIT_MSG"
@@ -602,10 +513,14 @@ jobs:
 
       - name: Create or update Pull Request
         if: steps.changes.outputs.has_changes == 'true' && env.SYNC_DRY_RUN != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NEW_COUNT: ${{ steps.changes.outputs.new_count }}
+          MOD_COUNT: ${{ steps.changes.outputs.modified_count }}
+          DEL_COUNT: ${{ steps.changes.outputs.deleted_count }}
+          GH_REPO: ${{ github.repository }}
         run: |
           # Determine PR title
-          NEW="${{ steps.changes.outputs.new_count }}"
-          MOD="${{ steps.changes.outputs.modified_count }}"
           TODAY=$(date -u +%Y-%m-%d)
           PR_TITLE="sync: update agents from upstream (${TODAY})"
 
@@ -617,12 +532,12 @@ jobs:
             gh pr edit "$EXISTING_PR" \
               --title "$PR_TITLE" \
               --body-file /tmp/pr-body.md
-            echo "PR updated: https://github.com/${{ github.repository }}/pull/${EXISTING_PR}"
+            echo "PR updated: https://github.com/${GH_REPO}/pull/${EXISTING_PR}"
           else
             echo "Creating new PR"
             # Determine labels based on content
             LABELS="sync,automated"
-            if [ "$NEW" -gt 0 ]; then
+            if [ "$NEW_COUNT" -gt 0 ]; then
               LABELS="${LABELS},needs-review"
             fi
 
