@@ -6,7 +6,7 @@
 
 | Métrique | Valeur |
 |----------|--------|
-| Agents | 49 installés \| 6 en attente d'intégration \| 55 cible |
+| Agents | 50 installés \| 6 en attente d'intégration \| 56 cible |
 | Tests | 117 Python \| 59 CLI |
 | Commits | ~20 |
 | Version du plan | v3 |
@@ -56,6 +56,10 @@
 - **D14** ✅ : github-actions-expert non intégré (redondant avec ci-cd-engineer)
 
 ## Notes de session
+
+### Session 4 (2026-02-17)
+- Ajout agent `screenshot-ui-analyzer` (catégorie team, commit 34aa791) — hors plan v3
+- Compteurs mis à jour : 49 → 50 agents, cible 55 → 56
 
 ### Session 3 (2026-02-17)
 - Décisions D10-D14 tranchées

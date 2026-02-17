@@ -3,7 +3,7 @@
   "repo": "dmicheneau/opencode-template-agent",
   "branch": "main",
   "base_path": ".opencode/agents",
-  "agent_count": 50,
+  "agent_count": 53,
   "categories": {
     "ai": {
       "label": "AI & Machine Learning",
@@ -39,6 +39,11 @@
       "label": "Programming Languages",
       "icon": "💻",
       "description": "Language-specific experts for TypeScript, Python, Go, Rust, and more"
+    },
+    "mcp": {
+      "label": "MCP (Model Context Protocol)",
+      "icon": "🔌",
+      "description": "Agents for building and securing MCP servers"
     },
     "security": {
       "label": "Security",
@@ -359,6 +364,33 @@
       "tags": ["typescript", "types", "generics", "full-stack", "node", "react"]
     },
     {
+      "name": "mcp-protocol-specialist",
+      "category": "mcp",
+      "path": "mcp/mcp-protocol-specialist",
+      "mode": "subagent",
+      "description": "MCP protocol specification, standards compliance, and transport implementation",
+      "source": "aitmpl",
+      "tags": ["mcp", "protocol", "json-rpc", "transport", "standards"]
+    },
+    {
+      "name": "mcp-server-architect",
+      "category": "mcp",
+      "path": "mcp/mcp-server-architect",
+      "mode": "subagent",
+      "description": "MCP server architecture, implementation, and production deployment",
+      "source": "aitmpl",
+      "tags": ["mcp", "server", "architecture", "typescript", "python", "deployment"]
+    },
+    {
+      "name": "mcp-security-auditor",
+      "category": "mcp",
+      "path": "mcp/mcp-security-auditor",
+      "mode": "subagent",
+      "description": "MCP server security reviews, OAuth, RBAC, and compliance frameworks",
+      "source": "aitmpl",
+      "tags": ["mcp", "security", "oauth", "rbac", "compliance", "audit"]
+    },
+    {
       "name": "penetration-tester",
       "category": "security",
       "path": "security/penetration-tester",
@@ -538,6 +570,15 @@
         "security-auditor",
         "penetration-tester",
         "smart-contract-auditor"
+      ]
+    },
+    "mcp": {
+      "label": "MCP Development",
+      "description": "Complete MCP server development toolkit",
+      "agents": [
+        "mcp-protocol-specialist",
+        "mcp-server-architect",
+        "mcp-security-auditor"
       ]
     },
     "quality": {

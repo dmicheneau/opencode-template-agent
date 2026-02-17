@@ -6,7 +6,7 @@
 
 ## Contexte actuel
 
-- 49 agents, 11 catégories, 8 packs
+- 50 agents, 11 catégories, 8 packs
 - CLI non-interactive (list/search/install)
 - Zero npm deps, Node.js 20+ ESM only
 - Scripts Python sync (stdlib only)
@@ -25,7 +25,7 @@
 | `platform-engineer` | devops | 287 | Standard | Pas de recommandation modèle (D12) — modèle choisi au niveau session |
 | `prd` | business | 203 | Standard | Scope réduit — génération PRD uniquement, sans intégration GitHub (D13) |
 
-Nouvelle catégorie `mcp` avec 4 agents. Total après : **55 agents, 12 catégories**.
+Nouvelle catégorie `mcp` avec 4 agents. Total après : **56 agents, 12 catégories**.
 
 > **Non intégré** : `github-actions-expert` analysé mais non retenu — redondant avec `ci-cd-engineer` (D14).
 
@@ -121,7 +121,7 @@ Les deux axes sont **indépendants** et peuvent s'entrelacer :
 
 ## Critères de succès
 
-- [ ] 55 agents, 12 catégories
+- [ ] 56 agents, 12 catégories
 - [ ] TUI auto-lancé via `npx github:dmicheneau/opencode-template-agent` (détection TTY)
 - [ ] CLI existant préservé (non-breaking)
 - [ ] TUI : parcourir catégories → sélectionner agents → installer (flux E2E)

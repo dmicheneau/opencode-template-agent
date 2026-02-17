@@ -11,9 +11,9 @@ const wrap = (code) => (/** @type {string} */ text) => NO_COLOR ? String(text) :
 export const bold    = wrap('1');
 export const dim     = wrap('2');
 const italic  = wrap('3');
-const red     = wrap('31');
-const green   = wrap('32');
-const yellow  = wrap('33');
+export const red     = wrap('31');
+export const green   = wrap('32');
+export const yellow  = wrap('33');
 const blue    = wrap('34');
 const magenta = wrap('35');
 export const cyan    = wrap('36');
@@ -44,6 +44,7 @@ const CATEGORY_ICONS = {
   devtools:  '🛠️',
   docs:      '📝',
   languages: '💻',
+  mcp:       '🔌',
   security:  '🔒',
   web:       '🌐',
   business:  '📊',
