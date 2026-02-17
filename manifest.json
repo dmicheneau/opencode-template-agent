@@ -3,7 +3,7 @@
   "repo": "dmicheneau/opencode-template-agent",
   "branch": "main",
   "base_path": ".opencode/agents",
-  "agent_count": 49,
+  "agent_count": 50,
   "categories": {
     "ai": {
       "label": "AI & Machine Learning",
@@ -453,6 +453,14 @@
       "mode": "subagent",
       "description": "Visual interface design, design systems, and component libraries",
       "tags": ["ui", "design", "design-systems", "components", "accessibility", "ux"]
+    },
+    {
+      "name": "screenshot-ui-analyzer",
+      "category": "team",
+      "path": "team/screenshot-ui-analyzer",
+      "mode": "subagent",
+      "description": "Analyzes UI screenshots to extract components, layout structure, and design patterns",
+      "tags": ["ui", "screenshots", "analysis", "design-patterns", "layout", "components"]
     }
   ],
   "packs": {
