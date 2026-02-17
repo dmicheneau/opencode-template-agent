@@ -28,7 +28,7 @@
 
 ### v3 (en cours — .plan/00-plan-v3.md)
 - 2 workstreams : intégration de 6 agents + TUI
-- Estimé 9-11 sessions
+- Estimé 7-9 sessions
 
 ## Suivi v3
 
@@ -38,7 +38,7 @@
 | A2 | Convertir mcp-developer + platform-engineer | ⬜ À faire | - | Standard complexity |
 | A3 | Convertir prd (remapping outils) | ⬜ À faire | - | Complex — Claude Code tools → gh CLI |
 | A4 | Mettre à jour manifest + packs + tests | ⬜ À faire | - | Dépend de A1-A3 |
-| TUI-1 | TUI MVP (terminal + input + liste) | ⬜ À faire | - | ~800 lignes, 6 modules |
+| TUI-1 | TUI MVP (readline/promises) | ⬜ À faire | - | ~250 lignes, 3 modules |
 | TUI-2 | Navigation (écrans + state machine) | ⬜ À faire | - | Dépend de TUI-1 |
 | TUI-3 | Recherche + confirmation | ⬜ À faire | - | Dépend de TUI-2 |
 | TUI-4 | Polish + tests TUI | ⬜ À faire | - | Dépend de TUI-3 |
@@ -49,10 +49,19 @@
 
 - **D1-D8** : Voir .plan/archive/v2/02-decisions-v2.md
 - **D9** ✅ : Fichiers compagnons — Option E (copy + warning header + 5MB cap + anti-symlink)
-- **D10** : Nouveau — TUI zero-dependency (ANSI raw mode)
-- **D11** : Nouveau — Catégorie mcp/ pour les 4 agents MCP
+- **D10** ✅ : TUI Readline MVP (pas raw mode — reporté V4)
+- **D11** ✅ : Catégorie mcp/ pour 4 agents MCP
+- **D12** ✅ : Pas de recommandation modèle pour platform-engineer
+- **D13** ✅ : Agent prd sans fonctionnalités GitHub (PRD only)
+- **D14** ✅ : github-actions-expert non intégré (redondant avec ci-cd-engineer)
 
 ## Notes de session
+
+### Session 3 (2026-02-17)
+- Décisions D10-D14 tranchées
+- github-actions-expert analysé → redondant, non intégré
+- TUI: readline MVP validé (~250L), raw mode reporté V4
+- prd: scope réduit (pas de GitHub features)
 
 ### Session 2 (2026-02-17)
 - Revue technique Plan V3 complète → `.plan/05-technical-review-v3.md`

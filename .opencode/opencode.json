@@ -43,7 +43,8 @@
       "*": "allow"
     },
     "bash": {
-      "*": "ask"
+      "*": "ask",
+      "git *": "allow"
     }
   }
 }

@@ -32,27 +32,28 @@
 - [ ] **A2.1** — Fetcher et convertir `mcp-developer` (275L)
   - Fichiers : `.opencode/agents/mcp/mcp-developer.md` (nouveau)
   - Critère : conversion standard, soft refs conservées | Effort : **M**
-- [ ] **A2.2** — Décision D12 : modèle pour `platform-engineer` (opus vs sonnet)
-  - Fichiers : `PROGRESS.md` | Critère : décision documentée | Effort : **S**
-- [ ] **A2.3** — Fetcher et convertir `platform-engineer` (287L), catégorie devops
+- [ ] **A2.2** — Convertir `platform-engineer` (287L), catégorie devops — pas de recommandation modèle (D12)
   - Fichiers : `.opencode/agents/devops/platform-engineer.md` (nouveau) | Effort : **M**
-- [ ] **A2.4** — Ajouter les 2 agents au `manifest.json`
+- [ ] **A2.3** — Ajouter les 2 agents au `manifest.json`
   - Effort : **S**
-- [ ] **A2.5** — Mettre à jour le pack `mcp` avec `mcp-developer`
+- [ ] **A2.4** — Mettre à jour le pack `mcp` avec `mcp-developer`
   - Critère : pack `mcp` contient les 4 agents MCP | Effort : **S**
-- [ ] **A2.6** — Tests CLI — tous les tests passent
+- [ ] **A2.5** — Tests CLI — tous les tests passent
   - Effort : **S**
 
-### A3 — Agent complexe prd (1 session)
+### A3 — Agent prd — scope réduit (1 session)
+
+> **D13** : Scope réduit — génération PRD uniquement, sans intégration GitHub.
+> Les outils `create_issue`, `update_issue`, `search_issues`, `list_issues` sont supprimés.
 
 - [ ] **A3.1** — Fetcher le contenu upstream de `prd` (203L)
   - Fichiers : `.opencode/agents/business/prd.md` (nouveau) | Effort : **S**
-- [ ] **A3.2** — Mapper les outils Claude Code → OpenCode
+- [ ] **A3.2** — Mapper les outils Claude Code → OpenCode (PRD only)
   - codebase → Read/Glob/Grep, edit → Edit, fetch → webfetch, findTestFiles → Glob
-  - create_issue/update_issue/etc. → `Bash(gh issue ...)`, githubRepo → `Bash(gh repo ...)`
-  - Critère : tableau de mapping complet | Effort : **M**
+  - Supprimer : create_issue, update_issue, search_issues, list_issues, githubRepo
+  - Critère : tableau de mapping complet, zéro dépendance externe | Effort : **M**
 - [ ] **A3.3** — Réécrire les instructions de l'agent avec les outils OpenCode
-  - Critère : zéro référence aux outils Claude Code | Effort : **L**
+  - Critère : zéro référence aux outils Claude Code, zéro référence GitHub issues | Effort : **L**
 - [ ] **A3.4** — Ajouter au `manifest.json` (catégorie business)
   - Effort : **S**
 - [ ] **A3.5** — Tests CLI — tous les tests passent
@@ -73,21 +74,17 @@
 
 ## Axe 2 — TUI Interactive
 
-### TUI-1 — MVP (~800L, 2 sessions)
+### TUI-1 — MVP readline/promises (~250L, 1 session)
 
-- [ ] **TUI-1.1** — Créer `src/tui/terminal.mjs` (~200L) : enterRawMode, alternate screen, moveTo, clearScreen, getSize, cleanup
-  - Tests : mock process.stdout, assert escape sequences | Effort : **L**
-- [ ] **TUI-1.2** — Créer `src/tui/input.mjs` (~150L) : parseKeypress (arrows, Enter, Escape, Space, Ctrl+C, Backspace, chars)
-  - Tests : injection bytes bruts → assert parsed events | Effort : **M**
-- [ ] **TUI-1.3** — Créer `src/tui/renderer.mjs` (~300L) : renderScrollableList, renderStatusBar, renderHeader, viewport + scroll
-  - Tests : assert string arrays rendus | Effort : **L**
-- [ ] **TUI-1.4** — Point d'entrée TUI : commande `tui`/`browse` dans `bin/cli.mjs` (~15L), auto-détection TTY
+> **D10** : Option B — `node:readline/promises`. Raw mode reporté V4 si besoin validé.
+
+- [ ] **TUI-1.1** — Créer `src/tui/prompt.mjs` (~150L) : menus numérotés, sélection par numéro/nom, confirmation y/n avec `readline/promises`
+  - Tests : assert menus rendus, sélection valide/invalide | Effort : **L**
+- [ ] **TUI-1.2** — Créer `src/tui/search.mjs` (~60L) : recherche interactive via `rl.question()`, filtrage en temps réel
+  - Tests : assert filtrage résultats | Effort : **M**
+- [ ] **TUI-1.3** — Intégrer dans `bin/cli.mjs` — commande `tui`/`browse`, auto-détection TTY (R5)
   - Effort : **S**
-- [ ] **TUI-1.5** — Intégration end-to-end : TUI → liste → sélection Space → install Enter, gestion SIGINT
-  - Effort : **L**
-- [ ] **TUI-1.6** — Callback de progression dans `src/installer.mjs` (~20L) — capturer statut sans console.log
-  - Effort : **S**
-- [ ] **TUI-1.7** — Tests unitaires TUI-1 (~100L) : terminal, input, renderer
+- [ ] **TUI-1.4** — Tests unitaires TUI-1 (~80L)
   - Effort : **M**
 
 ### TUI-2 — Navigation (~500L, 1-2 sessions)
@@ -124,6 +121,13 @@
   - Effort : **M**
 - [ ] **TUI-4.5** — Documentation TUI dans `README.md` : section usage interactif
   - Effort : **M**
+
+---
+
+## Non intégré
+
+> **D14** : `github-actions-expert` analysé mais non retenu — quasi-redondant avec `ci-cd-engineer` existant.
+> Cherry-picker la checklist de sécurité workflow et les clarifying questions dans `ci-cd-engineer` si pertinent.
 
 ---
 

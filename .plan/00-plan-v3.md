@@ -22,10 +22,12 @@
 | `mcp-server-architect` | mcp | 74 | Simple | Outils standard |
 | `mcp-security-auditor` | mcp | 70 | Simple | Coexiste avec security-auditor général |
 | `mcp-developer` | mcp | 275 | Standard | Refs souples vers autres agents |
-| `platform-engineer` | devops | 287 | Standard | Demande opus — décider opus vs sonnet |
-| `prd` | business | 203 | Complexe | Remapping outils Claude Code → gh CLI |
+| `platform-engineer` | devops | 287 | Standard | Pas de recommandation modèle (D12) — modèle choisi au niveau session |
+| `prd` | business | 203 | Standard | Scope réduit — génération PRD uniquement, sans intégration GitHub (D13) |
 
 Nouvelle catégorie `mcp` avec 4 agents. Total après : **55 agents, 12 catégories**.
+
+> **Non intégré** : `github-actions-expert` analysé mais non retenu — redondant avec `ci-cd-engineer` (D14).
 
 ### Tâches d'intégration (ordonnées)
 
@@ -34,7 +36,7 @@ Nouvelle catégorie `mcp` avec 4 agents. Total après : **55 agents, 12 catégor
 | A1 | Créer catégorie `mcp/` — manifest.json + icônes display | — |
 | A2 | Convertir 3 agents MCP simples (parallel) | A1 |
 | A3 | Convertir mcp-developer + platform-engineer | A1 |
-| A4 | Convertir prd — remapping complexe Claude Code → OpenCode/gh | A1 |
+| A4 | Convertir prd — scope réduit, PRD only (D13) | A1 |
 | A5 | Mettre à jour manifest.json + packs (nouveau pack `mcp` possible) | A2-A4 |
 | A6 | Valider tous les tests CLI avec manifest mis à jour | A5 |
 
@@ -44,19 +46,19 @@ Transformer le CLI en TUI interactive tout en **préservant le CLI existant** (n
 
 ### Architecture
 
-- 6 modules dans `src/tui/` (~1 650 lignes total)
+- 6 modules dans `src/tui/` (~1 000 lignes total)
 - Zero nouvelles dépendances
-- Alternate screen buffer, raw mode, rendu ANSI
+- `node:readline/promises` pour l'interaction utilisateur (D10)
 - Détection TTY automatique
 
 ### Phases TUI
 
-**TUI-1 : MVP** (~800L, 2 sessions)
-- `terminal.mjs` — raw mode, curseur, alternate screen buffer (~200L)
-- `input.mjs` — parsing keypress (~150L)
-- Liste scrollable de tous les agents avec sélection checkbox + install
-- Commande `tui` dans cli.mjs, auto-detect TTY
+**TUI-1 : MVP** (~250L, 1 session)
+- `prompt.mjs` — menus numérotés, sélection par numéro/nom, confirmation y/n avec `readline/promises` (~150L)
+- `search.mjs` — recherche interactive via `rl.question()`, filtrage en temps réel (~60L)
+- Commande `tui`/`browse` dans cli.mjs, auto-detect TTY
 - Gestion propre des sorties (SIGINT, exceptions)
+- Raw mode reporté en V4 si le besoin est validé (D10)
 
 **TUI-2 : Navigation** (~500L, 1-2 sessions)
 - `screens.mjs` — menu principal, détail catégorie, vue packs (~350L)
@@ -91,14 +93,14 @@ Les deux axes sont **indépendants** et peuvent s'entrelacer :
 |-------|-------|----------|--------|
 | **A1** | Catégorie mcp/ + 3 agents simples | 1 | — |
 | **A2** | mcp-developer + platform-engineer | 1 | A1 |
-| **TUI-1** | MVP (terminal + input + liste) | 2 | — |
+| **TUI-1** | MVP (readline/promises) | 1 | — |
 | **A3** | prd (remapping complexe) | 1 | A1 |
 | **A4** | Manifest, packs, tests | 1 | A1-A3 |
 | **TUI-2** | Navigation (screens + state machine) | 1-2 | TUI-1 |
 | **TUI-3** | Recherche + confirmation | 1 | TUI-2 |
 | **TUI-4** | Polish + tests | 1 | TUI-3 |
 
-**Total estimé : 9-11 sessions**
+**Total estimé : 7-9 sessions**
 
 ## Contraintes
 
@@ -112,9 +114,9 @@ Les deux axes sont **indépendants** et peuvent s'entrelacer :
 
 | # | Risque | Sévérité | Mitigation |
 |---|--------|----------|------------|
-| R1 | Remapping prd (outils Claude Code sans équivalent direct) | 🔴 | Mapper vers gh CLI + webfetch, documenter les écarts |
-| R2 | Choix modèle platform-engineer (opus demandé, sonnet par défaut) | 🟡 | Décision explicite avant conversion |
-| R3 | TUI raw mode — compatibilité terminals (Windows Terminal, iTerm) | 🟡 | Fallback TERM=dumb, tests sur 3 terminaux |
+| R1 | Remapping prd (outils Claude Code sans équivalent direct) | 🟡 | Scope réduit (D13) — PRD only, pas d'intégration GitHub |
+| R2 | Choix modèle platform-engineer (opus demandé, sonnet par défaut) | ✅ Résolu | D12 — pas de recommandation modèle |
+| R3 | TUI raw mode — compatibilité terminals (Windows Terminal, iTerm) | ✅ Résolu | D10 — readline/promises, raw mode reporté V4 |
 | R4 | Scope creep TUI → maintenir le cap sur 4 phases | 🟡 | Pas de features hors scope sans nouveau plan |
 
 ## Critères de succès
