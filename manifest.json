@@ -3,7 +3,7 @@
   "repo": "dmicheneau/opencode-template-agent",
   "branch": "main",
   "base_path": ".opencode/agents",
-  "agent_count": 53,
+  "agent_count": 55,
   "categories": {
     "ai": {
       "label": "AI & Machine Learning",
@@ -220,6 +220,14 @@
       "tags": ["ci-cd", "github-actions", "gitlab-ci", "jenkins", "deployment", "automation"]
     },
     {
+      "name": "platform-engineer",
+      "category": "devops",
+      "path": "devops/platform-engineer",
+      "mode": "subagent",
+      "description": "Internal Developer Platforms, golden paths, GitOps, and developer self-service",
+      "tags": ["platform-engineering", "idp", "gitops", "kubernetes", "observability", "developer-experience"]
+    },
+    {
       "name": "code-reviewer",
       "category": "devtools",
       "path": "devtools/code-reviewer",
@@ -382,6 +390,15 @@
       "tags": ["mcp", "server", "architecture", "typescript", "python", "deployment"]
     },
     {
+      "name": "mcp-developer",
+      "category": "mcp",
+      "path": "mcp/mcp-developer",
+      "mode": "subagent",
+      "description": "MCP server development, tool design, resource exposure, and transport implementation",
+      "source": "aitmpl",
+      "tags": ["mcp", "server", "tools", "resources", "sdk", "development"]
+    },
+    {
       "name": "mcp-security-auditor",
       "category": "mcp",
       "path": "mcp/mcp-security-auditor",
@@ -533,7 +550,8 @@
         "terraform-specialist",
         "aws-specialist",
         "ci-cd-engineer",
-        "linux-admin"
+        "linux-admin",
+        "platform-engineer"
       ]
     },
     "fullstack": {
@@ -578,7 +596,8 @@
       "agents": [
         "mcp-protocol-specialist",
         "mcp-server-architect",
-        "mcp-security-auditor"
+        "mcp-security-auditor",
+        "mcp-developer"
       ]
     },
     "quality": {
