@@ -5,20 +5,25 @@
   "base_path": ".opencode/agents",
   "agent_count": 56,
   "categories": {
+    "languages": {
+      "label": "Languages",
+      "icon": "💻",
+      "description": "Language-specific experts for TypeScript, Python, Go, Rust, and more"
+    },
     "ai": {
       "label": "AI & Machine Learning",
       "icon": "🤖",
       "description": "AI systems, ML pipelines, data science, and LLM architecture"
     },
-    "api": {
-      "label": "API & GraphQL",
-      "icon": "🔌",
-      "description": "REST API design, GraphQL schemas, and API architecture"
+    "web": {
+      "label": "Web & Mobile",
+      "icon": "🌐",
+      "description": "React, Next.js, mobile, and UI design & analysis"
     },
-    "database": {
-      "label": "Database",
+    "data-api": {
+      "label": "Data & API",
       "icon": "🗄️",
-      "description": "Database design, optimization, and administration"
+      "description": "API design, GraphQL, database architecture, and data layer optimization"
     },
     "devops": {
       "label": "DevOps & Infrastructure",
@@ -26,44 +31,29 @@
       "description": "CI/CD, containers, orchestration, and cloud infrastructure"
     },
     "devtools": {
-      "label": "Developer Tools",
+      "label": "DevTools",
       "icon": "🛠️",
-      "description": "Code review, debugging, testing, and refactoring"
-    },
-    "docs": {
-      "label": "Documentation",
-      "icon": "📝",
-      "description": "Technical writing, API docs, and documentation engineering"
-    },
-    "languages": {
-      "label": "Programming Languages",
-      "icon": "💻",
-      "description": "Language-specific experts for TypeScript, Python, Go, Rust, and more"
-    },
-    "mcp": {
-      "label": "MCP (Model Context Protocol)",
-      "icon": "🔌",
-      "description": "Agents for building and securing MCP servers"
+      "description": "Code review, debugging, testing, refactoring, and workflow orchestration"
     },
     "security": {
       "label": "Security",
       "icon": "🔒",
       "description": "Security auditing, penetration testing, and smart contract analysis"
     },
-    "web": {
-      "label": "Web & Frontend",
-      "icon": "🌐",
-      "description": "React, Next.js, and modern web development"
+    "mcp": {
+      "label": "MCP (Model Context Protocol)",
+      "icon": "🔌",
+      "description": "Agents for building and securing MCP servers"
     },
     "business": {
       "label": "Business & Management",
       "icon": "📊",
       "description": "Project management, product strategy, and agile practices"
     },
-    "team": {
-      "label": "Development Team",
-      "icon": "👥",
-      "description": "Full-stack, mobile, and UI development roles"
+    "docs": {
+      "label": "Documentation",
+      "icon": "📝",
+      "description": "Technical writing, API docs, and documentation engineering"
     }
   },
   "agents": [
@@ -117,40 +107,40 @@
     },
     {
       "name": "api-architect",
-      "category": "api",
-      "path": "api/api-architect",
+      "category": "data-api",
+      "path": "data-api/api-architect",
       "mode": "subagent",
       "description": "REST API architecture, design patterns, and developer guidance",
       "tags": ["api", "rest", "architecture", "design", "http", "openapi"]
     },
     {
       "name": "graphql-architect",
-      "category": "api",
-      "path": "api/graphql-architect",
+      "category": "data-api",
+      "path": "data-api/graphql-architect",
       "mode": "subagent",
       "description": "GraphQL schema design, federation, and query performance optimization",
       "tags": ["graphql", "federation", "schema", "api", "query-optimization"]
     },
     {
       "name": "database-architect",
-      "category": "database",
-      "path": "database/database-architect",
+      "category": "data-api",
+      "path": "data-api/database-architect",
       "mode": "subagent",
       "description": "Database design, data modeling, scalability, and technology selection",
       "tags": ["database", "data-modeling", "scalability", "schema", "architecture"]
     },
     {
       "name": "postgres-pro",
-      "category": "database",
-      "path": "database/postgres-pro",
+      "category": "data-api",
+      "path": "data-api/postgres-pro",
       "mode": "subagent",
       "description": "PostgreSQL performance optimization, replication, and query tuning",
       "tags": ["postgresql", "database", "sql", "replication", "performance", "query-tuning"]
     },
     {
       "name": "redis-specialist",
-      "category": "database",
-      "path": "database/redis-specialist",
+      "category": "data-api",
+      "path": "data-api/redis-specialist",
       "mode": "subagent",
       "description": "Redis caching, data structures, pub/sub, clustering, and performance",
       "tags": ["redis", "caching", "pub-sub", "clustering", "streams", "performance"]
@@ -481,7 +471,7 @@
     },
     {
       "name": "episode-orchestrator",
-      "category": "team",
+      "category": "devtools",
       "path": "episode-orchestrator",
       "mode": "primary",
       "description": "Workflow orchestrator coordinating specialized subagents in sequence",
@@ -489,7 +479,7 @@
     },
     {
       "name": "fullstack-developer",
-      "category": "team",
+      "category": "web",
       "path": "fullstack-developer",
       "mode": "primary",
       "description": "End-to-end full-stack development spanning database, API, and frontend",
@@ -497,24 +487,24 @@
     },
     {
       "name": "mobile-developer",
-      "category": "team",
-      "path": "team/mobile-developer",
+      "category": "web",
+      "path": "web/mobile-developer",
       "mode": "subagent",
       "description": "Cross-platform mobile apps with React Native and Flutter",
       "tags": ["mobile", "react-native", "flutter", "ios", "android", "cross-platform"]
     },
     {
       "name": "ui-designer",
-      "category": "team",
-      "path": "team/ui-designer",
+      "category": "web",
+      "path": "web/ui-designer",
       "mode": "subagent",
       "description": "Visual interface design, design systems, and component libraries",
       "tags": ["ui", "design", "design-systems", "components", "accessibility", "ux"]
     },
     {
       "name": "screenshot-ui-analyzer",
-      "category": "team",
-      "path": "team/screenshot-ui-analyzer",
+      "category": "web",
+      "path": "web/screenshot-ui-analyzer",
       "mode": "subagent",
       "description": "Analyzes UI screenshots to extract components, layout structure, and design patterns",
       "tags": ["ui", "screenshots", "analysis", "design-patterns", "layout", "components"]

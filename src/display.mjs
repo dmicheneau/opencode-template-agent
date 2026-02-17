@@ -20,18 +20,16 @@ const ARROW = dim('→');
 
 /** @type {Record<string, string>} */
 const CATEGORY_ICONS = {
+  languages: '💻',
   ai:        '🤖',
-  api:       '🔌',
-  database:  '🗄️',
+  web:       '🌐',
+  'data-api':'🗄️',
   devops:    '⚙️',
   devtools:  '🛠️',
-  docs:      '📝',
-  languages: '💻',
-  mcp:       '🔌',
   security:  '🔒',
-  web:       '🌐',
+  mcp:       '🔌',
   business:  '📊',
-  team:      '👥',
+  docs:      '📝',
 };
 
 /**

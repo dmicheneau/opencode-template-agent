@@ -165,11 +165,11 @@ describe('CLI install', () => {
     assert.ok(output.includes('would install'));
     assert.ok(output.includes('postgres-pro'));
     // Verify no files were created
-    assert.ok(!existsSync(join(TEMP_DIR, '.opencode', 'agents', 'database', 'postgres-pro.md')));
+    assert.ok(!existsSync(join(TEMP_DIR, '.opencode', 'agents', 'data-api', 'postgres-pro.md')));
   });
 
   it('should dry-run a category install', () => {
-    const output = run(['install', '--category', 'database', '--dry-run'], { cwd: TEMP_DIR });
+    const output = run(['install', '--category', 'data-api', '--dry-run'], { cwd: TEMP_DIR });
     assert.ok(output.includes('would install'));
     assert.ok(output.includes('postgres-pro'));
     assert.ok(output.includes('redis-specialist'));
@@ -217,15 +217,15 @@ describe('CLI install', () => {
   // ─── Multi-category install ───────────────────────────────────────────────────
 
   it('should dry-run a multi-category install', () => {
-    const output = run(['install', '--category', 'database', 'security', '--dry-run'], { cwd: TEMP_DIR });
+    const output = run(['install', '--category', 'data-api', 'security', '--dry-run'], { cwd: TEMP_DIR });
     assert.ok(output.includes('would install'));
-    assert.ok(output.includes('postgres-pro'));        // from database
+    assert.ok(output.includes('postgres-pro'));        // from data-api
     assert.ok(output.includes('security-auditor'));     // from security
     assert.ok(output.includes('categories'));           // plural label
   });
 
   it('should error for any unknown category in multi-category', () => {
-    const output = run(['install', '--category', 'database', 'nonexistent', '--dry-run'], { expectError: true, cwd: TEMP_DIR });
+    const output = run(['install', '--category', 'data-api', 'nonexistent', '--dry-run'], { expectError: true, cwd: TEMP_DIR });
     assert.ok(output.includes('Unknown category'));
     assert.ok(output.includes('nonexistent'));
   });
@@ -253,9 +253,9 @@ describe('CLI install', () => {
   });
 
   it('should support comma-separated categories', () => {
-    const output = run(['install', '--category', 'database,security', '--dry-run'], { cwd: TEMP_DIR });
+    const output = run(['install', '--category', 'data-api,security', '--dry-run'], { cwd: TEMP_DIR });
     assert.ok(output.includes('would install'));
-    assert.ok(output.includes('postgres-pro'));        // from database
+    assert.ok(output.includes('postgres-pro'));        // from data-api
     assert.ok(output.includes('security-auditor'));     // from security
     assert.ok(output.includes('categories'));           // plural label
   });
@@ -316,7 +316,7 @@ describe('Registry module', () => {
     const agent = getAgent('postgres-pro');
     assert.ok(agent);
     assert.equal(agent.name, 'postgres-pro');
-    assert.equal(agent.category, 'database');
+    assert.equal(agent.category, 'data-api');
   });
 
   it('should return undefined for unknown agent', async () => {
@@ -327,9 +327,9 @@ describe('Registry module', () => {
 
   it('should get agents by category', async () => {
     const { getCategory } = await import('../src/registry.mjs');
-    const agents = getCategory('database');
+    const agents = getCategory('data-api');
     assert.ok(agents.length >= 3);
-    assert.ok(agents.every((a) => a.category === 'database'));
+    assert.ok(agents.every((a) => a.category === 'data-api'));
   });
 
   it('should resolve pack agents', async () => {
@@ -576,7 +576,7 @@ describe('Install: File I/O', () => {
       'Output should show the .opencode/agents path structure'
     );
     // Verify that when we manually create the expected directory, it works
-    const expectedDir = join(IO_TEMP, '.opencode', 'agents', 'database');
+    const expectedDir = join(IO_TEMP, '.opencode', 'agents', 'data-api');
     mkdirSync(expectedDir, { recursive: true });
     assert.ok(existsSync(expectedDir), 'Directory structure should be creatable');
     // Also verify parent directories exist
@@ -586,7 +586,7 @@ describe('Install: File I/O', () => {
 
   it('should skip existing files without --force', () => {
     // Pre-create the agent file with dummy content
-    const agentDir = join(IO_TEMP, '.opencode', 'agents', 'database');
+    const agentDir = join(IO_TEMP, '.opencode', 'agents', 'data-api');
     const agentFile = join(agentDir, 'postgres-pro.md');
     mkdirSync(agentDir, { recursive: true });
     writeFileSync(agentFile, 'DUMMY CONTENT — DO NOT OVERWRITE', 'utf-8');
@@ -605,7 +605,7 @@ describe('Install: File I/O', () => {
 
   it('should overwrite existing files with --force', () => {
     // Pre-create the agent file with dummy content
-    const agentDir = join(IO_TEMP, '.opencode', 'agents', 'database');
+    const agentDir = join(IO_TEMP, '.opencode', 'agents', 'data-api');
     const agentFile = join(agentDir, 'postgres-pro.md');
     mkdirSync(agentDir, { recursive: true });
     writeFileSync(agentFile, 'DUMMY CONTENT — SHOULD BE REPLACED', 'utf-8');

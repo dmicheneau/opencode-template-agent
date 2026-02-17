@@ -6,14 +6,9 @@ mode: primary
 model: github-copilot/claude-opus-4.6
 permission:
   write: allow
-  edit: ask
+  edit: allow
   bash:
-    "git status": allow
-    "git diff*": allow
-    "git log*": allow
-    "git add*": allow
-    "git commit*": ask
-    "*": ask
+    "*": allow
   task:
     "*": allow
 color: accent

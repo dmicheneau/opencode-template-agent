@@ -363,16 +363,16 @@ class TestGetOpencodeCategory(unittest.TestCase):
         self.assertEqual(_get_opencode_category("blockchain-web3"), "security")
 
     def test_database(self):
-        """Verifie le mapping database -> database."""
-        self.assertEqual(_get_opencode_category("database"), "database")
+        """Verifie le mapping database -> data-api."""
+        self.assertEqual(_get_opencode_category("database"), "data-api")
 
     def test_web_tools(self):
         """Verifie le mapping web-tools -> web."""
         self.assertEqual(_get_opencode_category("web-tools"), "web")
 
     def test_api_graphql(self):
-        """Verifie le mapping api-graphql -> api."""
-        self.assertEqual(_get_opencode_category("api-graphql"), "api")
+        """Verifie le mapping api-graphql -> data-api."""
+        self.assertEqual(_get_opencode_category("api-graphql"), "data-api")
 
     def test_documentation(self):
         """Verifie le mapping documentation -> docs."""
@@ -383,8 +383,8 @@ class TestGetOpencodeCategory(unittest.TestCase):
         self.assertEqual(_get_opencode_category("business-marketing"), "business")
 
     def test_development_team(self):
-        """Verifie le mapping development-team -> team."""
-        self.assertEqual(_get_opencode_category("development-team"), "team")
+        """Verifie le mapping development-team -> web."""
+        self.assertEqual(_get_opencode_category("development-team"), "web")
 
     def test_expert_advisors(self):
         """Verifie le mapping expert-advisors -> devtools."""
@@ -538,7 +538,7 @@ class TestNewCategoryMappings(unittest.TestCase):
             "git": "devtools",
             "performance-testing": "devtools",
             "ui-analysis": "web",
-            "deep-research-team": "team",
+            "deep-research-team": "web",
             "ffmpeg-clip-team": "media",
             "obsidian-ops-team": "specialist",
             "ocr-extraction-team": "specialist",

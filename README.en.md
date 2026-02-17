@@ -99,20 +99,18 @@ npx github:dmicheneau/opencode-template-agent search "machine learning"
 
 56 agents — 4 primary (`Tab` in OpenCode) + 52 subagents (`@category/name`).
 
-| Category | # | Agents |
-|----------|---|--------|
-| 💻 `languages` | 10 | typescript-pro, python-pro, golang-pro, rust-pro, java-architect, cpp-pro, php-pro, kotlin-specialist, csharp-developer, rails-expert |
-| ⚙️ `devops` | 9 | cloud-architect ⭐, devops-engineer ⭐, docker-specialist, kubernetes-specialist, terraform-specialist, aws-specialist, linux-admin, ci-cd-engineer, platform-engineer |
-| 🤖 `ai` | 6 | ai-engineer, data-scientist, ml-engineer, llm-architect, prompt-engineer, search-specialist |
-| 🛠️ `devtools` | 5 | code-reviewer, debugger, performance-engineer, refactoring-specialist, test-automator |
-| 👥 `team` | 5 | episode-orchestrator ⭐, fullstack-developer ⭐, mobile-developer, ui-designer, screenshot-ui-analyzer |
-| 🔌 `mcp` | 4 | mcp-protocol-specialist, mcp-server-architect, mcp-developer, mcp-security-auditor |
-| 📊 `business` | 4 | product-manager, project-manager, scrum-master, prd |
-| 🗄️ `database` | 3 | database-architect, postgres-pro, redis-specialist |
-| 📝 `docs` | 3 | api-documenter, documentation-engineer, technical-writer |
-| 🔒 `security` | 3 | penetration-tester, security-auditor, smart-contract-auditor |
-| 🔌 `api` | 2 | api-architect, graphql-architect |
-| 🌐 `web` | 2 | expert-nextjs-developer, expert-react-frontend-engineer |
+| Category | Agents | Description |
+|----------|--------|-------------|
+| 💻 Languages | 10 | TypeScript, Python, Go, Rust, Java, C#, PHP, Kotlin, C++, Rails |
+| 🤖 AI | 6 | AI engineering, data science, ML, LLM, prompts, research |
+| 🌐 Web | 6 | React, Next.js, fullstack, mobile, UI design, UI analysis |
+| 🗄️ Data & API | 5 | API architecture, GraphQL, databases, PostgreSQL, Redis |
+| ⚙️ DevOps | 9 | Docker, Kubernetes, Terraform, AWS, CI/CD, Linux, platform |
+| 🛠️ DevTools | 6 | Code review, debugging, performance, refactoring, testing, orchestration |
+| 🔒 Security | 3 | Security audit, penetration testing, smart contracts |
+| 🔌 MCP | 4 | MCP protocol, servers, development, security audit |
+| 📊 Business | 4 | Product management, project management, PRD, Scrum |
+| 📝 Docs | 3 | Technical documentation, API docs, writing |
 
 ⭐ = primary agent
 
@@ -148,22 +146,20 @@ opencode-template-agent/
 │       ├── renderer.mjs     # Layout + formatting
 │       ├── input.mjs        # User input handling
 │       └── ansi.mjs         # ANSI escape sequences
-├── manifest.json            # 56 agents, 12 categories, 9 packs
+├── manifest.json            # 56 agents, 10 categories, 9 packs
 ├── install.sh               # Bash install script
 ├── .opencode/agents/        # Agent files (.md)
 │   ├── *.md                 # 4 primary agents
 │   ├── languages/           # 10 agents
-│   ├── devops/              # 7 subagents
 │   ├── ai/                  # 6 agents
-│   ├── devtools/            # 5 agents
-│   ├── team/                # 3 subagents
+│   ├── web/                 # 6 agents
+│   ├── data-api/            # 5 agents
+│   ├── devops/              # 9 agents
+│   ├── devtools/            # 6 agents
+│   ├── security/            # 3 agents
 │   ├── mcp/                 # 4 agents
 │   ├── business/            # 4 agents
-│   ├── database/            # 3 agents
-│   ├── docs/                # 3 agents
-│   ├── security/            # 3 agents
-│   ├── api/                 # 2 agents
-│   └── web/                 # 2 agents
+│   └── docs/                # 3 agents
 └── tests/
 ```
 
