@@ -1,0 +1,697 @@
+# =============================================================================
+# sync-agents.yml — Automated agent sync from davila7/claude-code-templates
+# =============================================================================
+#
+# This workflow fetches agent definitions from the upstream source repository,
+# converts them to OpenCode format, validates the result, and opens a PR for
+# human review. It never pushes directly to main.
+#
+# Design decisions documented at the bottom of this file.
+# =============================================================================
+
+name: Sync Agents
+
+on:
+  # Weekly on Monday at 06:00 UTC — gives a full business week for review
+  schedule:
+    - cron: "0 6 * * 1"
+
+  # Manual trigger with configurable options
+  workflow_dispatch:
+    inputs:
+      tier:
+        description: "Agent tier to sync"
+        required: false
+        default: "core"
+        type: choice
+        options:
+          - core
+          - extended
+          - all
+      force:
+        description: "Force overwrite all agent files (ignore skip-if-exists)"
+        required: false
+        default: true
+        type: boolean
+      dry_run:
+        description: "Preview changes without creating a PR"
+        required: false
+        default: false
+        type: boolean
+
+# ---------------------------------------------------------------------------
+# Permissions — least privilege principle
+# ---------------------------------------------------------------------------
+permissions:
+  contents: write        # Push sync branch
+  pull-requests: write   # Create/update PR
+
+# ---------------------------------------------------------------------------
+# Concurrency — only one sync at a time, cancel stale runs
+# ---------------------------------------------------------------------------
+concurrency:
+  group: sync-agents
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    # Skip schedule runs on forks to avoid wasted minutes
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.repository == 'dmicheneau/opencode-template-agent'
+
+    env:
+      # Authenticated API gives 5000 req/hr vs 60 for anonymous
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      SYNC_BRANCH: sync/agents-latest
+      # Resolve inputs with defaults for scheduled runs
+      SYNC_TIER: ${{ inputs.tier || 'core' }}
+      SYNC_FORCE: ${{ inputs.force != false && 'true' || 'false' }}
+      SYNC_DRY_RUN: ${{ inputs.dry_run == true && 'true' || 'false' }}
+
+    steps:
+      # -----------------------------------------------------------------------
+      # 1. Checkout with full history (needed for branch operations)
+      # -----------------------------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          ref: main
+          fetch-depth: 0
+
+      # -----------------------------------------------------------------------
+      # 2. Setup Python (stdlib-only script, no pip install needed)
+      # -----------------------------------------------------------------------
+      - name: Setup Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.12"
+
+      # -----------------------------------------------------------------------
+      # 3. Snapshot current state (for change detection later)
+      # -----------------------------------------------------------------------
+      - name: Snapshot pre-sync state
+        run: |
+          # Capture the current root manifest agent names for new-agent detection
+          python3 -c "
+          import json
+          with open('manifest.json') as f:
+              m = json.load(f)
+          names = sorted(a['name'] for a in m.get('agents', []))
+          with open('/tmp/pre-sync-agents.txt', 'w') as f:
+              f.write('\n'.join(names))
+          print(f'Pre-sync: {len(names)} agents in root manifest')
+          "
+
+      # -----------------------------------------------------------------------
+      # 4. Run the sync script
+      # -----------------------------------------------------------------------
+      - name: Sync agents from source repository
+        run: |
+          echo "::group::Sync configuration"
+          echo "  Tier:  $SYNC_TIER"
+          echo "  Force: $SYNC_FORCE"
+          echo "  Dry run: $SYNC_DRY_RUN"
+          echo "::endgroup::"
+
+          # Build command arguments
+          SYNC_ARGS="--tier $SYNC_TIER --verbose"
+
+          if [ "$SYNC_FORCE" = "true" ]; then
+            SYNC_ARGS="$SYNC_ARGS --force"
+          fi
+
+          echo "::group::Running sync-agents.py"
+          python3 scripts/sync-agents.py $SYNC_ARGS
+          echo "::endgroup::"
+
+      # -----------------------------------------------------------------------
+      # 5. Detect changes — exit early if nothing changed
+      # -----------------------------------------------------------------------
+      - name: Detect changes
+        id: changes
+        run: |
+          # Stage all potential changes for accurate diff
+          git add -A .opencode/agents/
+
+          # Check if there are any staged changes in the agents directory
+          if git diff --cached --quiet .opencode/agents/; then
+            echo "No changes detected in agent files."
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "has_changes=true" >> "$GITHUB_OUTPUT"
+
+          # Classify changes: new files vs modified files
+          echo "::group::Change summary"
+
+          NEW_FILES=$(git diff --cached --name-only --diff-filter=A .opencode/agents/ | grep '\.md$' || true)
+          MODIFIED_FILES=$(git diff --cached --name-only --diff-filter=M .opencode/agents/ | grep '\.md$' || true)
+          DELETED_FILES=$(git diff --cached --name-only --diff-filter=D .opencode/agents/ | grep '\.md$' || true)
+
+          NEW_COUNT=$(echo "$NEW_FILES" | grep -c '.' || echo 0)
+          MOD_COUNT=$(echo "$MODIFIED_FILES" | grep -c '.' || echo 0)
+          DEL_COUNT=$(echo "$DELETED_FILES" | grep -c '.' || echo 0)
+
+          echo "new_count=$NEW_COUNT" >> "$GITHUB_OUTPUT"
+          echo "modified_count=$MOD_COUNT" >> "$GITHUB_OUTPUT"
+          echo "deleted_count=$DEL_COUNT" >> "$GITHUB_OUTPUT"
+
+          # Save file lists for PR description
+          echo "$NEW_FILES" > /tmp/new-agents.txt
+          echo "$MODIFIED_FILES" > /tmp/modified-agents.txt
+          echo "$DELETED_FILES" > /tmp/deleted-agents.txt
+
+          echo "New:      $NEW_COUNT file(s)"
+          echo "Modified: $MOD_COUNT file(s)"
+          echo "Deleted:  $DEL_COUNT file(s)"
+          echo "::endgroup::"
+
+          # Unstage — we'll re-stage after manifest update
+          git reset HEAD .opencode/agents/
+
+      # -----------------------------------------------------------------------
+      # 6. Update root manifest.json with new agents
+      # -----------------------------------------------------------------------
+      - name: Update root manifest.json
+        if: steps.changes.outputs.has_changes == 'true'
+        run: |
+          python3 << 'PYEOF'
+          import json
+          import os
+          import re
+          import sys
+
+          # Load both manifests
+          with open("manifest.json", "r") as f:
+              root = json.load(f)
+
+          sync_manifest_path = ".opencode/agents/manifest.json"
+          if not os.path.exists(sync_manifest_path):
+              print("No sync manifest generated — skipping root manifest update")
+              sys.exit(0)
+
+          with open(sync_manifest_path, "r") as f:
+              sync = json.load(f)
+
+          # Build lookup of existing agents in root manifest
+          existing = {a["name"]: a for a in root.get("agents", [])}
+          sync_agents = {a["name"]: a for a in sync.get("agents", [])}
+
+          added = []
+          updated = []
+
+          for name, sa in sorted(sync_agents.items()):
+              if name not in existing:
+                  # New agent — add with minimal metadata and flag for review
+                  oc_cat = sa.get("opencode_category", sa.get("category", "uncategorized"))
+
+                  # Map path from sync manifest (which may differ from root convention)
+                  path = sa.get("path", f"{oc_cat}/{name}")
+
+                  # Determine mode
+                  mode = sa.get("mode", "subagent")
+
+                  # Generate a placeholder description from the agent name
+                  human_name = name.replace("-", " ").title()
+                  description = f"[NEEDS_REVIEW] {human_name} agent — auto-synced, needs description"
+
+                  # Determine root manifest category from opencode_category
+                  # Map sync categories to root manifest categories
+                  category_map = {
+                      "languages": "languages",
+                      "ai": "ai",
+                      "web": "web",
+                      "team": "web",
+                      "devops": "devops",
+                      "devtools": "devtools",
+                      "security": "security",
+                      "mcp": "mcp",
+                      "business": "business",
+                      "docs": "docs",
+                      "database": "data-api",
+                      "data-api": "data-api",
+                      "api": "data-api",
+                      "specialist": "devtools",
+                      "media": "devtools",
+                  }
+                  root_category = category_map.get(oc_cat, "devtools")
+
+                  new_entry = {
+                      "name": name,
+                      "category": root_category,
+                      "path": path,
+                      "mode": mode,
+                      "description": description,
+                      "source": "aitmpl",
+                      "tags": [],
+                  }
+                  root["agents"].append(new_entry)
+                  added.append(name)
+              else:
+                  # Existing agent — don't overwrite curated metadata in root manifest
+                  updated.append(name)
+
+          if added:
+              # Update agent count
+              root["agent_count"] = len(root["agents"])
+
+              # Sort agents by name for consistent diffs
+              root["agents"].sort(key=lambda a: a["name"])
+
+              with open("manifest.json", "w") as f:
+                  json.dump(root, f, indent=2, ensure_ascii=False)
+                  f.write("\n")
+
+              print(f"Root manifest updated: {len(added)} new agent(s) added")
+              for name in added:
+                  print(f"  + {name}")
+          else:
+              print("No new agents to add to root manifest")
+
+          # Write metadata for PR description
+          with open("/tmp/sync-metadata.json", "w") as f:
+              json.dump({
+                  "added": added,
+                  "updated": updated,
+                  "tier": os.environ.get("SYNC_TIER", "core"),
+                  "total_synced": len(sync_agents),
+              }, f)
+          PYEOF
+
+      # -----------------------------------------------------------------------
+      # 7. Validate — run the same checks as CI before creating the PR
+      # -----------------------------------------------------------------------
+      - name: Run test suite
+        if: steps.changes.outputs.has_changes == 'true' && env.SYNC_DRY_RUN != 'true'
+        run: python3 tests/run_tests.py
+
+      - name: Validate YAML frontmatter
+        if: steps.changes.outputs.has_changes == 'true' && env.SYNC_DRY_RUN != 'true'
+        run: |
+          python3 -c "
+          import sys, os, re
+
+          errors = []
+          agents_dir = '.opencode/agents'
+
+          for root, dirs, files in os.walk(agents_dir):
+              for fname in files:
+                  if not fname.endswith('.md'):
+                      continue
+                  path = os.path.join(root, fname)
+                  with open(path, 'r', encoding='utf-8') as f:
+                      content = f.read().strip()
+
+                  if not content.startswith('---'):
+                      errors.append(f'{path}: missing YAML frontmatter')
+                      continue
+
+                  end = content.find('\n---', 3)
+                  if end == -1:
+                      errors.append(f'{path}: missing closing --- in frontmatter')
+                      continue
+
+                  frontmatter = content[3:end].strip()
+                  if not frontmatter:
+                      errors.append(f'{path}: empty frontmatter')
+                      continue
+
+                  for i, line in enumerate(frontmatter.split('\n'), 1):
+                      if not line.strip():
+                          continue
+                      if line.startswith(' ') or line.startswith('\t'):
+                          continue
+                      if not re.match(r'^[\w][\w-]*\s*:', line):
+                          errors.append(f'{path}: line {i}: invalid key: {line!r}')
+
+          if errors:
+              print('Frontmatter validation errors:', file=sys.stderr)
+              for e in errors:
+                  print(f'  {e}', file=sys.stderr)
+              sys.exit(1)
+          else:
+              print(f'All agent files have valid YAML frontmatter.')
+          "
+
+      - name: Validate manifest.json
+        if: steps.changes.outputs.has_changes == 'true' && env.SYNC_DRY_RUN != 'true'
+        run: |
+          python3 -c "
+          import json, sys, os
+
+          with open('manifest.json', 'r') as f:
+              manifest = json.load(f)
+
+          errors = []
+          base = manifest.get('base_path', '.opencode/agents')
+
+          for agent in manifest.get('agents', []):
+              path = agent.get('path', '')
+              md_file = os.path.join(base, path + '.md')
+              if not os.path.isfile(md_file):
+                  errors.append(f'Missing file for agent \"{agent[\"name\"]}\": {md_file}')
+
+          if errors:
+              for e in errors:
+                  print(f'ERROR: {e}', file=sys.stderr)
+              sys.exit(1)
+          else:
+              print(f'All {len(manifest[\"agents\"])} agents in manifest.json have matching files.')
+          "
+
+      - name: Check for deprecated fields
+        if: steps.changes.outputs.has_changes == 'true' && env.SYNC_DRY_RUN != 'true'
+        run: |
+          found=0
+          while IFS= read -r -d '' f; do
+            frontmatter=$(sed -n '1,/^---$/!d; /^---$/d; p' "$f" | head -50)
+            if echo "$frontmatter" | grep -qP '^tools\s*:'; then
+              echo "ERROR: $f contains deprecated 'tools:' field"
+              found=1
+            fi
+          done < <(find .opencode/agents -name '*.md' -print0)
+          if [ "$found" -eq 1 ]; then
+            exit 1
+          fi
+          echo "No deprecated fields found."
+
+      # -----------------------------------------------------------------------
+      # 8. Dry-run summary (if requested, stop here)
+      # -----------------------------------------------------------------------
+      - name: Dry-run summary
+        if: steps.changes.outputs.has_changes == 'true' && env.SYNC_DRY_RUN == 'true'
+        run: |
+          echo "============================================"
+          echo "  DRY RUN — No PR will be created"
+          echo "============================================"
+          echo ""
+          echo "Changes detected:"
+          echo "  New:      ${{ steps.changes.outputs.new_count }} file(s)"
+          echo "  Modified: ${{ steps.changes.outputs.modified_count }} file(s)"
+          echo "  Deleted:  ${{ steps.changes.outputs.deleted_count }} file(s)"
+          echo ""
+          echo "Files that would be included:"
+          git status --short .opencode/agents/ manifest.json
+
+      # -----------------------------------------------------------------------
+      # 9. Create branch, commit, and push
+      # -----------------------------------------------------------------------
+      - name: Configure git identity
+        if: steps.changes.outputs.has_changes == 'true' && env.SYNC_DRY_RUN != 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Create sync branch and commit
+        if: steps.changes.outputs.has_changes == 'true' && env.SYNC_DRY_RUN != 'true'
+        run: |
+          # Delete local branch if it exists from a previous run
+          git branch -D "$SYNC_BRANCH" 2>/dev/null || true
+
+          # Create the sync branch from current main
+          git checkout -b "$SYNC_BRANCH"
+
+          # Stage agent files and manifest
+          git add .opencode/agents/
+          git add manifest.json
+
+          # Build commit message
+          NEW="${{ steps.changes.outputs.new_count }}"
+          MOD="${{ steps.changes.outputs.modified_count }}"
+          DEL="${{ steps.changes.outputs.deleted_count }}"
+
+          COMMIT_MSG="sync: update agents from davila7/claude-code-templates
+
+          Tier: ${SYNC_TIER}
+          New: ${NEW} | Updated: ${MOD} | Deleted: ${DEL}
+          Source: davila7/claude-code-templates (main)"
+
+          git commit -m "$COMMIT_MSG"
+
+      - name: Push sync branch
+        if: steps.changes.outputs.has_changes == 'true' && env.SYNC_DRY_RUN != 'true'
+        run: |
+          # Force-push to handle the case where a previous sync branch exists
+          git push --force origin "$SYNC_BRANCH"
+
+      # -----------------------------------------------------------------------
+      # 10. Create or update the Pull Request
+      # -----------------------------------------------------------------------
+      - name: Build PR description
+        if: steps.changes.outputs.has_changes == 'true' && env.SYNC_DRY_RUN != 'true'
+        id: pr_body
+        run: |
+          python3 << 'PYEOF'
+          import json
+          import os
+          from datetime import datetime, timezone
+
+          tier = os.environ.get("SYNC_TIER", "core")
+          new_count = os.environ.get("NEW_COUNT", "0")
+          mod_count = os.environ.get("MOD_COUNT", "0")
+          del_count = os.environ.get("DEL_COUNT", "0")
+          today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+          # Load sync metadata if available
+          metadata = {}
+          try:
+              with open("/tmp/sync-metadata.json") as f:
+                  metadata = json.load(f)
+          except (FileNotFoundError, json.JSONDecodeError):
+              pass
+
+          added_agents = metadata.get("added", [])
+          total_synced = metadata.get("total_synced", 0)
+
+          # Load file change lists
+          def read_list(path):
+              try:
+                  with open(path) as f:
+                      return [l.strip() for l in f if l.strip()]
+              except FileNotFoundError:
+                  return []
+
+          new_files = read_list("/tmp/new-agents.txt")
+          modified_files = read_list("/tmp/modified-agents.txt")
+          deleted_files = read_list("/tmp/deleted-agents.txt")
+
+          # Build the PR body
+          lines = []
+          lines.append("## Agent Sync Report")
+          lines.append("")
+          lines.append(f"**Source**: `davila7/claude-code-templates` (`main`)")
+          lines.append(f"**Tier**: `{tier}`")
+          lines.append(f"**Date**: {today}")
+          lines.append(f"**Agents synced**: {total_synced}")
+          lines.append("")
+          lines.append("### Summary")
+          lines.append("")
+          lines.append(f"| Metric | Count |")
+          lines.append(f"|--------|-------|")
+          lines.append(f"| New agent files | {len(new_files)} |")
+          lines.append(f"| Updated agent files | {len(modified_files)} |")
+          lines.append(f"| Deleted agent files | {len(deleted_files)} |")
+          lines.append("")
+
+          # New agents warning section
+          if added_agents:
+              lines.append("### :warning: New Agents — Permission Review Required")
+              lines.append("")
+              lines.append("The following agents were added to `manifest.json` with")
+              lines.append("**placeholder metadata** (`[NEEDS_REVIEW]`) and **no tags**.")
+              lines.append("Discovered agents receive `UNKNOWN_PERMISSIONS` (all capabilities denied).")
+              lines.append("")
+              lines.append("**Before merging**, please:")
+              lines.append("1. Review and set appropriate permissions in each `.md` frontmatter")
+              lines.append("2. Write a proper description in `manifest.json`")
+              lines.append("3. Add relevant tags in `manifest.json`")
+              lines.append("4. Verify the category assignment is correct")
+              lines.append("")
+              lines.append("| Agent | Category | Path |")
+              lines.append("|-------|----------|------|")
+              try:
+                  with open("manifest.json") as f:
+                      manifest = json.load(f)
+                  agent_lookup = {a["name"]: a for a in manifest.get("agents", [])}
+                  for name in sorted(added_agents):
+                      a = agent_lookup.get(name, {})
+                      cat = a.get("category", "?")
+                      path = a.get("path", "?")
+                      lines.append(f"| `{name}` | `{cat}` | `{path}` |")
+              except Exception:
+                  for name in sorted(added_agents):
+                      lines.append(f"| `{name}` | — | — |")
+              lines.append("")
+
+          # Modified files section
+          if modified_files:
+              lines.append("### Updated Agents")
+              lines.append("")
+              lines.append("These existing agents have upstream changes. Review the diff")
+              lines.append("for any semantic prompt modifications.")
+              lines.append("")
+              lines.append("<details>")
+              lines.append(f"<summary>{len(modified_files)} file(s) updated</summary>")
+              lines.append("")
+              for f in sorted(modified_files):
+                  # Extract agent name from path like .opencode/agents/ai/prompt-engineer.md
+                  agent_name = f.rsplit("/", 1)[-1].replace(".md", "")
+                  lines.append(f"- `{agent_name}` — `{f}`")
+              lines.append("")
+              lines.append("</details>")
+              lines.append("")
+
+          # New files section (different from "added to manifest" — these are new .md files)
+          if new_files and not added_agents:
+              lines.append("### New Agent Files")
+              lines.append("")
+              lines.append("<details>")
+              lines.append(f"<summary>{len(new_files)} file(s) added</summary>")
+              lines.append("")
+              for f in sorted(new_files):
+                  lines.append(f"- `{f}`")
+              lines.append("")
+              lines.append("</details>")
+              lines.append("")
+
+          # Deleted files section
+          if deleted_files:
+              lines.append("### Deleted Agents")
+              lines.append("")
+              lines.append("<details>")
+              lines.append(f"<summary>{len(deleted_files)} file(s) removed</summary>")
+              lines.append("")
+              for f in sorted(deleted_files):
+                  lines.append(f"- `{f}`")
+              lines.append("")
+              lines.append("</details>")
+              lines.append("")
+
+          # Validation section
+          lines.append("### Validation")
+          lines.append("")
+          lines.append("- [x] `sync-agents.py` completed successfully")
+          lines.append("- [x] Test suite passed (`tests/run_tests.py`)")
+          lines.append("- [x] YAML frontmatter validated")
+          lines.append("- [x] `manifest.json` validated against agent files")
+          lines.append("- [x] No deprecated `tools:` field detected")
+          lines.append("")
+          lines.append("---")
+          lines.append("")
+          lines.append("*This PR was automatically generated by the")
+          lines.append("[sync-agents workflow](../actions/workflows/sync-agents.yml).*")
+
+          body = "\n".join(lines)
+
+          # Write to file for gh pr create
+          with open("/tmp/pr-body.md", "w") as f:
+              f.write(body)
+
+          print("PR description generated successfully")
+          PYEOF
+        env:
+          NEW_COUNT: ${{ steps.changes.outputs.new_count }}
+          MOD_COUNT: ${{ steps.changes.outputs.modified_count }}
+          DEL_COUNT: ${{ steps.changes.outputs.deleted_count }}
+
+      - name: Create or update Pull Request
+        if: steps.changes.outputs.has_changes == 'true' && env.SYNC_DRY_RUN != 'true'
+        run: |
+          # Determine PR title
+          NEW="${{ steps.changes.outputs.new_count }}"
+          MOD="${{ steps.changes.outputs.modified_count }}"
+          TODAY=$(date -u +%Y-%m-%d)
+          PR_TITLE="sync: update agents from upstream (${TODAY})"
+
+          # Check if a PR already exists for this branch
+          EXISTING_PR=$(gh pr list --head "$SYNC_BRANCH" --state open --json number --jq '.[0].number' 2>/dev/null || true)
+
+          if [ -n "$EXISTING_PR" ] && [ "$EXISTING_PR" != "null" ]; then
+            echo "Updating existing PR #${EXISTING_PR}"
+            gh pr edit "$EXISTING_PR" \
+              --title "$PR_TITLE" \
+              --body-file /tmp/pr-body.md
+            echo "PR updated: https://github.com/${{ github.repository }}/pull/${EXISTING_PR}"
+          else
+            echo "Creating new PR"
+            # Determine labels based on content
+            LABELS="sync,automated"
+            if [ "$NEW" -gt 0 ]; then
+              LABELS="${LABELS},needs-review"
+            fi
+
+            gh pr create \
+              --base main \
+              --head "$SYNC_BRANCH" \
+              --title "$PR_TITLE" \
+              --body-file /tmp/pr-body.md \
+              --label "$LABELS" 2>/dev/null || \
+            gh pr create \
+              --base main \
+              --head "$SYNC_BRANCH" \
+              --title "$PR_TITLE" \
+              --body-file /tmp/pr-body.md
+
+            echo "PR created successfully"
+          fi
+
+# =============================================================================
+# DESIGN DECISIONS
+# =============================================================================
+#
+# 1. SEPARATE WORKFLOW (not extending ci.yml)
+#    The CI workflow validates on push/PR. Agent sync is a different concern:
+#    it runs on a schedule, interacts with an external API, and creates PRs.
+#    Keeping them separate follows single-responsibility and makes each
+#    workflow easier to reason about independently.
+#
+# 2. BRANCH NAME: sync/agents-latest (fixed)
+#    A fixed branch name means that if the workflow runs multiple times
+#    before the PR is merged, it force-pushes to the same branch and
+#    updates the existing PR. This is more idempotent than date-based
+#    branch names which would create duplicate PRs.
+#
+# 3. TWO MANIFESTS
+#    - .opencode/agents/manifest.json: auto-generated by sync-agents.py
+#      with permission data, source paths, and sync status.
+#    - manifest.json (root): the project's curated registry with human-
+#      written descriptions, tags, packs, and category metadata.
+#    The workflow bridges this gap by adding new agents to the root
+#    manifest with placeholder metadata and [NEEDS_REVIEW] markers.
+#
+# 4. TIER: core by default
+#    Core agents (~43) are curated and have proper permission mappings.
+#    Extended/all tiers include agents that get UNKNOWN_PERMISSIONS
+#    (all capabilities denied) and require manual review. The workflow
+#    defaults to core for safety, with manual override via dispatch.
+#
+# 5. --force MODE IN CI
+#    The incremental cache (.sync-cache.json) is designed for local dev
+#    and is gitignored. In CI, we always run fresh to ensure we catch
+#    all upstream changes. --force overwrites existing files so git diff
+#    shows the real delta.
+#
+# 6. ALL CHANGES NEED REVIEW (no auto-merge)
+#    Even updates to existing agents can contain semantic changes to
+#    prompts that affect behavior. All sync PRs require human review.
+#    New agents are explicitly flagged with UNKNOWN_PERMISSIONS.
+#
+# 7. CATEGORY ASSIGNMENT FOR NEW AGENTS
+#    sync-agents.py already has CATEGORY_MAPPING that maps source
+#    categories to OpenCode subdirectories. The root manifest update
+#    step maps those to the project's category taxonomy. Unknown
+#    categories fall back to "devtools" as a safe default.
+#
+# 8. SECURITY
+#    - GITHUB_TOKEN is the auto-provisioned token (not a PAT)
+#    - Minimal permissions (contents:write, pull-requests:write)
+#    - SHA-pinned actions matching the existing ci.yml
+#    - Fork detection prevents wasted minutes on schedule
+#    - sync-agents.py has built-in path traversal protection
+#    - New agents get UNKNOWN_PERMISSIONS (all capabilities denied)
+# =============================================================================
