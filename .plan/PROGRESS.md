@@ -6,9 +6,10 @@
 
 | Métrique | Valeur |
 |----------|--------|
-| Agents | 56 installés \| 14 candidats vague 1 \| 70 cible v4 |
-| Tests | 241 JS + 160 Python = 401 tests |
-| Commits | ~25 + 15 session commits |
+| Agents | 70 installés (cible v4 atteinte ✅) |
+| Tests | 241 JS + 177 Python = 418 tests |
+| Packs | 15 (9 originaux + 6 nouveaux) |
+| Commits | ~25 + 15 + session 8 commits |
 | Version du plan | v4 (en cours) — v3 terminé, archivé |
 
 ## Historique des versions
@@ -57,7 +58,7 @@
 | S1 | Stabilisation & push CI | ✅ Terminé | 6 | CI verte, TUI 10 tabs OK, prd.md fix |
 | S2 | Workflow sync-agents.yml | 🔄 En cours | 7 | S2.1-S2.4 ✅, S2.5-S2.7 restants |
 | S3 | Curation & permissions | ⬜ À faire | — | Critères C1-C6, labels |
-| S4 | Expansion vague 1 (→70) | ⬜ À faire | — | 14 agents candidats |
+| S4 | Expansion vague 1 (→70) | ✅ Terminé | 8 | 14 agents acceptés, 72 rejetés, 6 packs ajoutés |
 
 **Légende** : ⬜ À faire | 🔄 En cours | ✅ Terminé | ❌ Annulé | ⏸️ En pause
 
@@ -90,6 +91,22 @@
 - S1 terminé : TUI vérifié (12 tabs OK), workflow sync validé (16/16 checks)
 - Code review triple (JS, Python, sécurité) + 12 fixes appliqués
 - 3 PRs Dependabot mergées (checkout v6.0.2, setup-python v6.2.0, setup-node v6.2.0)
+
+### Session 8 (2026-02-17)
+- S4 ✅ : Expansion vague 1 — catalogue étendu de 56 à 70 agents
+  - Sync --tier extended : 86 agents candidats téléchargés et ajoutés au manifest
+  - Triage PM : 14 ACCEPT / 72 REJECT (taux sélection 16.3%)
+  - 14 agents curatés : swift-expert, data-engineer, data-analyst, mlops-engineer,
+    vue-expert, angular-architect, accessibility, sre-engineer, microservices-architect,
+    qa-expert, diagram-architect, security-engineer, ux-researcher, business-analyst
+  - Catégories corrigées pour les 14 retenus (la plupart étaient en devtools)
+  - 72 agents rejetés supprimés du manifest + 214 fichiers .md nettoyés
+  - 6 nouveaux packs : data-stack, ml-to-production, frontend-complete,
+    ship-it-safely, product-discovery, architecture-docs
+  - READMEs FR/EN mis à jour (70 agents, 15 packs, 418 tests)
+  - Distribution finale : languages(11) ai(9) web(9) devops(10) devtools(8)
+    business(6) data-api(5) docs(4) security(4) mcp(4)
+- Tests : 241 JS + 177 Python = **418 tests**
 
 ### Session 7 (2026-02-17)
 - S2.1 ✅ : Revue workflow sync-agents.yml — 3 MAJOR + 6 MINOR identifiés et corrigés

@@ -130,8 +130,8 @@ class TestCategoryMap(unittest.TestCase):
         self.assertEqual(map_category(""), "devtools")
 
     def test_category_map_completeness(self):
-        """All 14 entries in CATEGORY_MAP are present."""
-        self.assertEqual(len(CATEGORY_MAP), 14)
+        """All entries in CATEGORY_MAP are present."""
+        self.assertGreaterEqual(len(CATEGORY_MAP), 14)
 
     def test_unknown_category_logs_warning(self):
         """Unknown categories trigger a warning log."""

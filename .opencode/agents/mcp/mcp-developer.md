@@ -6,9 +6,9 @@ description: >
 mode: subagent
 permission:
   write: allow
-  edit: allow
+  edit: ask
   bash:
-    "*": allow
+    "*": ask
   task:
     "*": allow
 ---

@@ -3,15 +3,15 @@
 > 🇫🇷 [Version française](README.md)
 
 [![CI](https://github.com/dmicheneau/opencode-template-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/dmicheneau/opencode-template-agent/actions/workflows/ci.yml)
-![Agents](https://img.shields.io/badge/agents-56-blue)
-![Tests](https://img.shields.io/badge/tests-401%20passing-brightgreen)
+![Agents](https://img.shields.io/badge/agents-70-blue)
+![Tests](https://img.shields.io/badge/tests-418%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Node](https://img.shields.io/badge/node-18%2B-green)
 ![npm](https://img.shields.io/npm/v/opencode-agents?label=npm&color=cb3837)
 
-Curated registry of **56 AI agents** for [OpenCode](https://opencode.ai), distributed via a zero-dependency CLI and interactive TUI. Agents are `.md` files containing system prompts that configure AI assistants for specific roles.
+Curated registry of **70 AI agents** for [OpenCode](https://opencode.ai), distributed via a zero-dependency CLI and interactive TUI. Agents are `.md` files containing system prompts that configure AI assistants for specific roles.
 
-Source: [aitmpl.com](https://www.aitmpl.com/agents) (413+ agents available) + 8 custom agents.
+Source: [aitmpl.com](https://www.aitmpl.com/agents) (413+ agents available) + 4 custom agents.
 
 ## 🚀 Quickstart
 
@@ -97,26 +97,26 @@ npx github:dmicheneau/opencode-template-agent search "machine learning"
 
 ## 📋 Available agents
 
-56 agents — 4 primary (`Tab` in OpenCode) + 52 subagents (`@category/name`).
+70 agents — 4 primary (`Tab` in OpenCode) + 66 subagents (`@category/name`).
 
 | Category | Agents | Description |
 |----------|--------|-------------|
-| 💻 Languages | 10 | TypeScript, Python, Go, Rust, Java, C#, PHP, Kotlin, C++, Rails |
-| 🤖 AI | 6 | AI engineering, data science, ML, LLM, prompts, research |
-| 🌐 Web | 6 | React, Next.js, fullstack, mobile, UI design, UI analysis |
+| 💻 Languages | 11 | TypeScript, Python, Go, Rust, Java, C#, PHP, Kotlin, C++, Rails, Swift |
+| 🤖 AI | 9 | AI engineering, data science, ML, MLOps, LLM, prompts, research, data engineering, data analysis |
+| 🌐 Web | 9 | React, Next.js, Vue, Angular, fullstack, mobile, UI design, UI analysis, accessibility |
 | 🗄️ Data & API | 5 | API architecture, GraphQL, databases, PostgreSQL, Redis |
-| ⚙️ DevOps | 9 | Docker, Kubernetes, Terraform, AWS, CI/CD, Linux, platform |
-| 🛠️ DevTools | 6 | Code review, debugging, performance, refactoring, testing, orchestration |
-| 🔒 Security | 3 | Security audit, penetration testing, smart contracts |
+| ⚙️ DevOps | 10 | Docker, Kubernetes, Terraform, AWS, CI/CD, Linux, platform, SRE |
+| 🛠️ DevTools | 8 | Code review, debugging, performance, refactoring, testing, orchestration, microservices, QA |
+| 🔒 Security | 4 | Security audit, penetration testing, smart contracts, security engineering |
 | 🔌 MCP | 4 | MCP protocol, servers, development, security audit |
-| 📊 Business | 4 | Product management, project management, PRD, Scrum |
-| 📝 Docs | 3 | Technical documentation, API docs, writing |
+| 📊 Business | 6 | Product management, project management, PRD, Scrum, UX research, business analysis |
+| 📝 Docs | 4 | Technical documentation, API docs, writing, diagrams |
 
 ⭐ = primary agent
 
 ## 🎒 Packs
 
-9 predefined packs for installing coherent groups of agents.
+15 predefined packs for installing coherent groups of agents.
 
 | Pack | Agents | Description |
 |------|--------|-------------|
@@ -129,6 +129,12 @@ npx github:dmicheneau/opencode-template-agent search "machine learning"
 | `mcp` | mcp-protocol-specialist, mcp-server-architect, mcp-developer, mcp-security-auditor | MCP servers |
 | `quality` | code-reviewer, test-automator, debugger, performance-engineer, refactoring-specialist | Code quality |
 | `startup` | fullstack-developer, typescript-pro, expert-nextjs-developer, postgres-pro, docker-specialist, product-manager, ui-designer, test-automator | Startup kit |
+| `data-stack` | data-engineer, data-analyst, data-scientist, database-architect, postgres-pro | Data stack |
+| `ml-to-production` | data-scientist, ml-engineer, mlops-engineer, llm-architect, docker-specialist, kubernetes-specialist | ML to production |
+| `frontend-complete` | expert-react-frontend-engineer, expert-nextjs-developer, vue-expert, angular-architect, accessibility, ui-designer | Complete frontend |
+| `ship-it-safely` | ci-cd-engineer, docker-specialist, kubernetes-specialist, sre-engineer, security-engineer, qa-expert | Safe deployment |
+| `product-discovery` | product-manager, ux-researcher, business-analyst, prd, ui-designer | Product discovery |
+| `architecture-docs` | microservices-architect, api-architect, database-architect, diagram-architect, documentation-engineer | Architecture & docs |
 
 ## 🔄 Automatic Sync
 
@@ -182,26 +188,26 @@ opencode-template-agent/
 │   ├── sync-agents.py       # Upstream sync pipeline
 │   ├── update-manifest.py   # Sync manifest → main manifest merge
 │   └── sync_common.py       # Shared HTTP utilities
-├── manifest.json            # 56 agents, 10 categories, 9 packs
+├── manifest.json            # 70 agents, 10 categories, 15 packs
 ├── install.sh               # Bash install script
 ├── .opencode/agents/        # Agent files (.md)
 │   ├── *.md                 # 4 primary agents
-│   ├── languages/           # 10 agents
-│   ├── ai/                  # 6 agents
-│   ├── web/                 # 6 agents
+│   ├── languages/           # 11 agents
+│   ├── ai/                  # 9 agents
+│   ├── web/                 # 9 agents
 │   ├── data-api/            # 5 agents
-│   ├── devops/              # 9 agents
-│   ├── devtools/            # 6 agents
-│   ├── security/            # 3 agents
+│   ├── devops/              # 10 agents
+│   ├── devtools/            # 8 agents
+│   ├── security/            # 4 agents
 │   ├── mcp/                 # 4 agents
-│   ├── business/            # 4 agents
-│   └── docs/                # 3 agents
+│   ├── business/            # 6 agents
+│   └── docs/                # 4 agents
 └── tests/
 ```
 
 ## 🧪 Tests
 
-**401 tests** (241 JS + 160 Python).
+**418 tests** (241 JS + 177 Python).
 
 ```bash
 # All JS tests (CLI + TUI)

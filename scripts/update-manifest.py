@@ -92,12 +92,39 @@ CATEGORY_MAP: Dict[str, str] = {
     "mcp": "mcp",
     "business": "business",
     "docs": "docs",
-    # Remapped categories
-    "team": "web",
+    "data-api": "data-api",
+    # Remapped categories — upstream source categories from aitmpl
+    "programming-languages": "languages",
+    "development-tools": "devtools",
+    "data-ai": "ai",
+    "ai-specialists": "ai",
+    "devops-infrastructure": "devops",
+    "blockchain-web3": "security",  # smart contracts & audit focus
     "database": "data-api",
+    "web-tools": "web",
+    "api-graphql": "data-api",
     "api": "data-api",
+    "documentation": "docs",
+    "business-marketing": "business",
+    "development-team": "web",  # full-stack team workflows
+    "team": "web",  # multi-agent team patterns
+    "expert-advisors": "devtools",
     "specialist": "devtools",
-    "media": "devtools",
+    "media": "devtools",  # A/V processing tools
+    # Tier 2 source categories
+    "game-development": "devtools",  # game engines & tooling
+    "mcp-dev-team": "mcp",
+    "modernization": "devops",
+    "realtime": "web",
+    "finance": "business",
+    "git": "devtools",
+    "performance-testing": "devtools",
+    "ui-analysis": "web",
+    "deep-research-team": "web",  # web research & scraping workflows
+    "ffmpeg-clip-team": "devtools",
+    "obsidian-ops-team": "devtools",
+    "ocr-extraction-team": "devtools",
+    "podcast-creator-team": "devtools",
 }
 """Maps upstream sync categories to our curated category names."""
 

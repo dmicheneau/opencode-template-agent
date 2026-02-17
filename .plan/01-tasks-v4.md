@@ -55,21 +55,18 @@
 
 ## Axe 3 — Expansion du catalogue (priorité moyenne)
 
-### S4 — Vague 1 d'expansion (→ ~70 agents)
+### S4 — Vague 1 d'expansion (→ 70 agents) ✅
 
-- [ ] S4.1 Identifier et valider les 14 agents candidats de la vague 1
-  - swift-specialist, dart-flutter-developer, scala-pro
-  - vue-developer, angular-architect, svelte-developer
-  - mongodb-specialist, mysql-pro
-  - gcp-specialist, azure-specialist
-  - electron-developer
-  - technical-pm, solutions-architect
-  - accessibility-specialist
-- [ ] S4.2 Assigner les catégories pour chaque nouvel agent
-- [ ] S4.3 Exécuter le sync pour les agents validés
-- [ ] S4.4 Mettre à jour manifest.json, packs, README
-- [ ] S4.5 Créer un pack `mobile` (mobile-developer, dart-flutter-developer, ui-designer, typescript-pro, test-automator)
-- [ ] S4.6 Vérifier tous les tests (cible : 400+ tests)
+- [x] S4.1 Sync --tier extended (86 agents candidats téléchargés)
+- [x] S4.2 Triage Product Manager : 14 ACCEPT / 72 REJECT (taux 16.3%)
+  - ACCEPT : swift-expert, data-engineer, data-analyst, mlops-engineer, vue-expert,
+    angular-architect, accessibility, sre-engineer, microservices-architect, qa-expert,
+    diagram-architect, security-engineer, ux-researcher, business-analyst
+- [x] S4.3 Nettoyage manifest : supprimé 72 rejetés, corrigé 14 retenus (catégories, paths, descriptions, tags)
+- [x] S4.4 Nettoyage fichiers .md : supprimé 214 fichiers, déplacé 3, vérifié 70 OK
+- [x] S4.5 Ajout 6 nouveaux packs : data-stack, ml-to-production, frontend-complete, ship-it-safely, product-discovery, architecture-docs
+- [x] S4.6 Mise à jour READMEs FR/EN (compteurs 70 agents, 15 packs, 418 tests)
+- [x] S4.7 Vérification des tests (cible : 418 tests)
 
 ## Décisions à trancher
 
