@@ -6,10 +6,10 @@
 
 | Métrique | Valeur |
 |----------|--------|
-| Agents | 56 installés \| 0 en attente \| 56 cible ✅ |
+| Agents | 56 installés \| 14 candidats vague 1 \| 70 cible v4 |
 | Tests | 241 JS + 117 Python = 358 tests |
-| Commits | ~25 + 13 session commits |
-| Version du plan | v3 (terminé) |
+| Commits | ~25 + 15 session commits |
+| Version du plan | v4 (en cours) — v3 terminé, archivé |
 
 ## Historique des versions
 
@@ -26,9 +26,14 @@
   - T4.0 ❌ : Prototype conversion skills — annulé (sera repris plus tard)
   - Revue de code P1+P2 ✅ : 9 corrections appliquées (C1, C2, M1, M2/S1, m1, m2, m4, S2, S3)
 
-### v3 (terminé — .plan/00-plan-v3.md)
+### v3 (terminé — archivé dans .plan/archive/v3/)
 - 2 workstreams : intégration de 6 agents + TUI
 - **Cible atteinte : 56 agents, 10 catégories, 9 packs**
+
+### v4 (en cours — .plan/00-plan-v4.md)
+- 3 axes : stabilisation CI, pipeline de sync continue, expansion catalogue
+- Pipeline GitHub Actions pour détection automatique de nouveaux agents
+- Cible : 70 agents, sync automatisé hebdomadaire
 
 ## Suivi v3
 
@@ -45,6 +50,17 @@
 
 **Légende** : ⬜ À faire | 🔄 En cours | ✅ Terminé | ❌ Annulé | ⏸️ En pause
 
+## Suivi v4
+
+| # | Tâche | Statut | Session | Notes |
+|---|-------|--------|---------|-------|
+| S1 | Stabilisation & push CI | ⬜ À faire | — | TUI visuel + 4 jobs CI |
+| S2 | Workflow sync-agents.yml | ⬜ À faire | — | Cron hebdo + PR auto |
+| S3 | Curation & permissions | ⬜ À faire | — | Critères C1-C6, labels |
+| S4 | Expansion vague 1 (→70) | ⬜ À faire | — | 14 agents candidats |
+
+**Légende** : ⬜ À faire | 🔄 En cours | ✅ Terminé | ❌ Annulé | ⏸️ En pause
+
 ## Décisions actives
 
 - **D1-D8** : Voir .plan/archive/v2/02-decisions-v2.md
@@ -55,8 +71,36 @@
 - **D13** ✅ : Agent prd sans fonctionnalités GitHub (PRD only)
 - **D14** ✅ : github-actions-expert non intégré (redondant avec ci-cd-engineer)
 - **D15** ✅ : Réorganisation catégories — fusion api+database→data-api, dissolution team→web+devtools, labels clairs, ordre par workflow développeur
+- **D16** ⬜ : Fréquence du cron sync (hebdo vs quotidien)
+- **D17** ⬜ : Scope du sync automatique (core seul vs core+extended)
+- **D18** ⬜ : Auto-merge pour mises à jour d'agents existants ?
+- **D19** ⬜ : Seuil pour créer de nouvelles catégories
+- **D20** ⬜ : Architecture update-manifest.py (patch vs rebuild)
 
 ## Notes de session
+
+### Session 6 (2026-02-17)
+- Réorganisation catégories 12→10 (commit a53883b)
+- Mise à jour .plan pour réorg (commit 256517b)
+- Création plan v4 + workflow sync-agents.yml (commit 7d18dd8)
+- Archivage fichiers plan v3 dans .plan/archive/v3/
+- Création 01-tasks-v4.md avec 25 tâches détaillées
+
+### Session 5 — Réorganisation des catégories ✅
+
+#### Commit
+- `a53883b` refactor: reorganize categories from 12 to 10 for clearer TUI navigation
+
+#### Changements
+- Fusion `api` (2) + `database` (3) → `data-api` (5) "Data & API"
+- Dissolution `team` (5) → agents redistribués dans `web` (6) et `devtools` (6)
+- Renommage labels : DevTools (un mot), Languages (complet), Data & API
+- Réordonnancement tabs par workflow dev : Languages→AI→Web→Data&API→DevOps→DevTools→Security→MCP→Business→Docs
+- Correction frontmatter manquant dans prd.md
+- 11 corrections de tests, 358/358 passent (241 JS + 117 Python)
+
+#### Décision
+- **D15** : Réorganisation catégories — fusion api+database→data-api, dissolution team→web+devtools, labels clairs, ordre par workflow développeur
 
 ### Session 4 (2026-02-17)
 - Ajout agent `screenshot-ui-analyzer` (catégorie team, commit 34aa791) — hors plan v3
@@ -82,19 +126,3 @@
 - Analyse des 9 agents demandés → 6 nouveaux, 3 déjà présents
 - Analyse TUI complète → architecture 6 modules, ~1650L
 - Création plan v3 et fichier de progression
-
-## Session v3.1 — Réorganisation des catégories ✅
-
-### Commit
-- `a53883b` refactor: reorganize categories from 12 to 10 for clearer TUI navigation
-
-### Changements
-- Fusion `api` (2) + `database` (3) → `data-api` (5) "Data & API"
-- Dissolution `team` (5) → agents redistribués dans `web` (6) et `devtools` (6)
-- Renommage labels : DevTools (un mot), Languages (complet), Data & API
-- Réordonnancement tabs par workflow dev : Languages→AI→Web→Data&API→DevOps→DevTools→Security→MCP→Business→Docs
-- Correction frontmatter manquant dans prd.md
-- 11 corrections de tests, 358/358 passent (241 JS + 117 Python)
-
-### Décision
-- **D15** : Réorganisation catégories — fusion api+database→data-api, dissolution team→web+devtools, labels clairs, ordre par workflow développeur
