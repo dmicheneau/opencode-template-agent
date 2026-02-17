@@ -32,9 +32,9 @@
 - **Cible atteinte : 56 agents, 10 catégories, 9 packs**
 
 ### v4 (en cours — .plan/00-plan-v4.md)
-- 3 axes : stabilisation CI, pipeline de sync continue, expansion catalogue
+- 4 axes : stabilisation CI, pipeline de sync continue, expansion catalogue, TUI polish
 - Pipeline GitHub Actions pour détection automatique de nouveaux agents
-- Cible : 70 agents, sync automatisé hebdomadaire
+- Cible : 70 agents ✅, sync automatisé hebdomadaire, TUI sans glitches
 
 ## Suivi v3
 
@@ -59,6 +59,7 @@
 | S2 | Workflow sync-agents.yml | 🔄 En cours | 7 | S2.1-S2.4 ✅, S2.5-S2.7 restants |
 | S3 | Curation & permissions | ⬜ À faire | — | Critères C1-C6, labels |
 | S4 | Expansion vague 1 (→70) | ✅ Terminé | 8 | 14 agents acceptés, 72 rejetés, 6 packs ajoutés |
+| S5 | TUI polish & corrections | 🔄 En cours | 9 | 3 bugs + 2 features, ~50 min estimé |
 
 **Légende** : ⬜ À faire | 🔄 En cours | ✅ Terminé | ❌ Annulé | ⏸️ En pause
 
@@ -80,17 +81,16 @@
 
 ## Notes de session
 
-### Session 6 (2026-02-17)
-- Réorganisation catégories 12→10 (commit a53883b)
-- Mise à jour .plan pour réorg (commit 256517b)
-- Création plan v4 + workflow sync-agents.yml (commit 7d18dd8)
-- Archivage fichiers plan v3 dans .plan/archive/v3/
-- Création 01-tasks-v4.md avec 25 tâches détaillées
-- Fix prd.md mode `all` → `byline` (commit post-push)
-- Push 32 commits to GitHub, CI verte (4/4 jobs)
-- S1 terminé : TUI vérifié (12 tabs OK), workflow sync validé (16/16 checks)
-- Code review triple (JS, Python, sécurité) + 12 fixes appliqués
-- 3 PRs Dependabot mergées (checkout v6.0.2, setup-python v6.2.0, setup-node v6.2.0)
+### Session 9 (2026-02-17)
+- S5 🔄 : TUI polish & corrections — 5 tâches identifiées
+  - S5.1 : Fix `--help` example (`database` → `data-api`) — CLI bugfix
+  - S5.2 : Fix display glitches (`screen.mjs` flush sans clear-to-end) — TUI bugfix
+  - S5.3 : Enhance highlight line (inverse trop subtil → fond coloré) — TUI feature
+  - S5.4 : Fix packs tab Space action (Space sur Packs ne fait rien) — TUI bugfix
+  - S5.5 : Show already-installed agents indicator dans la liste — TUI feature
+  - S5.6 : Vérifier tests après corrections
+- Plan v4 mis à jour → v4.1 (ajout Axe 4 TUI polish, CS11-CS12, séquencement)
+- Fichiers .plan/ mis à jour (00-plan-v4.md, 01-tasks-v4.md, PROGRESS.md)
 
 ### Session 8 (2026-02-17)
 - S4 ✅ : Expansion vague 1 — catalogue étendu de 56 à 70 agents

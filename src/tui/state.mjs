@@ -1,7 +1,10 @@
-// ─── state.mjs ── Pure state machine for TUI commander ──────────────────────
-// Zero side-effects. Returns new state copies on every transition.
+// ─── state.mjs ── State machine for TUI commander ───────────────────────────
+// Returns new state copies on every transition.
+// detectInstalled() performs filesystem I/O to detect pre-installed agents.
 
 import { Action } from './input.mjs';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -33,10 +36,28 @@ const MIN_VIEWPORT = 5;
  * @property {{ agents: AgentEntry[], progress: number, current: number, results: Array<{name: string, status: string}>, error: string|null, doneCursor: number, forceSelection: Set<string>, forceMode?: boolean }|null} install
  * @property {{ cols: number, rows: number }} terminal
  * @property {Manifest} manifest
+ * @property {Set<string>} installed
  * @property {AgentEntry[]} allAgents
  */
 
 // ─── Exports ─────────────────────────────────────────────────────────────────
+
+/**
+ * Scan .opencode/agents/ to detect already-installed agent files.
+ * @param {Manifest} manifest
+ * @returns {Set<string>}  Set of installed agent names
+ */
+export function detectInstalled(manifest) {
+  const basePath = manifest.base_path || '.opencode/agents';
+  const installed = new Set();
+  for (const agent of manifest.agents) {
+    const filePath = agent.mode === 'primary'
+      ? join(basePath, `${agent.name}.md`)
+      : join(basePath, agent.category, `${agent.name}.md`);
+    if (existsSync(filePath)) installed.add(agent.name);
+  }
+  return installed;
+}
 
 /**
  * Create the initial state from a loaded manifest.
@@ -68,6 +89,7 @@ export function createInitialState(manifest, terminal) {
     tabs: { ids: tabIds, labels: tabLabels, activeIndex: 0 },
     list: { items: allAgents, cursor: 0, scrollOffset: 0 },
     selection: new Set(),
+    installed: detectInstalled(manifest),
     search: { active: false, query: '' },
     packs: {
       ids: packIds,
@@ -152,7 +174,12 @@ function updateBrowse(state, { action }) {
     case Action.SHIFT_TAB: return switchTab(state, -1);
     case Action.RIGHT:
     case Action.TAB:       return switchTab(state, +1);
-    case Action.SELECT:    return toggleSelection(state);
+    case Action.SELECT:    {
+      // On packs tab, Space drills into the pack (same as Enter)
+      const isPacksTab = state.tabs.ids[state.tabs.activeIndex] === 'packs';
+      if (isPacksTab) return handleConfirm(state);
+      return toggleSelection(state);
+    }
     case Action.SELECT_ALL: return toggleSelectAll(state);
     case Action.CONFIRM:   return handleConfirm(state);
     case Action.SEARCH:    return { ...state, mode: 'search', search: { active: true, query: '' } };

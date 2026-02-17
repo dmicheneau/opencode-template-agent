@@ -10,6 +10,7 @@ export const CURSOR_SHOW = '\x1b[?25h';
 export const CURSOR_HOME = '\x1b[H';
 export const CLEAR_SCREEN = '\x1b[2J';
 export const CLEAR_LINE = '\x1b[2K';
+export const CLEAR_TO_END = '\x1b[J';
 
 // ── Cursor Movement ────────────────────────────────────────────────────────
 /** @param {number} row - 1-based row */
@@ -44,6 +45,7 @@ export const bgCyan = wrap(46);
 export const bgWhite = wrap(47);
 export const boldCyan = wrap('1;36');
 export const boldBrightCyan = wrap('1;96');
+export const highlight = wrap('7;1');
 
 // ── Box Drawing ─────────────────────────────────────────────────────────────
 export const BOX = {

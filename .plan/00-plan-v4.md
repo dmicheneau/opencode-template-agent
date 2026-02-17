@@ -1,18 +1,19 @@
-# Plan V4 — Pipeline de synchronisation continue + Expansion catalogue
+# Plan V4 — Pipeline de synchronisation continue + Expansion catalogue + TUI polish
 
-> Version : 4.0 | Date : 2026-02-17 | **Statut : EN COURS**
-> Consolide trois axes : stabilisation CI, pipeline d'alimentation continue, expansion du catalogue
+> Version : 4.1 | Date : 2026-02-17 | **Statut : EN COURS**
+> Consolide quatre axes : stabilisation CI, pipeline d'alimentation continue, expansion du catalogue, polish TUI
 > Plan v3 archivable dans `.plan/archive/v3/` une fois v4 lancé
 
-## Contexte actuel (post-v3)
+## Contexte actuel (post-v3, mis à jour session 8)
 
-- **56 agents, 10 catégories, 9 packs** — TUI complet avec raw-mode, tabs, recherche, multi-select
+- **70 agents, 10 catégories, 15 packs** — TUI complet avec raw-mode, tabs, recherche, multi-select
 - CLI non-interactif préservé (non-breaking)
-- **358 tests** (241 JS + 117 Python), tous passent localement
-- CI : 4 jobs GitHub Actions (test, test-cli, lint, validate-agents)
+- **418 tests** (241 JS + 177 Python), tous passent localement et en CI
+- CI : 4 jobs GitHub Actions (test, test-cli, lint, validate-agents) — ✅ tous verts
 - Sync script : Python stdlib, supporte `--incremental` (ETag), `--tier core|extended|all`
-- **~90 agents étendus** définis dans `EXTENDED_AGENTS` mais non intégrés au projet
+- **70 agents intégrés** dont 4 primary (épisode-orchestrator, fullstack-developer, cloud-architect, devops-engineer)
 - Source : `davila7/claude-code-templates` (~133+ agents, site SPA aitmpl.com)
+- Distribution : languages(11) ai(9) web(9) devops(10) devtools(8) business(6) data-api(5) docs(4) security(4) mcp(4)
 
 ---
 
@@ -24,6 +25,7 @@
 | **O2** | Automatiser la détection et l'intégration des nouveaux agents du repo source | Workflow `sync.yml` opérationnel, PRs automatiques créées |
 | **O3** | Étendre le catalogue de 56 → 70+ agents avec critères de qualité | ≥14 agents extended intégrés, tous avec permissions vérifiées |
 | **O4** | Maintenir la vélocité de développement via des manifestes synchronisés | `manifest.json` (projet) et `.opencode/agents/manifest.json` (sync) cohérents en permanence |
+| **O5** | Corriger les bugs UX du TUI et améliorer l'expérience interactive | 5 fixes/features (S5.1-S5.5) livrés, 0 glitch visuel |
 
 ---
 
@@ -387,7 +389,62 @@ Analyse des agents `EXTENDED_AGENTS` qui sont redondants ou hors scope :
 
 ---
 
-## 5. Tâches détaillées
+## 5. Axe 4 — Polish TUI (priorité haute)
+
+### 5.1 Contexte
+
+Post-expansion (70 agents, 15 packs), le TUI présente plusieurs bugs UX et des améliorations attendues par les utilisateurs. Ces corrections sont nécessaires avant de considérer v4 comme terminé.
+
+### 5.2 Bugs identifiés
+
+| # | Bug | Sévérité | Fichier(s) |
+|---|-----|----------|------------|
+| S5.1 | `--help` affiche `--category languages,database` (invalide) | Basse | `bin/cli.mjs` L122 |
+| S5.2 | Glitches d'affichage (lignes résiduelles) lors des changements de tab/resize | Moyenne | `src/tui/screen.mjs`, `src/tui/renderer.mjs` |
+| S5.4 | `Space` sur onglet Packs ne fait rien (toggle broken) | Moyenne | `src/tui/state.mjs` |
+
+### 5.3 Améliorations UX
+
+| # | Feature | Impact | Fichier(s) |
+|---|---------|--------|------------|
+| S5.3 | Surbrillance curseur plus visible (inverse trop subtil) | Moyen | `src/tui/ansi.mjs`, `src/tui/renderer.mjs` |
+| S5.5 | Indicateur "déjà installé" dans la liste de sélection | Haut | `src/tui/state.mjs`, `src/tui/renderer.mjs`, `src/tui/index.mjs` |
+
+### 5.4 Détails techniques
+
+#### S5.2 — Display glitches
+
+**Root cause** : `flush()` dans `screen.mjs` fait `CURSOR_HOME + buffer` sans clear screen. Chaque ligne a `CLEAR_LINE` prefix via `bdr()`, mais si le frame N a plus de lignes que frame N+1, les anciennes lignes restent visibles en bas. Le padding `while(out.length < rows-1)` ne couvre pas tous les cas edge (switch tab, resize).
+
+**Fix** : Ajouter `\x1b[J` (clear-to-end-of-screen) après le buffer dans `flush()`, et s'assurer que le padding remplit exactement `rows` lignes.
+
+#### S5.4 — Packs tab Space action
+
+**Root cause** : `toggleSelection()` opère sur `state.list.items[cursor]` qui attend un agent (`.name`). Sur l'onglet Packs, `list.items` contient des objets pack (`.id`), donc `selection.has(agent.name)` ne matche jamais.
+
+**Fix** : Sur l'onglet Packs, mapper `Space` vers le drill-in (même action que `Enter`), car l'utilisateur s'attend à "activer" un pack, pas sélectionner des agents invisibles.
+
+#### S5.5 — Installed agents indicator
+
+**Design** :
+1. Au démarrage du TUI, scanner `.opencode/agents/` pour les fichiers `.md` déjà présents
+2. Stocker un `Set<string>` de noms dans `state.installed`
+3. Afficher `✔` vert dim ou `[installed]` dans `renderAgentList`
+4. Rafraîchir le set après chaque installation (dans `index.mjs` après `performInstall`)
+
+### 5.5 Ordre d'implémentation
+
+```
+S5.1 (trivial, 1 min) → S5.2 (screen fix, 5 min) → S5.3 (highlight, 10 min)
+→ S5.4 (packs fix, 10 min) → S5.5 (installed indicator, 20 min)
+→ S5.6 (tests, 5 min)
+```
+
+Total estimé : ~50 minutes, 1 session.
+
+---
+
+## 6. Tâches détaillées
 
 ### S1.x — Stabilisation & CI
 
@@ -459,8 +516,9 @@ Analyse des agents `EXTENDED_AGENTS` qui sont redondants ou hors scope :
 | CS2 | Workflow `sync.yml` fonctionnel | ≥1 exécution réussie (manuelle ou cron) |
 | CS3 | PR automatique créée lors de changements upstream | PR visible sur GitHub avec les bons labels |
 | CS4 | ≥70 agents dans le catalogue | `manifest.json` → `agent_count ≥ 70` |
-| CS5 | Tous les tests passent | ≥370 tests (241+ JS, 117+ Python, + nouveaux) |
+| CS5 | Tous les tests passent | ≥418 tests (241+ JS, 177+ Python) |
 | CS6 | Aucun agent avec UNKNOWN_PERMISSIONS dans le catalogue intégré | Tous les agents dans `manifest.json` ont des permissions explicites |
+| CS11 | TUI sans glitches visuels ni bugs de navigation | S5.1-S5.4 corrigés, tests passent |
 
 ### Recommandés (bonus v4)
 
@@ -470,6 +528,7 @@ Analyse des agents `EXTENDED_AGENTS` qui sont redondants ou hors scope :
 | CS8 | Documentation du processus de sync | `docs/SYNC.md` ou section README |
 | CS9 | CHANGELOG.md créé et à jour | Historique v1-v4 documenté |
 | CS10 | `.sync-state.json` maintenu automatiquement | Mis à jour par le workflow `sync.yml` |
+| CS12 | Agents déjà installés visibles dans le TUI | Indicateur `✔` dans la liste d'agents |
 
 ---
 
@@ -556,20 +615,20 @@ Analyse des agents `EXTENDED_AGENTS` qui sont redondants ou hors scope :
 
 ## 8. Séquencement
 
-Les trois axes ont des dépendances légères :
+Les quatre axes ont des dépendances légères :
 
 ```
-Axe 1 (Stabilisation)     Axe 2 (Pipeline)         Axe 3 (Expansion)
-━━━━━━━━━━━━━━━━━━━       ━━━━━━━━━━━━━━━          ━━━━━━━━━━━━━━━━━
-S1.1 TUI visual check     │                         │
-S1.2 Push GitHub ──────── S2.1 .sync-state.json     │
-S1.3 Fix CI errors  │     S2.2 sync.yml             │
-S1.4 Badge CI       │     S2.3 update-manifest.py   │
-S1.5 Lint check     │     S2.4 Tests                │
-S1.6 CHANGELOG      │     S2.5 Test workflow_dispatch│
-                    │     S2.6 Rodage 1 semaine      │
-                    │     S2.7 Labels auto           │
-                    │     S2.8 Documentation         S3.1 Intégrer 14 agents
+Axe 1 (Stabilisation)     Axe 2 (Pipeline)         Axe 3 (Expansion)        Axe 4 (TUI polish)
+━━━━━━━━━━━━━━━━━━━       ━━━━━━━━━━━━━━━          ━━━━━━━━━━━━━━━━━        ━━━━━━━━━━━━━━━━━
+S1.1 TUI visual check     │                         │                        │
+S1.2 Push GitHub ──────── S2.1 .sync-state.json     │                        │
+S1.3 Fix CI errors  │     S2.2 sync.yml             │                        │
+S1.4 Badge CI       │     S2.3 update-manifest.py   │                        S5.1 Fix --help
+S1.5 Lint check     │     S2.4 Tests                │                        S5.2 Display glitches
+S1.6 CHANGELOG      │     S2.5 Test workflow_dispatch│                        S5.3 Highlight line
+                    │     S2.6 Rodage 1 semaine      │                        S5.4 Packs tab Space
+                    │     S2.7 Labels auto           │                        S5.5 Installed indicator
+                    │     S2.8 Documentation         S3.1 Intégrer 14 agents  S5.6 Tests
                     │                                S3.2 Manifest → 70
                     │                                S3.3 Tests → 370+
                     │                                S3.4 Permissions check
@@ -579,12 +638,13 @@ S1.6 CHANGELOG      │     S2.5 Test workflow_dispatch│
 ```
 
 **Ordre recommandé** :
-1. **S1.1-S1.3** — Stabilisation critique (1 session)
-2. **S2.1-S2.4** — Pipeline sync + script update-manifest (1-2 sessions)
-3. **S3.1-S3.5** — Expansion catalogue (1-2 sessions)
-4. **S1.4-S1.6, S2.5-S2.8** — Polish & documentation (1 session)
+1. **S1.1-S1.3** — Stabilisation critique (1 session) ✅
+2. **S2.1-S2.4** — Pipeline sync + script update-manifest (1-2 sessions) ✅
+3. **S4.1-S4.7** — Expansion catalogue → 70 agents (1 session) ✅
+4. **S5.1-S5.6** — TUI polish & corrections (1 session) ← **ACTUEL**
+5. **S1.4-S1.6, S2.5-S2.8** — Documentation & rodage sync (1 session)
 
-**Total estimé : 4-6 sessions**
+**Total estimé : 5-7 sessions (4 terminées, 1 en cours)**
 
 ---
 

@@ -5,7 +5,7 @@
 
 import { enter, exit, flush, getSize, onResize, onInput } from './screen.mjs';
 import { parseKey } from './input.mjs';
-import { createInitialState, update, getViewportHeight } from './state.mjs';
+import { createInitialState, update, getViewportHeight, detectInstalled } from './state.mjs';
 import { render } from './renderer.mjs';
 
 /**
@@ -85,8 +85,11 @@ export async function launchTUI(options = {}) {
         redraw();
       }
 
+      // Refresh installed set after installation
+      const installed = detectInstalled(state.manifest);
+
       // Done
-      state = { ...state, mode: 'done', install: { ...state.install, done: true } };
+      state = { ...state, mode: 'done', installed, install: { ...state.install, done: true } };
       redraw();
     } catch (err) {
       state = {

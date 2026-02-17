@@ -119,7 +119,7 @@ ${bold('Options:')}
 ${bold('Examples:')}
   ${dim('$')} npx opencode-agents install postgres-pro
   ${dim('$')} npx opencode-agents install --category devops
-  ${dim('$')} npx opencode-agents install --category languages,database
+  ${dim('$')} npx opencode-agents install --category languages,data-api
   ${dim('$')} npx opencode-agents install --pack backend
   ${dim('$')} npx opencode-agents install --pack backend,devops
   ${dim('$')} npx opencode-agents install --all

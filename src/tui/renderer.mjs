@@ -4,8 +4,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import {
-  CLEAR_LINE, BOX, bold, inverse, cyan, green, yellow, red, white,
-  boldCyan, brightCyan, brightGreen, brightWhite,
+  CLEAR_LINE, BOX, bold, inverse, highlight, cyan, green, yellow, red, white,
+  boldCyan, brightCyan, brightGreen, brightWhite, dim,
   visibleLength, padEnd, padEndAscii, truncate,
 } from './ansi.mjs';
 import { getViewportHeight } from './state.mjs';
@@ -94,10 +94,11 @@ function renderAgentList(state, out, W) {
       const idx = scrollOffset + i;
       if (idx >= items.length) { out.push(bdr('', W)); continue; }
       const a = items[idx], cur = idx === cursor, sel = state.selection.has(a.name);
-      const mk = cur ? bold(brightCyan('▸')) : sel ? bold(brightGreen('✓')) : ' ';
+      const inst = state.installed?.has(a.name);
+      const mk = cur ? bold(brightCyan('▸')) : sel ? bold(brightGreen('✓')) : inst ? dim(green('✔')) : ' ';
       const nameCol = sel ? green(padEndAscii(a.name, COL_NAME)) : brightWhite(padEndAscii(a.name, COL_NAME));
       let row = ` ${mk} ${icon(state, a.category)} ${yellow(padEndAscii(a.category, COL_CAT))}${nameCol}${cyan(truncate(a.description, descWidth))}`;
-      if (cur) row = inverse(padEnd(row, innerWidth));
+      if (cur) row = highlight(padEnd(row, innerWidth));
       out.push(bdr(row, W));
     }
   }
@@ -124,7 +125,7 @@ function renderPacks(state, out, W) {
     const p = pk[idx], cur = idx === cursor;
     const ptr = cur ? bold(brightCyan('▸')) : ' ';
     let row = ` ${ptr} ${brightWhite(padEnd(p.label || p.id, colPack - 2))}${brightCyan(padEnd(String(p.agents?.length || 0), colAgents))}${cyan(truncate(p.description || '', descWidth))}`;
-    if (cur) row = inverse(padEnd(row, innerWidth));
+    if (cur) row = highlight(padEnd(row, innerWidth));
     out.push(bdr(row, W));
   }
 
@@ -152,10 +153,11 @@ function renderPackDetail(state, out, W) {
     const idx = scrollOffset + i;
     if (idx >= agents.length) { out.push(bdr('', W)); continue; }
     const a = agents[idx], cur = idx === cursor, sel = state.selection.has(a.name);
+    const inst = state.installed?.has(a.name);
     const mk = sel && cur ? bold(brightGreen('✓')) + bold(brightCyan('▸'))
-      : cur ? ' ' + bold(brightCyan('▸')) : sel ? bold(brightGreen('✓')) + ' ' : '  ';
+      : cur ? ' ' + bold(brightCyan('▸')) : sel ? bold(brightGreen('✓')) + ' ' : inst ? dim(green('✔')) + ' ' : '  ';
     let row = ` ${mk} ${sel ? green(padEnd(a.name, COL_NAME)) : brightWhite(padEnd(a.name, COL_NAME))}${cyan(truncate(a.description, descWidth))}`;
-    if (cur) row = inverse(padEnd(row, innerWidth));
+    if (cur) row = highlight(padEnd(row, innerWidth));
     out.push(bdr(row, W));
   }
 

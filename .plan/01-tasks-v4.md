@@ -76,6 +76,32 @@
 - [ ] D19 Seuil pour créer de nouvelles catégories (>15 agents ?)
 - [x] D20 Architecture update-manifest.py — patch incrémental (préserve curated, ajoute nouveaux, détecte stale)
 
+## Axe 4 — Polish TUI (priorité haute)
+
+### S5 — Corrections et améliorations TUI
+
+- [ ] S5.1 Fix `--help` : exemple `--category languages,database` → `--category languages,data-api`
+  - Fichier : `bin/cli.mjs` L122
+  - Type : Bugfix trivial (1 ligne)
+- [ ] S5.2 Fix display glitches/jumps lors des changements de tab et resize
+  - Fichier : `src/tui/screen.mjs` (flush) + `src/tui/renderer.mjs`
+  - Root cause : flush() ne clear pas les lignes résiduelles en bas de frame
+  - Fix : ajouter `\x1b[J` (clear-to-end-of-screen) dans flush() + padding exact `rows` lignes
+- [ ] S5.3 Améliorer la surbrillance de la ligne curseur (highlight plus visible)
+  - Fichiers : `src/tui/ansi.mjs` + `src/tui/renderer.mjs`
+  - État actuel : `inverse()` (ANSI 7) est subtil sur terminaux sombres
+  - Fix : ajouter style `bgHighlight` (inverse+bold ou fond bleu) pour un contraste supérieur
+- [ ] S5.4 Fix onglet Packs : `Space` ne sélectionne rien (toggle broken)
+  - Fichier : `src/tui/state.mjs` (toggleSelection)
+  - Root cause : sur packs tab, `list.items` contient des objets pack (`.id`) pas des agents (`.name`)
+  - Fix : mapper `Space` sur packs tab vers drill-in (même action que `Enter`)
+- [ ] S5.5 Afficher les agents déjà installés dans la liste de sélection
+  - Fichiers : `src/tui/state.mjs` + `src/tui/renderer.mjs` + `src/tui/index.mjs`
+  - Design : scanner `.opencode/agents/` au démarrage, stocker `state.installed: Set<string>`
+  - Indicateur visuel : `✔` vert dim ou `[installed]` pour les agents déjà présents
+  - Rafraîchir le set après chaque installation
+- [ ] S5.6 Vérification : tous les tests passent (418 tests) + test visuel TUI
+
 ## Séquencement
 
 | Phase | Tâches | Pré-requis | Sessions |
@@ -83,3 +109,4 @@
 | 1. Stabilisation | S1.1-S1.5 | — | 1 |
 | 2. Pipeline sync | S2.1-S2.8, S3.1-S3.3 | S1 terminé | 2-3 |
 | 3. Expansion | S4.1-S4.6 | S2 terminé | 1-2 |
+| 4. TUI polish | S5.1-S5.6 | S4 terminé | 1 |

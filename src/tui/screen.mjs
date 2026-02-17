@@ -11,6 +11,7 @@ import {
   CURSOR_SHOW,
   CURSOR_HOME,
   CLEAR_SCREEN,
+  CLEAR_TO_END,
 } from './ansi.mjs';
 
 // ─── Internal State ─────────────────────────────────────────────────────────
@@ -71,7 +72,7 @@ export function exit() {
  * @param {string} buffer - Complete frame content.
  */
 export function flush(buffer) {
-  process.stdout.write(CURSOR_HOME + buffer);
+  process.stdout.write(CURSOR_HOME + buffer + CLEAR_TO_END);
 }
 
 /**
