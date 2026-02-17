@@ -1,5 +1,7 @@
 // ─── ANSI Color Helpers (zero dependencies) ────────────────────────────────────
 
+import { padEnd as ansiPadEnd } from './tui/ansi.mjs';
+
 const NO_COLOR = 'NO_COLOR' in process.env || process.env.TERM === 'dumb';
 
 const ESC = '\x1b[';
@@ -54,19 +56,6 @@ function categoryIcon(category) {
 }
 
 // ─── Formatting Utilities ───────────────────────────────────────────────────────
-
-/**
- * Pad a string to a fixed width.
- * @param {string} str
- * @param {number} width
- * @returns {string}
- */
-function padEnd(str, width) {
-  // Strip ANSI codes for length calculation
-  const stripped = str.replace(/\x1b\[[0-9;]*m/g, '');
-  const padding = Math.max(0, width - stripped.length);
-  return str + ' '.repeat(padding);
-}
 
 /**
  * Print a header line.
@@ -154,7 +143,7 @@ export function printAgentList(manifest) {
     console.log(`${catMeta.icon} ${bold(catMeta.label)} ${dim(`(${agents.length})`)}`);
 
     for (const agent of agents) {
-      const name = padEnd(cyan(agent.name), maxNameLen + 10); // +10 for ANSI codes
+      const name = ansiPadEnd(cyan(agent.name), maxNameLen + 10); // +10 for ANSI codes
       const mode = agent.mode === 'primary' ? yellow(' ★') : '';
       console.log(`  ${name} ${dim(agent.description)}${mode}`);
     }
@@ -203,7 +192,7 @@ export function printSearchResults(results, query) {
   const maxNameLen = results.reduce((max, a) => Math.max(max, a.name.length), 0);
 
   for (const agent of results) {
-    const name = padEnd(cyan(agent.name), maxNameLen + 10);
+    const name = ansiPadEnd(cyan(agent.name), maxNameLen + 10);
     const cat = dim(`(${agent.category})`);
     console.log(`  ${name} ${cat}  ${dim(agent.description)}`);
   }

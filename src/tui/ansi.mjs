@@ -47,9 +47,6 @@ export const boldBrightCyan = wrap('1;96');
 
 // ── Box Drawing ─────────────────────────────────────────────────────────────
 export const BOX = {
-  TL: '\u250c', TR: '\u2510', BL: '\u2514', BR: '\u2518',
-  H: '\u2500', V: '\u2502', LT: '\u251c', RT: '\u2524',
-  // Long aliases used by renderer
   topLeft: '\u250c', topRight: '\u2510', bottomLeft: '\u2514', bottomRight: '\u2518',
   horizontal: '\u2500', vertical: '\u2502', teeRight: '\u251c', teeLeft: '\u2524',
 };
@@ -79,6 +76,22 @@ export function charWidth(cp) {
   if (cp >= 0x2600 && cp <= 0x27bf) return 2;
   // CJK Unified Ideographs
   if (cp >= 0x4e00 && cp <= 0x9fff) return 2;
+  // CJK Compatibility Ideographs
+  if (cp >= 0xf900 && cp <= 0xfaff) return 2;
+  // Hangul Syllables
+  if (cp >= 0xac00 && cp <= 0xd7af) return 2;
+  // Fullwidth Forms
+  if (cp >= 0xff01 && cp <= 0xff60) return 2;
+  // Fullwidth Signs
+  if (cp >= 0xffe0 && cp <= 0xffe6) return 2;
+  // CJK Extension B
+  if (cp >= 0x20000 && cp <= 0x2a6df) return 2;
+  // CJK Extension C/D/E
+  if (cp >= 0x2a700 && cp <= 0x2ceaf) return 2;
+  // CJK Extension F
+  if (cp >= 0x2ceb0 && cp <= 0x2ebef) return 2;
+  // CJK Extension G
+  if (cp >= 0x30000 && cp <= 0x3134f) return 2;
   return 1;
 }
 

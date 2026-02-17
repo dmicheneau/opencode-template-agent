@@ -1,6 +1,5 @@
-import { mkdirSync, existsSync, writeFileSync, readFileSync } from 'node:fs';
+import { mkdirSync, existsSync, writeFileSync } from 'node:fs';
 import { join, dirname, resolve, sep } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import https from 'node:https';
 import { loadManifest } from './registry.mjs';
 import {
@@ -11,12 +10,9 @@ import {
   installSummary,
   infoMessage,
 } from './display.mjs';
+import { USER_AGENT } from './meta.mjs';
 
 // ─── Constants ───────────────────────────────────────────────────────────────────
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'));
-const USER_AGENT = `opencode-agents/${pkg.version}`;
 
 const ALLOWED_HOSTS = ['raw.githubusercontent.com', 'objects.githubusercontent.com', 'github.com'];
 const MAX_REDIRECTS = 5;

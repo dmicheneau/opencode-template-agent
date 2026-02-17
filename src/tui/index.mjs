@@ -108,6 +108,11 @@ export async function launchTUI(options = {}) {
     // Resize handler
     const unsubResize = onResize((size) => {
       state = { ...state, terminal: size };
+      // Adjust scroll to keep cursor in viewport
+      const vh = Math.max(5, size.rows - 8);
+      if (state.list.cursor >= state.list.scrollOffset + vh) {
+        state = { ...state, list: { ...state.list, scrollOffset: state.list.cursor - vh + 1 } };
+      }
       redraw();
     });
 

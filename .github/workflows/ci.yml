@@ -46,7 +46,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Run CLI tests
-        run: node --test tests/cli.test.mjs
+        run: node --test tests/cli.test.mjs tests/tui.test.mjs
 
   lint:
     runs-on: ubuntu-latest
@@ -66,7 +66,7 @@ jobs:
         run: python3 -c "import ast; ast.parse(open('scripts/sync-agents.py').read())"
 
       - name: Check Node.js syntax
-        run: node --check bin/cli.mjs src/*.mjs
+        run: node --check bin/cli.mjs src/*.mjs src/tui/*.mjs
 
       - name: Install shellcheck
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends shellcheck
