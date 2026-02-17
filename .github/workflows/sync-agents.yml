@@ -158,9 +158,12 @@ jobs:
           MODIFIED_FILES=$(git diff --cached --name-only --diff-filter=M .opencode/agents/ | grep '\.md$' || true)
           DELETED_FILES=$(git diff --cached --name-only --diff-filter=D .opencode/agents/ | grep '\.md$' || true)
 
-          NEW_COUNT=$(echo "$NEW_FILES" | grep -c '.' || echo 0)
-          MOD_COUNT=$(echo "$MODIFIED_FILES" | grep -c '.' || echo 0)
-          DEL_COUNT=$(echo "$DELETED_FILES" | grep -c '.' || echo 0)
+          # Count non-empty lines (grep -c returns exit 1 when 0 matches,
+          # so we must avoid '|| echo 0' which would append a second '0' line)
+          count_lines() { if [ -z "$1" ]; then echo 0; else echo "$1" | wc -l | tr -d ' '; fi; }
+          NEW_COUNT=$(count_lines "$NEW_FILES")
+          MOD_COUNT=$(count_lines "$MODIFIED_FILES")
+          DEL_COUNT=$(count_lines "$DELETED_FILES")
 
           echo "new_count=$NEW_COUNT" >> "$GITHUB_OUTPUT"
           echo "modified_count=$MOD_COUNT" >> "$GITHUB_OUTPUT"
