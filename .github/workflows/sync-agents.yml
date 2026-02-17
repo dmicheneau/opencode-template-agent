@@ -84,6 +84,7 @@ jobs:
         with:
           ref: main
           fetch-depth: 1
+          persist-credentials: false
 
       # -----------------------------------------------------------------------
       # 2. Setup Python (stdlib-only script, no pip install needed)
@@ -350,7 +351,11 @@ jobs:
 
       - name: Push sync branch
         if: steps.changes.outputs.has_changes == 'true' && env.SYNC_DRY_RUN != 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Configure credentials (persist-credentials is false)
+          git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           # Force-push to handle the case where a previous sync branch exists
           git push --force origin "$SYNC_BRANCH"
 

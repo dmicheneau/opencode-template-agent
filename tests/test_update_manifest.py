@@ -14,6 +14,7 @@ from __future__ import annotations
 import importlib
 import json
 import os
+import shutil
 import sys
 import tempfile
 import unittest
@@ -38,6 +39,9 @@ map_category = update_manifest_mod.map_category
 merge_manifests = update_manifest_mod.merge_manifests
 update_manifest = update_manifest_mod.update_manifest
 main = update_manifest_mod.main
+ManifestError = update_manifest_mod.ManifestError
+ManifestNotFoundError = update_manifest_mod.ManifestNotFoundError
+SyncManifestNotFoundError = update_manifest_mod.SyncManifestNotFoundError
 
 
 # ---------------------------------------------------------------------------
@@ -73,7 +77,7 @@ def make_agent(name, category="devtools", **kwargs):
     entry = {
         "name": name,
         "category": category,
-        "path": f".opencode/agents/{category}/{name}.md",
+        "path": f"{category}/{name}",
         "mode": "byline",
         "description": f"A {name} agent",
     }
@@ -148,8 +152,6 @@ class TestJsonIO(unittest.TestCase):
         self.tmpdir = tempfile.mkdtemp()
 
     def tearDown(self):
-        import shutil
-
         shutil.rmtree(self.tmpdir, ignore_errors=True)
 
     def test_load_json_valid(self):
@@ -220,6 +222,21 @@ class TestJsonIO(unittest.TestCase):
         result = load_json(path)
         self.assertEqual(result, {"initial": True})
 
+    def test_save_json_overwrite_existing(self):
+        """save_json correctly overwrites an existing file."""
+        path = os.path.join(self.tmpdir, "overwrite.json")
+        save_json(path, {"version": 1})
+        save_json(path, {"version": 2})
+        result = load_json(path)
+        self.assertEqual(result, {"version": 2})
+
+    def test_save_json_no_leftover_tmp_files(self):
+        """save_json does not leave .tmp files after success."""
+        path = os.path.join(self.tmpdir, "clean.json")
+        save_json(path, {"data": True})
+        leftover = [f for f in os.listdir(self.tmpdir) if f.endswith(".tmp")]
+        self.assertEqual(leftover, [], f"Leftover tmp files: {leftover}")
+
 
 # =====================================================================
 # Test: Merge Logic
@@ -233,17 +250,20 @@ class TestMergeManifests(unittest.TestCase):
         self.tmpdir = tempfile.mkdtemp()
 
     def tearDown(self):
-        import shutil
-
         shutil.rmtree(self.tmpdir, ignore_errors=True)
 
     def test_empty_sync_no_changes(self):
-        """Empty sync manifest produces no changes."""
-        root = make_root_manifest(agents=[make_agent("existing")])
+        """Empty sync manifest produces no changes and preserves agent data."""
+        original = make_agent("existing", description="Curated", tags=["keep"])
+        root = make_root_manifest(agents=[original])
         sync = make_sync_manifest(agents=[])
         result, added, stale = merge_manifests(root, sync)
         self.assertEqual(len(added), 0)
         self.assertEqual(len(result["agents"]), 1)
+        agent = result["agents"][0]
+        self.assertEqual(agent["description"], "Curated")
+        self.assertEqual(agent["tags"], ["keep"])
+        self.assertEqual(agent["mode"], "byline")
 
     def test_new_agent_added(self):
         """New agents from sync are added with NEEDS_REVIEW."""
@@ -264,18 +284,26 @@ class TestMergeManifests(unittest.TestCase):
         self.assertEqual(agent["source"], "aitmpl")
 
     def test_existing_agent_preserved(self):
-        """Existing agents are not overwritten by sync data."""
+        """All fields of existing agents are preserved, not overwritten."""
         curated = make_agent(
             "my-agent",
             category="web",
             description="Curated description",
             tags=["frontend", "react"],
+            mode="full",
+            path="web/my-agent",
+            source="aitmpl",
+            custom_field="should-survive",
         )
         root = make_root_manifest(agents=[curated])
         sync = make_sync_manifest(
             agents=[
                 make_agent(
-                    "my-agent", category="team", description="Upstream description"
+                    "my-agent",
+                    category="team",
+                    description="Upstream description",
+                    mode="byline",
+                    path="team/my-agent",
                 ),
             ]
         )
@@ -285,6 +313,12 @@ class TestMergeManifests(unittest.TestCase):
         self.assertEqual(agent["description"], "Curated description")
         self.assertEqual(agent["tags"], ["frontend", "react"])
         self.assertEqual(agent["category"], "web")  # NOT remapped
+        self.assertEqual(agent["mode"], "full")  # NOT overwritten
+        self.assertEqual(agent["path"], "web/my-agent")  # NOT changed
+        self.assertEqual(agent["source"], "aitmpl")  # preserved
+        self.assertEqual(
+            agent["custom_field"], "should-survive"
+        )  # extra fields survive
 
     def test_category_remapping_for_new_agents(self):
         """New agents get their category remapped."""
@@ -395,20 +429,20 @@ class TestMergeManifests(unittest.TestCase):
         result, added, stale = merge_manifests(root, sync)
         agent = result["agents"][0]
         # Path should use data-api (mapped) not database (upstream)
-        self.assertIn("data-api", agent["path"])
+        self.assertEqual(agent["path"], "data-api/db-tool")
 
     def test_sync_path_preserved_if_provided(self):
         """If sync agent has a path, it is used as-is."""
         root = make_root_manifest()
         sync = make_sync_manifest(
             agents=[
-                make_agent("custom", path=".opencode/agents/custom-path.md"),
+                make_agent("custom", path="devtools/custom-path"),
             ]
         )
         result, added, stale = merge_manifests(root, sync)
         self.assertEqual(
             result["agents"][0]["path"],
-            ".opencode/agents/custom-path.md",
+            "devtools/custom-path",
         )
 
     def test_default_mode_is_byline(self):
@@ -421,6 +455,84 @@ class TestMergeManifests(unittest.TestCase):
         )
         result, added, stale = merge_manifests(root, sync)
         self.assertEqual(result["agents"][0]["mode"], "byline")
+
+    def test_duplicate_agents_in_sync_first_wins(self):
+        """When sync has duplicate names, only the first is added."""
+        root = make_root_manifest()
+        sync = make_sync_manifest(
+            agents=[
+                make_agent("dup", category="ai", description="First version"),
+                make_agent("dup", category="web", description="Second version"),
+            ]
+        )
+        result, added, stale = merge_manifests(root, sync)
+        # Added only once
+        self.assertEqual(added, ["dup"])
+        self.assertEqual(len(result["agents"]), 1)
+        agent = result["agents"][0]
+        # First occurrence wins — category "ai" not "web"
+        self.assertEqual(agent["category"], "ai")
+        self.assertIn("First version", agent["description"])
+
+    def test_missing_description_uses_fallback(self):
+        """Agent without description gets 'Auto-synced agent' fallback."""
+        root = make_root_manifest()
+        sync = make_sync_manifest(
+            agents=[
+                {"name": "no-desc", "category": "ai", "mode": "byline"},
+            ]
+        )
+        result, added, stale = merge_manifests(root, sync)
+        agent = result["agents"][0]
+        self.assertTrue(agent["description"].startswith(NEEDS_REVIEW_PREFIX))
+        self.assertIn("Auto-synced agent", agent["description"])
+
+    def test_case_sensitivity_in_category(self):
+        """Category mapping is case-sensitive (uppercase falls to devtools)."""
+        root = make_root_manifest()
+        sync = make_sync_manifest(
+            agents=[make_agent("upper", category="AI")],
+        )
+        with self.assertLogs("update-manifest", level="WARNING"):
+            result, added, stale = merge_manifests(root, sync)
+        self.assertEqual(result["agents"][0]["category"], "devtools")
+
+    def test_missing_agents_key_in_root(self):
+        """Root manifest missing 'agents' key is handled gracefully."""
+        root = {"version": "1.0.0", "base_path": ".opencode/agents"}
+        sync = make_sync_manifest(agents=[make_agent("new")])
+        result, added, stale = merge_manifests(root, sync)
+        self.assertEqual(len(added), 1)
+        self.assertEqual(result["agents"][0]["name"], "new")
+
+    def test_agent_without_name_skipped(self):
+        """Sync agents without a 'name' field are skipped with warning."""
+        root = make_root_manifest()
+        sync = make_sync_manifest(
+            agents=[
+                {"category": "ai", "description": "Nameless"},
+                make_agent("valid"),
+            ]
+        )
+        with self.assertLogs("update-manifest", level="WARNING"):
+            result, added, stale = merge_manifests(root, sync)
+        self.assertEqual(added, ["valid"])
+        self.assertEqual(len(result["agents"]), 1)
+
+    def test_duplicate_names_in_root_logged(self):
+        """Duplicate agent names in root manifest trigger a warning."""
+        root = make_root_manifest(
+            agents=[
+                make_agent("dup-root", description="First"),
+                make_agent("dup-root", description="Second"),
+            ]
+        )
+        sync = make_sync_manifest(agents=[])
+        with self.assertLogs("update-manifest", level="WARNING") as cm:
+            result, added, stale = merge_manifests(root, sync)
+        self.assertTrue(any("Duplicate" in msg for msg in cm.output))
+        # Last one wins in dict comprehension, only 1 remains
+        self.assertEqual(len(result["agents"]), 1)
 
 
 # =====================================================================
@@ -438,8 +550,6 @@ class TestUpdateManifest(unittest.TestCase):
         self.metadata_path = os.path.join(self.tmpdir, "metadata.json")
 
     def tearDown(self):
-        import shutil
-
         shutil.rmtree(self.tmpdir, ignore_errors=True)
 
     def test_basic_update(self):
@@ -473,27 +583,25 @@ class TestUpdateManifest(unittest.TestCase):
         meta = load_json(self.metadata_path)
         self.assertEqual(meta["added"], ["new-one"])
 
-    def test_no_sync_manifest_exits_2(self):
-        """Missing sync manifest exits with code 2."""
+    def test_no_sync_manifest_raises(self):
+        """Missing sync manifest raises SyncManifestNotFoundError."""
         write_json(self.root_path, make_root_manifest())
-        with self.assertRaises(SystemExit) as ctx:
+        with self.assertRaises(SyncManifestNotFoundError):
             update_manifest(
                 root_path=self.root_path,
                 sync_path="/nonexistent/sync.json",
                 metadata_path=self.metadata_path,
             )
-        self.assertEqual(ctx.exception.code, 2)
 
-    def test_no_root_manifest_exits_1(self):
-        """Missing root manifest exits with code 1."""
+    def test_no_root_manifest_raises(self):
+        """Missing root manifest raises ManifestNotFoundError."""
         write_json(self.sync_path, make_sync_manifest())
-        with self.assertRaises(SystemExit) as ctx:
+        with self.assertRaises(ManifestNotFoundError):
             update_manifest(
                 root_path="/nonexistent/root.json",
                 sync_path=self.sync_path,
                 metadata_path=self.metadata_path,
             )
-        self.assertEqual(ctx.exception.code, 1)
 
     def test_dry_run_no_writes(self):
         """Dry run does not modify the root manifest."""
@@ -615,6 +723,102 @@ class TestUpdateManifest(unittest.TestCase):
 
         self.assertEqual(result["tier"], "extended")
 
+    def test_default_tier_is_core(self):
+        """Default tier is 'core' when SYNC_TIER env var is not set."""
+        write_json(self.root_path, make_root_manifest())
+        write_json(self.sync_path, make_sync_manifest())
+
+        env = os.environ.copy()
+        env.pop("SYNC_TIER", None)
+        with patch.dict(os.environ, env, clear=True):
+            result = update_manifest(
+                root_path=self.root_path,
+                sync_path=self.sync_path,
+                metadata_path=self.metadata_path,
+            )
+
+        self.assertEqual(result["tier"], "core")
+
+    def test_corrupt_root_json_raises(self):
+        """Corrupt root manifest JSON raises ManifestError."""
+        with open(self.root_path, "w") as f:
+            f.write("{invalid json!!!")
+        write_json(self.sync_path, make_sync_manifest())
+
+        with self.assertRaises(ManifestError):
+            update_manifest(
+                root_path=self.root_path,
+                sync_path=self.sync_path,
+                metadata_path=self.metadata_path,
+            )
+
+    def test_corrupt_sync_json_raises(self):
+        """Corrupt sync manifest JSON raises ManifestError."""
+        write_json(self.root_path, make_root_manifest())
+        with open(self.sync_path, "w") as f:
+            f.write("not valid json [[[")
+
+        with self.assertRaises(ManifestError):
+            update_manifest(
+                root_path=self.root_path,
+                sync_path=self.sync_path,
+                metadata_path=self.metadata_path,
+            )
+
+    def test_stale_agents_in_metadata(self):
+        """Stale agents appear in pipeline metadata output."""
+        root = make_root_manifest(
+            agents=[
+                make_agent("kept", source="aitmpl"),
+                make_agent("removed-upstream", source="aitmpl"),
+                make_agent("manual-agent"),  # no source — never stale
+            ]
+        )
+        write_json(self.root_path, root)
+        write_json(
+            self.sync_path,
+            make_sync_manifest(agents=[make_agent("kept")]),
+        )
+
+        result = update_manifest(
+            root_path=self.root_path,
+            sync_path=self.sync_path,
+            metadata_path=self.metadata_path,
+        )
+
+        self.assertEqual(result["stale"], ["removed-upstream"])
+        self.assertEqual(result["added"], [])
+
+        # Verify metadata file also contains stale info
+        meta = load_json(self.metadata_path)
+        self.assertEqual(meta["stale"], ["removed-upstream"])
+
+    def test_non_dict_root_manifest_raises(self):
+        """Root manifest that is not a JSON object raises ManifestError."""
+        with open(self.root_path, "w") as f:
+            json.dump(["not", "a", "dict"], f)
+        write_json(self.sync_path, make_sync_manifest())
+
+        with self.assertRaises(ManifestError):
+            update_manifest(
+                root_path=self.root_path,
+                sync_path=self.sync_path,
+                metadata_path=self.metadata_path,
+            )
+
+    def test_non_dict_sync_manifest_raises(self):
+        """Sync manifest that is not a JSON object raises ManifestError."""
+        write_json(self.root_path, make_root_manifest())
+        with open(self.sync_path, "w") as f:
+            json.dump("just a string", f)
+
+        with self.assertRaises(ManifestError):
+            update_manifest(
+                root_path=self.root_path,
+                sync_path=self.sync_path,
+                metadata_path=self.metadata_path,
+            )
+
 
 # =====================================================================
 # Test: CLI
@@ -631,8 +835,6 @@ class TestCLI(unittest.TestCase):
         self.metadata_path = os.path.join(self.tmpdir, "meta.json")
 
     def tearDown(self):
-        import shutil
-
         shutil.rmtree(self.tmpdir, ignore_errors=True)
 
     def test_cli_dry_run(self):
@@ -703,6 +905,78 @@ class TestCLI(unittest.TestCase):
             with self.assertRaises(SystemExit) as ctx:
                 main()
             self.assertEqual(ctx.exception.code, 2)
+
+    def test_cli_full_update(self):
+        """CLI full update writes manifest and metadata."""
+        write_json(self.root_path, make_root_manifest())
+        write_json(
+            self.sync_path,
+            make_sync_manifest(agents=[make_agent("cli-agent", category="ai")]),
+        )
+
+        with patch(
+            "sys.argv",
+            [
+                "update-manifest.py",
+                "--root-manifest",
+                self.root_path,
+                "--sync-manifest",
+                self.sync_path,
+                "--metadata-output",
+                self.metadata_path,
+            ],
+        ):
+            main()
+
+        # Manifest updated
+        manifest = load_json(self.root_path)
+        self.assertEqual(manifest["agent_count"], 1)
+        self.assertEqual(manifest["agents"][0]["name"], "cli-agent")
+
+        # Metadata written
+        self.assertTrue(os.path.exists(self.metadata_path))
+        meta = load_json(self.metadata_path)
+        self.assertEqual(meta["added"], ["cli-agent"])
+
+    def test_cli_verbose_flag(self):
+        """CLI --verbose flag is accepted without error."""
+        write_json(self.root_path, make_root_manifest())
+        write_json(self.sync_path, make_sync_manifest())
+
+        with patch(
+            "sys.argv",
+            [
+                "update-manifest.py",
+                "--root-manifest",
+                self.root_path,
+                "--sync-manifest",
+                self.sync_path,
+                "--no-metadata",
+                "-v",
+            ],
+        ):
+            main()  # Should not raise
+
+    def test_cli_corrupt_json_exits_1(self):
+        """CLI exits with code 1 when root manifest has corrupt JSON."""
+        with open(self.root_path, "w") as f:
+            f.write("{{broken")
+        write_json(self.sync_path, make_sync_manifest())
+
+        with patch(
+            "sys.argv",
+            [
+                "update-manifest.py",
+                "--root-manifest",
+                self.root_path,
+                "--sync-manifest",
+                self.sync_path,
+                "--no-metadata",
+            ],
+        ):
+            with self.assertRaises(SystemExit) as ctx:
+                main()
+            self.assertEqual(ctx.exception.code, 1)
 
 
 if __name__ == "__main__":

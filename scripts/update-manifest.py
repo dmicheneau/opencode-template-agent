@@ -35,10 +35,11 @@ import argparse
 import json
 import logging
 import os
+import shutil
 import sys
 import tempfile
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 # ---------------------------------------------------------------------------
 # Logger
@@ -51,6 +52,9 @@ logger = logging.getLogger("update-manifest")
 
 __all__ = [
     "CATEGORY_MAP",
+    "ManifestError",
+    "ManifestNotFoundError",
+    "SyncManifestNotFoundError",
     "load_json",
     "save_json",
     "map_category",
@@ -58,6 +62,24 @@ __all__ = [
     "update_manifest",
     "main",
 ]
+
+
+# ---------------------------------------------------------------------------
+# Exceptions
+# ---------------------------------------------------------------------------
+
+
+class ManifestError(Exception):
+    """Base exception for manifest processing errors."""
+
+
+class ManifestNotFoundError(ManifestError):
+    """Root manifest not found."""
+
+
+class SyncManifestNotFoundError(ManifestError):
+    """Sync manifest not found (nothing to merge)."""
+
 
 CATEGORY_MAP: Dict[str, str] = {
     # Direct mappings (upstream category == our category)
@@ -81,7 +103,7 @@ CATEGORY_MAP: Dict[str, str] = {
 
 DEFAULT_ROOT_MANIFEST = "manifest.json"
 DEFAULT_SYNC_MANIFEST = ".opencode/agents/manifest.json"
-DEFAULT_METADATA_OUTPUT = "/tmp/sync-metadata.json"
+DEFAULT_METADATA_OUTPUT = os.path.join(tempfile.gettempdir(), "sync-metadata.json")
 
 NEEDS_REVIEW_PREFIX = "[NEEDS_REVIEW]"
 """Prefix added to descriptions of auto-synced agents pending human review."""
@@ -199,16 +221,28 @@ def merge_manifests(
           found in the sync manifest.
     """
     project_root = Path(project_root)
+    base_path = root.get("base_path", ".opencode/agents")
 
     # Build lookup of existing agents by name
-    existing: Dict[str, Dict[str, Any]] = {a["name"]: a for a in root.get("agents", [])}
+    existing: Dict[str, Dict[str, Any]] = {}
+    for a in root.get("agents", []):
+        name = a.get("name")
+        if not name:
+            logger.warning("Skipping agent entry with no name: %s", a)
+            continue
+        if name in existing:
+            logger.warning("Duplicate agent name in root manifest: %r", name)
+        existing[name] = a
 
     # Track sync agent names for staleness detection
-    sync_names: set[str] = set()
+    sync_names: Set[str] = set()
     added: List[str] = []
 
     for agent in sync.get("agents", []):
-        name = agent["name"]
+        name = agent.get("name")
+        if not name:
+            logger.warning("Skipping sync agent entry with no name: %s", agent)
+            continue
         sync_names.add(name)
 
         if name in existing:
@@ -219,14 +253,15 @@ def merge_manifests(
         sync_category = agent.get("category", "devtools")
         our_category = map_category(sync_category)
 
-        agent_path = agent.get("path", f".opencode/agents/{our_category}/{name}.md")
+        # Path is relative to base_path, without .md extension
+        agent_path = agent.get("path", f"{our_category}/{name}")
 
-        # Verify the .md file exists
-        full_path = project_root / agent_path
+        # Verify the .md file exists on disk
+        full_path = project_root / base_path / f"{agent_path}.md"
         if not full_path.is_file():
             logger.warning(
                 "Agent file not found at %s (may be staged but not on disk)",
-                agent_path,
+                full_path,
             )
 
         new_entry: Dict[str, Any] = {
@@ -288,34 +323,39 @@ def update_manifest(
         ``total_synced``, ``tier``, ``dry_run``.
 
     Raises:
-        SystemExit: With code 2 if sync manifest is not found.
-        SystemExit: With code 1 on JSON parse errors or I/O failures.
+        ManifestNotFoundError: If root manifest does not exist.
+        ManifestError: On JSON parse errors or I/O failures.
+        SyncManifestNotFoundError: If sync manifest is not found.
     """
     # Validate root manifest exists
     if not os.path.isfile(root_path):
-        logger.error("Root manifest not found: %s", root_path)
-        sys.exit(1)
+        raise ManifestNotFoundError(f"Root manifest not found: {root_path}")
 
     # Check sync manifest exists
     if not os.path.isfile(sync_path):
-        logger.info("No sync manifest found at %s, nothing to merge", sync_path)
-        sys.exit(2)
+        raise SyncManifestNotFoundError(
+            f"No sync manifest found at {sync_path}, nothing to merge"
+        )
 
     # Load manifests
     try:
         root = load_json(root_path)
     except (json.JSONDecodeError, OSError) as exc:
-        logger.error("Failed to load root manifest %s: %s", root_path, exc)
-        sys.exit(1)
+        raise ManifestError(f"Failed to load root manifest {root_path}: {exc}") from exc
+
+    if not isinstance(root, dict):
+        raise ManifestError(f"Root manifest is not a JSON object: {root_path}")
 
     try:
         sync = load_json(sync_path)
     except (json.JSONDecodeError, OSError) as exc:
-        logger.error("Failed to load sync manifest %s: %s", sync_path, exc)
-        sys.exit(1)
+        raise ManifestError(f"Failed to load sync manifest {sync_path}: {exc}") from exc
+
+    if not isinstance(sync, dict):
+        raise ManifestError(f"Sync manifest is not a JSON object: {sync_path}")
 
     # Determine project root from root manifest location
-    project_root = Path(root_path).parent or Path(".")
+    project_root = Path(root_path).parent
 
     # Merge
     root, added, stale = merge_manifests(root, sync, project_root=project_root)
@@ -426,12 +466,19 @@ def main() -> None:
 
     metadata_path = None if args.no_metadata else args.metadata_output
 
-    update_manifest(
-        root_path=args.root_manifest,
-        sync_path=args.sync_manifest,
-        metadata_path=metadata_path,
-        dry_run=args.dry_run,
-    )
+    try:
+        update_manifest(
+            root_path=args.root_manifest,
+            sync_path=args.sync_manifest,
+            metadata_path=metadata_path,
+            dry_run=args.dry_run,
+        )
+    except SyncManifestNotFoundError as exc:
+        logger.info("%s", exc)
+        sys.exit(2)
+    except ManifestError as exc:
+        logger.error("%s", exc)
+        sys.exit(1)
 
 
 if __name__ == "__main__":
