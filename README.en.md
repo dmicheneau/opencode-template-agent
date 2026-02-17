@@ -6,12 +6,12 @@
 ![Agents](https://img.shields.io/badge/agents-70-blue)
 ![Tests](https://img.shields.io/badge/tests-418%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
-![Node](https://img.shields.io/badge/node-18%2B-green)
+![Node](https://img.shields.io/badge/node-20%2B-green)
 ![npm](https://img.shields.io/npm/v/opencode-agents?label=npm&color=cb3837)
 
 Curated registry of **70 AI agents** for [OpenCode](https://opencode.ai), distributed via a zero-dependency CLI and interactive TUI. Agents are `.md` files containing system prompts that configure AI assistants for specific roles.
 
-Source: [aitmpl.com](https://www.aitmpl.com/agents) (413+ agents available) + 4 custom agents.
+Source: [aitmpl.com](https://www.aitmpl.com/agents) (413+ agents available). The 4 primary agents are custom.
 
 ## 🚀 Quickstart
 
@@ -30,7 +30,7 @@ npx github:dmicheneau/opencode-template-agent install typescript-pro     # Insta
 npx github:dmicheneau/opencode-template-agent install --pack backend
 ```
 
-Agents are downloaded from GitHub and installed into `.opencode/agents/`. Requires Node.js 18+.
+Agents are downloaded from GitHub and installed into `.opencode/agents/`. Requires Node.js 20+.
 
 ### Via bash script
 
@@ -71,7 +71,7 @@ npx github:dmicheneau/opencode-template-agent install --pack backend,devops
 
 # One or more categories
 npx github:dmicheneau/opencode-template-agent install --category languages
-npx github:dmicheneau/opencode-template-agent install --category languages,database
+npx github:dmicheneau/opencode-template-agent install --category languages,data-api
 
 # All agents
 npx github:dmicheneau/opencode-template-agent install --all
@@ -112,7 +112,7 @@ npx github:dmicheneau/opencode-template-agent search "machine learning"
 | 📊 Business | 6 | Product management, project management, PRD, Scrum, UX research, business analysis |
 | 📝 Docs | 4 | Technical documentation, API docs, writing, diagrams |
 
-⭐ = primary agent
+⭐ 4 primary agents (`Tab` in OpenCode): cloud-architect, devops-engineer, fullstack-developer, episode-orchestrator
 
 ## 🎒 Packs
 
@@ -138,11 +138,11 @@ npx github:dmicheneau/opencode-template-agent search "machine learning"
 
 ## 🔄 Automatic Sync
 
-Agents are automatically synced from [aitmpl.com](https://www.aitmpl.com/agents) via a weekly GitHub Actions workflow.
+Agents are synced from [aitmpl.com](https://www.aitmpl.com/agents) via a GitHub Actions workflow (to be activated).
 
 ### How it works
 
-1. **Weekly cron** — every Monday at 06:00 UTC, the `sync-agents.yml` workflow checks for updates
+1. **Weekly cron (to be activated)** — every Monday at 06:00 UTC, the `sync-agents.yml` workflow will check for updates
 2. **Change detection** — new, modified, or deleted agents are identified
 3. **Manifest update** — `scripts/update-manifest.py` merges synced agents with the main manifest while preserving curated metadata (tags, descriptions, packs)
 4. **Validation** — automated tests, frontmatter verification, and manifest consistency checks
@@ -153,8 +153,9 @@ Agents are automatically synced from [aitmpl.com](https://www.aitmpl.com/agents)
 ```bash
 # Via GitHub CLI
 gh workflow run "Sync Agents" -f tier=core -f dry_run=true    # Dry-run (no commit)
-gh workflow run "Sync Agents" -f tier=core                     # Actual sync
-gh workflow run "Sync Agents" -f tier=all -f force=true        # Full forced sync
+gh workflow run "Sync Agents" -f tier=core                     # Actual sync (core agents only)
+gh workflow run "Sync Agents" -f tier=extended                  # Extended tier sync
+gh workflow run "Sync Agents" -f tier=all -f force=true        # Full forced sync (all tiers)
 ```
 
 New agents are marked `[NEEDS_REVIEW]` in the manifest and require manual review before merging.
