@@ -4,7 +4,7 @@
 
 [![CI](https://github.com/dmicheneau/opencode-template-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/dmicheneau/opencode-template-agent/actions/workflows/ci.yml)
 ![Agents](https://img.shields.io/badge/agents-56-blue)
-![Tests](https://img.shields.io/badge/tests-176%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-401%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Node](https://img.shields.io/badge/node-18%2B-green)
 ![npm](https://img.shields.io/npm/v/opencode-agents?label=npm&color=cb3837)
@@ -130,12 +130,44 @@ npx github:dmicheneau/opencode-template-agent search "machine learning"
 | `quality` | code-reviewer, test-automator, debugger, performance-engineer, refactoring-specialist | Qualité code |
 | `startup` | fullstack-developer, typescript-pro, expert-nextjs-developer, postgres-pro, docker-specialist, product-manager, ui-designer, test-automator | Kit startup |
 
+## 🔄 Synchronisation automatique
+
+Les agents sont synchronisés automatiquement depuis [aitmpl.com](https://www.aitmpl.com/agents) via un workflow GitHub Actions hebdomadaire.
+
+### Fonctionnement
+
+1. **Cron hebdomadaire** — chaque lundi à 06:00 UTC, le workflow `sync-agents.yml` vérifie les mises à jour
+2. **Détection des changements** — les agents nouveaux, modifiés ou supprimés sont identifiés
+3. **Mise à jour du manifest** — `scripts/update-manifest.py` fusionne les agents synchronisés avec le manifest principal en préservant les métadonnées curées (tags, descriptions, packs)
+4. **Validation** — tests automatiques, vérification du frontmatter et de la cohérence du manifest
+5. **Pull Request** — une PR est créée automatiquement avec un rapport détaillé pour revue humaine
+
+### Lancement manuel
+
+```bash
+# Via GitHub CLI
+gh workflow run "Sync Agents" -f tier=core -f dry_run=true    # Dry-run (pas de commit)
+gh workflow run "Sync Agents" -f tier=core                     # Sync réelle
+gh workflow run "Sync Agents" -f tier=all -f force=true        # Sync complète forcée
+```
+
+Les nouveaux agents sont marqués `[NEEDS_REVIEW]` dans le manifest et nécessitent une revue manuelle avant merge.
+
+### Scripts de sync
+
+| Script | Description |
+|--------|-------------|
+| `scripts/sync-agents.py` | Télécharge les agents depuis le repo upstream |
+| `scripts/update-manifest.py` | Fusionne le manifest sync avec le manifest principal |
+| `scripts/sync_common.py` | Utilitaires HTTP et helpers partagés |
+
 ## 🏗️ Architecture du projet
 
 ```
 opencode-template-agent/
 ├── bin/cli.mjs              # CLI entry point
 ├── src/
+│   ├── meta.mjs             # Version, user agent
 │   ├── registry.mjs         # Manifest, search, filtering
 │   ├── installer.mjs        # Download + install
 │   ├── display.mjs          # ANSI output
@@ -146,6 +178,10 @@ opencode-template-agent/
 │       ├── renderer.mjs     # Layout + formatting
 │       ├── input.mjs        # User input handling
 │       └── ansi.mjs         # ANSI escape sequences
+├── scripts/
+│   ├── sync-agents.py       # Pipeline de sync upstream
+│   ├── update-manifest.py   # Fusion manifest sync → manifest principal
+│   └── sync_common.py       # Utilitaires HTTP partagés
 ├── manifest.json            # 56 agents, 10 catégories, 9 packs
 ├── install.sh               # Script d'installation bash
 ├── .opencode/agents/        # Fichiers agents (.md)
@@ -154,7 +190,7 @@ opencode-template-agent/
 │   ├── ai/                  # 6 agents
 │   ├── web/                 # 6 agents
 │   ├── data-api/            # 5 agents
-│   ├── devops/              # 7 subagents
+│   ├── devops/              # 9 agents
 │   ├── devtools/            # 6 agents
 │   ├── security/            # 3 agents
 │   ├── mcp/                 # 4 agents
@@ -165,18 +201,19 @@ opencode-template-agent/
 
 ## 🧪 Tests
 
-**176 tests** (59 CLI + 117 Python).
+**401 tests** (241 JS + 160 Python).
 
 ```bash
-# Tests CLI (Node.js)
-node --test tests/cli.test.mjs
+# Tous les tests JS (CLI + TUI)
+node --test tests/cli.test.mjs tests/tui.test.mjs
 
-# Tests Python
+# Tous les tests Python
 python3 tests/run_tests.py
 
 # Tests spécifiques
 python3 -m pytest tests/test_agents.py -v
 python3 -m pytest tests/test_sync_script.py -v
+python3 -m pytest tests/test_update_manifest.py -v
 ```
 
 ## 🤝 Contribuer
