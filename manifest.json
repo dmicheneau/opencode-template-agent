@@ -3,7 +3,7 @@
   "repo": "dmicheneau/opencode-template-agent",
   "branch": "main",
   "base_path": ".opencode/agents",
-  "agent_count": 55,
+  "agent_count": 56,
   "categories": {
     "ai": {
       "label": "AI & Machine Learning",
@@ -462,6 +462,14 @@
       "mode": "subagent",
       "description": "Project planning, risk management, and stakeholder coordination",
       "tags": ["project-management", "planning", "risk", "stakeholders", "budget"]
+    },
+    {
+      "name": "prd",
+      "category": "business",
+      "path": "business/prd",
+      "mode": "subagent",
+      "description": "Transform ideas and briefs into structured, actionable Product Requirements Documents",
+      "tags": ["prd", "requirements", "product", "specifications", "documentation", "planning"]
     },
     {
       "name": "scrum-master",
