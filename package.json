@@ -32,7 +32,7 @@
     "code-templates"
   ],
   "scripts": {
-    "test": "node --test tests/cli.test.mjs",
+    "test": "node --test tests/cli.test.mjs tests/tui.test.mjs",
     "lint": "node --check bin/cli.mjs src/*.mjs",
     "prepublishOnly": "npm test"
   }

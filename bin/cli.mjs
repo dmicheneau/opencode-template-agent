@@ -2,7 +2,7 @@
 
 // ─── opencode-agents CLI ────────────────────────────────────────────────────────
 // Zero-dependency CLI for installing AI agent templates into OpenCode projects.
-// Uses only Node.js 18+ built-in modules.
+// Uses only Node.js 20+ built-in modules.
 // ─────────────────────────────────────────────────────────────────────────────────
 
 import { readFileSync } from 'node:fs';

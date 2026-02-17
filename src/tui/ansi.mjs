@@ -1,5 +1,5 @@
 // ── NO_COLOR support ────────────────────────────────────────────────────────
-export const NO_COLOR = 'NO_COLOR' in process.env;
+export const NO_COLOR = 'NO_COLOR' in process.env || process.env.TERM === 'dumb';
 
 // ── Escape Sequences ────────────────────────────────────────────────────────
 export const ESC = '\x1b';
@@ -42,8 +42,8 @@ export const bgBlue = wrap(44);
 export const bgMagenta = wrap(45);
 export const bgCyan = wrap(46);
 export const bgWhite = wrap(47);
-export const boldCyan = NO_COLOR ? (s) => s : (s) => `\x1b[1;36m${s}\x1b[0m`;
-export const boldBrightCyan = (s) => bold(brightCyan(s));
+export const boldCyan = wrap('1;36');
+export const boldBrightCyan = wrap('1;96');
 
 // ── Box Drawing ─────────────────────────────────────────────────────────────
 export const BOX = {

@@ -10,20 +10,13 @@ const wrap = (code) => (/** @type {string} */ text) => NO_COLOR ? String(text) :
 
 export const bold    = wrap('1');
 export const dim     = wrap('2');
-const italic  = wrap('3');
 export const red     = wrap('31');
 export const green   = wrap('32');
 export const yellow  = wrap('33');
-const blue    = wrap('34');
-const magenta = wrap('35');
 export const cyan    = wrap('36');
-const white   = wrap('37');
 
 // Combined helpers
-const boldGreen  = (/** @type {string} */ t) => bold(green(t));
 export const boldCyan   = (/** @type {string} */ t) => bold(cyan(t));
-const boldRed    = (/** @type {string} */ t) => bold(red(t));
-const boldYellow = (/** @type {string} */ t) => bold(yellow(t));
 
 // ─── Status Icons ───────────────────────────────────────────────────────────────
 

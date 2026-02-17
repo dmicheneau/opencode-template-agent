@@ -77,6 +77,9 @@ function validateManifest(manifest) {
     if (agent.path && agent.path.includes('..')) {
       throw new Error(`Agent path contains "..": "${agent.path}"`);
     }
+    if (agent.path.includes('\0')) {
+      throw new Error(`Invalid null byte in agent path: "${agent.name}"`);
+    }
   }
 }
 

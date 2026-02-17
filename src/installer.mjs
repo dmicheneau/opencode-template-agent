@@ -59,6 +59,7 @@ function download(url, _redirectCount = 0) {
     const request = https.get(url, { headers: { 'User-Agent': USER_AGENT } }, (res) => {
       // Handle redirects
       if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        res.resume();
         download(res.headers.location, _redirectCount + 1).then(resolve, reject);
         return;
       }
