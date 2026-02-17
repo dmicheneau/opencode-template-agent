@@ -305,13 +305,30 @@ function renderEmpty(state, out, W, vh) {
 // ─── Too Small ──────────────────────────────────────────────────────────────
 
 function renderTooSmall(cols, rows) {
-  const w = Math.max(cols, 24), lines = [];
-  const msg = ['', '  Terminal too small.', `  Min: ${MIN_COLS}x${MIN_ROWS}`,
-    `  Current: ${cols}x${rows}`, '', '  Resize to continue.', ''];
+  const w = Math.max(cols, 30), lines = [];
+  const iw = w - 4; // inner width between borders
+
+  const center = (txt) => {
+    const vl = visibleLength(txt);
+    const left = Math.max(0, Math.floor((iw - vl) / 2));
+    const right = Math.max(0, iw - vl - left);
+    return ' '.repeat(left) + txt + ' '.repeat(right);
+  };
+
+  const msg = [
+    '',
+    bold(brightCyan('⚠  TERMINAL TOO SMALL')),
+    '',
+    `${yellow('Current:')} ${bold(red(`${cols}×${rows}`))}`,
+    `${yellow('Minimum:')} ${bold(brightGreen(`${MIN_COLS}×${MIN_ROWS}`))}`,
+    '',
+    white('Resize your terminal to continue.'),
+    '',
+  ];
+
   lines.push(cyan(BOX.topLeft + BOX.horizontal.repeat(Math.max(0, w - 2)) + BOX.topRight));
   for (const m of msg) {
-    const g = Math.max(0, w - visibleLength(m) - 4);
-    lines.push(`${cyan(BOX.vertical)} ${m}${' '.repeat(g)} ${cyan(BOX.vertical)}`);
+    lines.push(`${cyan(BOX.vertical)} ${center(m)} ${cyan(BOX.vertical)}`);
   }
   lines.push(cyan(BOX.bottomLeft + BOX.horizontal.repeat(Math.max(0, w - 2)) + BOX.bottomRight));
   while (lines.length < rows) lines.push(CLEAR_LINE);
