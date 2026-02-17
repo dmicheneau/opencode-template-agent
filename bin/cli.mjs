@@ -117,6 +117,7 @@ ${bold('Usage:')}
   opencode-agents list                            List all available agents
   opencode-agents list --packs                    List available packs
   opencode-agents search <query>                  Search agents
+  opencode-agents tui                             Interactive agent browser
 
 ${bold('Options:')}
   --force      Overwrite existing agent files
@@ -346,8 +347,16 @@ async function main() {
       cmdSearch(parsed);
       break;
 
+    case 'tui':
+      await (await import('../src/tui/index.mjs')).launchTUI({ force: Boolean(parsed.flags.force) });
+      break;
+
     case '':
-      showHelp();
+      if (process.stdin.isTTY) {
+        await (await import('../src/tui/index.mjs')).launchTUI({ force: Boolean(parsed.flags.force) });
+      } else {
+        showHelp();
+      }
       break;
 
     default:
