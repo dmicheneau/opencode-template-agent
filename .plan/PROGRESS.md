@@ -54,7 +54,15 @@
 
 ## Notes de session
 
-### Session courante (2026-02-17)
+### Session 2 (2026-02-17)
+- Revue technique Plan V3 complète → `.plan/05-technical-review-v3.md`
+  - 8 dimensions analysées, verdict APPROVE WITH CHANGES
+  - 2 risques majeurs : T1 (SIGTSTP crash recovery), T2 (ratio tests TUI 21% vs 64%)
+  - 1 risque haut : R1 (remapping prd)
+  - 6 risques moyens, 3 risques bas
+  - Recommandations : 2 obligatoires, 7 recommandées, 4 actions agents
+
+### Session 1 (2026-02-17)
 - Annulation T4.0 (prototype skills)
 - Archivage plan v2 dans .plan/archive/v2/
 - Analyse des 9 agents demandés → 6 nouveaux, 3 déjà présents
