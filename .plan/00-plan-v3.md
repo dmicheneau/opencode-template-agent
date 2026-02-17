@@ -6,11 +6,11 @@
 
 ## Contexte actuel
 
-- **56 agents, 12 catégories, 9 packs** (cible atteinte)
+- **56 agents, 10 catégories, 9 packs** (cible atteinte)
 - CLI non-interactive (list/search/install) + TUI interactif
 - Zero npm deps, Node.js 20+ ESM only
 - Scripts Python sync (stdlib only)
-- ~25 commits, 117 tests Python, 59 tests CLI
+- ~25 commits, 241 JS + 117 Python = 358 tests
 
 ## Axe 1 — Intégration agents (6 nouveaux)
 
@@ -25,7 +25,7 @@
 | `platform-engineer` | devops | 287 | Standard | Pas de recommandation modèle (D12) — modèle choisi au niveau session |
 | `prd` | business | 203 | Standard | Scope réduit — génération PRD uniquement, sans intégration GitHub (D13) |
 
-Nouvelle catégorie `mcp` avec 4 agents. Total : **56 agents, 12 catégories** ✅ (cible atteinte).
+Nouvelle catégorie `mcp` avec 4 agents. Total : **56 agents, 10 catégories** ✅ (cible atteinte).
 
 > **Non intégré** : `github-actions-expert` analysé mais non retenu — redondant avec `ci-cd-engineer` (D14).
 
@@ -121,9 +121,13 @@ Les deux axes sont **indépendants** et peuvent s'entrelacer :
 
 ## Critères de succès
 
-- [x] 56 agents, 12 catégories
+- [x] 56 agents, 10 catégories
 - [x] TUI auto-lancé via `npx github:dmicheneau/opencode-template-agent` (détection TTY)
 - [x] CLI existant préservé (non-breaking)
 - [x] TUI : parcourir catégories → sélectionner agents → installer (flux E2E)
 - [x] Tous les tests passent (Python + CLI + TUI)
 - [x] Nouveau pack `mcp` disponible
+
+## Post-plan — Notes de maintenance
+
+- **D15** : Categories reorganized from 12→10 (api+database→data-api, team dissolved→web+devtools)

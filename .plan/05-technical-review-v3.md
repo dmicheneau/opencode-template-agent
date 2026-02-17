@@ -215,21 +215,21 @@ Le plan liste : keypress parsing, composants (assert strings), machine à états
 
 ### Évaluation
 
-Le TUI affichera **55 agents** dans 12 catégories. C'est une quantité **triviale** — aucun problème de performance n'est anticipé.
+Le TUI affichera **56 agents** dans 10 catégories. C'est une quantité **triviale** — aucun problème de performance n'est anticipé.
 
 ### Analyse
 
 | Opération | Volume | Impact |
 |---|---|---|
-| Chargement du manifest | 55 agents, ~25KB JSON | Instantané (<1ms) |
-| Rendu full-frame | ~55 lignes max + headers | Instantané (<5ms) |
-| Filtrage live (recherche) | 55 éléments, string.includes() | Instantané (<0.1ms) |
-| Scroll | 55 éléments | Pas de virtualisation nécessaire |
+| Chargement du manifest | 56 agents, ~25KB JSON | Instantané (<1ms) |
+| Rendu full-frame | ~56 lignes max + headers | Instantané (<5ms) |
+| Filtrage live (recherche) | 56 éléments, string.includes() | Instantané (<0.1ms) |
+| Scroll | 56 éléments | Pas de virtualisation nécessaire |
 | Installation séquentielle pendant TUI | N agents, ~1-3s chacun | UX acceptable — afficher progression |
 
 ### Risques
 
-- 🟢 **BAS — Full-frame redraw** : Le plan ne précise pas si le renderer utilise le diff-based rendering ou le full-redraw. Pour 55 agents, le full-redraw est parfaitement acceptable et plus simple à implémenter. Ne pas over-engineer avec du diff.
+- 🟢 **BAS — Full-frame redraw** : Le plan ne précise pas si le renderer utilise le diff-based rendering ou le full-redraw. Pour 56 agents, le full-redraw est parfaitement acceptable et plus simple à implémenter. Ne pas over-engineer avec du diff.
 
 - 🟢 **BAS — Installation pendant le TUI** : L'installer actuel (`installer.mjs`) fait des downloads HTTPS séquentiels. Pendant l'install, le TUI doit afficher une progression (spinner ou barre). Le plan (TUI-3) mentionne un "écran de confirmation" mais pas l'affichage de progression pendant l'install.
 
@@ -302,8 +302,8 @@ Le codebase existant est **propre et cohérent** : JSDoc partout, ESM strict, no
 | Lignes Node.js (src/ + bin/) | 1 008 | ~2 700 (+168%) |
 | Lignes de test Node.js | 642 | ~1 000 (+56%) |
 | Fichiers source Node.js | 4 | 10 (+6 modules TUI) |
-| Agents dans manifest | 49 | 55 (+12%) |
-| Catégories | 11 | 12 (+1 mcp) |
+| Agents dans manifest | 49 | 56 (+14%) |
+| Catégories | 11 | 10 (-1, réorganisation) |
 
 ---
 
@@ -406,3 +406,7 @@ Axe 2 (TUI) :
 ---
 
 > **Bottom line technique** : Le plan V3 est plus simple et mieux ciblé que le V2. L'axe agents est un travail routinier à faible risque. L'axe TUI est ambitieux mais bien architecturé — les deux risques majeurs (crash recovery terminal et couverture de tests) sont facilement résolvables avec les mitigations proposées. Le projet reste dans ses contraintes (zero deps, ESM, stdlib only).
+
+---
+### Post-review: Réorganisation catégories (D15)
+Toutes les issues identifiées dans cette revue ont été corrigées. De plus, les catégories ont été réorganisées de 12→10 pour résoudre la confusion UX entre les tabs "Developer"/"Programming"/"Development". 358 tests passent (241 JS + 117 Python).

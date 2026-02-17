@@ -47,3 +47,9 @@ Ajouter une section nouveautés pour chaque version.
 4. Migration vers `npx opencode-agents` (npm public) ?
 5. Validation fonctionnelle du contenu des agents ?
 6. Coût de maintenance TUI zero-dep à long terme ?
+
+---
+### Post-review: Actions réalisées
+- R4 (confusion catégories) → Résolu via D15 : réorganisation 12→10 catégories
+- R1 (readline vs raw mode) → Raw mode implémenté avec succès
+- Toutes les recommandations ont été adressées dans l'implémentation

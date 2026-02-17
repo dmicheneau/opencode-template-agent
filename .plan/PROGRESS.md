@@ -7,8 +7,8 @@
 | Métrique | Valeur |
 |----------|--------|
 | Agents | 56 installés \| 0 en attente \| 56 cible ✅ |
-| Tests | 117 Python \| 59 CLI |
-| Commits | ~25 |
+| Tests | 241 JS + 117 Python = 358 tests |
+| Commits | ~25 + 13 session commits |
 | Version du plan | v3 (terminé) |
 
 ## Historique des versions
@@ -28,7 +28,7 @@
 
 ### v3 (terminé — .plan/00-plan-v3.md)
 - 2 workstreams : intégration de 6 agents + TUI
-- **Cible atteinte : 56 agents, 12 catégories, 9 packs**
+- **Cible atteinte : 56 agents, 10 catégories, 9 packs**
 
 ## Suivi v3
 
@@ -37,7 +37,7 @@
 | A1 | Créer catégorie mcp/ + 3 agents simples | ✅ Terminé | S4 | mcp-protocol-specialist, mcp-server-architect, mcp-security-auditor |
 | A2 | Convertir mcp-developer + platform-engineer | ✅ Terminé | S4 | Standard complexity |
 | A3 | Convertir prd (remapping outils) | ✅ Terminé | S4 | Scope réduit — PRD only (D13) |
-| A4 | Mettre à jour manifest + packs + tests | ✅ Terminé | S4-S5 | 56 agents, 12 catégories, 9 packs |
+| A4 | Mettre à jour manifest + packs + tests | ✅ Terminé | S4-S5 | 56 agents, 10 catégories, 9 packs |
 | TUI-1 | TUI MVP (readline/promises) | ✅ Terminé | S4 | 6 modules dans src/tui/ |
 | TUI-2 | Navigation (écrans + state machine) | ✅ Terminé | S4 | state.mjs + screen.mjs |
 | TUI-3 | Recherche + confirmation | ✅ Terminé | S4 | input.mjs + renderer.mjs |
@@ -54,6 +54,7 @@
 - **D12** ✅ : Pas de recommandation modèle pour platform-engineer
 - **D13** ✅ : Agent prd sans fonctionnalités GitHub (PRD only)
 - **D14** ✅ : github-actions-expert non intégré (redondant avec ci-cd-engineer)
+- **D15** ✅ : Réorganisation catégories — fusion api+database→data-api, dissolution team→web+devtools, labels clairs, ordre par workflow développeur
 
 ## Notes de session
 
@@ -81,3 +82,19 @@
 - Analyse des 9 agents demandés → 6 nouveaux, 3 déjà présents
 - Analyse TUI complète → architecture 6 modules, ~1650L
 - Création plan v3 et fichier de progression
+
+## Session v3.1 — Réorganisation des catégories ✅
+
+### Commit
+- `a53883b` refactor: reorganize categories from 12 to 10 for clearer TUI navigation
+
+### Changements
+- Fusion `api` (2) + `database` (3) → `data-api` (5) "Data & API"
+- Dissolution `team` (5) → agents redistribués dans `web` (6) et `devtools` (6)
+- Renommage labels : DevTools (un mot), Languages (complet), Data & API
+- Réordonnancement tabs par workflow dev : Languages→AI→Web→Data&API→DevOps→DevTools→Security→MCP→Business→Docs
+- Correction frontmatter manquant dans prd.md
+- 11 corrections de tests, 358/358 passent (241 JS + 117 Python)
+
+### Décision
+- **D15** : Réorganisation catégories — fusion api+database→data-api, dissolution team→web+devtools, labels clairs, ordre par workflow développeur
