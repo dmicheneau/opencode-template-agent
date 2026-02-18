@@ -72,7 +72,10 @@ jobs:
           node-version: "22"
 
       - name: Check Python syntax
-        run: python3 -c "import ast; ast.parse(open('scripts/sync-agents.py').read())"
+        run: |
+          for f in scripts/sync-agents.py scripts/sync_common.py scripts/update-manifest.py scripts/sync-skills.py; do
+            python3 -c "import ast; ast.parse(open('$f').read())"
+          done
 
       - name: Check Node.js syntax
         run: node --check bin/cli.mjs src/*.mjs src/tui/*.mjs

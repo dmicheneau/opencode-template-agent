@@ -10,7 +10,7 @@
 | Tests | 250 JS + 177 Python = 427 tests |
 | Packs | 15 (9 originaux + 6 nouveaux) |
 | Commits | ~25 + 15 + session 8 commits |
-| Version du plan | v4 (en cours) — v3 terminé, archivé |
+| Version du plan | v4 (terminé ✅) — tous les axes S1-S6 complétés |
 
 ## Historique des versions
 
@@ -57,7 +57,7 @@
 |---|-------|--------|---------|-------|
 | S1 | Stabilisation & push CI | ✅ Terminé | 6 | CI verte, TUI 10 tabs OK, prd.md fix |
 | S2 | Workflow sync-agents.yml | ✅ Terminé | 7,10 | S2.1-S2.8 ✅, cron weekly actif, reviewer auto |
-| S3 | Curation & permissions | ⬜ À faire | — | Critères C1-C6, labels |
+| S3 | Curation & permissions | ✅ Terminé | 12 | C1-C6 formalisés, permission mapping, CONTRIBUTING.md |
 | S4 | Expansion vague 1 (→70) | ✅ Terminé | 8 | 14 agents acceptés, 72 rejetés, 6 packs ajoutés |
 | S5 | TUI polish & corrections | ✅ Terminé | 9 | 3 bugs + 2 features, 418 tests verts |
 | S6 | Redesign visuel TUI | ✅ Terminé | 11 | Colored tabs, catColors, bgRow highlight, 427 tests |
@@ -81,6 +81,20 @@
 - **D20** ✅ : Architecture update-manifest.py — patch incrémental (préserve curated, ajoute nouveaux, détecte stale)
 
 ## Notes de session
+
+### Session 12 (2026-02-18)
+- S3 ✅ : Curation & permissions — **plan V4 complété**
+  - S3.1 : Processus de curation formalisé (critères C1-C6, scoring ≥4/6, exclusions veto)
+  - S3.2 : Mapping permissions par catégorie (table 10 catégories × 6 permissions)
+  - S3.3 : CONTRIBUTING.md réécrit (section curation, permission mapping, 3 items checklist PR)
+- Docs fixes bundlés :
+  - README.md + README.en.md : badges 418→427, compteurs 241→250
+  - agent_request.md : catégories obsolètes (database, api, team) → 10 catégories actuelles
+  - CONTRIBUTING.md : 44→70 agents, Python 3.8+→3.10+, lien cassé corrigé
+- CI lint : `ci.yml` couvre maintenant les 4 scripts Python (sync-agents, sync_common, update-manifest, sync-skills)
+- Dead code : supprimé `mobile` et `research` de CAT_COLORS/TAB_COLORS (catégories inexistantes)
+- CHANGELOG.md créé (v1.0.0 → v4.0.0, format Keep a Changelog)
+- Tests : 250 JS + 177 Python = **427 tests** (inchangé, aucune régression)
 
 ### Session 11 (2026-02-18)
 - S6 ✅ : Redesign visuel TUI — style Finder/Hacker-News

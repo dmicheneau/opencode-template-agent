@@ -43,15 +43,16 @@
 
 ### S3 — Gestion des permissions et curation
 
-- [ ] S3.1 Définir le processus de curation pour les nouveaux agents
-  - Critères d'acceptation (C1-C6 du plan)
-  - Template de revue dans la PR
-  - Labels GitHub (needs-curation, auto-sync, reviewed)
-- [ ] S3.2 Créer un mapping de permissions par défaut par catégorie
-  - Agents `languages/` : read+write+edit, bash deny, task allow
-  - Agents `devops/` : read+write+edit+bash, task allow
-  - etc.
-- [ ] S3.3 Documenter les critères de curation dans CONTRIBUTING.md ou README
+- [x] S3.1 Définir le processus de curation pour les nouveaux agents
+  - Critères d'acceptation C1-C6 formalisés dans CONTRIBUTING.md
+  - 3 items de curation ajoutés à la checklist PR
+  - Labels GitHub recommandés : needs-curation, auto-sync, reviewed
+- [x] S3.2 Créer un mapping de permissions par défaut par catégorie
+  - Table 10 catégories × 6 permissions dans CONTRIBUTING.md
+  - ⚠️ = autorisé avec restrictions de chemin/commande explicites
+- [x] S3.3 Documenter les critères de curation dans CONTRIBUTING.md
+  - Section "Processus de curation" avec C1-C6, scoring, exclusions (veto)
+  - Sous-section "Mapping des permissions par catégorie"
 
 ## Axe 3 — Expansion du catalogue (priorité moyenne)
 

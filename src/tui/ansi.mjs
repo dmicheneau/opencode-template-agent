@@ -68,10 +68,8 @@ const CAT_COLORS = {
   security:     wrap(91),     // bright red
   devops:       wrap(93),     // bright yellow
   mcp:          wrap(95),     // bright magenta
-  mobile:       wrap(96),     // bright cyan
   docs:         wrap(37),     // white
   business:     wrap(34),     // blue
-  research:     wrap(92),     // bright green
 };
 const DEFAULT_CAT_COLOR = wrap(37); // white
 
@@ -93,10 +91,8 @@ const TAB_COLORS = {
   security:     wrap('1;91'),  // bold bright red
   devops:       wrap('1;93'),  // bold bright yellow
   mcp:          wrap('1;95'),  // bold bright magenta
-  mobile:       wrap('1;38;5;208'),  // bold orange (256-color)
   docs:         wrap('1;37'),  // bold white
   business:     wrap('1;34'),  // bold blue
-  research:     wrap('1;92'),  // bold bright green
 };
 const DEFAULT_TAB_COLOR = wrap('1;37');
 

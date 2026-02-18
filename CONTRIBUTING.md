@@ -1,6 +1,6 @@
 # Contribuer à OpenCode Agent Template
 
-Bienvenue et merci de vouloir contribuer ! Ce projet est un registre curé de **44 agents IA** pour [OpenCode](https://opencode.ai), synchronisés depuis [aitmpl.com](https://www.aitmpl.com/agents). Toute contribution — correction de bug, nouvel agent ou amélioration — est la bienvenue.
+Bienvenue et merci de vouloir contribuer ! Ce projet est un registre curé de **70 agents IA** pour [OpenCode](https://opencode.ai), synchronisés depuis [aitmpl.com](https://www.aitmpl.com/agents). Toute contribution — correction de bug, nouvel agent ou amélioration — est la bienvenue.
 
 ## Comment contribuer
 
@@ -136,7 +136,7 @@ python3 tests/run_tests.py
 
 - Utiliser **`permission:`** uniquement dans le frontmatter
 - Ne **jamais** utiliser le champ `tools:` (déprécié par OpenCode)
-- Se référer aux [profils de permissions](README.md#système-de-permissions) dans le README
+- Se référer au [mapping des permissions par catégorie](#mapping-des-permissions-par-catégorie) ci-dessous
 
 ### Langue
 
@@ -146,7 +146,51 @@ python3 tests/run_tests.py
 ### Script de synchronisation
 
 - **Python stdlib uniquement** — aucune dépendance externe (pas de pip)
-- Compatible Python 3.8+
+- Compatible Python 3.10+
+
+---
+
+## Processus de curation
+
+Chaque agent proposé est évalué selon six critères avant d'être intégré au registre.
+
+### Critères C1–C6
+
+- **C1 — Non-redondant (obligatoire)** : l'agent ne duplique pas un agent existant
+- **C2 — Permissions claires (obligatoire)** : toutes les `permission:` sont explicites et justifiées
+- **C3 — Prompt substantiel (recommandé)** : le prompt système fait ≥50 lignes
+- **C4 — Catégorie existante (recommandé)** : correspond à une des 10 catégories (`languages`, `devtools`, `web`, `data-api`, `ai`, `security`, `devops`, `mcp`, `docs`, `business`)
+- **C5 — Valeur utilisateur (recommandé)** : apporte une valeur tangible et différenciée
+- **C6 — Source stable (recommandé)** : la source upstream est maintenue activement
+
+### Scoring
+
+Un agent doit satisfaire **C1+C2** (obligatoires) **ET** ≥2 recommandés (≥4/6 total).
+
+### Exclusion (veto)
+
+Un agent est automatiquement refusé s'il :
+
+- Utilise des tools indisponibles dans OpenCode
+- Dépend d'un service propriétaire de niche
+- Exemples non transposables depuis Claude Code
+
+### Mapping des permissions par catégorie
+
+| Catégorie | `read` | `write` | `edit` | `bash` | `task` | `mcp` |
+|-----------|--------|---------|--------|--------|--------|-------|
+| `languages` | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ |
+| `devtools` | ✅ | ✅ | ✅ | ⚠️ | ✅ | ❌ |
+| `web` | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ |
+| `data-api` | ✅ | ✅ | ✅ | ⚠️ | ✅ | ❌ |
+| `ai` | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ |
+| `security` | ✅ | ✅ | ✅ | ⚠️ | ✅ | ❌ |
+| `devops` | ✅ | ✅ | ✅ | ⚠️ | ✅ | ❌ |
+| `mcp` | ✅ | ✅ | ✅ | ⚠️ | ✅ | ✅ |
+| `docs` | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ |
+| `business` | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ |
+
+> ⚠️ = autorisé avec restrictions de chemin/commande explicites.
 
 ---
 
@@ -162,6 +206,9 @@ Avant d'ouvrir votre Pull Request, vérifiez les points suivants :
 - [ ] La synchronisation fonctionne : `python3 scripts/sync-agents.py --force` (si agent synchronisé)
 - [ ] Le `manifest.json` est à jour (généré automatiquement par le script)
 - [ ] Pas de secrets ou tokens dans les fichiers commités
+- [ ] L'agent satisfait C1+C2 (obligatoires) + ≥2 recommandés
+- [ ] Les permissions suivent le mapping de la catégorie
+- [ ] Aucun critère d'exclusion (veto) n'est déclenché
 
 ---
 

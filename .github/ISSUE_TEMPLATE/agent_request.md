@@ -16,15 +16,14 @@ Dans quelle catégorie cet agent devrait-il être placé ?
 
 - [ ] `languages` — Langages de programmation
 - [ ] `devtools` — Outils de développement
-- [ ] `ai` — IA & Data
-- [ ] `devops` — DevOps & Infrastructure
-- [ ] `security` — Sécurité
-- [ ] `database` — Bases de données
 - [ ] `web` — Web & Frontend
-- [ ] `api` — API & GraphQL
+- [ ] `data-api` — Bases de données, API & GraphQL
+- [ ] `ai` — IA & Machine Learning
+- [ ] `security` — Sécurité
+- [ ] `devops` — DevOps & Infrastructure
+- [ ] `mcp` — Model Context Protocol
 - [ ] `docs` — Documentation
-- [ ] `business` — Business & Marketing
-- [ ] `team` — Équipe de développement
+- [ ] `business` — Business & Management
 - [ ] Autre (précisez) :
 
 ## Cas d'usage

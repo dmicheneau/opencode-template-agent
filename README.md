@@ -4,7 +4,7 @@
 
 [![CI](https://github.com/dmicheneau/opencode-template-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/dmicheneau/opencode-template-agent/actions/workflows/ci.yml)
 ![Agents](https://img.shields.io/badge/agents-70-blue)
-![Tests](https://img.shields.io/badge/tests-418%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-427%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Node](https://img.shields.io/badge/node-20%2B-green)
 ![npm](https://img.shields.io/npm/v/opencode-agents?label=npm&color=cb3837)
@@ -208,7 +208,7 @@ opencode-template-agent/
 
 ## 🧪 Tests
 
-**418 tests** (241 JS + 177 Python).
+**427 tests** (250 JS + 177 Python).
 
 ```bash
 # Tous les tests JS (CLI + TUI)
