@@ -104,7 +104,7 @@ function renderAgentList(state, out, W) {
       if (idx >= items.length) { out.push(bdr('', W)); continue; }
       const a = items[idx], cur = idx === cursor, sel = state.selection.has(a.name);
       const inst = state.installed?.has(a.name);
-      const mk = cur ? bold(brightCyan('▸')) : sel ? bold(brightGreen('✓')) : inst ? dim(green('✔')) : ' ';
+      const mk = cur ? bold(brightCyan('▸')) : sel ? bold(brightGreen('✓')) : inst ? brightGreen('✔') : ' ';
       const cc = catColor(a.category);
       // INVARIANT: agent names and category ids are ASCII-only (enforced by manifest schema)
       const nameCol = nameStyle(padEndAscii(a.name, COL_NAME), cur, sel);
@@ -178,13 +178,15 @@ function renderPackDetail(state, out, W) {
 
 // ─── Info Line ──────────────────────────────────────────────────────────────
 
+const LEGEND = `  ${brightGreen('✔')} ${dim('installed')}  ${brightGreen('✓')} ${dim('selected')}  ${brightCyan('▸')} ${dim('cursor')}`;
+
 function renderInfo(state, out, W, total, vh, off) {
   if (state.search?.active) {
     out.push(bdr(`  ${bold(brightCyan('Search:'))} ${white(state.search.query)}${cyan('█')}`, W));
   } else if (total > vh) {
-    out.push(bdr(cyan(`  ↑↓ ${off + 1}-${Math.min(off + vh, total)} of ${total}`), W));
+    out.push(bdr(cyan(`  ↑↓ ${off + 1}-${Math.min(off + vh, total)} of ${total}`) + LEGEND, W));
   } else {
-    out.push(bdr('', W));
+    out.push(bdr(LEGEND, W));
   }
 }
 
