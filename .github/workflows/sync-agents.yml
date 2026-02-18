@@ -540,6 +540,7 @@ jobs:
             gh pr edit "$EXISTING_PR" \
               --title "$PR_TITLE" \
               --body-file /tmp/pr-body.md
+            PR_NUMBER="$EXISTING_PR"
             echo "PR updated: https://github.com/${GH_REPO}/pull/${EXISTING_PR}"
           else
             echo "Creating new PR"
@@ -549,21 +550,27 @@ jobs:
               LABELS="${LABELS},needs-review"
             fi
 
-            gh pr create \
+            PR_URL=$(gh pr create \
               --base main \
               --head "$SYNC_BRANCH" \
               --title "$PR_TITLE" \
               --body-file /tmp/pr-body.md \
-              --label "$LABELS" \
-              --reviewer "${{ github.repository_owner }}" 2>/dev/null || \
+              --label "$LABELS" 2>/dev/null || \
             gh pr create \
               --base main \
               --head "$SYNC_BRANCH" \
               --title "$PR_TITLE" \
-              --body-file /tmp/pr-body.md \
-              --reviewer "${{ github.repository_owner }}"
+              --body-file /tmp/pr-body.md)
 
-            echo "PR created successfully"
+            PR_NUMBER=$(echo "$PR_URL" | grep -oE '[0-9]+$')
+            echo "PR created successfully: ${PR_URL}"
+          fi
+
+          # Assign reviewer (best-effort, non-blocking)
+          if [ -n "$PR_NUMBER" ]; then
+            gh pr edit "$PR_NUMBER" \
+              --add-reviewer "${{ github.repository_owner }}" 2>/dev/null || \
+              echo "::warning::Could not assign reviewer ${{ github.repository_owner }}"
           fi
 
 # =============================================================================
