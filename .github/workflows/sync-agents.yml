@@ -554,12 +554,14 @@ jobs:
               --head "$SYNC_BRANCH" \
               --title "$PR_TITLE" \
               --body-file /tmp/pr-body.md \
-              --label "$LABELS" 2>/dev/null || \
+              --label "$LABELS" \
+              --reviewer "${{ github.repository_owner }}" 2>/dev/null || \
             gh pr create \
               --base main \
               --head "$SYNC_BRANCH" \
               --title "$PR_TITLE" \
-              --body-file /tmp/pr-body.md
+              --body-file /tmp/pr-body.md \
+              --reviewer "${{ github.repository_owner }}"
 
             echo "PR created successfully"
           fi

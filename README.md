@@ -138,11 +138,11 @@ npx github:dmicheneau/opencode-template-agent search "machine learning"
 
 ## 🔄 Synchronisation automatique
 
-Les agents sont synchronisés automatiquement depuis [aitmpl.com](https://www.aitmpl.com/agents) via un workflow GitHub Actions hebdomadaire (à activer).
+Les agents sont synchronisés automatiquement depuis [aitmpl.com](https://www.aitmpl.com/agents) via un workflow GitHub Actions hebdomadaire.
 
 ### Fonctionnement
 
-1. **Cron hebdomadaire (à activer)** — chaque lundi à 06:00 UTC, le workflow `sync-agents.yml` vérifie les mises à jour
+1. **Cron hebdomadaire** — chaque lundi à 06:00 UTC, le workflow `sync-agents.yml` vérifie les mises à jour
 2. **Détection des changements** — les agents nouveaux, modifiés ou supprimés sont identifiés
 3. **Mise à jour du manifest** — `scripts/update-manifest.py` fusionne les agents synchronisés avec le manifest principal en préservant les métadonnées curées (tags, descriptions, packs)
 4. **Validation** — tests automatiques, vérification du frontmatter et de la cohérence du manifest
