@@ -10,7 +10,7 @@
 | Tests | 250 JS + 177 Python = 427 tests |
 | Packs | 15 (9 originaux + 6 nouveaux) |
 | Commits | ~25 + 15 + session 8 commits |
-| Version du plan | v4 (terminé ✅) — tous les axes S1-S6 complétés |
+| Version du plan | v5 (en cours) — v4 terminé, consolidation & distribution |
 
 ## Historique des versions
 
@@ -31,10 +31,16 @@
 - 2 workstreams : intégration de 6 agents + TUI
 - **Cible atteinte : 56 agents, 10 catégories, 9 packs**
 
-### v4 (en cours — .plan/00-plan-v4.md)
-- 4 axes : stabilisation CI, pipeline de sync continue, expansion catalogue, TUI polish
+### v4 (terminé ✅ — archivé dans .plan/archive/v4/)
+- 6 axes : stabilisation CI, pipeline sync, curation, expansion, TUI polish, TUI redesign
 - Pipeline GitHub Actions pour détection automatique de nouveaux agents
-- Cible : 70 agents ✅, sync automatisé hebdomadaire, TUI sans glitches
+- Cible atteinte : 70 agents, 10 catégories, 15 packs, 427 tests
+- Processus de curation formalisé (critères C1-C6, mapping permissions)
+- CHANGELOG.md créé (v1→v4)
+
+### v5 (en cours — .plan/00-plan-v5.md)
+- 6 axes : npm publish, install.sh overhaul, expansion wave 2, TUI enhance, infra, community
+- Cible : publication npm, 85 agents, vue détail TUI
 
 ## Suivi v3
 
@@ -61,6 +67,19 @@
 | S4 | Expansion vague 1 (→70) | ✅ Terminé | 8 | 14 agents acceptés, 72 rejetés, 6 packs ajoutés |
 | S5 | TUI polish & corrections | ✅ Terminé | 9 | 3 bugs + 2 features, 418 tests verts |
 | S6 | Redesign visuel TUI | ✅ Terminé | 11 | Colored tabs, catColors, bgRow highlight, 427 tests |
+
+**Légende** : ⬜ À faire | 🔄 En cours | ✅ Terminé | ❌ Annulé | ⏸️ En pause
+
+## Suivi v5
+
+| # | Tâche | Statut | Session | Notes |
+|---|-------|--------|---------|-------|
+| S7 | npm Publish & Distribution | ⬜ À faire | — | package.json, GitHub Releases, semver tags |
+| S8 | install.sh Overhaul | ⬜ À faire | — | shellcheck, bats, D21 depreciation |
+| S9 | Agent Expansion Wave 2 | ⬜ À faire | — | Cible 85 agents (+15) |
+| S10 | TUI Enhancements | ⬜ À faire | — | Vue détail, aide raccourcis, D22 themes |
+| S11 | Infrastructure & DevOps | ⬜ À faire | — | Pin Actions SHA, D18 revisit, versioning |
+| S12 | Community & Adoption | ⬜ À faire | — | npm keywords, D23 telemetrie, template contrib |
 
 **Légende** : ⬜ À faire | 🔄 En cours | ✅ Terminé | ❌ Annulé | ⏸️ En pause
 

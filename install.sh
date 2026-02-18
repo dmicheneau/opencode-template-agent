@@ -26,14 +26,14 @@ set -euo pipefail
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
-readonly VERSION="1.0.0"
+readonly VERSION="4.0.0"
 readonly REPO_URL="https://github.com/dmicheneau/opencode-template-agent.git"
 readonly REPO_INSTALL_DIR="${HOME}/.local/share/opencode-agents"
 readonly LOG_FILE="${REPO_INSTALL_DIR}/install.log"
 readonly MARKER_FILE=".opencode-agents-installed"
 
 # Agent subdirectories (categories containing .md agent files)
-readonly AGENT_SUBDIRS=(ai api business database devops devtools docs languages mcp media security specialist team web)
+readonly AGENT_SUBDIRS=(ai business data-api devops devtools docs languages mcp security web)
 # Root-level agent files (agents not in a subdirectory)
 readonly AGENT_ROOT_FILES=(cloud-architect.md devops-engineer.md episode-orchestrator.md fullstack-developer.md)
 # Skills subdirectories
