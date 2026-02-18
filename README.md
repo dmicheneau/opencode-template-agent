@@ -13,26 +13,84 @@ Registre curé de **70 agents IA** pour [OpenCode](https://opencode.ai), distrib
 
 Source : [aitmpl.com](https://www.aitmpl.com/agents) (413+ agents disponibles). Les 4 agents primary sont custom.
 
+---
+
 ## 🚀 Quickstart
 
 ```bash
-npx github:dmicheneau/opencode-template-agent                            # TUI interactif (auto-détecte TTY)
-npx github:dmicheneau/opencode-template-agent list                       # Parcourir le catalogue
-npx github:dmicheneau/opencode-template-agent install --pack backend     # Installer un pack
-npx github:dmicheneau/opencode-template-agent install typescript-pro     # Installer un agent
-```
+# TUI interactif (auto-détecte TTY)
+npx github:dmicheneau/opencode-template-agent
 
-## 📦 Installation
-
-### Via npx (recommandé)
-
-```bash
+# CLI rapide — installer un pack en une commande
 npx github:dmicheneau/opencode-template-agent install --pack backend
 ```
 
-Les agents sont téléchargés depuis GitHub et installés dans `.opencode/agents/`. Node.js 20+ requis.
+---
 
-### Via script bash
+## 📦 Installation
+
+### Mode 1 — TUI interactif (recommandé)
+
+Le TUI est le moyen le plus simple de découvrir et installer des agents. Il se lance automatiquement lorsque le terminal supporte un TTY.
+
+```bash
+npx github:dmicheneau/opencode-template-agent
+# ou explicitement :
+npx github:dmicheneau/opencode-template-agent tui
+```
+
+**Ce que ça fait :**
+
+- Auto-détecte le TTY et lance l'interface interactive
+- Parcourir les catégories par onglets (`←` `→` / `Tab`)
+- Naviguer dans les listes avec `↑` `↓`
+- Sélectionner des agents avec `Space`, installer avec `Enter`
+- Recherche intégrée (`/`), exploration par packs et catégories
+
+### Mode 2 — CLI non-interactif
+
+Pour l'automatisation ou une installation rapide sans interface graphique.
+
+**Commandes :**
+
+```bash
+# Installer un agent spécifique
+npx github:dmicheneau/opencode-template-agent install typescript-pro
+
+# Installer un ou plusieurs packs (virgule ou espace)
+npx github:dmicheneau/opencode-template-agent install --pack backend
+npx github:dmicheneau/opencode-template-agent install --pack backend,devops
+
+# Installer une ou plusieurs catégories
+npx github:dmicheneau/opencode-template-agent install --category languages
+npx github:dmicheneau/opencode-template-agent install --category languages,data-api
+
+# Installer tous les agents
+npx github:dmicheneau/opencode-template-agent install --all
+
+# Lister tous les agents par catégorie
+npx github:dmicheneau/opencode-template-agent list
+
+# Lister les packs disponibles
+npx github:dmicheneau/opencode-template-agent list --packs
+
+# Rechercher des agents
+npx github:dmicheneau/opencode-template-agent search docker
+npx github:dmicheneau/opencode-template-agent search "machine learning"
+```
+
+**Options :**
+
+| Option | Description |
+|--------|-------------|
+| `--force` | Écraser les fichiers existants |
+| `--dry-run` | Aperçu sans écriture sur le disque |
+
+> **Note :** `--pack` et `--category` sont mutuellement exclusifs.
+
+### Mode 3 — Script bash / Clone local
+
+**Via script bash :**
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/dmicheneau/opencode-template-agent/main/install.sh | bash
@@ -40,7 +98,7 @@ curl -fsSL https://raw.githubusercontent.com/dmicheneau/opencode-template-agent/
 
 Options : `--copy`, `--global`, `--dir PATH`, `--force`, `--dry-run`, `--uninstall`.
 
-### Depuis le repo local
+**Via clone local :**
 
 ```bash
 git clone https://github.com/dmicheneau/opencode-template-agent.git ~/.opencode-agents
@@ -48,52 +106,94 @@ echo 'export OPENCODE_CONFIG_DIR=~/.opencode-agents' >> ~/.zshrc
 source ~/.zshrc
 ```
 
-## 💡 Commandes
+Les agents sont installés dans `.opencode/agents/`. Node.js 20+ requis pour les modes 1 et 2.
 
-### tui (mode interactif)
+---
 
-```bash
-npx github:dmicheneau/opencode-template-agent                # Auto-détecte TTY et lance le TUI
-npx github:dmicheneau/opencode-template-agent tui             # Lancer explicitement le TUI
+## 🏗️ Architecture
+
+> Documentation détaillée : [`docs/architecture.md`](docs/architecture.md)
+
+Le diagramme ci-dessous présente l'architecture globale du système : le point d'entrée CLI, les modules TUI, le registre d'agents et le pipeline de synchronisation depuis le dépôt upstream.
+
+```mermaid
+flowchart TB
+    User["Utilisateur"]
+
+    subgraph CLI["bin/cli.mjs — Point d'entree CLI"]
+        Parse["Analyse des arguments<br/>(install, list, search, tui)"]
+    end
+
+    subgraph TUI["Interface TUI interactive"]
+        Index["index.mjs<br/>Orchestrateur<br/>(lifecycle, boucle principale,<br/>signaux)"]
+        Screen["screen.mjs<br/>E/S Terminal<br/>(raw mode, flush,<br/>resize, onInput)"]
+        Input["input.mjs<br/>Parseur de touches<br/>(raw bytes → ~20 Actions)"]
+        State["state.mjs<br/>Machine a etats<br/>(browse, search, confirm,<br/>installing, pack_detail,<br/>done, quit)"]
+        Renderer["renderer.mjs<br/>Constructeur de frames<br/>(state → chaine ANSI)"]
+        Ansi["ansi.mjs<br/>Codes ANSI, couleurs,<br/>box drawing, palettes<br/>(catColor, tabColor)"]
+    end
+
+    subgraph Data["Couche de donnees"]
+        Registry["registry.mjs<br/>Chargeur de manifest<br/>(validation, getAgent,<br/>getCategory, searchAgents,<br/>resolvePackAgents)"]
+        Manifest["manifest.json<br/>70 agents | 10 categories<br/>15 packs"]
+        Installer["installer.mjs<br/>Telechargement GitHub raw<br/>→ .opencode/agents/"]
+    end
+
+    subgraph Sync["Pipeline de synchronisation"]
+        Upstream["davila7/claude-code-templates<br/>(depot upstream)"]
+        SyncScript["sync-agents.py<br/>(1200 lignes, fetch,<br/>conversion tools→permission,<br/>CURATED + EXTENDED agents)"]
+        SyncCommon["sync_common.py<br/>(HTTP, cache ETag,<br/>frontmatter, validation)"]
+        UpdateManifest["update-manifest.py<br/>(fusion manifest,<br/>prefix NEEDS_REVIEW)"]
+        GHA["GitHub Actions<br/>(cron lundi 6h UTC,<br/>CI: test + lint + validate)"]
+    end
+
+    LocalDir[".opencode/agents/<br/>Agents installes"]
+
+    User --> CLI
+    Parse -->|"tui"| Index
+    Parse -->|"install"| Installer
+    Parse -->|"list / search"| Registry
+
+    Index --> Screen
+    Screen --> Input
+    Input --> State
+    State --> Renderer
+    Renderer --> Ansi
+    Ansi -->|"frames ANSI"| Screen
+
+    Index --> Registry
+    Index --> Installer
+    Registry --> Manifest
+    Installer -->|"telecharge"| LocalDir
+
+    Upstream --> SyncScript
+    SyncScript --> SyncCommon
+    SyncScript --> UpdateManifest
+    UpdateManifest --> Manifest
+    GHA -->|"orchestre"| SyncScript
+    GHA -->|"orchestre"| UpdateManifest
+
+    classDef entrypoint fill:#4a90d9,stroke:#2c5f8a,color:#fff
+    classDef tui fill:#6ab04c,stroke:#3d7a28,color:#fff
+    classDef data fill:#f0932b,stroke:#c0741e,color:#fff
+    classDef sync fill:#9b59b6,stroke:#6c3483,color:#fff
+    classDef storage fill:#e74c3c,stroke:#a93226,color:#fff
+    classDef user fill:#34495e,stroke:#1c2833,color:#fff
+
+    class User user
+    class Parse entrypoint
+    class Index,Screen,Input,State,Renderer,Ansi tui
+    class Registry,Manifest,Installer data
+    class Upstream,SyncScript,SyncCommon,UpdateManifest,GHA sync
+    class LocalDir storage
 ```
 
-Parcourir les catégories, rechercher des agents et installer directement depuis l'interface interactive.
+Deux diagrammes supplémentaires sont disponibles dans [`docs/architecture.md`](docs/architecture.md) :
 
-### install
+- **Flux utilisateur TUI** — machine à états complète (browse, search, confirm, installing, done)
+- **Pipeline de mise à jour des agents** — les 10 étapes du workflow de synchronisation GitHub Actions
 
-```bash
-# Un agent
-npx github:dmicheneau/opencode-template-agent install typescript-pro
-
-# Un ou plusieurs packs (virgule ou espace)
-npx github:dmicheneau/opencode-template-agent install --pack backend
-npx github:dmicheneau/opencode-template-agent install --pack backend,devops
-
-# Une ou plusieurs catégories
-npx github:dmicheneau/opencode-template-agent install --category languages
-npx github:dmicheneau/opencode-template-agent install --category languages,data-api
-
-# Tous les agents
-npx github:dmicheneau/opencode-template-agent install --all
-```
-
-Options : `--force` (écraser les fichiers existants), `--dry-run` (aperçu sans écriture).
-
-> `--pack` et `--category` sont mutuellement exclusifs.
-
-### list
-
-```bash
-npx github:dmicheneau/opencode-template-agent list            # Tous les agents par catégorie
-npx github:dmicheneau/opencode-template-agent list --packs    # Packs disponibles
-```
-
-### search
-
-```bash
-npx github:dmicheneau/opencode-template-agent search docker
-npx github:dmicheneau/opencode-template-agent search "machine learning"
-```
+---
 
 ## 📋 Agents disponibles
 
@@ -112,11 +212,13 @@ npx github:dmicheneau/opencode-template-agent search "machine learning"
 | 📊 Business | 6 | Product management, project management, PRD, Scrum, UX research, business analysis |
 | 📝 Docs | 4 | Documentation technique, API, rédaction, diagrammes |
 
-⭐ 4 agents primary (`Tab` dans OpenCode) : cloud-architect, devops-engineer, fullstack-developer, episode-orchestrator
+> ⭐ **4 agents primary** (`Tab` dans OpenCode) : `cloud-architect`, `devops-engineer`, `fullstack-developer`, `episode-orchestrator`
+
+---
 
 ## 🎒 Packs
 
-15 packs prédéfinis pour installer des groupes d'agents cohérents.
+15 packs prédéfinis pour installer des groupes d'agents cohérents en une seule commande.
 
 | Pack | Agents | Description |
 |------|--------|-------------|
@@ -136,6 +238,8 @@ npx github:dmicheneau/opencode-template-agent search "machine learning"
 | `product-discovery` | product-manager, ux-researcher, business-analyst, prd, ui-designer | Découverte produit |
 | `architecture-docs` | microservices-architect, api-architect, database-architect, diagram-architect, documentation-engineer | Architecture & docs |
 
+---
+
 ## 🔄 Synchronisation automatique
 
 Les agents sont synchronisés automatiquement depuis [aitmpl.com](https://www.aitmpl.com/agents) via un workflow GitHub Actions hebdomadaire.
@@ -148,6 +252,8 @@ Les agents sont synchronisés automatiquement depuis [aitmpl.com](https://www.ai
 4. **Validation** — tests automatiques, vérification du frontmatter et de la cohérence du manifest
 5. **Pull Request** — une PR est créée automatiquement avec un rapport détaillé pour revue humaine
 
+Les nouveaux agents sont marqués `[NEEDS_REVIEW]` dans le manifest et nécessitent une revue manuelle avant merge.
+
 ### Lancement manuel
 
 ```bash
@@ -158,53 +264,15 @@ gh workflow run "Sync Agents" -f tier=extended                  # Sync étendue
 gh workflow run "Sync Agents" -f tier=all -f force=true        # Sync complète forcée
 ```
 
-Les nouveaux agents sont marqués `[NEEDS_REVIEW]` dans le manifest et nécessitent une revue manuelle avant merge.
-
-### Scripts de sync
+### Scripts de synchronisation
 
 | Script | Description |
 |--------|-------------|
-| `scripts/sync-agents.py` | Télécharge les agents depuis le repo upstream |
-| `scripts/update-manifest.py` | Fusionne le manifest sync avec le manifest principal |
-| `scripts/sync_common.py` | Utilitaires HTTP et helpers partagés |
+| `scripts/sync-agents.py` | Télécharge les agents depuis le dépôt upstream, convertit les champs `tools:` en `permission:` |
+| `scripts/update-manifest.py` | Fusionne le manifest de sync dans le manifest principal, préfixe `[NEEDS_REVIEW]` |
+| `scripts/sync_common.py` | Utilitaires HTTP partagés, cache ETag, validation de frontmatter |
 
-## 🏗️ Architecture du projet
-
-```
-opencode-template-agent/
-├── bin/cli.mjs              # CLI entry point
-├── src/
-│   ├── meta.mjs             # Version, user agent
-│   ├── registry.mjs         # Manifest, search, filtering
-│   ├── installer.mjs        # Download + install
-│   ├── display.mjs          # ANSI output
-│   └── tui/                 # TUI interactif (6 modules)
-│       ├── index.mjs        # Entry point + TTY detection
-│       ├── state.mjs        # State machine
-│       ├── screen.mjs       # Screen rendering
-│       ├── renderer.mjs     # Layout + formatting
-│       ├── input.mjs        # User input handling
-│       └── ansi.mjs         # ANSI escape sequences
-├── scripts/
-│   ├── sync-agents.py       # Pipeline de sync upstream
-│   ├── update-manifest.py   # Fusion manifest sync → manifest principal
-│   └── sync_common.py       # Utilitaires HTTP partagés
-├── manifest.json            # 70 agents, 10 catégories, 15 packs
-├── install.sh               # Script d'installation bash
-├── .opencode/agents/        # Fichiers agents (.md)
-│   ├── *.md                 # 4 agents primary
-│   ├── languages/           # 11 agents
-│   ├── ai/                  # 9 agents
-│   ├── web/                 # 9 agents
-│   ├── data-api/            # 5 agents
-│   ├── devops/              # 10 agents
-│   ├── devtools/            # 8 agents
-│   ├── security/            # 4 agents
-│   ├── mcp/                 # 4 agents
-│   ├── business/            # 6 agents
-│   └── docs/                # 4 agents
-└── tests/
-```
+---
 
 ## 🧪 Tests
 
@@ -223,11 +291,15 @@ python3 -m pytest tests/test_sync_script.py -v
 python3 -m pytest tests/test_update_manifest.py -v
 ```
 
+---
+
 ## 🤝 Contribuer
 
 Les contributions sont les bienvenues ! Voir les [issues](https://github.com/dmicheneau/opencode-template-agent/issues) ouvertes.
 
 Agents sourcés depuis [aitmpl.com](https://www.aitmpl.com/agents) ([claude-code-templates](https://github.com/davila7/claude-code-templates)).
+
+---
 
 ## 📄 Licence
 
