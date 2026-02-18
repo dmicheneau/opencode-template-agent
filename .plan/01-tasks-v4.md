@@ -87,6 +87,21 @@
 - [x] S5.5 Agents installés : `detectInstalled()` + indicateur ✔ vert dim + refresh post-install
 - [x] S5.6 Vérification : 418/418 tests ✅ + code review (2 HIGH, 2 MEDIUM corrigés)
 
+### S6 — Redesign visuel TUI (style Finder)
+
+- [x] S6.1 Colored tabs par catégorie (TAB_COLORS, 14 couleurs ANSI distinctes)
+- [x] S6.2 Catégories colorées dans la liste agents (CAT_COLORS, 12 couleurs)
+- [x] S6.3 Barre de surbrillance pleine largeur fond bleu (bgRow, bgRowBold via reApplyBg)
+- [x] S6.4 Code review findings corrigés (8/8)
+  - H1 : Fix collision couleur packs/mobile (cyan → orange pour mobile)
+  - M3 : Fix highlight bar gap aux bordures dans bdr()
+  - L1 : Suppression dead export `highlight`
+  - L2 : Suppression dead import `bgRowBold` dans renderer
+  - L3 : Extraction helper `nameStyle()` (3 occurrences → 1 helper)
+  - M1 : Commentaire invariant ASCII-only pour padEndAscii
+  - M2 : 9 nouveaux tests (bgRow, catColor, tabColor + régression H1)
+- [x] S6.5 Vérification : 427/427 tests ✅
+
 ## Séquencement
 
 | Phase | Tâches | Pré-requis | Sessions |
@@ -95,3 +110,4 @@
 | 2. Pipeline sync | S2.1-S2.8, S3.1-S3.3 | S1 terminé | 2-3 |
 | 3. Expansion | S4.1-S4.6 | S2 terminé | 1-2 |
 | 4. TUI polish | S5.1-S5.6 | S4 terminé | 1 |
+| 5. TUI redesign | S6.1-S6.5 | S5 terminé | 1 |

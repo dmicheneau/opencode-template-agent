@@ -7,7 +7,7 @@
 | Métrique | Valeur |
 |----------|--------|
 | Agents | 70 installés (cible v4 atteinte ✅) |
-| Tests | 241 JS + 177 Python = 418 tests |
+| Tests | 250 JS + 177 Python = 427 tests |
 | Packs | 15 (9 originaux + 6 nouveaux) |
 | Commits | ~25 + 15 + session 8 commits |
 | Version du plan | v4 (en cours) — v3 terminé, archivé |
@@ -60,6 +60,7 @@
 | S3 | Curation & permissions | ⬜ À faire | — | Critères C1-C6, labels |
 | S4 | Expansion vague 1 (→70) | ✅ Terminé | 8 | 14 agents acceptés, 72 rejetés, 6 packs ajoutés |
 | S5 | TUI polish & corrections | ✅ Terminé | 9 | 3 bugs + 2 features, 418 tests verts |
+| S6 | Redesign visuel TUI | ✅ Terminé | 11 | Colored tabs, catColors, bgRow highlight, 427 tests |
 
 **Légende** : ⬜ À faire | 🔄 En cours | ✅ Terminé | ❌ Annulé | ⏸️ En pause
 
@@ -80,6 +81,22 @@
 - **D20** ✅ : Architecture update-manifest.py — patch incrémental (préserve curated, ajoute nouveaux, détecte stale)
 
 ## Notes de session
+
+### Session 11 (2026-02-18)
+- S6 ✅ : Redesign visuel TUI — style Finder/Hacker-News
+  - Colored tabs par catégorie (TAB_COLORS, 14 couleurs distinctes)
+  - Catégories colorées dans la liste agents (CAT_COLORS, 12 couleurs)
+  - Barre de surbrillance pleine largeur fond bleu marine (bgRow, bgRowBold)
+  - Code review : 8 findings corrigés (H1, M3, L1-L3, M1, M2)
+  - H1 : Fix collision packs/mobile (tous deux cyan → mobile=orange)
+  - M3 : Fix highlight bar gaps aux bordures
+  - L1 : Suppression dead export `highlight`
+  - L2 : Suppression dead import `bgRowBold` dans renderer
+  - L3 : Extraction helper `nameStyle()` (3 occurrences dédupliquées)
+  - M1 : Commentaire invariant ASCII-only pour padEndAscii
+  - M2 : 9 nouveaux tests (bgRow×3, catColor×3, tabColor×3)
+- Tests : 250 JS + 177 Python = **427 tests**
+- Commit `76461d1` pushé sur main
 
 ### Session 10 (2026-02-18)
 - S2.5 ✅ : Cron déjà actif (lundi 6h UTC) — READMEs mis à jour, "(à activer)" retiré
