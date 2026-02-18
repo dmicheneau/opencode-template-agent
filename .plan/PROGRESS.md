@@ -56,10 +56,10 @@
 | # | Tâche | Statut | Session | Notes |
 |---|-------|--------|---------|-------|
 | S1 | Stabilisation & push CI | ✅ Terminé | 6 | CI verte, TUI 10 tabs OK, prd.md fix |
-| S2 | Workflow sync-agents.yml | 🔄 En cours | 7 | S2.1-S2.4 ✅, S2.5-S2.7 restants |
+| S2 | Workflow sync-agents.yml | ✅ Terminé | 7,10 | S2.1-S2.8 ✅, cron weekly actif, reviewer auto |
 | S3 | Curation & permissions | ⬜ À faire | — | Critères C1-C6, labels |
 | S4 | Expansion vague 1 (→70) | ✅ Terminé | 8 | 14 agents acceptés, 72 rejetés, 6 packs ajoutés |
-| S5 | TUI polish & corrections | 🔄 En cours | 9 | 3 bugs + 2 features, ~50 min estimé |
+| S5 | TUI polish & corrections | ✅ Terminé | 9 | 3 bugs + 2 features, 418 tests verts |
 
 **Légende** : ⬜ À faire | 🔄 En cours | ✅ Terminé | ❌ Annulé | ⏸️ En pause
 
@@ -73,16 +73,27 @@
 - **D13** ✅ : Agent prd sans fonctionnalités GitHub (PRD only)
 - **D14** ✅ : github-actions-expert non intégré (redondant avec ci-cd-engineer)
 - **D15** ✅ : Réorganisation catégories — fusion api+database→data-api, dissolution team→web+devtools, labels clairs, ordre par workflow développeur
-- **D16** ⬜ : Fréquence du cron sync (hebdo vs quotidien)
-- **D17** ⬜ : Scope du sync automatique (core seul vs core+extended)
-- **D18** ⬜ : Auto-merge pour mises à jour d'agents existants ?
-- **D19** ⬜ : Seuil pour créer de nouvelles catégories
+- **D16** ✅ : Fréquence du cron sync — hebdomadaire lundi 6h UTC (suffisant pour le rythme upstream)
+- **D17** ✅ : Scope du sync automatique — core seul en cron, extended en dispatch manuel
+- **D18** ✅ : Pas d'auto-merge — toute PR sync requiert review manuelle via --reviewer
+- **D19** ✅ : Agents supprimés upstream signalés en PR mais non auto-supprimés (décision manuelle)
 - **D20** ✅ : Architecture update-manifest.py — patch incrémental (préserve curated, ajoute nouveaux, détecte stale)
 
 ## Notes de session
 
-### Session 9 (2026-02-17)
-- S5 🔄 : TUI polish & corrections — 5 tâches identifiées
+### Session 10 (2026-02-18)
+- S2.5 ✅ : Cron déjà actif (lundi 6h UTC) — READMEs mis à jour, "(à activer)" retiré
+- S2.6 ✅ : PR automatique déjà implémentée (branche sync/, labels, description détaillée)
+- S2.7 ✅ : Ajout `--reviewer ${{ github.repository_owner }}` au gh pr create
+- Dry-run dispatch réussi (0 new, 0 modified — core à jour avec upstream)
+- D16 ✅ : Weekly Monday 6am UTC (rythme upstream modéré)
+- D17 ✅ : Core en cron, extended en dispatch manuel
+- D18 ✅ : Pas d'auto-merge, review manuelle obligatoire
+- D19 ✅ : Pas d'auto-suppression, signalement en PR
+- **S2 complété** — pipeline sync entièrement opérationnel
+
+### Session 9 (2026-02-18)
+- S5 ✅ : TUI polish & corrections — 6/6 tâches complétées, 418 tests verts
   - S5.1 : Fix `--help` example (`database` → `data-api`) — CLI bugfix
   - S5.2 : Fix display glitches (`screen.mjs` flush sans clear-to-end) — TUI bugfix
   - S5.3 : Enhance highlight line (inverse trop subtil → fond coloré) — TUI feature

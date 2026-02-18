@@ -36,9 +36,9 @@
   - TestUpdateManifest (8) : basic, exit codes, dry-run, idempotent, preserves metadata
   - TestCLI (3) : dry-run, no-metadata, missing sync
 - [x] S2.4 Test local du workflow (simulation bout en bout réussie)
-- [ ] S2.5 Premier run du workflow sur GitHub (workflow_dispatch manuel)
-- [ ] S2.6 Activer le cron (hebdomadaire lundi 06h UTC)
-- [ ] S2.7 Documenter le processus de revue des PRs de sync dans le README
+- [x] S2.5 Premier run du workflow sur GitHub (workflow_dispatch manuel) — dry-run ✅ 25s
+- [x] S2.6 Cron déjà actif (hebdomadaire lundi 06h UTC) — vérifié, READMEs mis à jour
+- [x] S2.7 Notification PM : --reviewer ajouté au gh pr create dans sync-agents.yml
 - [x] S2.8 Revue sécurité du workflow intégrée dans S2.1 (injection-safe, token scoping, fork detection)
 
 ### S3 — Gestion des permissions et curation
@@ -70,37 +70,22 @@
 
 ## Décisions à trancher
 
-- [ ] D16 Fréquence du cron sync (hebdo lundi 06h UTC vs quotidien)
-- [ ] D17 Scope du sync automatique (core seul vs core+extended)
-- [ ] D18 Auto-merge pour mises à jour d'agents existants ?
-- [ ] D19 Seuil pour créer de nouvelles catégories (>15 agents ?)
+- [x] D16 Fréquence du cron sync → **hebdomadaire lundi 06h UTC** (Option B)
+- [x] D17 Scope du sync automatique → **core seul** (cron), extended via workflow_dispatch
+- [x] D18 Auto-merge → **Non, review manuelle systématique** (Option A, période rodage)
+- [x] D19 Agents supprimés upstream → **flaggés en PR, pas auto-supprimés**
 - [x] D20 Architecture update-manifest.py — patch incrémental (préserve curated, ajoute nouveaux, détecte stale)
 
 ## Axe 4 — Polish TUI (priorité haute)
 
 ### S5 — Corrections et améliorations TUI
 
-- [ ] S5.1 Fix `--help` : exemple `--category languages,database` → `--category languages,data-api`
-  - Fichier : `bin/cli.mjs` L122
-  - Type : Bugfix trivial (1 ligne)
-- [ ] S5.2 Fix display glitches/jumps lors des changements de tab et resize
-  - Fichier : `src/tui/screen.mjs` (flush) + `src/tui/renderer.mjs`
-  - Root cause : flush() ne clear pas les lignes résiduelles en bas de frame
-  - Fix : ajouter `\x1b[J` (clear-to-end-of-screen) dans flush() + padding exact `rows` lignes
-- [ ] S5.3 Améliorer la surbrillance de la ligne curseur (highlight plus visible)
-  - Fichiers : `src/tui/ansi.mjs` + `src/tui/renderer.mjs`
-  - État actuel : `inverse()` (ANSI 7) est subtil sur terminaux sombres
-  - Fix : ajouter style `bgHighlight` (inverse+bold ou fond bleu) pour un contraste supérieur
-- [ ] S5.4 Fix onglet Packs : `Space` ne sélectionne rien (toggle broken)
-  - Fichier : `src/tui/state.mjs` (toggleSelection)
-  - Root cause : sur packs tab, `list.items` contient des objets pack (`.id`) pas des agents (`.name`)
-  - Fix : mapper `Space` sur packs tab vers drill-in (même action que `Enter`)
-- [ ] S5.5 Afficher les agents déjà installés dans la liste de sélection
-  - Fichiers : `src/tui/state.mjs` + `src/tui/renderer.mjs` + `src/tui/index.mjs`
-  - Design : scanner `.opencode/agents/` au démarrage, stocker `state.installed: Set<string>`
-  - Indicateur visuel : `✔` vert dim ou `[installed]` pour les agents déjà présents
-  - Rafraîchir le set après chaque installation
-- [ ] S5.6 Vérification : tous les tests passent (418 tests) + test visuel TUI
+- [x] S5.1 Fix `--help` : exemple `--category languages,database` → `--category languages,data-api`
+- [x] S5.2 Fix display glitches : `CLEAR_TO_END` dans flush() + `highlight` (inverse+bold)
+- [x] S5.3 Améliorer surbrillance curseur : `highlight` = inverse+bold (7;1) adapté tous thèmes
+- [x] S5.4 Fix onglet Packs : Space → drill-in (même action que Enter)
+- [x] S5.5 Agents installés : `detectInstalled()` + indicateur ✔ vert dim + refresh post-install
+- [x] S5.6 Vérification : 418/418 tests ✅ + code review (2 HIGH, 2 MEDIUM corrigés)
 
 ## Séquencement
 

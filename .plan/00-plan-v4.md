@@ -546,7 +546,7 @@ Total estimé : ~50 minutes, 1 session.
 
 **Recommandation** : **Option B** (hebdomadaire). Le repo source (`davila7/claude-code-templates`) n'a pas un rythme de mise à jour quotidien. Un sync hebdomadaire est suffisant. Le workflow_dispatch permet de déclencher manuellement en cas de besoin urgent.
 
-**Statut** : ⬜ À trancher
+**Statut** : ✅ **Option B retenue** — cron `0 6 * * 1` (lundi 06h UTC)
 
 ---
 
@@ -562,7 +562,7 @@ Total estimé : ~50 minutes, 1 session.
 
 **Recommandation** : **Option B** (`extended`). Les agents `EXTENDED_AGENTS` ont déjà un mapping de catégorie défini. Les agents hors de cette liste nécessitent un travail de curation trop important pour être automatisé. Le `--tier=all` reste disponible en `workflow_dispatch` pour une exploration ponctuelle.
 
-**Statut** : ⬜ À trancher
+**Statut** : ✅ **Option A retenue pour le cron** (core seul, sûr) — extended via workflow_dispatch manuel
 
 ---
 
@@ -578,7 +578,7 @@ Total estimé : ~50 minutes, 1 session.
 
 **Recommandation** : **Option A** pour les premières semaines (période de rodage), puis évaluer **Option C** après 4-6 semaines de fonctionnement sans incident.
 
-**Statut** : ⬜ À trancher
+**Statut** : ✅ **Option A retenue** — review manuelle systématique (période de rodage)
 
 ---
 
@@ -594,7 +594,7 @@ Total estimé : ~50 minutes, 1 session.
 
 **Recommandation** : **Option A**. La réorganisation D15 (12 → 10 catégories) était un gain UX validé. Ne pas revenir en arrière. Les agents `specialist` et `media` sont peu nombreux et peuvent être absorbés par les catégories existantes. Réévaluer si le catalogue dépasse 100 agents.
 
-**Statut** : ⬜ À trancher
+**Statut** : ✅ **Option A retenue** — 10 catégories maintenues, specialist→devtools, media→docs
 
 ---
 
