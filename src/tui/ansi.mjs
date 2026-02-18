@@ -43,9 +43,67 @@ export const bgBlue = wrap(44);
 export const bgMagenta = wrap(45);
 export const bgCyan = wrap(46);
 export const bgWhite = wrap(47);
+export const bgBrightBlack = wrap(100);    // dark gray bg
 export const boldCyan = wrap('1;36');
 export const boldBrightCyan = wrap('1;96');
-export const highlight = wrap('7;1');
+
+// ── Highlight Bar (selected row) ─────────────────────────────────────────────
+// 48;5;24 = 256-color bg (dark navy blue #005f87) — very visible cursor bar
+// on dark terminals. Matches the "FINDER" TUI screenshot style.
+// Inner resets (\x1b[0m) are replaced with \x1b[0;48;5;24m so the background
+// persists across colored text segments (category, name, description).
+const BG_CODE = '48;5;24';
+const reApplyBg = (s) => s.replaceAll('\x1b[0m', `\x1b[0;${BG_CODE}m`);
+export const bgRow = (s) => NO_COLOR ? s : `\x1b[${BG_CODE}m${reApplyBg(s)}\x1b[0m`;
+export const bgRowBold = (s) => NO_COLOR ? s : `\x1b[1;97;${BG_CODE}m${reApplyBg(s)}\x1b[0m`;
+
+// ── Category Color Palette ───────────────────────────────────────────────────
+// Each category gets a distinct color for visual scanning (like the screenshot TUI).
+const CAT_COLORS = {
+  languages:    wrap(33),     // yellow
+  'devtools':   wrap(36),     // cyan
+  web:          wrap(35),     // magenta
+  'data-api':   wrap(32),     // green
+  ai:           wrap(94),     // bright blue
+  security:     wrap(91),     // bright red
+  devops:       wrap(93),     // bright yellow
+  mcp:          wrap(95),     // bright magenta
+  mobile:       wrap(96),     // bright cyan
+  docs:         wrap(37),     // white
+  business:     wrap(34),     // blue
+  research:     wrap(92),     // bright green
+};
+const DEFAULT_CAT_COLOR = wrap(37); // white
+
+/** Get the color function for a category id */
+export function catColor(catId) {
+  return CAT_COLORS[catId] || DEFAULT_CAT_COLOR;
+}
+
+// ── Tab Color Palette ────────────────────────────────────────────────────────
+// Tabs get distinct colors matching their category, "all" and "packs" are special.
+const TAB_COLORS = {
+  all:          wrap('1;97'),  // bold bright white
+  packs:        wrap('1;96'),  // bold bright cyan
+  languages:    wrap('1;33'),  // bold yellow
+  'devtools':   wrap('1;36'),  // bold cyan
+  web:          wrap('1;35'),  // bold magenta
+  'data-api':   wrap('1;32'),  // bold green
+  ai:           wrap('1;94'),  // bold bright blue
+  security:     wrap('1;91'),  // bold bright red
+  devops:       wrap('1;93'),  // bold bright yellow
+  mcp:          wrap('1;95'),  // bold bright magenta
+  mobile:       wrap('1;38;5;208'),  // bold orange (256-color)
+  docs:         wrap('1;37'),  // bold white
+  business:     wrap('1;34'),  // bold blue
+  research:     wrap('1;92'),  // bold bright green
+};
+const DEFAULT_TAB_COLOR = wrap('1;37');
+
+/** Get the color function for a tab id */
+export function tabColor(tabId) {
+  return TAB_COLORS[tabId] || DEFAULT_TAB_COLOR;
+}
 
 // ── Box Drawing ─────────────────────────────────────────────────────────────
 export const BOX = {

@@ -4,8 +4,9 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import {
-  CLEAR_LINE, BOX, bold, inverse, highlight, cyan, green, yellow, red, white,
+  CLEAR_LINE, BOX, bold, inverse, cyan, green, yellow, red, white,
   boldCyan, brightCyan, brightGreen, brightWhite, dim,
+  bgRow, catColor, tabColor,
   visibleLength, padEnd, padEndAscii, truncate,
 } from './ansi.mjs';
 import { getViewportHeight } from './state.mjs';
@@ -23,11 +24,17 @@ const SPINNER  = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇',
 
 const icon = (s, id) => s.manifest?.categories?.[id]?.icon || '📦';
 
+/** Style agent/pack name based on cursor and selection state. */
+const nameStyle = (text, cur, sel) =>
+  sel ? green(text) : cur ? bold(brightWhite(text)) : brightWhite(text);
+
 /** Wrap content inside │ ... │ padded to full width, prefixed with CLEAR_LINE. */
-function bdr(content, W) {
+function bdr(content, W, bg) {
   const innerWidth = W - 4;
   const gap = Math.max(0, innerWidth - visibleLength(content));
-  return `${CLEAR_LINE}${cyan(BOX.vertical)} ${content}${' '.repeat(gap)} ${cyan(BOX.vertical)}`;
+  const padded = `${content}${' '.repeat(gap)}`;
+  const inner = bg ? bg(` ${padded} `) : ` ${padded} `;
+  return `${CLEAR_LINE}${cyan(BOX.vertical)}${inner}${cyan(BOX.vertical)}`;
 }
 
 function topBorder(W, state) {
@@ -49,10 +56,12 @@ function botBorder(W) {
 function buildTabs(state, innerWidth) {
   const { tabs } = state;
   const parts = tabs.labels.map((l, i) => {
+    const id = tabs.ids[i];
+    const color = tabColor(id);
     if (i === tabs.activeIndex) return bold(inverse(`[${l}]`));
-    // Colorize parenthesized count in inactive tabs
-    const colored = l.replace(/\((\d+)\)/, (_, n) => brightCyan(`(${n})`));
-    return white(colored);
+    // Colorize count in inactive tabs + distinct category color
+    const colored = l.replace(/\((\d+)\)/, (_, n) => dim(`(${n})`));
+    return color(colored);
   });
   const full = ' ' + parts.join(' ');
   if (visibleLength(full) <= innerWidth) return [full];
@@ -96,10 +105,12 @@ function renderAgentList(state, out, W) {
       const a = items[idx], cur = idx === cursor, sel = state.selection.has(a.name);
       const inst = state.installed?.has(a.name);
       const mk = cur ? bold(brightCyan('▸')) : sel ? bold(brightGreen('✓')) : inst ? dim(green('✔')) : ' ';
-      const nameCol = sel ? green(padEndAscii(a.name, COL_NAME)) : brightWhite(padEndAscii(a.name, COL_NAME));
-      let row = ` ${mk} ${icon(state, a.category)} ${yellow(padEndAscii(a.category, COL_CAT))}${nameCol}${cyan(truncate(a.description, descWidth))}`;
-      if (cur) row = highlight(padEnd(row, innerWidth));
-      out.push(bdr(row, W));
+      const cc = catColor(a.category);
+      // INVARIANT: agent names and category ids are ASCII-only (enforced by manifest schema)
+      const nameCol = nameStyle(padEndAscii(a.name, COL_NAME), cur, sel);
+      const desc = cur ? dim(white(truncate(a.description, descWidth))) : dim(truncate(a.description, descWidth));
+      const row = ` ${mk} ${icon(state, a.category)} ${cc(padEndAscii(a.category, COL_CAT))}${nameCol}${desc}`;
+      out.push(bdr(row, W, cur ? bgRow : undefined));
     }
   }
 
@@ -124,9 +135,8 @@ function renderPacks(state, out, W) {
     if (idx >= pk.length) { out.push(bdr('', W)); continue; }
     const p = pk[idx], cur = idx === cursor;
     const ptr = cur ? bold(brightCyan('▸')) : ' ';
-    let row = ` ${ptr} ${brightWhite(padEnd(p.label || p.id, colPack - 2))}${brightCyan(padEnd(String(p.agents?.length || 0), colAgents))}${cyan(truncate(p.description || '', descWidth))}`;
-    if (cur) row = highlight(padEnd(row, innerWidth));
-    out.push(bdr(row, W));
+    const row = ` ${ptr} ${nameStyle(padEnd(p.label || p.id, colPack - 2), cur, false)}${brightCyan(padEnd(String(p.agents?.length || 0), colAgents))}${cur ? dim(white(truncate(p.description || '', descWidth))) : dim(truncate(p.description || '', descWidth))}`;
+    out.push(bdr(row, W, cur ? bgRow : undefined));
   }
 
   renderInfo(state, out, W, pk.length, vh, scrollOffset);
@@ -156,9 +166,10 @@ function renderPackDetail(state, out, W) {
     const inst = state.installed?.has(a.name);
     const mk = sel && cur ? bold(brightGreen('✓')) + bold(brightCyan('▸'))
       : cur ? ' ' + bold(brightCyan('▸')) : sel ? bold(brightGreen('✓')) + ' ' : inst ? dim(green('✔')) + ' ' : '  ';
-    let row = ` ${mk} ${sel ? green(padEnd(a.name, COL_NAME)) : brightWhite(padEnd(a.name, COL_NAME))}${cyan(truncate(a.description, descWidth))}`;
-    if (cur) row = highlight(padEnd(row, innerWidth));
-    out.push(bdr(row, W));
+    const nameCol = nameStyle(padEnd(a.name, COL_NAME), cur, sel);
+    const desc = cur ? dim(white(truncate(a.description, descWidth))) : dim(truncate(a.description, descWidth));
+    const row = ` ${mk} ${nameCol}${desc}`;
+    out.push(bdr(row, W, cur ? bgRow : undefined));
   }
 
   out.push(bdr('', W));

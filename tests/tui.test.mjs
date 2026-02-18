@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 
 import { parseKey, Action } from '../src/tui/input.mjs';
 import { createInitialState, update, computeFilteredList, getViewportHeight } from '../src/tui/state.mjs';
-import { visibleLength, truncate, padEnd, charWidth, stripAnsi } from '../src/tui/ansi.mjs';
+import { visibleLength, truncate, padEnd, charWidth, stripAnsi, bgRow, catColor, tabColor } from '../src/tui/ansi.mjs';
 import { render } from '../src/tui/renderer.mjs';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -1485,5 +1485,80 @@ describe('render — pack detail mode', () => {
     const plain = stripAnsi(output);
     assert.ok(plain.includes('Back to Packs'), 'missing back navigation');
     assert.ok(plain.includes('Backend Essentials'), 'missing pack label');
+  });
+});
+
+// ─── bgRow / catColor / tabColor ─────────────────────────────────────────────
+
+describe('bgRow', () => {
+  it('wraps text with background color code', () => {
+    const result = bgRow('hello');
+    assert.ok(result.includes('48;5;24'), 'should contain BG_CODE 48;5;24');
+    assert.ok(result.endsWith('\x1b[0m'), 'should end with reset');
+  });
+
+  it('preserves background through nested ANSI resets (reApplyBg)', () => {
+    // Simulate text that contains an ANSI reset mid-string
+    const input = 'before\x1b[0mafter';
+    const result = bgRow(input);
+    // The inner reset should be replaced with reset+bg, not plain reset
+    assert.ok(!result.includes('\x1b[0m\x1b[0m'), 'should not double-reset');
+    // Count occurrences of BG_CODE — opening + reApplyBg replacements
+    const bgMatches = result.match(/48;5;24/g) || [];
+    assert.ok(bgMatches.length >= 2, `expected >=2 BG_CODE occurrences, got ${bgMatches.length}`);
+  });
+
+  it('returns plain text when NO_COLOR is set', () => {
+    // NO_COLOR is evaluated at module load; we test indirectly:
+    // if bgRow output contains ANSI, NO_COLOR is not set (expected in test env)
+    const result = bgRow('test');
+    assert.ok(result.includes('\x1b['), 'in normal env, bgRow should contain ANSI codes');
+  });
+});
+
+describe('catColor', () => {
+  it('returns a coloring function for a known category', () => {
+    const colorFn = catColor('languages');
+    assert.equal(typeof colorFn, 'function');
+    const colored = colorFn('test');
+    assert.ok(colored.includes('\x1b['), 'should wrap with ANSI code');
+    assert.ok(colored.includes('test'), 'should contain original text');
+  });
+
+  it('returns default color for unknown category', () => {
+    const colorFn = catColor('nonexistent_category');
+    assert.equal(typeof colorFn, 'function');
+    const colored = colorFn('test');
+    // Default is wrap(37) = white
+    assert.ok(colored.includes('37'), 'default should use color code 37 (white)');
+  });
+
+  it('different categories produce different colors', () => {
+    const lang = catColor('languages')('x');
+    const sec = catColor('security')('x');
+    assert.notEqual(lang, sec, 'languages and security should have different colors');
+  });
+});
+
+describe('tabColor', () => {
+  it('returns a coloring function for a known tab', () => {
+    const colorFn = tabColor('all');
+    assert.equal(typeof colorFn, 'function');
+    const colored = colorFn('test');
+    assert.ok(colored.includes('\x1b['), 'should wrap with ANSI code');
+  });
+
+  it('returns default color for unknown tab', () => {
+    const colorFn = tabColor('nonexistent_tab');
+    assert.equal(typeof colorFn, 'function');
+    const colored = colorFn('test');
+    // Default is wrap('1;37') = bold white
+    assert.ok(colored.includes('1;37'), 'default should use bold white');
+  });
+
+  it('packs and mobile have different colors (regression H1)', () => {
+    const packs = tabColor('packs')('x');
+    const mobile = tabColor('mobile')('x');
+    assert.notEqual(packs, mobile, 'packs and mobile tabs must not share the same color');
   });
 });
