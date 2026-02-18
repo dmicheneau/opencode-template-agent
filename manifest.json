@@ -726,7 +726,7 @@
       "name": "prd",
       "category": "business",
       "path": "business/prd",
-      "mode": "subagent",
+      "mode": "all",
       "description": "Transform ideas and briefs into structured, actionable Product Requirements Documents",
       "tags": [
         "prd",

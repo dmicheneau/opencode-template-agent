@@ -21,7 +21,7 @@ from typing import Any, Dict, List, Optional, Tuple
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 AGENTS_DIR = PROJECT_ROOT / ".opencode" / "agents"
 
-VALID_MODES = {"primary", "subagent", "byline", "ask"}
+VALID_MODES = {"primary", "subagent", "all", "byline", "ask"}
 REQUIRED_FIELDS = {"description", "mode"}
 FILENAME_PATTERN = re.compile(r"^[a-z0-9-]+\.md$")
 SYNC_HEADER_PATTERN = re.compile(r"<!--\s*Synced from aitmpl\.com\b")
