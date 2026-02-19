@@ -53,7 +53,7 @@ const MANIFEST_PATH = join(__dirname, '..', 'manifest.json');
 /** @type {Manifest | null} */
 let _cached = null;
 
-const SAFE_NAME_RE = /^[a-z0-9][a-z0-9._-]*$/i;
+export const SAFE_NAME_RE = /^[a-z0-9][a-z0-9._-]*$/i;
 
 /**
  * Validate manifest schema for security-sensitive fields.

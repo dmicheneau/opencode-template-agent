@@ -42,6 +42,8 @@ import {
   bootstrapLock,
 } from '../src/lock.mjs';
 
+import { parsePermissionFlags } from '../src/permissions/cli.mjs';
+
 // ─── Argument Parsing ───────────────────────────────────────────────────────────
 
 /**
@@ -146,6 +148,14 @@ ${bold('Options:')}
   --help       Show this help
   --version    Show version
 
+${bold('Permission options:')}
+  --permissions <preset>   Apply permission preset (strict|balanced|permissive|yolo)
+  --yolo                   Set all permissions to allow (requires CONFIRM)
+  --permission-override    Override specific permission (format: [agent:]perm=action)
+  --save-permissions       Save permission choices as default
+  --no-saved-permissions   Ignore saved permission preferences
+  --no-interactive         Skip interactive permission editor
+
 ${bold('Examples:')}
   ${dim('$')} npx opencode-agents install postgres-pro
   ${dim('$')} npx opencode-agents install --category devops
@@ -227,6 +237,10 @@ async function cmdInstall(parsed) {
   const force = Boolean(parsed.flags.force);
   const dryRun = Boolean(parsed.flags['dry-run']);
   const options = { force, dryRun };
+
+  // Parse permission flags (wiring deferred to C4 integration)
+  const rawArgs = process.argv.slice(2);
+  const permissionFlags = parsePermissionFlags(rawArgs);
 
   // Guard: mutually exclusive install modes
   const modes = ['all', 'pack', 'category', 'update'].filter((f) => parsed.flags[f]);
@@ -571,6 +585,8 @@ async function main() {
   const KNOWN_FLAGS = new Set([
     'help', 'version', 'dry-run', 'json', 'force', 'yes',
     'category', 'pack', 'all', 'confirm', 'packs', 'update',
+    'yolo', 'permissions', 'permission-override',
+    'save-permissions', 'no-saved-permissions', 'no-interactive',
   ]);
   const unknownFlags = Object.keys(parsed.flags).filter((f) => !KNOWN_FLAGS.has(f));
   if (unknownFlags.length > 0) {
