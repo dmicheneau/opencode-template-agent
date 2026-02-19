@@ -12,6 +12,7 @@ import {
 } from './display.mjs';
 import { USER_AGENT } from './meta.mjs';
 import { recordInstall, removeLockEntry } from './lock.mjs';
+import { applyPermissions } from './permissions/writer.mjs';
 
 // ─── Constants ───────────────────────────────────────────────────────────────────
 
@@ -26,6 +27,8 @@ const MAX_RESPONSE_SIZE = 1024 * 1024; // 1 MB
  *   force?: boolean;
  *   dryRun?: boolean;
  *   cwd?: string;
+ *   permissions?: Record<string, string | Record<string, string>> | null;
+ *   permissionMap?: Record<string, Record<string, string | Record<string, string>>> | null;
  * }} InstallOptions
  */
 
@@ -171,7 +174,12 @@ async function installAgent(agent, options) {
 
   try {
     const url = getDownloadUrl(agent);
-    const content = await download(url);
+    let content = await download(url);
+
+    // Apply permissions if provided (S4.30)
+    if (options.permissions) {
+      content = applyPermissions(content, options.permissions);
+    }
 
     // Create directory structure
     const dir = dirname(dest.absolute);
@@ -205,7 +213,9 @@ export async function installAgents(agents, options = {}) {
   const counts = { installed: 0, skipped: 0, failed: 0 };
 
   for (const agent of agents) {
-    const result = await installAgent(agent, options);
+    // Resolve per-agent permissions: permissionMap[agentName] > permissions > undefined
+    const agentPerms = options.permissionMap?.[agent.name] || options.permissions || undefined;
+    const result = await installAgent(agent, { ...options, permissions: agentPerms });
     counts[result]++;
   }
 

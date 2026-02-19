@@ -2211,15 +2211,31 @@ describe('update — preset-select mode', () => {
     assert.equal(s2.perm.permissions[agentName].write, 'deny');
   });
 
-  it('CONFIRM on yolo → installing with yolo preset', () => {
+  it('CONFIRM on yolo → yoloConfirm, then YES → installing with yolo preset', () => {
     let s = presetSelectState();
     // yolo is index 4
     for (let i = 0; i < 4; i++) s = update(s, { action: Action.DOWN });
+    // First CONFIRM enters yoloConfirm sub-state
     const s2 = update(s, { action: Action.CONFIRM });
-    assert.equal(s2.mode, 'installing');
-    assert.equal(s2.perm.selectedPreset, 'yolo');
-    const agentName = s2.install.agents[0].name;
-    assert.equal(s2.perm.permissions[agentName].mcp, 'allow');
+    assert.equal(s2.mode, 'preset-select');
+    assert.equal(s2.perm.yoloConfirm, true);
+    // Then YES confirms and transitions to installing
+    const s3 = update(s2, { action: Action.YES });
+    assert.equal(s3.mode, 'installing');
+    assert.equal(s3.perm.selectedPreset, 'yolo');
+    const agentName = s3.install.agents[0].name;
+    assert.equal(s3.perm.permissions[agentName].mcp, 'allow');
+  });
+
+  it('CONFIRM on yolo → yoloConfirm, then non-YES → cancels', () => {
+    let s = presetSelectState();
+    for (let i = 0; i < 4; i++) s = update(s, { action: Action.DOWN });
+    const s2 = update(s, { action: Action.CONFIRM });
+    assert.equal(s2.perm.yoloConfirm, true);
+    // Any non-YES key cancels
+    const s3 = update(s2, { action: Action.DOWN });
+    assert.equal(s3.mode, 'preset-select');
+    assert.equal(s3.perm.yoloConfirm, false);
   });
 
   it('CONFIRM on custom → permission-edit mode', () => {

@@ -5,7 +5,7 @@
 
 import { enter, exit, flush, invalidate, getSize, onResize, onInput } from './screen.mjs';
 import { parseKey } from './input.mjs';
-import { createInitialState, update, getViewportHeight, detectInstalled } from './state.mjs';
+import { createInitialState, update, getViewportHeight, detectInstalled, enterPresetSelect } from './state.mjs';
 import { render } from './renderer.mjs';
 import { SPINNER_INTERVAL_MS } from './ansi.mjs';
 
@@ -80,7 +80,8 @@ export async function launchTUI(options = {}) {
         redraw();
 
         // Install one agent at a time for progress tracking
-        const counts = await installAgents([agents[i]], { force: Boolean(opts.force) });
+        const permissionMap = state.perm?.permissions || {};
+        const counts = await installAgents([agents[i]], { force: Boolean(opts.force), permissionMap });
 
         // Derive status from counts
         const status = counts.failed > 0 ? 'failed'

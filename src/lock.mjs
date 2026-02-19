@@ -24,6 +24,16 @@ const LOCK_FILENAME = '.manifest-lock.json';
 // ─── Hash ────────────────────────────────────────────────────────────────────
 
 /**
+ * SHA-256 hashes in the lock file are for CHANGE DETECTION only.
+ * They detect when an agent file has been modified since installation.
+ * They are NOT for supply-chain verification — the download source
+ * is trusted via HTTPS + host allowlist, not content hashing.
+ *
+ * When permissions are modified at install time, the hash is computed
+ * AFTER permission modification, so rehash will not flag them as changed.
+ */
+
+/**
  * Compute SHA-256 hex digest of a string or Buffer.
  * @param {string|Buffer} content
  * @returns {string}

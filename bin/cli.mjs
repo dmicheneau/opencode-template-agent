@@ -43,6 +43,9 @@ import {
 } from '../src/lock.mjs';
 
 import { parsePermissionFlags } from '../src/permissions/cli.mjs';
+import { resolvePermissions } from '../src/permissions/resolve.mjs';
+import { loadPreferences, savePreferences } from '../src/permissions/persistence.mjs';
+import { displayWarning, requireConfirmation, getWarningsForPreset } from '../src/permissions/warnings.mjs';
 
 // ─── Argument Parsing ───────────────────────────────────────────────────────────
 
@@ -242,6 +245,31 @@ async function cmdInstall(parsed) {
   const rawArgs = process.argv.slice(2);
   const permissionFlags = parsePermissionFlags(rawArgs);
 
+  // Resolve permissions (S4.29 — C4 integration)
+  const savedPrefs = permissionFlags.noSavedPermissions ? null : loadPreferences();
+  const resolvedPerms = resolvePermissions({
+    savedPreferences: savedPrefs,
+    cliPreset: permissionFlags.preset,
+    cliYolo: permissionFlags.yolo,
+    cliOverrides: permissionFlags.overrides,
+  });
+
+  // YOLO gate (S4.32): require typing CONFIRM
+  if (permissionFlags.yolo) {
+    const warnings = getWarningsForPreset('yolo');
+    for (const w of warnings) displayWarning(w.level, w.title, w.message);
+    const confirmed = await requireConfirmation('Type CONFIRM to enable YOLO mode: ');
+    if (!confirmed) {
+      process.stderr.write('YOLO mode cancelled.\n');
+      process.exit(1);
+    }
+  }
+
+  // Save preferences if requested
+  if (permissionFlags.savePermissions && resolvedPerms) {
+    savePreferences({ preset: permissionFlags.preset || undefined, overrides: permissionFlags.overrides });
+  }
+
   // Guard: mutually exclusive install modes
   const modes = ['all', 'pack', 'category', 'update'].filter((f) => parsed.flags[f]);
   if (modes.length > 1) {
@@ -263,7 +291,7 @@ async function cmdInstall(parsed) {
       console.log(`  ${dim('→')} ${bold(agent.name)} — hash mismatch, reinstalling`);
     }
     console.log();
-    const result = await installAgents(outdated, { force: true, dryRun });
+    const result = await installAgents(outdated, { force: true, dryRun, permissions: resolvedPerms });
     process.exit(result.failed > 0 ? 1 : 0);
     return;
   }
@@ -272,7 +300,7 @@ async function cmdInstall(parsed) {
   if (parsed.flags.all === true) {
     const agents = listAll();
     header(`Installing all ${agents.length} agents...`);
-    const result = await installAgents(agents, options);
+    const result = await installAgents(agents, { ...options, permissions: resolvedPerms });
     process.exit(result.failed > 0 ? 1 : 0);
     return;
   }
@@ -303,7 +331,7 @@ async function cmdInstall(parsed) {
     }
 
     header(`Installing ${uniqueAgents.length} agents from ${formatLabel('category', catIds)}...`);
-    const result = await installAgents(uniqueAgents, options);
+    const result = await installAgents(uniqueAgents, { ...options, permissions: resolvedPerms });
     process.exit(result.failed > 0 ? 1 : 0);
     return;
   }
@@ -330,7 +358,7 @@ async function cmdInstall(parsed) {
     );
 
     header(`Installing ${formatLabel('pack', packNames)} (${uniqueAgents.length} agents)...`);
-    const result = await installAgents(uniqueAgents, options);
+    const result = await installAgents(uniqueAgents, { ...options, permissions: resolvedPerms });
     process.exit(result.failed > 0 ? 1 : 0);
     return;
   }
@@ -345,7 +373,7 @@ async function cmdInstall(parsed) {
   }
 
   const agent = resolveAgentOrExit(agentName, 'install');
-  const result = await installAgents([agent], options);
+  const result = await installAgents([agent], { ...options, permissions: resolvedPerms });
   process.exit(result.failed > 0 ? 1 : 0);
 }
 

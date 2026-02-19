@@ -57,6 +57,7 @@ const MIN_VIEWPORT = 5;
  * @property {boolean} bashEditingNew      — adding a new pattern
  * @property {string} bashInput            — current pattern input text
  * @property {string|null} selectedPreset  — name of the selected preset (for display)
+ * @property {boolean} yoloConfirm         — true when YOLO is selected and awaiting y/n confirmation
  */
 
 // ─── Exports ─────────────────────────────────────────────────────────────────
@@ -487,6 +488,7 @@ export function createPermState(agents) {
     bashEditingNew: false,
     bashInput: '',
     selectedPreset: null,
+    yoloConfirm: false,
   };
 }
 
@@ -511,6 +513,27 @@ function updatePresetSelect(state, { action }) {
   if (!state.perm) return { ...state, mode: 'browse' };
   const opts = state.perm.presetOptions;
 
+  // S4.32: YOLO confirmation sub-state
+  if (state.perm.yoloConfirm) {
+    if (action === Action.YES) {
+      // Confirmed — apply yolo preset to all agents
+      const preset = getPreset('yolo');
+      const permissions = {};
+      const agents = state.install?.agents || [];
+      for (const a of agents) {
+        permissions[a.name] = { ...preset };
+      }
+      return {
+        ...state,
+        mode: 'installing',
+        perm: { ...state.perm, permissions, selectedPreset: 'yolo', yoloConfirm: false },
+        install: { ...state.install, progress: 0, current: 0, results: [], error: null, doneCursor: 0, doneScrollOffset: 0, forceSelection: new Set() },
+      };
+    }
+    // Any other key → cancel yolo confirmation
+    return { ...state, perm: { ...state.perm, yoloConfirm: false } };
+  }
+
   switch (action) {
     case Action.UP: {
       const cursor = Math.max(0, state.perm.presetCursor - 1);
@@ -530,6 +553,10 @@ function updatePresetSelect(state, { action }) {
           perm: null,
           install: { ...state.install, progress: 0, current: 0, results: [], error: null, doneCursor: 0, doneScrollOffset: 0, forceSelection: new Set() },
         };
+      }
+      if (selected === 'yolo') {
+        // S4.32: Don't go straight to installing — require confirmation
+        return { ...state, perm: { ...state.perm, yoloConfirm: true } };
       }
       if (selected === 'custom') {
         // Enter per-agent permission editor

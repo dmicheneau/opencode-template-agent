@@ -306,6 +306,12 @@ function renderDone(state, out, W) {
   out.push(bdr(`  ${bold(brightGreen('✓'))} ${bold(brightGreen('Installation complete!'))}`, W));
   out.push(bdr('', W));
   out.push(bdr(`  ${green('Installed:')} ${green(String(ok))}  ${yellow('Skipped:')} ${yellow(String(sk))}  ${red('Failed:')} ${fl > 0 ? red(String(fl)) : white(String(fl))}`, W));
+
+  // Permission summary (S4.31)
+  if (state.perm?.selectedPreset && state.perm.selectedPreset !== 'skip') {
+    out.push(bdr(dim(`  Permissions: ${state.perm.selectedPreset} preset`), W));
+  }
+
   out.push(bdr('', W));
 
   // Viewport-limited scrolling for results list
@@ -405,6 +411,20 @@ function renderPresetSelect(state, out, W) {
   out.push(bdr('', W));
   out.push(bdr(dTop, W));
   out.push(bdr(dialogLine(''), W));
+
+  // S4.32: YOLO confirmation sub-state
+  if (perm.yoloConfirm) {
+    out.push(bdr(dialogLine(''), W));
+    out.push(bdr(dialogLine(`  ${red('⚠')} ${bold(red('CRITICAL: Unrestricted access'))}`), W));
+    out.push(bdr(dialogLine(`  ${red('All permissions set to allow.')}`), W));
+    out.push(bdr(dialogLine(`  ${red('The agent will have full access.')}`), W));
+    out.push(bdr(dialogLine(''), W));
+    out.push(bdr(dialogLine(`  ${bold(yellow('Press y to confirm YOLO'))}`), W));
+    out.push(bdr(dialogLine(`  ${dim('Any other key to cancel')}`), W));
+    out.push(bdr(dBot, W));
+    out.push(bdr('', W));
+    return;
+  }
 
   const opts = perm.presetOptions;
   for (let i = 0; i < opts.length; i++) {
