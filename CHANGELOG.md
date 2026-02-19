@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [6.0.0] - 2026-02-19
+
+### Added
+- **Agent Uninstall** — Full uninstall support in TUI (`[x]` key) and CLI (`uninstall`/`remove`/`rm` commands)
+  - Symlink protection (SEC-04): lstat check prevents malicious symlink traversal
+  - Batch uninstall with `--all`, `--pack`, `--category`, `--dry-run` flags
+  - TUI confirmation dialog with danger chrome, flash message feedback
+  - Browse footer updated with `[x] Uninstall` hint
+- **Lock Integrity Tools** — Three new CLI commands for lock file management:
+  - `update` / `--update`: Detect and reinstall outdated agents (hash mismatch)
+  - `verify` / `--verify`: Validate installed files against lock hashes (exit 1 on mismatch)
+  - `rehash` / `--rehash`: Rebuild lock file from disk state
+- 64 new tests (40 uninstall + 24 lock integrity)
+- 537 tests total (360 JS + 177 Python), all passing
+
 ## [5.0.0] - 2026-02-19
 
 ### Added

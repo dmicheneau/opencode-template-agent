@@ -67,41 +67,41 @@
 
 ### S6: Agent Uninstall
 
-- [ ] **S6.1** Add uninstallAgent() to `src/installer.mjs` — delete file, clean empty dirs, ENOENT handling, **symlink protection: lstat() + realpath() + reject symlinks** (MF-2)
-- [ ] **S6.2** Add uninstallAgents() batch function to `src/installer.mjs`
-- [ ] **S6.3** Add path traversal security check on delete paths (verify target inside agents directory)
-- [ ] **S6.4** Add uninstall display helpers to `src/display.mjs`
-- [ ] **S6.5** Add `UNINSTALL` to Action enum in `src/tui/input.mjs` (F-02)
-- [ ] **S6.6** Add `x` key → UNINSTALL action mapping in `src/tui/input.mjs` (F-02)
-- [ ] **S6.7** Add `uninstall_confirm`, `uninstalling` modes to `src/tui/state.mjs` (W-06: no separate uninstall_browse, reuse browse with filter)
-- [ ] **S6.8** Add mode transitions: browse → (x) → filter installed → select → uninstall_confirm → uninstalling → done
-- [ ] **S6.9** Filter to show only installed agents when in uninstall mode
-- [ ] **S6.10** Add renderUninstallConfirm() to `src/tui/renderer.mjs` — red chrome for danger (R6)
-- [ ] **S6.11** Add **footer hints** for uninstall modes (R2 mandatory, M-06)
-- [ ] **S6.12** Add performUninstall() orchestrator to `src/tui/index.mjs` — uses flash for "N agents uninstalled"
-- [ ] **S6.13** Add `uninstall` command to `bin/cli.mjs` with flags: --pack, --category, --dry-run, --force
-- [ ] **S6.14** Add `--all` flag requiring `--force` for safety (R7)
-- [ ] **S6.15** Add aliases: `rm`, `remove` for uninstall command
-- [ ] **S6.16** Update --help output with uninstall documentation
-- [ ] **S6.17** Write tests for uninstallAgent/uninstallAgents (including symlink rejection)
-- [ ] **S6.18** Write tests for TUI uninstall mode (state machine transitions)
-- [ ] **S6.19** Write tests for CLI uninstall command parsing
-- [ ] **S6.20** Run all tests — verify no regressions
+- [x] **S6.1** Add uninstallAgent() to `src/installer.mjs` — delete file, clean empty dirs, ENOENT handling, **symlink protection: lstat() + realpath() + reject symlinks** (MF-2)
+- [x] **S6.2** Add uninstallAgents() batch function to `src/installer.mjs`
+- [x] **S6.3** Add path traversal security check on delete paths (verify target inside agents directory)
+- [x] **S6.4** Add uninstall display helpers to `src/display.mjs`
+- [x] **S6.5** Add `UNINSTALL` to Action enum in `src/tui/input.mjs` (F-02)
+- [x] **S6.6** Add `x` key → UNINSTALL action mapping in `src/tui/input.mjs` (F-02)
+- [x] **S6.7** Add `uninstall_confirm`, `uninstalling` modes to `src/tui/state.mjs` (W-06: no separate uninstall_browse, reuse browse with filter)
+- [x] **S6.8** Add mode transitions: browse → (x) → filter installed → select → uninstall_confirm → uninstalling → done
+- [x] **S6.9** Filter to show only installed agents when in uninstall mode
+- [x] **S6.10** Add renderUninstallConfirm() to `src/tui/renderer.mjs` — red chrome for danger (R6)
+- [x] **S6.11** Add **footer hints** for uninstall modes (R2 mandatory, M-06)
+- [x] **S6.12** Add performUninstall() orchestrator to `src/tui/index.mjs` — uses flash for "N agents uninstalled"
+- [x] **S6.13** Add `uninstall` command to `bin/cli.mjs` with flags: --pack, --category, --dry-run, --force
+- [x] **S6.14** Add `--all` flag requiring `--force` for safety (R7)
+- [x] **S6.15** Add aliases: `rm`, `remove` for uninstall command
+- [x] **S6.16** Update --help output with uninstall documentation
+- [x] **S6.17** Write tests for uninstallAgent/uninstallAgents (including symlink rejection)
+- [x] **S6.18** Write tests for TUI uninstall mode (state machine transitions)
+- [x] **S6.19** Write tests for CLI uninstall command parsing
+- [x] **S6.20** Run all tests — verify no regressions
 
 ### S3 extras: CLI Flags
 
-- [ ] **S3.18** Add `--update` flag to CLI: reinstall only outdated agents
-- [ ] **S3.19** Add `--rehash` flag to CLI: rebuild lock file from disk (skip agents not in manifest — M-07)
-- [ ] **S3.20** Add `--verify` flag to CLI: verify installed files match lock hashes
-- [ ] **S3.21** Update lock file on uninstall (removeLockEntry) — integration with S6
-- [ ] **S3.22** Write tests for CLI hash flags
-- [ ] **S3.23** Run all tests — verify no regressions
+- [x] **S3.18** Add `--update` flag to CLI: reinstall only outdated agents
+- [x] **S3.19** Add `--rehash` flag to CLI: rebuild lock file from disk (skip agents not in manifest — M-07)
+- [x] **S3.20** Add `--verify` flag to CLI: verify installed files match lock hashes
+- [x] **S3.21** Update lock file on uninstall (removeLockEntry) — integration with S6
+- [x] **S3.22** Write tests for CLI hash flags
+- [x] **S3.23** Run all tests — verify no regressions
 
 ### V6.1 Release Tasks
 
-- [ ] **V6.1-R1** Version bump in package.json + install.sh (M-01)
-- [ ] **V6.1-R2** Update CHANGELOG.md
-- [ ] **V6.1-R3** Final full test run (JS + Python)
+- [x] **V6.1-R1** Version bump in package.json + install.sh (M-01)
+- [x] **V6.1-R2** Update CHANGELOG.md
+- [x] **V6.1-R3** Final full test run (JS + Python)
 
 ---
 

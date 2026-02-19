@@ -2,7 +2,7 @@
 
 **Plan:** [00-plan-v6.md](00-plan-v6.md)
 **Tasks:** [01-tasks-v6.md](01-tasks-v6.md)
-**Updated:** 2026-02-19 (V6.0 Phase A: S1 ✅ S5 ✅ S3 core partial ✅)
+**Updated:** 2026-02-19 (V6.1 Release: S6 ✅ S3 extras ✅)
 
 ---
 
@@ -22,10 +22,10 @@
 
 | Section | Done | Total | % |
 |---------|------|-------|---|
-| S6: Agent Uninstall | 0 | 20 | 0% |
-| S3 extras: CLI Flags | 0 | 6 | 0% |
-| V6.1 Release Tasks | 0 | 3 | 0% |
-| **V6.1 Total** | **0** | **26** | **0%** |
+| S6: Agent Uninstall | 20 | 20 | 100% |
+| S3 extras: CLI Flags | 6 | 6 | 100% |
+| V6.1 Release Tasks | 3 | 3 | 100% |
+| **V6.1 Total** | **29** | **29** | **100%** |
 
 ### V7.0 — Permissions (S4)
 
@@ -56,10 +56,10 @@
 | Release | Done | Total | % | Status |
 |---------|------|-------|---|--------|
 | V6.0 MVP | 29 | 39 | 74% | **In Progress** |
-| V6.1 Lifecycle | 0 | 26 | 0% | Queued |
+| V6.1 Lifecycle | 29 | 29 | 100% | **Done** |
 | V7.0 Permissions | 0 | 38 | 0% | Queued |
 | S2 Enrichment | 0 | 45 | 0% | Queued |
-| **Total** | **29** | **148** | **20%** | |
+| **Total** | **58** | **151** | **38%** | |
 
 ## Review Integration
 
@@ -71,6 +71,9 @@
 - [x] S1: TUI Anti-Flicker — DEC 2026 sync markers, line diffing, coalesced redraw, shared SPINNER_INTERVAL_MS
 - [x] S5: Pack Fix + Flash — auto-select uninstalled, flash messages, confirmContext, 3s auto-dismiss
 - [x] S3 core (partial): lock.mjs module, SHA-256 hashing, 4-state detection, lock I/O, migration bootstrap, 42 tests
+- [x] S6: Agent Uninstall — TUI + CLI + symlink protection, 40 new tests
+- [x] S3 extras: --update, --verify, --rehash CLI commands, 24 new tests
+- [x] V6.1 Release: version bump 6.0.0, CHANGELOG, 537 tests passing
 
 ## Timeline Estimate
 
