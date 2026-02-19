@@ -706,6 +706,18 @@ def sync_agent(
         assert sync_cache is not None  # narrowing for type checker
         content = _cached_get(raw_url, name, sync_cache)
         if content is None and name in sync_cache:
+            # Could be 304 Not Modified or a 404 for a deleted agent.
+            # Verify the agent file actually exists on disk — if it doesn't,
+            # this isn't a valid 304 scenario (the agent was likely deleted
+            # upstream and we just have stale cache metadata).
+            relative_path = _get_agent_relative_path(name, category)
+            expected_file = output_dir / f"{relative_path}.md"
+            if not expected_file.is_file():
+                logger.warning(
+                    "  [skip] %s: cached but file missing on disk — treating as 404",
+                    name,
+                )
+                return None
             # 304 Not Modified — agent unchanged
             if verbose:
                 logger.debug("  [cached] %s: unchanged (304 Not Modified)", name)
@@ -845,10 +857,20 @@ def write_manifest(
         return
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    manifest_path.write_text(
-        json.dumps(manifest, indent=2, ensure_ascii=False) + "\n",
-        encoding="utf-8",
+    tmp_fd, tmp_path = tempfile.mkstemp(
+        dir=str(manifest_path.parent), suffix=".tmp", prefix=".manifest-"
     )
+    try:
+        with os.fdopen(tmp_fd, "w", encoding="utf-8") as f:
+            json.dump(manifest, f, indent=2, ensure_ascii=False)
+            f.write("\n")
+        os.replace(tmp_path, str(manifest_path))
+    except BaseException:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+        raise
     logger.info("Manifest written: %s", manifest_path)
 
 

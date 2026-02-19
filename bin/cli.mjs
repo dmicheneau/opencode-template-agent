@@ -537,13 +537,28 @@ async function cmdUpdate(parsed) {
     return;
   }
 
+  // Resolve permissions (same as cmdInstall)
+  const rawArgs = process.argv.slice(2);
+  const permissionFlags = parsePermissionFlags(rawArgs);
+  const savedPrefs = permissionFlags.noSavedPermissions ? null : loadPreferences();
+  const resolvedPerms = resolvePermissions({
+    savedPreferences: savedPrefs,
+    cliPreset: permissionFlags.preset,
+    cliYolo: permissionFlags.yolo,
+    cliOverrides: permissionFlags.overrides,
+  });
+
+  if (permissionFlags.savePermissions && resolvedPerms) {
+    savePreferences({ preset: permissionFlags.preset || undefined, overrides: permissionFlags.overrides });
+  }
+
   header(`Updating ${outdated.length} outdated agent(s)...`);
   for (const agent of outdated) {
     console.log(`  ${dim('→')} ${bold(agent.name)} — hash mismatch, reinstalling`);
   }
   console.log();
 
-  const result = await installAgents(outdated, { force: true, dryRun });
+  const result = await installAgents(outdated, { force: true, dryRun, permissions: resolvedPerms });
   process.exit(result.failed > 0 ? 1 : 0);
 }
 
@@ -611,8 +626,8 @@ async function main() {
 
   // Warn about unknown flags (don't error — just inform)
   const KNOWN_FLAGS = new Set([
-    'help', 'version', 'dry-run', 'json', 'force', 'yes',
-    'category', 'pack', 'all', 'confirm', 'packs', 'update',
+    'help', 'version', 'dry-run', 'force',
+    'category', 'pack', 'all', 'packs', 'update',
     'yolo', 'permissions', 'permission-override',
     'save-permissions', 'no-saved-permissions', 'no-interactive',
   ]);

@@ -78,7 +78,7 @@ def make_agent(name, category="devtools", **kwargs):
         "name": name,
         "category": category,
         "path": f"{category}/{name}",
-        "mode": "byline",
+        "mode": "subagent",
         "description": f"A {name} agent",
     }
     entry.update(kwargs)
@@ -263,7 +263,7 @@ class TestMergeManifests(unittest.TestCase):
         agent = result["agents"][0]
         self.assertEqual(agent["description"], "Curated")
         self.assertEqual(agent["tags"], ["keep"])
-        self.assertEqual(agent["mode"], "byline")
+        self.assertEqual(agent["mode"], "subagent")
 
     def test_new_agent_added(self):
         """New agents from sync are added with NEEDS_REVIEW."""
@@ -421,7 +421,7 @@ class TestMergeManifests(unittest.TestCase):
                 {
                     "name": "db-tool",
                     "category": "database",
-                    "mode": "byline",
+                    "mode": "subagent",
                     "description": "A database tool",
                 },
             ]
@@ -445,8 +445,8 @@ class TestMergeManifests(unittest.TestCase):
             "devtools/custom-path",
         )
 
-    def test_default_mode_is_byline(self):
-        """Agents without a mode field get 'byline' by default."""
+    def test_default_mode_is_subagent(self):
+        """Agents without a mode field get 'subagent' by default."""
         root = make_root_manifest()
         sync = make_sync_manifest(
             agents=[
@@ -454,7 +454,7 @@ class TestMergeManifests(unittest.TestCase):
             ]
         )
         result, added, stale = merge_manifests(root, sync)
-        self.assertEqual(result["agents"][0]["mode"], "byline")
+        self.assertEqual(result["agents"][0]["mode"], "subagent")
 
     def test_duplicate_agents_in_sync_first_wins(self):
         """When sync has duplicate names, only the first is added."""

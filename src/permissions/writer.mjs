@@ -63,12 +63,12 @@ export function readFrontmatterBoundaries(content) {
 
 /**
  * Determine whether a YAML key needs double-quoting.
- * Quotes when the key contains `*` or a space.
+ * Quotes when the key contains YAML-special characters.
  * @param {string} key
  * @returns {string}
  */
 function quoteKey(key) {
-  if (key.includes('*') || key.includes(' ')) return `"${key}"`;
+  if (/[*{}\[\]|>&!%@\\` ]/.test(key)) return `"${key}"`;
   return key;
 }
 

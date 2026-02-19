@@ -123,9 +123,10 @@ export function writeLock(data, cwd = process.cwd(), basePath) {
  * @param {string} agentName
  * @param {string|Buffer} content
  * @param {string} [cwd]
+ * @param {string} [basePath]  manifest base_path override
  */
-export function recordInstall(agentName, content, cwd = process.cwd()) {
-  const lock = readLock(cwd);
+export function recordInstall(agentName, content, cwd = process.cwd(), basePath) {
+  const lock = readLock(cwd, basePath);
   const now = new Date().toISOString();
   const existing = lock[agentName];
   lock[agentName] = {
@@ -133,18 +134,19 @@ export function recordInstall(agentName, content, cwd = process.cwd()) {
     installedAt: existing?.installedAt || now,
     updatedAt: now,
   };
-  writeLock(lock, cwd);
+  writeLock(lock, cwd, basePath);
 }
 
 /**
  * Remove an agent entry from the lock file.
  * @param {string} agentName
  * @param {string} [cwd]
+ * @param {string} [basePath]  manifest base_path override
  */
-export function removeLockEntry(agentName, cwd = process.cwd()) {
-  const lock = readLock(cwd);
+export function removeLockEntry(agentName, cwd = process.cwd(), basePath) {
+  const lock = readLock(cwd, basePath);
   delete lock[agentName];
-  writeLock(lock, cwd);
+  writeLock(lock, cwd, basePath);
 }
 
 // ─── State detection ─────────────────────────────────────────────────────────

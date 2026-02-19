@@ -1847,11 +1847,11 @@ describe('render — uninstall_confirm dialog', () => {
       `missing agent name "${state.uninstallTarget.name}" in dialog`);
   });
 
-  it('contains [y] and [n] hints', () => {
+  it('contains [y/o] and [n] hints', () => {
     const state = uninstallConfirmState();
     const output = render(state);
     const plain = stripAnsi(output);
-    assert.ok(plain.includes('[y]'), 'missing [y] hint');
+    assert.ok(plain.includes('[y/o]'), 'missing [y/o] hint');
     assert.ok(plain.includes('[n]'), 'missing [n] hint');
   });
 });
@@ -2392,10 +2392,10 @@ describe('update — permission-edit mode', () => {
     assert.ok(s.flash, 'flash message should be set');
   });
 
-  it('ESCAPE → installing mode', () => {
+  it('ESCAPE → preset-select mode', () => {
     const s = permEditState();
     const s2 = update(s, { action: Action.ESCAPE });
-    assert.equal(s2.mode, 'installing');
+    assert.equal(s2.mode, 'preset-select');
   });
 
   it('null perm guard: returns browse if perm is null', () => {

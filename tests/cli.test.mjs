@@ -910,10 +910,10 @@ describe('CLI unknown flags warning', () => {
       '--dry-run should not trigger unknown flag warning');
   });
 
-  it('should NOT warn about --json', () => {
+  it('should warn about --json (dead flag removed)', () => {
     const { stderr } = runFull(['list', '--json']);
-    assert.ok(!stderr.includes('unknown flag'),
-      '--json should not trigger unknown flag warning');
+    assert.ok(stderr.includes('unknown flag'),
+      '--json should trigger unknown flag warning since it was removed');
   });
 
   it('should NOT warn about --force', () => {

@@ -169,7 +169,7 @@ function renderPackDetail(state, out, W) {
     const inst = state.installed?.has(a.name);
     const mk = sel && cur ? bold(brightGreen('✓')) + bold(brightCyan('▸'))
       : cur ? ' ' + bold(brightCyan('▸')) : sel ? bold(brightGreen('✓')) + ' ' : inst ? dim(green('✔')) + ' ' : '  ';
-    const nameCol = nameStyle(padEnd(a.name, COL_NAME), cur, sel);
+    const nameCol = nameStyle(padEndAscii(a.name, COL_NAME), cur, sel);
     const desc = cur ? dim(white(truncate(a.description, descWidth))) : dim(truncate(a.description, descWidth));
     const row = ` ${mk} ${nameCol}${desc}`;
     out.push(bdr(row, W, cur ? bgRow : undefined));
@@ -232,12 +232,12 @@ function renderConfirm(state, out, W) {
   for (const a of show) out.push(bdr(dialogLine(`  - ${white(a.name)}`), W));
   if (agents.length > maxShow) out.push(bdr(dialogLine(white(`  ... and ${agents.length - maxShow} more`)), W));
   out.push(bdr(dialogLine(''), W));
-  out.push(bdr(dialogLine(`  ${green('[y]')} Yes  ${red('[n]')} No`), W));
+  out.push(bdr(dialogLine(`  ${green('[y/o]')} Yes  ${red('[n]')} No`), W));
   out.push(bdr(dBot, W));
   out.push(bdr('', W));
 }
 
-// ─── Install Progress ───────────────────────────────────────────────────────
+// ─── Install Progress ───────────────────────────────────────────────
 
 function renderProgress(state, out, W) {
   const inst = state.install;
@@ -375,7 +375,7 @@ function renderUninstallConfirm(state, out, W) {
   out.push(bdr(dialogLine(''), W));
   out.push(bdr(dialogLine(dim('This will delete the agent file and its lock entry.')), W));
   out.push(bdr(dialogLine(''), W));
-  out.push(bdr(dialogLine(`  ${green('[y]')} Yes  ${red('[n]')} No`), W));
+  out.push(bdr(dialogLine(`  ${green('[y/o]')} Yes  ${red('[n]')} No`), W));
   out.push(bdr(dBot, W));
   out.push(bdr('', W));
 }
@@ -476,7 +476,18 @@ function renderPermissionEdit(state, out, W) {
   out.push(bdr('', W));
 
   const colName = 16;
-  const vh = Math.max(5, getViewportHeight(state) - 6);
+  let vh = Math.max(5, getViewportHeight(state) - 6);
+
+  // Account for the extra warning line that may be displayed for the cursor row
+  const cursorPermName = PERMISSION_NAMES[perm.permCursor];
+  const cursorAction = (() => {
+    const rawVal = agentPerms[cursorPermName] || 'ask';
+    return typeof rawVal === 'string' ? rawVal : (rawVal['*'] || 'ask');
+  })();
+  const cursorWarnings = getWarningsForPermission(cursorPermName, cursorAction);
+  if (cursorWarnings.length > 0) {
+    vh = Math.max(5, vh - 1);
+  }
 
   // Scroll if needed
   let scrollOffset = 0;

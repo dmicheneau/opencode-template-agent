@@ -2,7 +2,7 @@
 
 **Plan:** [00-plan-v6.md](00-plan-v6.md)
 **Tasks:** [01-tasks-v6.md](01-tasks-v6.md)
-**Updated:** 2026-02-19 (V7.0 Release: S4 Full Permissions ✅ — 38/38 tasks complete, 805 tests passing)
+**Updated:** 2026-02-19 (V7.0 Post-release Code Review: 16 issues fixed — 805 tests passing)
 
 ---
 
@@ -39,7 +39,8 @@
 | C3: TUI Editor | 8 | 8 | 100% |
 | C4: Integration | 7 | 7 | 100% |
 | V7.0 Release Tasks | 3 | 3 | 100% |
-| **V7.0 Total** | **38** | **38** | **100%** |
+| Post-release CR2 (16 issues) | 16 | 16 | 100% |
+| **V7.0 Total** | **54** | **54** | **100%** |
 
 ### S2 — Content Enrichment (continuous)
 
@@ -60,9 +61,9 @@
 |---------|------|-------|---|--------|
 | V6.0 MVP | 30 | 39 | 77% | **In Progress** |
 | V6.1 Lifecycle | 46 | 46 | 100% | **Done** |
-| V7.0 Permissions | 38 | 38 | 100% | **Done** |
+| V7.0 Permissions | 54 | 54 | 100% | **Done** |
 | S2 Enrichment | 0 | 45 | 0% | Queued |
-| **Total** | **114** | **168** | **68%** | |
+| **Total** | **130** | **184** | **71%** | |
 
 ## Review Integration
 
@@ -85,6 +86,7 @@
 - [x] V7.0 C3 TUI Permission Editor: createPermissionState + updatePermission pure reducer (W-03), preset selector (skip/strict/balanced/permissive/yolo/custom — R1 opt-in), per-agent permission editor, bash pattern sub-editor, security warnings inline, "Apply to all agents", footer hints (R2)
 - [x] V7.0 C4 Integration: permission step in install flow (opt-in — R1), installAgent applies permissions, TUI confirm dialog shows permission summary, YOLO gated with CONFIRM typing (MF-3), S3 hash documentation (MF-6)
 - [x] V7.0 Release: version bump 7.0.0 (package.json + install.sh), 805 tests passing (628 JS + 177 Python)
+- [x] V7.0 Post-release code review (CR2 — 16 issues): C-1 parsePermissionFlags --flag=value normalization, H-1 cmdUpdate permissions propagation, H-2 basePath in recordInstall/removeLockEntry, H-3 byline→subagent default mode, M-1 quoteKey alignment JS/Python, M-2 Esc permission-edit→preset-select, M-3 viewport overflow with inline warnings, M-4 CATEGORY_MAP alignment, M-5 comment fix, M-6 cache 304/404 distinction, L-1 dead flags removed, L-2 dead code removed, L-3 o/O hint added, L-4 padEndAscii, L-5 atomic write_manifest, L-6 symlink check in cache removal — 805 tests passing
 
 **Backlog (remaining V6.0 S3 core tasks):** S3.4 (corrupted JSON recovery), S3.5 (manifest sha256/size fields), S3.6 (Python sync hashes), S3.9-S3.10 (TUI state indicators), S3.12 (cache invalidation), S3.16 (Python sync tests)
 

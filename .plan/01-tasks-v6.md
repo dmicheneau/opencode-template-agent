@@ -2,7 +2,7 @@
 
 **Plan:** [00-plan-v6.md](00-plan-v6.md)
 **Created:** 2026-02-18
-**Updated:** 2026-02-19 (post-review revision: release split + new tasks from 4 reviews + code review hardening + Major CR fixes + Minor/Low CR fixes — ALL 21 CR issues resolved)
+**Updated:** 2026-02-19 (post-review revision: release split + new tasks from 4 reviews + code review hardening + Major CR fixes + Minor/Low CR fixes — ALL 21 CR issues resolved + V7.0 post-release code review: 16 issues fixed)
 
 ---
 
@@ -204,6 +204,32 @@
 - [x] **V7.0-R2** Update CHANGELOG.md
 - [x] **V7.0-R3** Final full test run (JS + Python)
 
+### Post-release V7.0 Code Review (16 issues fixed)
+
+**Critical (1):**
+- [x] **CR2-C1** Fix `--permissions=balanced` broken in parsePermissionFlags — normalize `--flag=value` (`src/permissions/cli.mjs`)
+
+**High (3):**
+- [x] **CR2-H1** `cmdUpdate` now resolves and passes permissions like `cmdInstall` (`bin/cli.mjs`)
+- [x] **CR2-H2** `basePath` propagated in `recordInstall`/`removeLockEntry` (`src/lock.mjs`)
+- [x] **CR2-H3** Default mode `"byline"` → `"subagent"` (`scripts/update-manifest.py`)
+
+**Medium (6):**
+- [x] **CR2-M1** `quoteKey` aligned with Python: quotes `{}[]|>&!%@\`` (`src/permissions/writer.mjs`)
+- [x] **CR2-M2** Esc in permission-edit → `preset-select` instead of direct install (`src/tui/state.mjs`)
+- [x] **CR2-M3** Viewport accounts for inline warnings in permission editor (`src/tui/renderer.mjs`)
+- [x] **CR2-M4** CATEGORY_MAP aligned between `sync-agents.py` and `update-manifest.py`
+- [x] **CR2-M5** Misleading comment fixed in `input.mjs` (done mode, not browse)
+- [x] **CR2-M6** Cache 304/404 distinction via disk file check (`scripts/sync-agents.py`)
+
+**Low (6):**
+- [x] **CR2-L1** Dead flags `json`/`yes`/`confirm` removed from KNOWN_FLAGS (`bin/cli.mjs`)
+- [x] **CR2-L2** Unreachable Enter mapping removed in done mode (`src/tui/input.mjs`)
+- [x] **CR2-L3** Footer hints show `[y/o]` for confirm modes — French "oui" (`src/tui/renderer.mjs`)
+- [x] **CR2-L4** `padEndAscii` used for ASCII-only agent names (`src/tui/renderer.mjs`)
+- [x] **CR2-L5** `write_manifest` made atomic via tempfile+os.replace (`scripts/sync-agents.py`)
+- [x] **CR2-L6** Symlink check added in `_remove_sync_cache` (`scripts/sync_common.py`)
+
 ---
 
 ## S2 — Content Enrichment (continuous, parallel)
@@ -277,8 +303,9 @@
 | V6.0 — MVP | 39 tasks | 3-4 days |
 | V6.1 — Lifecycle | 46 tasks (29 + 4 CR hardening + 8 Major fixes + 5 Minor/Low fixes) | 3-4 days |
 | V7.0 — Permissions | 38 tasks ✅ | 5-7 days |
+| V7.0 Post-release CR | 16 tasks ✅ (1 critical + 3 high + 6 medium + 6 low) | 1 day |
 | S2 — Enrichment | 45 tasks | 10-14 weeks |
-| **Total** | **168 tasks** | — |
+| **Total** | **184 tasks** | — |
 
 ### Key Review Findings Incorporated
 

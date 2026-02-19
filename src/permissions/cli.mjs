@@ -108,8 +108,19 @@ export function parsePermissionFlags(args) {
   let noSavedPermissions = false;
   let noInteractive = false;
 
-  for (let i = 0; i < args.length; i++) {
-    const arg = args[i];
+  // Normalize --flag=value into ['--flag', 'value']
+  const normalized = [];
+  for (const arg of args) {
+    if (arg.startsWith('--') && arg.includes('=')) {
+      const idx = arg.indexOf('=');
+      normalized.push(arg.slice(0, idx), arg.slice(idx + 1));
+    } else {
+      normalized.push(arg);
+    }
+  }
+
+  for (let i = 0; i < normalized.length; i++) {
+    const arg = normalized[i];
 
     switch (arg) {
       case '--yolo':
@@ -117,7 +128,7 @@ export function parsePermissionFlags(args) {
         break;
 
       case '--permissions': {
-        const value = args[++i];
+        const value = normalized[++i];
         if (value === undefined || value.startsWith('--')) {
           throw new Error('--permissions requires a preset name (strict | balanced | permissive | yolo)');
         }
@@ -131,7 +142,7 @@ export function parsePermissionFlags(args) {
       }
 
       case '--permission-override': {
-        const value = args[++i];
+        const value = normalized[++i];
         if (value === undefined || value.startsWith('--')) {
           throw new Error(
             '--permission-override requires a spec (e.g., bash=allow or agent:write=deny)',

@@ -469,7 +469,13 @@ def _remove_sync_cache(
 ) -> bool:
     """Remove the sync cache file if it exists.  Returns True if removed."""
     cache_path = output_dir / cache_filename
-    if cache_path.exists():
+    if cache_path.exists() or os.path.islink(str(cache_path)):
+        if os.path.islink(str(cache_path)):
+            logger.warning(
+                "  [skip] %s is a symlink — refusing to delete",
+                cache_filename,
+            )
+            return False
         cache_path.unlink()
         if verbose:
             logger.debug("  [removed] %s", cache_filename)

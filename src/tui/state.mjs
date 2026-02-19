@@ -706,11 +706,10 @@ function updatePermissionEdit(state, { action }) {
       };
     }
     case Action.ESCAPE: {
-      // Done editing — proceed to installing
+      // Go back to preset selection (don't start install on accidental Esc)
       return {
         ...state,
-        mode: 'installing',
-        install: { ...state.install, progress: 0, current: 0, results: [], error: null, doneCursor: 0, doneScrollOffset: 0, forceSelection: new Set() },
+        mode: 'preset-select',
       };
     }
     default:

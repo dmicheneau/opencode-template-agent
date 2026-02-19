@@ -112,7 +112,7 @@ CATEGORY_MAP: Dict[str, str] = {
     "specialist": "devtools",
     "media": "devtools",  # A/V processing tools
     # Tier 2 source categories
-    "game-development": "devtools",  # game engines & tooling
+    "game-development": "specialist",  # game engines & tooling
     "mcp-dev-team": "mcp",
     "modernization": "devops",
     "realtime": "web",
@@ -121,10 +121,10 @@ CATEGORY_MAP: Dict[str, str] = {
     "performance-testing": "devtools",
     "ui-analysis": "web",
     "deep-research-team": "web",  # web research & scraping workflows
-    "ffmpeg-clip-team": "devtools",
-    "obsidian-ops-team": "devtools",
-    "ocr-extraction-team": "devtools",
-    "podcast-creator-team": "devtools",
+    "ffmpeg-clip-team": "media",
+    "obsidian-ops-team": "specialist",
+    "ocr-extraction-team": "specialist",
+    "podcast-creator-team": "media",
 }
 """Maps upstream sync categories to our curated category names."""
 
@@ -295,7 +295,7 @@ def merge_manifests(
             "name": name,
             "category": our_category,
             "path": agent_path,
-            "mode": agent.get("mode", "byline"),
+            "mode": agent.get("mode", "subagent"),
             "description": (
                 f"{NEEDS_REVIEW_PREFIX} {agent.get('description', 'Auto-synced agent')}"
             ),

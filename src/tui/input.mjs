@@ -181,12 +181,11 @@ export function parseKey(data, mode) {
     return R_NONE;
   }
 
-  // ── Browse / pack_detail mode ─────────────────────────────────────────
+  // ── Done mode ──────────────────────────────────────────────────────────
   if (mode === 'done') {
     if (raw === SPACE) return R_SELECT;
     if (raw === 'f' || raw === 'F') return R_FORCE;
     if (raw === 'q' || raw === 'Q') return R_QUIT;
-    if (raw === ENTER) return R_CONFIRM;
     return R_NONE;                     // ignore unknown keys
   }
 
