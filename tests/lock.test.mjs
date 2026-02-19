@@ -17,6 +17,7 @@ import {
   findOutdatedAgents,
   verifyLockIntegrity,
   rehashLock,
+  isValidLockEntry,
 } from '../src/lock.mjs';
 
 // ─── Test helpers ────────────────────────────────────────────────────────────
@@ -111,6 +112,20 @@ describe('getLockPath', () => {
     assert.ok(p.startsWith(process.cwd()));
     assert.ok(p.endsWith('.manifest-lock.json'));
   });
+
+  // ─── M-1: getLockPath accepts optional basePath parameter ──────────────
+
+  it('M-1: should use default .opencode/agents when basePath is omitted', () => {
+    const p = getLockPath('/tmp/test-project');
+    assert.ok(p.includes(join('.opencode', 'agents')), 'default basePath should be .opencode/agents');
+    assert.equal(p, join('/tmp/test-project', '.opencode', 'agents', '.manifest-lock.json'));
+  });
+
+  it('M-1: should use custom basePath when provided', () => {
+    const p = getLockPath('/tmp/test-project', 'custom/path');
+    assert.equal(p, join('/tmp/test-project', 'custom', 'path', '.manifest-lock.json'));
+    assert.ok(!p.includes('.opencode'), 'custom basePath should override default');
+  });
 });
 
 // ─── readLock ────────────────────────────────────────────────────────────────
@@ -177,6 +192,92 @@ describe('readLock', () => {
     writeFileSync(lockPath, JSON.stringify(lockData), 'utf-8');
     const data = readLock(tmp);
     assert.deepEqual(data, lockData);
+  });
+
+  // ─── M-5: readLock warns on corrupted JSON ──────────────────────────────
+
+  it('M-5: should write warning to stderr when lock file is corrupted', () => {
+    const lockPath = getLockPath(tmp);
+    mkdirSync(join(lockPath, '..'), { recursive: true });
+    writeFileSync(lockPath, '<<< corrupted garbage >>>', 'utf-8');
+
+    // Capture stderr
+    const captured = [];
+    const originalWrite = process.stderr.write;
+    process.stderr.write = (chunk) => { captured.push(String(chunk)); return true; };
+    try {
+      const data = readLock(tmp);
+      assert.deepEqual(data, {}, 'corrupted lock should return {}');
+      assert.ok(captured.length > 0, 'should have written to stderr');
+      assert.ok(captured.some(s => s.includes('corrupted') || s.includes('Warning')),
+        `stderr should mention corruption, got: ${captured.join('')}`);
+    } finally {
+      process.stderr.write = originalWrite;
+    }
+  });
+
+  // ─── M-6: readLock filters out invalid entries ────────────────────────────
+
+  it('M-6: should filter out invalid entries and keep only valid ones', () => {
+    const lockPath = getLockPath(tmp);
+    mkdirSync(join(lockPath, '..'), { recursive: true });
+    const mixed = {
+      'valid-agent': { sha256: 'abc123', installedAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z' },
+      'missing-sha': { installedAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z' },
+      'null-entry': null,
+      'string-entry': 'just a string',
+      'number-entry': 42,
+      'valid-minimal': { sha256: 'def456' },
+    };
+    writeFileSync(lockPath, JSON.stringify(mixed), 'utf-8');
+    const data = readLock(tmp);
+    assert.ok(data['valid-agent'], 'valid full entry should be kept');
+    assert.ok(data['valid-minimal'], 'valid minimal entry (sha256 only) should be kept');
+    assert.ok(!data['missing-sha'], 'entry without sha256 should be filtered out');
+    assert.ok(!data['null-entry'], 'null entry should be filtered out');
+    assert.ok(!data['string-entry'], 'string entry should be filtered out');
+    assert.ok(!data['number-entry'], 'number entry should be filtered out');
+    assert.equal(Object.keys(data).length, 2, 'only 2 valid entries should remain');
+  });
+});
+
+// ─── writeLock ───────────────────────────────────────────────────────────────
+
+// ─── isValidLockEntry (M-6) ──────────────────────────────────────────────────
+
+describe('isValidLockEntry', () => {
+  it('should return true for entry with sha256 string', () => {
+    assert.equal(isValidLockEntry({ sha256: 'abc' }), true);
+  });
+
+  it('should return true for full entry with all fields', () => {
+    assert.equal(isValidLockEntry({ sha256: 'abc', installedAt: '2025-01-01', updatedAt: '2025-01-01' }), true);
+  });
+
+  it('should return false for empty object (missing sha256)', () => {
+    assert.equal(isValidLockEntry({}), false);
+  });
+
+  it('should return false for null', () => {
+    assert.equal(isValidLockEntry(null), false);
+  });
+
+  it('should return false for a string', () => {
+    assert.equal(isValidLockEntry('string'), false);
+  });
+
+  it('should return false for a number', () => {
+    assert.equal(isValidLockEntry(42), false);
+  });
+
+  it('should return false for undefined', () => {
+    assert.equal(isValidLockEntry(undefined), false);
+  });
+
+  it('should return false when sha256 is not a string', () => {
+    assert.equal(isValidLockEntry({ sha256: 123 }), false);
+    assert.equal(isValidLockEntry({ sha256: null }), false);
+    assert.equal(isValidLockEntry({ sha256: true }), false);
   });
 });
 

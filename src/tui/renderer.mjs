@@ -292,7 +292,7 @@ function renderProgress(state, out, W) {
 function renderDone(state, out, W) {
   const inst = state.install;
   if (!inst) return;
-  const { results, doneCursor, forceSelection } = inst;
+  const { results, doneCursor, forceSelection, doneScrollOffset = 0 } = inst;
   let ok = 0, sk = 0, fl = 0;
   for (const r of results) {
     if (r.status === 'installed') ok++;
@@ -306,7 +306,15 @@ function renderDone(state, out, W) {
   out.push(bdr(`  ${green('Installed:')} ${green(String(ok))}  ${yellow('Skipped:')} ${yellow(String(sk))}  ${red('Failed:')} ${fl > 0 ? red(String(fl)) : white(String(fl))}`, W));
   out.push(bdr('', W));
 
-  for (let i = 0; i < results.length; i++) {
+  // Viewport-limited scrolling for results list
+  const vh = Math.max(1, getViewportHeight(state) - 7);
+
+  if (doneScrollOffset > 0) {
+    out.push(bdr(cyan(`  ↑ ${doneScrollOffset} more above`), W));
+  }
+
+  const end = Math.min(results.length, doneScrollOffset + vh);
+  for (let i = doneScrollOffset; i < end; i++) {
     const r = results[i];
     const isCursor = i === doneCursor && sk > 0;
     const isSelected = forceSelection && forceSelection.has(r.name);
@@ -320,6 +328,11 @@ function renderDone(state, out, W) {
     } else {
       out.push(bdr(`  ${ptr} ${red('✗')} ${red(r.name)} ${red('(failed)')}${selMark}`, W));
     }
+  }
+
+  const remaining = results.length - end;
+  if (remaining > 0) {
+    out.push(bdr(cyan(`  ↓ ${remaining} more below`), W));
   }
 
   out.push(bdr('', W));

@@ -37,26 +37,55 @@ export function sha256(content) {
 /**
  * Get the lock file path for the given cwd.
  * @param {string} [cwd]
+ * @param {string} [basePath]  manifest base_path override (e.g. 'custom/agents')
  * @returns {string}
  */
-export function getLockPath(cwd = process.cwd()) {
-  return join(cwd, '.opencode', 'agents', LOCK_FILENAME);
+export function getLockPath(cwd = process.cwd(), basePath) {
+  return join(cwd, basePath || '.opencode/agents', LOCK_FILENAME);
+}
+
+/**
+ * Check whether a lock entry has the minimum required shape.
+ * @param {unknown} entry
+ * @returns {entry is LockEntry}
+ */
+export function isValidLockEntry(entry) {
+  return (
+    typeof entry === 'object' &&
+    entry !== null &&
+    typeof /** @type {any} */ (entry).sha256 === 'string'
+  );
 }
 
 /**
  * Read the lock file. Returns empty object if not found or invalid.
+ * Emits a stderr warning when the file exists but is corrupted.
+ * Invalid entries (missing `sha256`, etc.) are silently filtered out.
  * @param {string} [cwd]
+ * @param {string} [basePath]  manifest base_path override
  * @returns {LockData}
  */
-export function readLock(cwd = process.cwd()) {
-  const p = getLockPath(cwd);
+export function readLock(cwd = process.cwd(), basePath) {
+  const p = getLockPath(cwd, basePath);
   if (!existsSync(p)) return {};
   try {
     const raw = readFileSync(p, 'utf-8');
     const data = JSON.parse(raw);
     if (typeof data !== 'object' || data === null || Array.isArray(data)) return {};
-    return data;
+
+    // M-6: filter out entries that don't have the required shape
+    /** @type {LockData} */
+    const clean = {};
+    for (const [name, entry] of Object.entries(data)) {
+      if (isValidLockEntry(entry)) {
+        clean[name] = entry;
+      }
+    }
+    return clean;
   } catch {
+    process.stderr.write(
+      "Warning: Lock file corrupted, starting fresh. Run 'rehash' to rebuild.\n",
+    );
     return {};
   }
 }
@@ -66,9 +95,10 @@ export function readLock(cwd = process.cwd()) {
  * Creates parent directories if needed.
  * @param {LockData} data
  * @param {string} [cwd]
+ * @param {string} [basePath]  manifest base_path override
  */
-export function writeLock(data, cwd = process.cwd()) {
-  const p = getLockPath(cwd);
+export function writeLock(data, cwd = process.cwd(), basePath) {
+  const p = getLockPath(cwd, basePath);
   const dir = dirname(p);
   mkdirSync(dir, { recursive: true });
   const tmp = join(dir, `.lock-tmp-${process.pid}`);
@@ -122,9 +152,9 @@ export function removeLockEntry(agentName, cwd = process.cwd()) {
  * @returns {Map<string, AgentState>}
  */
 export function detectAgentStates(manifest, cwd = process.cwd()) {
-  const lock = readLock(cwd);
-  const states = new Map();
   const basePath = manifest.base_path || '.opencode/agents';
+  const lock = readLock(cwd, basePath);
+  const states = new Map();
 
   for (const agent of manifest.agents) {
     const filePath = agent.mode === 'primary'
@@ -194,8 +224,8 @@ export function findOutdatedAgents(manifest, cwd = process.cwd()) {
  * @returns {{ ok: string[], mismatch: string[], missing: string[] }}
  */
 export function verifyLockIntegrity(manifest, cwd = process.cwd()) {
-  const lock = readLock(cwd);
   const basePath = manifest.base_path || '.opencode/agents';
+  const lock = readLock(cwd, basePath);
   const agentMap = new Map(manifest.agents.map((a) => [a.name, a]));
 
   /** @type {string[]} */ const ok = [];
@@ -258,7 +288,7 @@ export function rehashLock(manifest, cwd = process.cwd()) {
     };
   }
 
-  writeLock(lock, cwd);
+  writeLock(lock, cwd, basePath);
   return Object.keys(lock).length;
 }
 
@@ -273,8 +303,8 @@ export function rehashLock(manifest, cwd = process.cwd()) {
  * @returns {boolean}  true if lock file was updated
  */
 export function bootstrapLock(manifest, cwd = process.cwd()) {
-  const lock = readLock(cwd);
   const basePath = manifest.base_path || '.opencode/agents';
+  const lock = readLock(cwd, basePath);
   let changed = false;
 
   for (const agent of manifest.agents) {
@@ -296,6 +326,6 @@ export function bootstrapLock(manifest, cwd = process.cwd()) {
     changed = true;
   }
 
-  if (changed) writeLock(lock, cwd);
+  if (changed) writeLock(lock, cwd, basePath);
   return changed;
 }

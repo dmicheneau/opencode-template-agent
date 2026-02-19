@@ -193,6 +193,26 @@ describe('parseKey', () => {
       // Arrow keys are multi-char escape sequences, handled before mode check
       assert.deepStrictEqual(parseKey(buf('\x1b[A'), mode), { action: 'UP' });
     });
+
+    // ─── TUI M-5: Paste multi-chars in search mode ─────────────────────────
+
+    it('M-5: multi-char printable paste → CHAR with full string', () => {
+      const result = parseKey(buf('hello'), mode);
+      assert.equal(result.action, 'CHAR');
+      assert.equal(result.char, 'hello');
+    });
+
+    it('M-5: escape sequence (starts with \\x1b) is not treated as paste', () => {
+      const result = parseKey(buf('\x1b[B'), mode);
+      assert.equal(result.action, 'DOWN');
+      assert.notEqual(result.action, 'CHAR');
+    });
+
+    it('M-5: multi-char with non-printable byte → not CHAR', () => {
+      // Contains a control character (0x01) so should NOT be treated as paste
+      const result = parseKey(buf('ab\x01cd'), mode);
+      assert.equal(result.action, 'NONE');
+    });
   });
 
   // ── Mode: confirm ───────────────────────────────────────────────────────
@@ -1526,6 +1546,67 @@ describe('render — done mode', () => {
     assert.ok(plain.includes('Force reinstall') || plain.includes('[f]'),
       'missing force reinstall hint for skipped agents');
   });
+
+  // ─── TUI M-1: renderDone viewport scrolling ──────────────────────────────
+
+  it('M-1: shows ↓ indicator when results exceed viewport height', () => {
+    // Many results + small terminal → should trigger scroll indicator
+    const manyResults = [];
+    for (let i = 0; i < 25; i++) {
+      manyResults.push({ name: `agent-${i}`, status: 'installed' });
+    }
+    const manyAgents = manyResults.map(r => ({
+      name: r.name, category: 'ai', path: `ai/${r.name}`, mode: 'subagent',
+      description: `Agent ${r.name}`, tags: ['ai'],
+    }));
+    const manifest = makeManifest({ agents: manyAgents });
+    let state = createInitialState(manifest, { cols: 80, rows: 15 });
+    state = {
+      ...state,
+      mode: 'done',
+      install: {
+        agents: manyAgents,
+        progress: 25,
+        current: 25,
+        results: manyResults,
+        error: null,
+        done: true,
+        doneCursor: 0,
+        doneScrollOffset: 0,
+        forceSelection: new Set(),
+      },
+    };
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('↓') || plain.includes('more below'),
+      'should show ↓ or "more below" when results overflow viewport');
+  });
+
+  it('M-1: does NOT show ↓ indicator when results fit in viewport', () => {
+    let state = makeState({}, { cols: 80, rows: 40 });
+    state = {
+      ...state,
+      mode: 'done',
+      install: {
+        agents: state.allAgents.slice(0, 2),
+        progress: 2,
+        current: 2,
+        results: [
+          { name: 'ai-engineer', status: 'installed' },
+          { name: 'ml-engineer', status: 'installed' },
+        ],
+        error: null,
+        done: true,
+        doneCursor: 0,
+        doneScrollOffset: 0,
+        forceSelection: new Set(),
+      },
+    };
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(!plain.includes('more below'),
+      'should NOT show "more below" when results fit in viewport');
+  });
 });
 
 describe('render — search mode', () => {
@@ -1984,5 +2065,30 @@ describe('uninstallAgents', () => {
     assert.equal(result.removed, 0);
     assert.equal(result.not_found, 2);
     assert.equal(result.failed, 0);
+  });
+
+  // ─── M-4: Batch uninstall error isolation ─────────────────────────────────
+
+  it('M-4: should continue processing after encountering a non-existent agent', () => {
+    const agents = [
+      { name: 'real-first', category: 'a', mode: 'subagent', description: 'test', tags: [] },
+      { name: 'nonexistent-middle', category: 'b', mode: 'subagent', description: 'test', tags: [] },
+      { name: 'real-last', category: 'c', mode: 'subagent', description: 'test', tags: [] },
+    ];
+
+    // Create first and last agents, skip middle
+    for (const a of [agents[0], agents[2]]) {
+      const dir = join(tmp, '.opencode', 'agents', a.category);
+      mkdirSync(dir, { recursive: true });
+      writeFileSync(join(dir, `${a.name}.md`), '# Agent', 'utf-8');
+    }
+
+    const result = uninstallAgents(agents, { cwd: tmp });
+    assert.equal(result.removed, 2, 'both existing agents should be removed');
+    assert.equal(result.not_found, 1, 'missing agent should be counted as not_found');
+    assert.equal(result.failed, 0, 'no failures expected');
+    // Verify the last agent was actually processed (not aborted after middle failure)
+    assert.ok(!existsSync(join(tmp, '.opencode', 'agents', 'c', 'real-last.md')),
+      'last agent file should be deleted — batch did not abort');
   });
 });

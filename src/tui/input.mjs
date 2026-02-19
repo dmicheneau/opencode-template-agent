@@ -141,9 +141,20 @@ export function parseKey(data, mode) {
   // ── Context-dependent mapping ─────────────────────────────────────────
 
   if (mode === 'search') {
-    // In search mode, any printable character is CHAR input
-    if (raw.length === 1 && raw.charCodeAt(0) >= 32) {
+    // Single printable character — normal typing
+    if (raw.length === 1 && raw.charCodeAt(0) >= 0x20) {
       return { action: Action.CHAR, char: raw };
+    }
+    // Multi-char paste: accept if every byte is printable ASCII (0x20..0x7E).
+    // Escape sequences also have raw.length > 1 but contain non-printable bytes
+    // (e.g. 0x1b), so this heuristic cleanly separates paste from sequences.
+    if (raw.length > 1) {
+      let printable = true;
+      for (let i = 0; i < raw.length; i++) {
+        const c = raw.charCodeAt(i);
+        if (c < 0x20 || c > 0x7E) { printable = false; break; }
+      }
+      if (printable) return { action: Action.CHAR, char: raw };
     }
     return R_NONE;
   }

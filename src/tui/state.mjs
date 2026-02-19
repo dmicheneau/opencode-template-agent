@@ -242,7 +242,7 @@ function updateConfirm(state, { action }) {
       return {
         ...state,
         mode: 'installing',
-        install: { agents, progress: 0, current: 0, results: [], error: null, doneCursor: 0, forceSelection: new Set() },
+        install: { agents, progress: 0, current: 0, results: [], error: null, doneCursor: 0, doneScrollOffset: 0, forceSelection: new Set() },
       };
     }
     case Action.NO:
@@ -330,7 +330,7 @@ function updatePackDetail(state, { action }) {
         ...state,
         mode: 'confirm',
         selection: sel,
-        install: { agents, progress: 0, current: 0, results: [], error: null, doneCursor: 0, forceSelection: new Set() },
+        install: { agents, progress: 0, current: 0, results: [], error: null, doneCursor: 0, doneScrollOffset: 0, forceSelection: new Set() },
         confirmContext: { type: 'pack', label: state.packDetail.packLabel, count: agents.length },
       };
     }
@@ -359,11 +359,11 @@ function updateDone(state, { action }) {
 
     case Action.UP: {
       const cursor = Math.max(0, state.install.doneCursor - 1);
-      return { ...state, install: { ...state.install, doneCursor: cursor } };
+      return adjustDoneScroll({ ...state, install: { ...state.install, doneCursor: cursor } });
     }
     case Action.DOWN: {
       const cursor = Math.min(results.length - 1, state.install.doneCursor + 1);
-      return { ...state, install: { ...state.install, doneCursor: cursor } };
+      return adjustDoneScroll({ ...state, install: { ...state.install, doneCursor: cursor } });
     }
 
     case Action.SELECT: {
@@ -396,6 +396,7 @@ function updateDone(state, { action }) {
           results: [],
           error: null,
           doneCursor: 0,
+          doneScrollOffset: 0,
           forceSelection: new Set(),
           forceMode: true,
         },
@@ -442,6 +443,26 @@ function adjustPackDetailScroll(state) {
   }
 
   return { ...state, packDetail: { ...state.packDetail, scrollOffset } };
+}
+
+/**
+ * Adjust doneScrollOffset so doneCursor stays within the done-screen viewport.
+ * Done screen has ~7 lines of chrome (header, summary, footer) inside the content area.
+ * @param {TuiState} state
+ * @returns {TuiState}
+ */
+function adjustDoneScroll(state) {
+  const vh = Math.max(1, getViewportHeight(state) - 7);
+  let { doneCursor, doneScrollOffset } = state.install;
+
+  if (doneCursor >= doneScrollOffset + vh) {
+    doneScrollOffset = doneCursor - vh + 1;
+  }
+  if (doneCursor < doneScrollOffset) {
+    doneScrollOffset = doneCursor;
+  }
+
+  return { ...state, install: { ...state.install, doneScrollOffset } };
 }
 
 // ─── Helpers (internal) ──────────────────────────────────────────────────────
@@ -605,7 +626,7 @@ function handleConfirm(state) {
   return {
     ...state,
     mode: 'confirm',
-    install: { agents, progress: 0, current: 0, results: [], error: null, doneCursor: 0, forceSelection: new Set() },
+    install: { agents, progress: 0, current: 0, results: [], error: null, doneCursor: 0, doneScrollOffset: 0, forceSelection: new Set() },
     confirmContext: { type: 'agents', count: agents.length },
   };
 }

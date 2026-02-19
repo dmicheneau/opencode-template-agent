@@ -250,7 +250,11 @@ export function uninstallAgent(agent, options = {}) {
       throw new Error(`Security: "${dest.relative}" is a symlink. Refusing to delete.`);
     }
     unlinkSync(dest.absolute);
-    removeLockEntry(agent.name, cwd);
+    try {
+      removeLockEntry(agent.name, cwd);
+    } catch (lockErr) {
+      process.stderr.write(`Warning: agent "${agent.name}" uninstalled but lock update failed: ${lockErr.message}\n`);
+    }
 
     // Cleanup empty parent directories for non-primary agents (category dirs)
     if (agent.mode !== 'primary') {
@@ -289,8 +293,14 @@ export function uninstallAgents(agents, options = {}) {
   const counts = { removed: 0, not_found: 0, failed: 0 };
 
   for (const agent of agents) {
-    const result = uninstallAgent(agent, options);
-    counts[result]++;
+    try {
+      const result = uninstallAgent(agent, options);
+      counts[result]++;
+    } catch (err) {
+      const message = err && err.message ? err.message : String(err);
+      process.stderr.write(`Error uninstalling "${agent.name}": ${message}\n`);
+      counts.failed++;
+    }
   }
 
   return counts;

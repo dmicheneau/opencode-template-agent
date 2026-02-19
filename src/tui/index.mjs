@@ -58,17 +58,17 @@ export async function launchTUI(options = {}) {
 
   // ─── M4: performInstall declared BEFORE the Promise ───────────────────
   const performInstall = async (opts) => {
-    const { installAgents } = await import('../installer.mjs');
-
-    // C3: Hijack console to prevent display corruption
-    console.log = () => {};
-    console.error = () => {};
-    consoleHijacked = true;
-
     // M1: Spinner redraw interval
     const spinnerInterval = setInterval(forceRedraw, SPINNER_INTERVAL_MS);
 
     try {
+      const { installAgents } = await import('../installer.mjs');
+
+      // C3: Hijack console to prevent display corruption
+      console.log = () => {};
+      console.error = () => {};
+      consoleHijacked = true;
+
       const agents = state.install.agents;
 
       for (let i = 0; i < agents.length; i++) {
