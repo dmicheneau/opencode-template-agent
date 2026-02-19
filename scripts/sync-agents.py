@@ -622,16 +622,18 @@ SPECIALIST_EXCEPTIONS: Dict[str, Dict[str, PermissionValue]] = {
     },
 }
 
-# Full 70-agent-to-archetype mapping: name -> (archetype, sub_profile | None)
-AGENT_ARCHETYPE_MAP: Dict[str, tuple] = {
+# Agent-to-archetype mapping for agents that go through the sync pipeline
+# (present in CURATED_AGENTS or EXTENDED_AGENTS).
+#
+# Agents that exist in the manifest but are NOT synced (hand-written or added
+# via other pipelines) belong in LOCAL_AGENT_ARCHETYPES below.
+AGENT_ARCHETYPE_MAP: Dict[str, tuple[str, str | None]] = {
     "accessibility": ("Auditor", None),
     "ai-engineer": ("Builder", None),
     "angular-architect": ("Builder", None),
     "api-architect": ("Specialist", "data"),
     "api-documenter": ("Specialist", "docs"),
-    "aws-specialist": ("Specialist", "infra"),
     "business-analyst": ("Analyst", None),
-    "ci-cd-engineer": ("Builder", None),
     "cloud-architect": ("Specialist", "infra"),
     "code-reviewer": ("Auditor", None),
     "cpp-pro": ("Builder", None),
@@ -643,9 +645,7 @@ AGENT_ARCHETYPE_MAP: Dict[str, tuple] = {
     "debugger": ("Builder", None),
     "devops-engineer": ("Specialist", "infra"),
     "diagram-architect": ("Specialist", "docs"),
-    "docker-specialist": ("Builder", None),
     "documentation-engineer": ("Specialist", "docs"),
-    "episode-orchestrator": ("Orchestrator", None),
     "expert-nextjs-developer": ("Builder", None),
     "expert-react-frontend-engineer": ("Builder", None),
     "fullstack-developer": ("Builder", None),
@@ -654,11 +654,9 @@ AGENT_ARCHETYPE_MAP: Dict[str, tuple] = {
     "java-architect": ("Builder", None),
     "kotlin-specialist": ("Builder", None),
     "kubernetes-specialist": ("Specialist", "infra"),
-    "linux-admin": ("Specialist", "infra"),
     "llm-architect": ("Specialist", "ai-infra"),
     "mcp-developer": ("Builder", None),
     "mcp-protocol-specialist": ("Auditor", None),
-    "mcp-security-auditor": ("Auditor", None),
     "mcp-server-architect": ("Builder", None),
     "microservices-architect": ("Specialist", "architecture"),
     "ml-engineer": ("Builder", None),
@@ -669,17 +667,14 @@ AGENT_ARCHETYPE_MAP: Dict[str, tuple] = {
     "php-pro": ("Builder", None),
     "platform-engineer": ("Specialist", "infra"),
     "postgres-pro": ("Specialist", "data"),
-    "prd": ("Orchestrator", None),
     "product-manager": ("Orchestrator", None),
     "project-manager": ("Orchestrator", None),
     "prompt-engineer": ("Analyst", None),
     "python-pro": ("Builder", None),
     "qa-expert": ("Auditor", None),
     "rails-expert": ("Builder", None),
-    "redis-specialist": ("Specialist", "data"),
     "refactoring-specialist": ("Builder", None),
     "rust-pro": ("Builder", None),
-    "screenshot-ui-analyzer": ("Auditor", None),
     "scrum-master": ("Orchestrator", None),
     "search-specialist": ("Analyst", None),
     "security-auditor": ("Auditor", None),
@@ -696,16 +691,78 @@ AGENT_ARCHETYPE_MAP: Dict[str, tuple] = {
     "vue-expert": ("Builder", None),
 }
 
+# Archetype data for agents that exist in the manifest but are NOT part of
+# the sync pipeline (hand-written, added via other tools, etc.).
+# The quality scorer and other tools can use this for archetype lookups.
+LOCAL_AGENT_ARCHETYPES: Dict[str, tuple[str, str | None]] = {
+    "aws-specialist": ("Specialist", "infra"),
+    "ci-cd-engineer": ("Builder", None),
+    "docker-specialist": ("Builder", None),
+    "episode-orchestrator": ("Orchestrator", None),
+    "linux-admin": ("Specialist", "infra"),
+    "mcp-security-auditor": ("Auditor", None),
+    "prd": ("Orchestrator", None),
+    "redis-specialist": ("Specialist", "data"),
+    "screenshot-ui-analyzer": ("Auditor", None),
+}
 
-def get_archetype(agent_name: str) -> tuple:
+# Default archetype inference by OpenCode category — used as a fallback
+# when an agent isn't in AGENT_ARCHETYPE_MAP or LOCAL_AGENT_ARCHETYPES.
+_CATEGORY_ARCHETYPE_DEFAULTS: Dict[str, tuple[str, str | None]] = {
+    "languages": ("Builder", None),
+    "devtools": ("Builder", None),
+    "web": ("Builder", None),
+    "ai": ("Specialist", "ai-infra"),
+    "security": ("Auditor", None),
+    "devops": ("Specialist", "infra"),
+    "data-api": ("Specialist", "data"),
+    "docs": ("Specialist", "docs"),
+    "business": ("Orchestrator", None),
+    "mcp": ("Builder", None),
+    "specialist": ("Builder", None),
+    "media": ("Builder", None),
+}
+
+
+def infer_archetype_from_category(agent_name: str) -> tuple[str | None, str | None]:
+    """Infer an archetype from the agent's OpenCode category.
+
+    Looks up the agent in CURATED_AGENTS / EXTENDED_AGENTS, maps the source
+    category to an OpenCode category, then returns a default archetype for
+    that category.
+
+    Returns:
+        ``(archetype, sub_profile)`` or ``(None, None)`` if the agent isn't
+        in the curated/extended lists or the category isn't mapped.
+    """
+    source_path = CURATED_AGENTS.get(agent_name) or EXTENDED_AGENTS.get(agent_name)
+    if not source_path:
+        return (None, None)
+    source_category = source_path.split("/")[0] if "/" in source_path else "unknown"
+    oc_category = _get_opencode_category(source_category)
+    return _CATEGORY_ARCHETYPE_DEFAULTS.get(oc_category, (None, None))
+
+
+def get_archetype(agent_name: str) -> tuple[str | None, str | None]:
     """Look up an agent's archetype and sub-profile.
+
+    Resolution order:
+    1. Explicit ``AGENT_ARCHETYPE_MAP`` (synced agents)
+    2. ``LOCAL_AGENT_ARCHETYPES`` (hand-written / non-synced agents)
+    3. ``infer_archetype_from_category()`` (fallback by category)
 
     Returns:
         ``(archetype, sub_profile)`` for known agents, e.g.
         ``("Builder", None)`` or ``("Specialist", "infra")``.
-        ``(None, None)`` for agents not in the archetype map.
+        ``(None, None)`` for agents not resolvable.
     """
-    return AGENT_ARCHETYPE_MAP.get(agent_name, (None, None))
+    result = AGENT_ARCHETYPE_MAP.get(agent_name)
+    if result is not None:
+        return result
+    result = LOCAL_AGENT_ARCHETYPES.get(agent_name)
+    if result is not None:
+        return result
+    return infer_archetype_from_category(agent_name)
 
 
 def build_archetype_permissions(
@@ -734,6 +791,11 @@ def build_archetype_permissions(
             if bash_patterns:
                 perms["bash"] = dict(bash_patterns)
             else:
+                logger.warning(
+                    "Unknown sub-profile '%s' for %s, using fallback bash patterns",
+                    sub_profile,
+                    agent_name,
+                )
                 perms["bash"] = {"*": "ask"}
         else:
             # Fallback — should not happen with well-formed data
@@ -810,7 +872,12 @@ def build_permissions(tools_str: str) -> Dict[str, PermissionValue]:
         perms["webfetch"] = "allow"
 
     # Task (subagents can invoke other subagents)
-    perms["task"] = {"*": "allow"}
+    perms["task"] = "allow"
+
+    # Normalize: if a permission is {"*": "allow"} with only one key, simplify
+    for key, val in list(perms.items()):
+        if isinstance(val, dict) and val == {"*": "allow"}:
+            perms[key] = "allow"
 
     return perms
 

@@ -14,6 +14,7 @@ Covers:
 from __future__ import annotations
 
 import importlib
+import json
 import sys
 import unittest
 from pathlib import Path
@@ -139,22 +140,89 @@ class TestGetArchetype(unittest.TestCase):
         self.assertIsNone(sub)
 
     def test_known_orchestrator(self):
-        arch, sub = sync_agents.get_archetype("prd")
+        arch, sub = sync_agents.get_archetype("product-manager")
         self.assertEqual(arch, "Orchestrator")
         self.assertIsNone(sub)
 
     def test_known_specialist_with_subprofile(self):
+        arch, sub = sync_agents.get_archetype("kubernetes-specialist")
+        self.assertEqual(arch, "Specialist")
+        self.assertEqual(sub, "infra")
+
+    def test_local_agent_resolved(self):
+        """Agents in LOCAL_AGENT_ARCHETYPES are found by get_archetype."""
+        arch, sub = sync_agents.get_archetype("prd")
+        self.assertEqual(arch, "Orchestrator")
+        self.assertIsNone(sub)
+
+    def test_local_agent_specialist(self):
+        """LOCAL_AGENT_ARCHETYPES specialist is resolved correctly."""
         arch, sub = sync_agents.get_archetype("aws-specialist")
         self.assertEqual(arch, "Specialist")
         self.assertEqual(sub, "infra")
+
+    def test_category_inference_fallback(self):
+        """Extended agents not in explicit maps use category inference."""
+        # django-developer is in EXTENDED_AGENTS (programming-languages)
+        # but not in AGENT_ARCHETYPE_MAP — should infer Builder from languages
+        arch, sub = sync_agents.get_archetype("django-developer")
+        self.assertEqual(arch, "Builder")
+        self.assertIsNone(sub)
 
     def test_unknown_agent(self):
         arch, sub = sync_agents.get_archetype("nonexistent-agent-xyz")
         self.assertIsNone(arch)
         self.assertIsNone(sub)
 
-    def test_all_70_agents_mapped(self):
-        self.assertEqual(len(sync_agents.AGENT_ARCHETYPE_MAP), 70)
+    def test_archetype_map_has_no_phantom_agents(self):
+        """AGENT_ARCHETYPE_MAP only contains agents in CURATED or EXTENDED lists."""
+        synced = set(sync_agents.CURATED_AGENTS) | set(sync_agents.EXTENDED_AGENTS)
+        phantoms = set(sync_agents.AGENT_ARCHETYPE_MAP) - synced
+        self.assertEqual(
+            phantoms, set(), f"Phantom agents in AGENT_ARCHETYPE_MAP: {phantoms}"
+        )
+
+    def test_all_synced_agents_have_archetype_coverage(self):
+        """Every agent in CURATED + EXTENDED resolves to an archetype
+        (either via explicit map or category inference)."""
+        all_synced = set(sync_agents.CURATED_AGENTS) | set(sync_agents.EXTENDED_AGENTS)
+        missing = []
+        for name in all_synced:
+            arch, _ = sync_agents.get_archetype(name)
+            if arch is None:
+                missing.append(name)
+        self.assertEqual(missing, [], f"Agents with no archetype coverage: {missing}")
+
+    def test_manifest_agents_have_archetype_coverage(self):
+        """Every agent in the sync manifest has archetype coverage
+        (explicit map, local archetypes, or category inference)."""
+        manifest_path = PROJECT_ROOT / ".opencode" / "agents" / "manifest.json"
+        if not manifest_path.is_file():
+            self.skipTest("Sync manifest not found")
+        with open(manifest_path, encoding="utf-8") as f:
+            manifest = json.load(f)
+        manifest_names = {a["name"] for a in manifest.get("agents", [])}
+        all_covered = (
+            set(sync_agents.AGENT_ARCHETYPE_MAP)
+            | set(sync_agents.LOCAL_AGENT_ARCHETYPES)
+            | set(sync_agents.CURATED_AGENTS)
+            | set(sync_agents.EXTENDED_AGENTS)
+        )
+        uncovered = manifest_names - all_covered
+        # Agents discovered via --all but not in any curated list are expected
+        # to be uncovered — that's fine, they get UNKNOWN_PERMISSIONS.
+        # We only check that agents we DO ship have coverage.
+        shipped = manifest_names & (
+            set(sync_agents.CURATED_AGENTS)
+            | set(sync_agents.EXTENDED_AGENTS)
+            | set(sync_agents.LOCAL_AGENT_ARCHETYPES)
+        )
+        missing = []
+        for name in shipped:
+            arch, _ = sync_agents.get_archetype(name)
+            if arch is None:
+                missing.append(name)
+        self.assertEqual(missing, [], f"Shipped agents with no archetype: {missing}")
 
     def test_all_archetypes_represented(self):
         archetypes = {v[0] for v in sync_agents.AGENT_ARCHETYPE_MAP.values()}
@@ -192,13 +260,13 @@ class TestBuildArchetypePermissions(unittest.TestCase):
         self.assertIn("python *", perms["bash"])
 
     def test_orchestrator_no_bash(self):
-        perms = sync_agents.build_archetype_permissions("prd")
+        perms = sync_agents.build_archetype_permissions("product-manager")
         self.assertIsNotNone(perms)
         self.assertEqual(perms["bash"], "deny")
         self.assertEqual(perms["task"], "allow")
 
     def test_specialist_infra_subprofile(self):
-        perms = sync_agents.build_archetype_permissions("aws-specialist")
+        perms = sync_agents.build_archetype_permissions("kubernetes-specialist")
         self.assertIsNotNone(perms)
         self.assertIsInstance(perms["bash"], dict)
         self.assertIn("terraform *", perms["bash"])
@@ -263,8 +331,8 @@ class TestBuildArchetypePermissions(unittest.TestCase):
             "typescript-pro",
             "code-reviewer",
             "data-analyst",
-            "prd",
-            "aws-specialist",
+            "product-manager",
+            "kubernetes-specialist",
         ]:
             perms = sync_agents.build_archetype_permissions(agent_name)
             self.assertIsNotNone(perms, f"None for {agent_name}")

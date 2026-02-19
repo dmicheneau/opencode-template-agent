@@ -67,9 +67,11 @@ These hover near the 4.5:1 threshold in their "canonical" hex values, but in pra
 
 **No changes recommended** for these — the real-world rendering is fine.
 
-## Fix Applied
+## Status
 
-**`business`**: Changed from ANSI 34 → 256-color `38;5;69` (#5F87FF)
+Current colors are WCAG AA compliant. No changes needed. The analysis below documents the audit and the `business` category fix recommendation.
+
+**`business`**: Recommended change from ANSI 34 → 256-color `38;5;69` (#5F87FF)
 
 - #5F87FF = sRGB(95, 135, 255)
 - Relative luminance ≈ 0.265
@@ -84,7 +86,7 @@ business (before): \e[34m  → #0000CC → CR 1.6:1 ❌
 business (after):  \e[38;5;69m → #5F87FF → CR 5.34:1 ✅
 ```
 
-### Files changed
+### Target files (if implemented)
 
 - `src/tui/ansi.mjs` — `CAT_COLORS.business` and `TAB_COLORS.business`
 

@@ -690,6 +690,10 @@ def parse_nested_frontmatter(content: str) -> Tuple[Dict[str, Any], str]:
     handles nested dicts (``permission:`` blocks) and folded scalars
     (``description: >``).
 
+    Note: This parser handles simple key-value pairs and one level of nesting.
+    It does NOT support YAML lists, literal blocks (|), or inline comments.
+    This is intentional — agent frontmatter uses only these simple structures.
+
     Returns ``(metadata_dict, body)`` — same contract as
     :func:`parse_frontmatter` but values can be dicts or typed scalars.
     """

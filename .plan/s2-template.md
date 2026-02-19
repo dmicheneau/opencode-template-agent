@@ -32,21 +32,25 @@ permission:
 
 **`description`** — Exactly 2 sentences. First: what the agent does. Second: when to invoke it. This text appears in the orchestrator's agent registry, so it must be scannable.
 
-**`mode`** — One of `primary` (top-level, user-facing) or `subagent` (invoked by orchestrator or Task tool). Most agents are `subagent`.
+**`mode`** — One of `primary` (top-level, user-facing), `subagent` (invoked by orchestrator or Task tool), or `all` (visible in every context — used for cross-cutting agents like `prd`). Most agents are `subagent`.
 
 **`permission`** — Must match one of the 5 archetypes below. Never copy-paste a generic block. The permission set is the agent's security boundary — get it wrong and you either cripple the agent or give a read-only auditor write access.
+
+> **Path convention:** Primary agents use bare paths (`cloud-architect`). Subagents use `category/name` paths (`languages/typescript-pro`). Mode `all` agents use bare paths.
 
 ### Permission Archetypes
 
 | Archetype | Agents | write | edit | bash | task |
 |-----------|--------|-------|------|------|------|
-| **Builder** | languages/*, fullstack, devops-engineer | allow | allow | patterns* | allow |
-| **Auditor** | security/*, code-reviewer | deny | deny | deny | allow |
-| **Analyst** | ai/data-*, business/* | allow | ask | ask | allow |
-| **Orchestrator** | episode-orchestrator, primary agents | allow | allow | patterns* | allow |
-| **Specialist** | docs/*, mcp/*, web/screenshot-* | per-domain | per-domain | per-domain | allow |
+| **Builder** (28) | languages/\*, web/{frontend,framework}, devtools/{test,debug,refactoring}, mcp/{dev,server} | allow | allow | patterns* | allow |
+| **Auditor** (9) | code-reviewer, qa-expert, security-auditor, accessibility, screenshot-ui-analyzer... | deny | deny | deny | allow |
+| **Analyst** (6) | data-analyst, data-scientist, business-analyst, ux-researcher, search-specialist, prompt-engineer | allow | ask | patterns* | allow |
+| **Orchestrator** (5) | episode-orchestrator, project-manager, scrum-master, product-manager, prd | deny | deny | deny | allow |
+| **Specialist** (22) | infra(7), data(5), security(2), docs(5), ai-infra(2), architecture(1) | per-domain | per-domain | per-domain | allow |
 
-*patterns = specific bash commands allowed (git, test runners, linters), wildcard denied*
+*patterns = specific bash commands allowed (git, test runners, linters, data tools), wildcard denied*
+
+> This table shows key permissions only. See `.plan/s2-archetypes.md` for the complete 17-permission map per archetype and the full 70-agent mapping.
 
 Builder bash example:
 ```yaml
@@ -64,7 +68,11 @@ Auditor bash example:
 bash: deny
 ```
 
+> This is a minimal example. Full bash pattern maps per archetype are defined in `.plan/s2-archetypes.md`.
+
 The archetype is a starting point. Each agent may tighten (never loosen) based on its actual needs. A `typescript-pro` might allow `npx tsc --noEmit` while a `python-pro` allows `pytest` and `mypy`.
+
+> **Mode ≠ archetype.** Mode and archetype are orthogonal. Mode determines visibility (primary = always available). Archetype determines permissions. A primary-mode Builder (e.g., `fullstack-developer`) is valid. A primary-mode Specialist (e.g., `cloud-architect`) is also valid.
 
 ---
 
@@ -129,7 +137,7 @@ For each step, ask: "Would a different agent role do this same step?" If yes, th
 
 ---
 
-## Section 3 — Decision Trees
+## Section 3 — Decisions
 
 **Required. Minimum 3, maximum 7. IF/THEN/ELSE format.**
 
@@ -164,7 +172,7 @@ Each tree must have at least 2 branches. If every tree resolves to "do the obvio
 
 ---
 
-## Section 4 — Tool Guidance
+## Section 4 — Tools
 
 **Required. 3-8 directives.**
 
@@ -224,9 +232,9 @@ For each checkpoint, imagine the agent skipping it. If skipping it would produce
 
 ---
 
-## Optional Sections
+## Section 6 — Anti-patterns
 
-### Anti-patterns
+**Required. 3-5 entries.**
 
 Common mistakes this specific agent makes. Not generic bad practices — actual failure modes observed or anticipated for this role. Format: what the agent does wrong → what to do instead.
 
@@ -237,9 +245,13 @@ Common mistakes this specific agent makes. Not generic bad practices — actual 
 - **{{bad_thing}}** → {{correction}}
 ```
 
-### Collaboration
+---
 
-How this agent works with other agents. Only include if the agent has real handoff points. Use actual agent names from the registry (not invented ones like "backend-developer").
+## Section 7 — Collaboration
+
+**Required. 2-4 handoff points.**
+
+How this agent works with other agents. Use actual agent names from the registry (not invented ones like "backend-developer"). Include both "delegate to" and "receive from" flows where applicable.
 
 ```markdown
 ## Collaboration
@@ -247,6 +259,10 @@ How this agent works with other agents. Only include if the agent has real hando
 - {{agent_name}}: {{handoff_description}}
 - {{agent_name}}: {{handoff_description}}
 ```
+
+---
+
+## Optional Sections
 
 ### Examples
 
@@ -259,7 +275,7 @@ How this agent works with other agents. Only include if the agent has real hando
 | Rule | Threshold | Fail action |
 |------|-----------|-------------|
 | Total lines | 60-120 | Reject if outside range |
-| Mandatory sections present | 5/5 | Reject if any missing |
+| Mandatory sections present | 7/7 | Reject if any missing |
 | Decision trees count | 3-7 | Reject if <3 |
 | Quality gate checkpoints | 3-5 | Reject if <3 |
 | Fake JSON blocks | 0 | Reject if any found |
@@ -480,6 +496,8 @@ Use this checklist when enriching an agent to verify template conformance:
 - [ ] Decisions: 3-7 trees, each with ≥2 branches, encode real tradeoffs
 - [ ] Tools: prefer + restrict sections, every directive prevents a real mistake
 - [ ] Quality Gate: 3-5 checkpoints, each with a failure condition
+- [ ] Anti-patterns: 3-5 domain-specific failure modes with corrections
+- [ ] Collaboration: 2-4 handoff points with actual registry agent names
 - [ ] Total lines: 60-120
 - [ ] Zero fake JSON blocks
 - [ ] Zero keyword-only bullet lists

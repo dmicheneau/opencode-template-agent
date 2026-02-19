@@ -212,6 +212,8 @@ None. Bash is `deny`.
 
 The hardest constraint and the most important one. An auditor that can write is a compromised audit. Even "harmless" bash commands create an attack surface — if an auditor agent is confused or prompted, it could `rm -rf` or exfiltrate data. The `task: allow` escape valve lets auditors create actionable findings: "delegate to typescript-pro to fix X." `webfetch: ask` is the one concession — auditors legitimately need to check CVE databases, OWASP references, and specification documents, but under user supervision.
 
+**Verification workflow:** Auditors verify findings by delegating execution to Builder agents via Task. For example, code-reviewer delegates `tsc --noEmit` to typescript-pro and analyzes the output. This adds a round-trip but preserves audit integrity — the reviewer never modifies the codebase it's reviewing.
+
 ### Agent List (9)
 
 | Category | Agent | Notes |

@@ -273,7 +273,11 @@ def merge_manifests(
         sync_names.add(name)
 
         if name in existing:
-            # Already in root manifest — preserve curated metadata
+            # Already in root manifest — preserve curated metadata,
+            # but update quality_score if the sync manifest has one
+            sync_score = agent.get("quality_score")
+            if sync_score is not None:
+                existing[name]["quality_score"] = sync_score
             continue
 
         # New agent — map category and build entry
@@ -302,6 +306,10 @@ def merge_manifests(
             "tags": [],
             "source": "aitmpl",
         }
+        # Preserve quality_score if present in sync manifest
+        sync_score = agent.get("quality_score")
+        if sync_score is not None:
+            new_entry["quality_score"] = sync_score
         existing[name] = new_entry
         added.append(name)
         logger.info("Added new agent: %s (category: %s)", name, our_category)

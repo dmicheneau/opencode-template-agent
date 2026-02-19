@@ -20,7 +20,7 @@ import json
 import re
 import sys
 from statistics import mean
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 # Import the nested frontmatter parser from sync_common (same package dir)
 from sync_common import parse_nested_frontmatter
@@ -53,6 +53,29 @@ _RE_GENERIC = re.compile(
 _RE_TOOL_REF = re.compile(r"`([a-zA-Z_][\w-]*)`")
 _RE_CONDITIONAL_TOOL = re.compile(
     r"(?:use|prefer|run)\s+`\w+`\s+(?:when|if|for)", re.IGNORECASE
+)
+
+# Known tools that agents can reference — only these are counted for scoring
+KNOWN_TOOLS: frozenset[str] = frozenset(
+    {
+        "Read",
+        "Edit",
+        "Write",
+        "Bash",
+        "Glob",
+        "Grep",
+        "Task",
+        "Fetch",
+        "WebFetch",
+        "Search",
+        "Diff",
+        "Notebook",
+        "MCP",
+        "Browser",
+        "Think",
+        "TodoWrite",
+        "Architect",
+    }
 )
 _RE_ANTIPATTERN = re.compile(
     r"(?i)\b(do not|don't|never|avoid|anti-pattern|mistake|pitfall|trap)\b"
@@ -123,13 +146,36 @@ def score_agent(content: str) -> Dict[str, Any]:
         scores["workflow_clarity"] = 1
 
     # 4. Permission Alignment
-    tool_refs_in_body = set(_RE_TOOL_REF.findall(body))
-    # Simple heuristic: permissions that exist but aren't tool names in body
-    unused = permission_keys - tool_refs_in_body
-    if len(unused) == 0 and len(permission_keys) > 0:
-        scores["permission_alignment"] = 5
-    elif len(unused) <= 2 and len(permission_keys) > 0:
-        scores["permission_alignment"] = 3
+    # Check if the body mentions the tools enabled by the permissions.
+    # Map permission keys to the tool names that an agent would reference.
+    _PERM_TO_TOOLS: Dict[str, set[str]] = {
+        "read": {"Read"},
+        "write": {"Write"},
+        "edit": {"Edit"},
+        "bash": {"Bash"},
+        "glob": {"Glob"},
+        "grep": {"Grep"},
+        "task": {"Task"},
+        "webfetch": {"WebFetch", "Fetch"},
+        "browsermcp": {"Browser"},
+        "mcp": {"MCP"},
+        "todowrite": {"TodoWrite"},
+        "todoread": {"TodoWrite"},  # often mentioned together
+    }
+    expected_tools: set[str] = set()
+    for pkey in permission_keys:
+        expected_tools |= _PERM_TO_TOOLS.get(pkey, set())
+    # Find which known tools are actually mentioned in the body
+    all_refs = set(_RE_TOOL_REF.findall(body))
+    mentioned_tools = all_refs & (expected_tools | KNOWN_TOOLS)
+    if len(permission_keys) > 0 and len(expected_tools) > 0:
+        coverage = len(mentioned_tools & expected_tools) / len(expected_tools)
+        if coverage >= 0.6:
+            scores["permission_alignment"] = 5
+        elif coverage >= 0.3:
+            scores["permission_alignment"] = 3
+        else:
+            scores["permission_alignment"] = 2
     elif len(permission_keys) > 0:
         scores["permission_alignment"] = 2
     else:
@@ -146,7 +192,8 @@ def score_agent(content: str) -> Dict[str, Any]:
         scores["density"] = 1
 
     # 6. Tool Awareness
-    unique_tools = set(_RE_TOOL_REF.findall(body))
+    all_tool_refs = set(_RE_TOOL_REF.findall(body))
+    unique_tools = all_tool_refs & KNOWN_TOOLS
     conditional_refs = len(_RE_CONDITIONAL_TOOL.findall(body))
     if len(unique_tools) >= 4 and conditional_refs >= 2:
         scores["tool_awareness"] = 5
@@ -211,7 +258,8 @@ def main() -> int:
     exit_code = 0
     for path in sys.argv[1:]:
         try:
-            content = open(path, encoding="utf-8").read()
+            with open(path, encoding="utf-8") as f:
+                content = f.read()
         except OSError as exc:
             print(f"ERROR: {exc}", file=sys.stderr)
             exit_code = 1

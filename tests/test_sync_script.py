@@ -229,8 +229,7 @@ class TestBuildPermissions(unittest.TestCase):
         """Verifie que la permission task est toujours presente."""
         perms = build_permissions("")
         self.assertIn("task", perms)
-        self.assertIsInstance(perms["task"], dict)
-        self.assertEqual(perms["task"]["*"], "allow")
+        self.assertEqual(perms["task"], "allow")
 
     def test_empty_tools_string(self):
         """Verifie le comportement avec une chaine d'outils vide."""
