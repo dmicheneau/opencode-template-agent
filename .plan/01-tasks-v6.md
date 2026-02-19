@@ -8,52 +8,52 @@
 
 ## V6.0 — MVP (S1 + S5 + S3 core)
 
-### S1: TUI Anti-Flicker
+### S1: TUI Anti-Flicker ✅
 
-- [ ] **S1.1** Add SYNC_START/SYNC_END constants to `src/tui/ansi.mjs` (`\x1b[?2026h` / `\x1b[?2026l`)
-- [ ] **S1.2** Wrap flush() output with sync markers in `src/tui/screen.mjs`
-- [ ] **S1.3** Add prevLines[] cache and line-level diffing to flush() in `src/tui/screen.mjs`
-- [ ] **S1.4** Add `moveTo(row, col)` helper to `src/tui/ansi.mjs` (if not exists)
-- [ ] **S1.5** Export invalidate() from screen.mjs — call on resize AND frame height changes (W-10)
-- [ ] **S1.6** Call invalidate() in onResize and enter() in `src/tui/index.mjs`
-- [ ] **S1.7** Add queueMicrotask-based deferred redraw() in `src/tui/index.mjs`
-- [ ] **S1.8** Extract `SPINNER_INTERVAL_MS = 120` shared constant in `src/tui/ansi.mjs` (W-04)
-- [ ] **S1.9** Use SPINNER_INTERVAL_MS in `src/tui/index.mjs` (setInterval) and `src/tui/renderer.mjs` (divisor)
-- [ ] **S1.10** Run all 250 JS tests — verify no regressions
+- [x] **S1.1** Add SYNC_START/SYNC_END constants to `src/tui/ansi.mjs` (`\x1b[?2026h` / `\x1b[?2026l`)
+- [x] **S1.2** Wrap flush() output with sync markers in `src/tui/screen.mjs`
+- [x] **S1.3** Add prevLines[] cache and line-level diffing to flush() in `src/tui/screen.mjs`
+- [x] **S1.4** Add `moveTo(row, col)` helper to `src/tui/ansi.mjs` (already existed)
+- [x] **S1.5** Export invalidate() from screen.mjs — call on resize AND frame height changes (W-10)
+- [x] **S1.6** Call invalidate() in onResize and enter() in `src/tui/index.mjs`
+- [x] **S1.7** Add queueMicrotask-based deferred redraw() in `src/tui/index.mjs`
+- [x] **S1.8** Extract `SPINNER_INTERVAL_MS = 120` shared constant in `src/tui/ansi.mjs` (W-04)
+- [x] **S1.9** Use SPINNER_INTERVAL_MS in `src/tui/index.mjs` (setInterval) and `src/tui/renderer.mjs` (divisor)
+- [x] **S1.10** Run all 250 JS tests — verify no regressions
 - [ ] **S1.11** Visual testing: run TUI, navigate, install, verify no flicker
 
-### S5: Pack Installation Fix + Flash Messages
+### S5: Pack Installation Fix + Flash Messages ✅
 
-- [ ] **S5.1** In `src/tui/state.mjs` updatePackDetail(): when CONFIRM + selection.size===0, auto-select all uninstalled agents
-- [ ] **S5.2** Add `confirmContext` field to state (pack name, agent count) for confirm dialog
-- [ ] **S5.3** Update `src/tui/renderer.mjs` renderConfirm() to show pack context when available
-- [ ] **S5.4** Handle edge case: all agents in pack already installed → show flash message
-- [ ] **S5.5** Add `flash` state field (message string + timestamp) to state (F-01)
-- [ ] **S5.6** Add flash rendering in `src/tui/renderer.mjs` info bar area (F-01)
-- [ ] **S5.7** Add flash timer management in `src/tui/index.mjs` — auto-clear after 3 seconds (F-01)
-- [ ] **S5.8** Write tests for pack auto-select behavior
-- [ ] **S5.9** Write tests for flash message display + auto-dismiss
-- [ ] **S5.10** Run all tests — verify no regressions
+- [x] **S5.1** In `src/tui/state.mjs` updatePackDetail(): when CONFIRM + selection.size===0, auto-select all uninstalled agents
+- [x] **S5.2** Add `confirmContext` field to state (pack name, agent count) for confirm dialog
+- [x] **S5.3** Update `src/tui/renderer.mjs` renderConfirm() to show pack context when available
+- [x] **S5.4** Handle edge case: all agents in pack already installed → show flash message
+- [x] **S5.5** Add `flash` state field (message string + timestamp) to state (F-01)
+- [x] **S5.6** Add flash rendering in `src/tui/renderer.mjs` info bar area (F-01)
+- [x] **S5.7** Add flash timer management in `src/tui/index.mjs` — auto-clear after 3 seconds (F-01)
+- [x] **S5.8** Write tests for pack auto-select behavior
+- [x] **S5.9** Write tests for flash message display + auto-dismiss
+- [x] **S5.10** Run all tests — verify no regressions
 
-### S3 core: Hash-Based Detection (foundation)
+### S3 core: Hash-Based Detection (foundation) — partial ✅
 
-- [ ] **S3.1** Create `src/lock.mjs` — computeHash(), computeFileHash(), readLockFile(), writeLockFile()
-- [ ] **S3.2** Add upsertLockEntry(), removeLockEntry(), createEmptyLock() to lock.mjs
+- [x] **S3.1** Create `src/lock.mjs` — computeHash(), computeFileHash(), readLockFile(), writeLockFile()
+- [x] **S3.2** Add upsertLockEntry(), removeLockEntry(), createEmptyLock() to lock.mjs
 - [ ] **S3.3** Implement atomic write (tmp+rename) in writeLockFile()
 - [ ] **S3.4** Implement corrupted JSON recovery: display warning + backup to .bak + return empty lock (MF-4)
 - [ ] **S3.5** Add **optional** `sha256` and `size` fields to manifest.json agent entries (W-02: optional to not break makeManifest test fixtures)
 - [ ] **S3.6** Update `scripts/update-manifest.py` to compute SHA-256 hashes during sync
-- [ ] **S3.7** Add `detectAgentStates()` returning Map<id, state> in `src/tui/state.mjs` (W-08)
-- [ ] **S3.8** Wrap `detectInstalled()` as backward-compatible Set<id> using detectAgentStates() (W-08)
+- [x] **S3.7** Add `detectAgentStates()` returning Map<id, state> in `src/lock.mjs` (W-08)
+- [x] **S3.8** Wrap `detectInstalled()` as backward-compatible Set<id> using detectInstalledSet() (W-08)
 - [ ] **S3.9** Update `src/tui/renderer.mjs` to display state indicators (checkmark green, up-arrow yellow, ? gray)
 - [ ] **S3.10** Update `src/tui/ansi.mjs` with state indicator colors
-- [ ] **S3.11** Modify `src/installer.mjs` installAgent() to compute hash + write lock entry on install
+- [x] **S3.11** Modify `src/installer.mjs` installAgent() to compute hash + write lock entry on install
 - [ ] **S3.12** Invalidate registry.mjs singleton cache when manifest version changes (M-05)
-- [ ] **S3.13** Add migration: detect installed agents without lock file, bootstrap "unknown" state entries (F-03)
-- [ ] **S3.14** Write tests for lock.mjs (read/write/corrupt/missing/atomic)
-- [ ] **S3.15** Write tests for 4-state detection logic + migration bootstrap
+- [x] **S3.13** Add migration: detect installed agents without lock file, bootstrap "unknown" state entries (F-03)
+- [x] **S3.14** Write tests for lock.mjs (read/write/corrupt/missing/atomic)
+- [x] **S3.15** Write tests for 4-state detection logic + migration bootstrap
 - [ ] **S3.16** Write tests for manifest hash computation in Python sync
-- [ ] **S3.17** Run all 427 tests — verify no regressions
+- [x] **S3.17** Run all 427 tests — verify no regressions
 
 ### V6.0 Release Tasks
 

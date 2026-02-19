@@ -5,6 +5,7 @@
 import { Action } from './input.mjs';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { detectInstalledSet } from '../lock.mjs';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -38,25 +39,20 @@ const MIN_VIEWPORT = 5;
  * @property {Manifest} manifest
  * @property {Set<string>} installed
  * @property {AgentEntry[]} allAgents
+ * @property {{ message: string, ts: number }|null} flash
+ * @property {{ type: string, label?: string, count: number }|null} confirmContext
  */
 
 // ─── Exports ─────────────────────────────────────────────────────────────────
 
 /**
  * Scan .opencode/agents/ to detect already-installed agent files.
+ * Delegates to the lock-based detection for hash-aware state tracking.
  * @param {Manifest} manifest
  * @returns {Set<string>}  Set of installed agent names
  */
 export function detectInstalled(manifest) {
-  const basePath = manifest.base_path || '.opencode/agents';
-  const installed = new Set();
-  for (const agent of manifest.agents) {
-    const filePath = agent.mode === 'primary'
-      ? join(basePath, `${agent.name}.md`)
-      : join(basePath, agent.category, `${agent.name}.md`);
-    if (existsSync(filePath)) installed.add(agent.name);
-  }
-  return installed;
+  return detectInstalledSet(manifest);
 }
 
 /**
@@ -97,6 +93,8 @@ export function createInitialState(manifest, terminal) {
     },
     packDetail: null,
     install: null,
+    flash: null,
+    confirmContext: null,
     terminal,
     manifest,
     allAgents,
@@ -301,16 +299,27 @@ function updatePackDetail(state, { action }) {
       return { ...state, selection };
     }
     case Action.CONFIRM: {
-      if (state.selection.size === 0) return state;
-      const agents = state.allAgents.filter(a => state.selection.has(a.name));
+      let sel = state.selection;
+      if (sel.size === 0) {
+        // S5: Auto-select all uninstalled agents in the pack
+        const uninstalled = state.packDetail.agents.filter(a => !state.installed?.has(a.name));
+        if (uninstalled.length === 0) {
+          return { ...state, flash: { message: 'All agents in this pack are already installed', ts: Date.now() } };
+        }
+        sel = new Set(uninstalled.map(a => a.name));
+      }
+      const agents = state.allAgents.filter(a => sel.has(a.name));
+      if (agents.length === 0) return state;
       return {
         ...state,
         mode: 'confirm',
+        selection: sel,
         install: { agents, progress: 0, current: 0, results: [], error: null, doneCursor: 0, forceSelection: new Set() },
+        confirmContext: { type: 'pack', label: state.packDetail.packLabel, count: agents.length },
       };
     }
     case Action.ESCAPE:
-      return { ...state, mode: 'browse', packDetail: null };
+      return { ...state, mode: 'browse', packDetail: null, flash: null, confirmContext: null };
     default: return state;
   }
 }
@@ -567,6 +576,7 @@ function handleConfirm(state) {
     ...state,
     mode: 'confirm',
     install: { agents, progress: 0, current: 0, results: [], error: null, doneCursor: 0, forceSelection: new Set() },
+    confirmContext: { type: 'agents', count: agents.length },
   };
 }
 
@@ -583,6 +593,8 @@ function resetToBrowse(state) {
     install: null,
     packDetail: null,
     search: { active: false, query: '' },
+    flash: null,
+    confirmContext: null,
   };
   return refilter(updated);
 }

@@ -12,6 +12,10 @@ import {
   CURSOR_HOME,
   CLEAR_SCREEN,
   CLEAR_TO_END,
+  CLEAR_LINE,
+  SYNC_START,
+  SYNC_END,
+  moveTo,
 } from './ansi.mjs';
 
 // ─── Internal State ─────────────────────────────────────────────────────────
@@ -22,7 +26,18 @@ let active = false;
 /** Saved stdin encoding to restore on exit. */
 let savedEncoding = null;
 
+/** Previous frame lines for diff-based rendering. */
+let prevLines = [];
+
 // ─── Public API ─────────────────────────────────────────────────────────────
+
+/**
+ * Invalidate the line cache so the next flush() performs a full redraw.
+ * Called on enter() and terminal resize.
+ */
+export function invalidate() {
+  prevLines = [];
+}
 
 /**
  * Enter TUI mode: alternate screen, raw mode, hide cursor.
@@ -43,6 +58,7 @@ export function enter() {
   process.stdin.setEncoding('utf-8');
   process.stdout.write(ALT_SCREEN_ON + CURSOR_HIDE + CLEAR_SCREEN + CURSOR_HOME);
 
+  invalidate();
   active = true;
 }
 
@@ -67,12 +83,30 @@ export function exit() {
 }
 
 /**
- * Write a complete frame buffer to stdout in a single operation.
- * Moves cursor to home first — does NOT clear screen (anti-flickering).
+ * Write a frame buffer to stdout using line-level diffing.
+ * Only changed lines are rewritten. Output is wrapped in DEC 2026
+ * synchronized-update markers to eliminate flicker.
  * @param {string} buffer - Complete frame content.
  */
 export function flush(buffer) {
-  process.stdout.write(CURSOR_HOME + buffer + CLEAR_TO_END);
+  const nextLines = buffer.split('\n');
+  let out = SYNC_START;
+
+  if (nextLines.length !== prevLines.length) {
+    // Line count changed — full redraw
+    out += CURSOR_HOME + buffer + CLEAR_TO_END;
+  } else {
+    // Diff: only repaint changed lines
+    for (let i = 0; i < nextLines.length; i++) {
+      if (nextLines[i] !== prevLines[i]) {
+        out += moveTo(i + 1, 1) + CLEAR_LINE + nextLines[i];
+      }
+    }
+  }
+
+  out += SYNC_END;
+  prevLines = nextLines;
+  process.stdout.write(out);
 }
 
 /**

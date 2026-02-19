@@ -8,6 +8,7 @@ import {
   boldCyan, brightCyan, brightGreen, brightWhite, dim,
   bgRow, catColor, tabColor,
   visibleLength, padEnd, padEndAscii, truncate,
+  SPINNER_INTERVAL_MS,
 } from './ansi.mjs';
 import { getViewportHeight } from './state.mjs';
 
@@ -183,6 +184,8 @@ const LEGEND = `  ${brightGreen('✔')} ${dim('installed')}  ${brightGreen('✓'
 function renderInfo(state, out, W, total, vh, off) {
   if (state.search?.active) {
     out.push(bdr(`  ${bold(brightCyan('Search:'))} ${white(state.search.query)}${cyan('█')}`, W));
+  } else if (state.flash) {
+    out.push(bdr(`  ${yellow('⚠')} ${yellow(state.flash.message)}`, W));
   } else if (total > vh) {
     out.push(bdr(cyan(`  ↑↓ ${off + 1}-${Math.min(off + vh, total)} of ${total}`) + LEGEND, W));
   } else {
@@ -217,7 +220,10 @@ function renderConfirm(state, out, W) {
   out.push(bdr('', W));
   out.push(bdr(dTop, W));
   out.push(bdr(dialogLine(''), W));
-  out.push(bdr(dialogLine(bold(`Install ${agents.length} agent(s)?`)), W));
+  const title = state.confirmContext?.type === 'pack'
+    ? `Install pack "${state.confirmContext.label}" (${agents.length} agents)?`
+    : `Install ${agents.length} agent(s)?`;
+  out.push(bdr(dialogLine(bold(title)), W));
   // Clamp maxShow based on viewport height (leave room for dialog chrome)
   const maxShow = Math.max(1, getViewportHeight(state) - 6);
   const show = agents.slice(0, maxShow);
@@ -262,7 +268,7 @@ function renderProgress(state, out, W) {
         : r.status === 'skipped' ? yellow(' (skipped)') : red(' (failed)');
       out.push(bdr(`  ${st} ${white(a.name)}${truncate(dt, Math.max(10, innerWidth - visibleLength(a.name) - 6))}`, W));
     } else if (i === current) {
-      const fr = SPINNER[Math.floor(Date.now() / 80) % SPINNER.length];
+      const fr = SPINNER[Math.floor(Date.now() / SPINNER_INTERVAL_MS) % SPINNER.length];
       out.push(bdr(`  ${cyan(fr)} ${brightWhite(a.name)} ${yellow('(installing...)')}`, W));
     } else {
       out.push(bdr(`  ${white('·')} ${white(a.name)} ${white('(pending)')}`, W));

@@ -3,10 +3,11 @@
 // Zero npm deps, Node 20+ ESM.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { enter, exit, flush, getSize, onResize, onInput } from './screen.mjs';
+import { enter, exit, flush, invalidate, getSize, onResize, onInput } from './screen.mjs';
 import { parseKey } from './input.mjs';
 import { createInitialState, update, getViewportHeight, detectInstalled } from './state.mjs';
 import { render } from './renderer.mjs';
+import { SPINNER_INTERVAL_MS } from './ansi.mjs';
 
 /**
  * Launch the interactive TUI.
@@ -35,12 +36,25 @@ export async function launchTUI(options = {}) {
   const origError = console.error;
   let consoleHijacked = false;
 
-  // ─── Render function ──────────────────────────────────────────────────
-  const redraw = () => flush(render(state));
-  redraw();
+  // ─── Render function (microtask-coalesced) ─────────────────────────────
+  /** Direct flush — used by spinner interval which must fire consistently. */
+  const forceRedraw = () => flush(render(state));
+
+  /** Coalesced redraw — batches rapid state changes into a single frame. */
+  let redrawPending = false;
+  const redraw = () => {
+    if (redrawPending) return;
+    redrawPending = true;
+    queueMicrotask(() => {
+      redrawPending = false;
+      forceRedraw();
+    });
+  };
+  forceRedraw();
 
   // ─── C2: Reentrancy guard for async input handling ────────────────────
   let processing = false;
+  let flashTimeout = null;
 
   // ─── M4: performInstall declared BEFORE the Promise ───────────────────
   const performInstall = async (opts) => {
@@ -52,7 +66,7 @@ export async function launchTUI(options = {}) {
     consoleHijacked = true;
 
     // M1: Spinner redraw interval
-    const spinnerInterval = setInterval(redraw, 80);
+    const spinnerInterval = setInterval(forceRedraw, SPINNER_INTERVAL_MS);
 
     try {
       const agents = state.install.agents;
@@ -116,6 +130,7 @@ export async function launchTUI(options = {}) {
       if (state.list.cursor >= state.list.scrollOffset + vh) {
         state = { ...state, list: { ...state.list, scrollOffset: state.list.cursor - vh + 1 } };
       }
+      invalidate();
       redraw();
     });
 
@@ -147,6 +162,16 @@ export async function launchTUI(options = {}) {
 
         state = newState;
         redraw();
+
+        // S5: Auto-clear flash messages after 3 seconds
+        if (state.flash) {
+          if (flashTimeout) clearTimeout(flashTimeout);
+          flashTimeout = setTimeout(() => {
+            state = { ...state, flash: null };
+            flashTimeout = null;
+            redraw();
+          }, 3000);
+        }
       } finally {
         processing = false;
       }
@@ -154,6 +179,7 @@ export async function launchTUI(options = {}) {
 
     // Cleanup function
     const cleanup = () => {
+      if (flashTimeout) clearTimeout(flashTimeout);
       unsubResize();
       unsubInput();
       process.off('SIGINT', onSigint);

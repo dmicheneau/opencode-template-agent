@@ -12,6 +12,14 @@ export const CLEAR_SCREEN = '\x1b[2J';
 export const CLEAR_LINE = '\x1b[2K';
 export const CLEAR_TO_END = '\x1b[J';
 
+// ── DEC 2026 Synchronized Output ─────────────────────────────────────────────
+export const SYNC_START = '\x1b[?2026h';
+export const SYNC_END = '\x1b[?2026l';
+
+// ── Timing Constants ─────────────────────────────────────────────────────────
+/** Spinner animation interval in ms. Shared by renderer + orchestrator. */
+export const SPINNER_INTERVAL_MS = 120;
+
 // ── Cursor Movement ────────────────────────────────────────────────────────
 /** @param {number} row - 1-based row */
 /** @param {number} col - 1-based column */

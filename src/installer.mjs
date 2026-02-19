@@ -11,6 +11,7 @@ import {
   infoMessage,
 } from './display.mjs';
 import { USER_AGENT } from './meta.mjs';
+import { recordInstall } from './lock.mjs';
 
 // ─── Constants ───────────────────────────────────────────────────────────────────
 
@@ -174,6 +175,7 @@ async function installAgent(agent, options) {
 
     // Write the agent file
     writeFileSync(dest.absolute, content, 'utf-8');
+    recordInstall(agent.name, content, cwd);
     installSuccess(agent.name, dest.relative);
     return 'installed';
   } catch (err) {

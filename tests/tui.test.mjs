@@ -350,6 +350,8 @@ describe('createInitialState', () => {
     assert.ok(state.terminal);
     assert.ok(state.manifest);
     assert.ok(Array.isArray(state.allAgents));
+    assert.equal(state.flash, null);
+    assert.equal(state.confirmContext, null);
   });
 
   it('builds tabs from categories with "all" and "packs" first', () => {
@@ -915,11 +917,21 @@ describe('update — pack_detail mode', () => {
     assert.ok(state.install.agents.length > 0);
   });
 
-  it('CONFIRM without selection does nothing', () => {
+  it('CONFIRM without selection auto-selects uninstalled agents (S5 fix)', () => {
     let state = packDetailState();
     assert.equal(state.selection.size, 0);
     const s1 = update(state, { action: Action.CONFIRM });
-    assert.equal(s1.mode, 'pack_detail'); // stays in pack_detail
+    // S5: auto-selects uninstalled agents, transitions to confirm
+    // If all are installed, stays in pack_detail with flash message
+    if (s1.mode === 'confirm') {
+      assert.ok(s1.selection.size > 0);
+      assert.ok(s1.install);
+      assert.ok(s1.confirmContext);
+      assert.equal(s1.confirmContext.type, 'pack');
+    } else {
+      assert.equal(s1.mode, 'pack_detail');
+      assert.ok(s1.flash);
+    }
   });
 
   it('ESCAPE returns to browse and clears packDetail', () => {
@@ -946,6 +958,55 @@ describe('update — pack_detail mode', () => {
     const state = { ...makeState(), mode: 'pack_detail', packDetail: null };
     const s1 = update(state, { action: Action.DOWN });
     assert.equal(s1.mode, 'browse');
+  });
+});
+
+// ─── state.mjs — S5 pack fix + flash messages ────────────────────────────────
+
+describe('S5 — pack auto-select and flash messages', () => {
+  function mkPackState() {
+    let s = makeState();
+    s = update(s, { action: Action.TAB });
+    s = update(s, { action: Action.CONFIRM });
+    return s;
+  }
+
+  it('CONFIRM with empty selection auto-selects uninstalled agents', () => {
+    const state = mkPackState();
+    const empty = { ...state, installed: new Set() };
+    const result = update(empty, { action: Action.CONFIRM });
+    assert.equal(result.mode, 'confirm');
+    assert.ok(result.selection.size > 0);
+    assert.ok(result.confirmContext);
+    assert.equal(result.confirmContext.type, 'pack');
+  });
+
+  it('shows flash when all pack agents are installed', () => {
+    const state = mkPackState();
+    const allInstalled = new Set(state.packDetail.agents.map(a => a.name));
+    const full = { ...state, installed: allInstalled };
+    const result = update(full, { action: Action.CONFIRM });
+    assert.equal(result.mode, 'pack_detail');
+    assert.ok(result.flash);
+    assert.ok(result.flash.message.includes('already installed'));
+    assert.ok(result.flash.ts > 0);
+  });
+
+  it('confirmContext includes pack label', () => {
+    const state = mkPackState();
+    const empty = { ...state, installed: new Set() };
+    const result = update(empty, { action: Action.CONFIRM });
+    assert.equal(result.confirmContext.label, state.packDetail.packLabel);
+    assert.equal(result.confirmContext.count, result.install.agents.length);
+  });
+
+  it('resetToBrowse clears flash and confirmContext', () => {
+    const state = mkPackState();
+    const withFlash = { ...state, flash: { message: 'test', ts: Date.now() }, confirmContext: { type: 'pack' } };
+    const result = update(withFlash, { action: Action.ESCAPE });
+    assert.equal(result.mode, 'browse');
+    assert.equal(result.flash, null);
+    assert.equal(result.confirmContext, null);
   });
 });
 
