@@ -24,6 +24,9 @@ import {
   bold,
   dim,
   cyan,
+  green,
+  red,
+  yellow,
   boldCyan,
   errorMessage,
   printAgentList,
@@ -31,6 +34,13 @@ import {
   printSearchResults,
   header,
 } from '../src/display.mjs';
+
+import {
+  findOutdatedAgents,
+  verifyLockIntegrity,
+  rehashLock,
+  bootstrapLock,
+} from '../src/lock.mjs';
 
 // ─── Argument Parsing ───────────────────────────────────────────────────────────
 
@@ -105,6 +115,8 @@ ${bold('Usage:')}
   opencode-agents install --category <cat,...>    Install all agents in one or more categories
   opencode-agents install --pack <pack,...>       Install one or more predefined packs
   opencode-agents install --all                   Install all agents
+  opencode-agents install --update                 Reinstall outdated agents (hash mismatch)
+  opencode-agents update                           Reinstall outdated agents (alias)
   opencode-agents list                            List all available agents
   opencode-agents list --packs                    List available packs
   opencode-agents search <query>                  Search agents
@@ -112,11 +124,16 @@ ${bold('Usage:')}
   opencode-agents uninstall --category <cat,...>   Uninstall all agents in categories
   opencode-agents uninstall --pack <pack,...>      Uninstall agents from packs
   opencode-agents uninstall --all                  Uninstall all agents
+  opencode-agents verify                          Verify installed files match lock hashes
+  opencode-agents rehash                          Rebuild lock file from installed files
   opencode-agents tui                             Interactive agent browser
 
 ${bold('Options:')}
   --force      Overwrite existing agent files
   --dry-run    Preview without writing files
+  --update     Reinstall only outdated agents (hash mismatch)
+  --verify     Verify installed files match lock hashes
+  --rehash     Rebuild lock file from installed files
   --help       Show this help
   --version    Show version
 
@@ -132,6 +149,9 @@ ${bold('Examples:')}
   ${dim('$')} npx opencode-agents uninstall postgres-pro
   ${dim('$')} npx opencode-agents uninstall --category devops
   ${dim('$')} npx opencode-agents uninstall --all
+  ${dim('$')} npx opencode-agents install --update
+  ${dim('$')} npx opencode-agents verify
+  ${dim('$')} npx opencode-agents rehash
 
 ${dim('Documentation: https://github.com/dmicheneau/opencode-template-agent')}
 `);
@@ -179,10 +199,29 @@ async function cmdInstall(parsed) {
   const options = { force, dryRun };
 
   // Guard: mutually exclusive install modes
-  const modes = ['all', 'pack', 'category'].filter((f) => parsed.flags[f]);
+  const modes = ['all', 'pack', 'category', 'update'].filter((f) => parsed.flags[f]);
   if (modes.length > 1) {
     errorMessage(`Cannot combine --${modes.join(' and --')}. Use one at a time.`);
     process.exit(1);
+  }
+
+  // --update: reinstall only outdated agents
+  if (parsed.flags.update === true) {
+    const manifest = getManifest();
+    const outdated = findOutdatedAgents(manifest);
+    if (outdated.length === 0) {
+      header('All agents are up to date.');
+      process.exit(0);
+      return;
+    }
+    header(`Updating ${outdated.length} outdated agent(s)...`);
+    for (const agent of outdated) {
+      console.log(`  ${dim('→')} ${bold(agent.name)} — hash mismatch, reinstalling`);
+    }
+    console.log();
+    const result = await installAgents(outdated, { force: true, dryRun });
+    process.exit(result.failed > 0 ? 1 : 0);
+    return;
   }
 
   // --all: install every agent
@@ -429,6 +468,91 @@ function cmdSearch(parsed) {
   printSearchResults(results, query);
 }
 
+// ─── Command: update ────────────────────────────────────────────────────────────
+
+/**
+ * Handle the "update" command (standalone alias for `install --update`).
+ * Reinstall only agents whose installed file hash doesn't match the lock hash.
+ * @param {ParsedArgs} parsed
+ */
+async function cmdUpdate(parsed) {
+  const dryRun = Boolean(parsed.flags['dry-run']);
+  const manifest = getManifest();
+  const outdated = findOutdatedAgents(manifest);
+
+  if (outdated.length === 0) {
+    header('All agents are up to date.');
+    process.exit(0);
+    return;
+  }
+
+  header(`Updating ${outdated.length} outdated agent(s)...`);
+  for (const agent of outdated) {
+    console.log(`  ${dim('→')} ${bold(agent.name)} — hash mismatch, reinstalling`);
+  }
+  console.log();
+
+  const result = await installAgents(outdated, { force: true, dryRun });
+  process.exit(result.failed > 0 ? 1 : 0);
+}
+
+// ─── Command: verify ────────────────────────────────────────────────────────────
+
+/**
+ * Handle the "verify" command.
+ * Verify installed files match their lock file hashes.
+ */
+function cmdVerify() {
+  const manifest = getManifest();
+  const { ok, mismatch, missing } = verifyLockIntegrity(manifest);
+
+  header('Lock integrity verification');
+
+  if (ok.length > 0) {
+    console.log(`  ${green('✓')} ${bold(String(ok.length))} agent(s) OK`);
+    for (const name of ok) {
+      console.log(`    ${dim('•')} ${name}`);
+    }
+  }
+
+  if (mismatch.length > 0) {
+    console.log(`  ${red('✗')} ${bold(String(mismatch.length))} agent(s) with hash mismatch`);
+    for (const name of mismatch) {
+      console.log(`    ${dim('•')} ${name}`);
+    }
+  }
+
+  if (missing.length > 0) {
+    console.log(`  ${yellow('⚠')} ${bold(String(missing.length))} agent(s) missing from disk`);
+    for (const name of missing) {
+      console.log(`    ${dim('•')} ${name}`);
+    }
+  }
+
+  if (ok.length === 0 && mismatch.length === 0 && missing.length === 0) {
+    console.log(`  ${dim('No lock entries found. Run install first.')}`);
+  }
+
+  console.log();
+  process.exit(mismatch.length > 0 || missing.length > 0 ? 1 : 0);
+}
+
+// ─── Command: rehash ────────────────────────────────────────────────────────────
+
+/**
+ * Handle the "rehash" command.
+ * Rebuild the lock file from disk — scan all installed agents and recompute hashes.
+ */
+function cmdRehash() {
+  const manifest = getManifest();
+  const count = rehashLock(manifest);
+
+  header('Lock file rebuilt from disk');
+  console.log(`  ${green('✓')} ${bold(String(count))} agent(s) rehashed`);
+  console.log();
+  process.exit(0);
+}
+
 // ─── Main Router ────────────────────────────────────────────────────────────────
 
 async function main() {
@@ -445,12 +569,35 @@ async function main() {
     return;
   }
 
+  // Global flags that act as standalone commands
+  if (parsed.flags.verify === true) {
+    cmdVerify();
+    return;
+  }
+
+  if (parsed.flags.rehash === true) {
+    cmdRehash();
+    return;
+  }
+
   // Route commands
   switch (parsed.command) {
     case 'install':
     case 'i':
     case 'add':
       await cmdInstall(parsed);
+      break;
+
+    case 'update':
+      await cmdUpdate(parsed);
+      break;
+
+    case 'verify':
+      cmdVerify();
+      break;
+
+    case 'rehash':
+      cmdRehash();
       break;
 
     case 'list':

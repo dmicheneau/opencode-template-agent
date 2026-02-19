@@ -164,6 +164,100 @@ export function detectInstalledSet(manifest, cwd = process.cwd()) {
   return set;
 }
 
+// ─── Outdated detection ──────────────────────────────────────────────────────
+
+/**
+ * Find agents whose installed file hash does NOT match the lock hash.
+ * Returns the full AgentEntry objects for outdated agents only.
+ *
+ * @param {import('./registry.mjs').Manifest} manifest
+ * @param {string} [cwd]
+ * @returns {import('./registry.mjs').AgentEntry[]}
+ */
+export function findOutdatedAgents(manifest, cwd = process.cwd()) {
+  const states = detectAgentStates(manifest, cwd);
+  return manifest.agents.filter((a) => states.get(a.name) === 'outdated');
+}
+
+// ─── Integrity verification ──────────────────────────────────────────────────
+
+/**
+ * Verify installed files match their lock file hashes.
+ * Checks every entry in the lock file against the actual file on disk.
+ *
+ * @param {import('./registry.mjs').Manifest} manifest
+ * @param {string} [cwd]
+ * @returns {{ ok: string[], mismatch: string[], missing: string[] }}
+ */
+export function verifyLockIntegrity(manifest, cwd = process.cwd()) {
+  const lock = readLock(cwd);
+  const basePath = manifest.base_path || '.opencode/agents';
+  const agentMap = new Map(manifest.agents.map((a) => [a.name, a]));
+
+  /** @type {string[]} */ const ok = [];
+  /** @type {string[]} */ const mismatch = [];
+  /** @type {string[]} */ const missing = [];
+
+  for (const [name, entry] of Object.entries(lock)) {
+    const agent = agentMap.get(name);
+    const filePath = agent
+      ? (agent.mode === 'primary'
+          ? join(cwd, basePath, `${name}.md`)
+          : join(cwd, basePath, agent.category, `${name}.md`))
+      : join(cwd, basePath, `${name}.md`); // fallback for orphan lock entries
+
+    if (!existsSync(filePath)) {
+      missing.push(name);
+      continue;
+    }
+
+    const content = readFileSync(filePath, 'utf-8');
+    const currentHash = sha256(content);
+    if (currentHash === entry.sha256) {
+      ok.push(name);
+    } else {
+      mismatch.push(name);
+    }
+  }
+
+  return { ok, mismatch, missing };
+}
+
+// ─── Rehash ──────────────────────────────────────────────────────────────────
+
+/**
+ * Rebuild the lock file from disk — scan all installed agents and recompute
+ * their SHA-256 hashes. Unlike bootstrapLock, this overwrites existing entries.
+ *
+ * @param {import('./registry.mjs').Manifest} manifest
+ * @param {string} [cwd]
+ * @returns {number}  number of entries written
+ */
+export function rehashLock(manifest, cwd = process.cwd()) {
+  const basePath = manifest.base_path || '.opencode/agents';
+  /** @type {LockData} */
+  const lock = {};
+  const now = new Date().toISOString();
+
+  for (const agent of manifest.agents) {
+    const filePath = agent.mode === 'primary'
+      ? join(cwd, basePath, `${agent.name}.md`)
+      : join(cwd, basePath, agent.category, `${agent.name}.md`);
+
+    if (!existsSync(filePath)) continue;
+
+    const content = readFileSync(filePath, 'utf-8');
+    lock[agent.name] = {
+      sha256: sha256(content),
+      installedAt: now,
+      updatedAt: now,
+    };
+  }
+
+  writeLock(lock, cwd);
+  return Object.keys(lock).length;
+}
+
 // ─── Migration ───────────────────────────────────────────────────────────────
 
 /**

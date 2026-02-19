@@ -14,6 +14,9 @@ import {
   detectAgentStates,
   detectInstalledSet,
   bootstrapLock,
+  findOutdatedAgents,
+  verifyLockIntegrity,
+  rehashLock,
 } from '../src/lock.mjs';
 
 // ─── Test helpers ────────────────────────────────────────────────────────────
@@ -583,5 +586,259 @@ describe('bootstrapLock', () => {
     const manifest = makeManifest([]);
     const result = bootstrapLock(manifest, tmp);
     assert.equal(result, false);
+  });
+});
+
+// ─── findOutdatedAgents ──────────────────────────────────────────────────────
+
+describe('findOutdatedAgents', () => {
+  /** @type {string} */
+  let tmp;
+
+  beforeEach(() => {
+    tmp = mkdtempSync(join(tmpdir(), 'lock-outdated-'));
+  });
+
+  afterEach(() => {
+    rmSync(tmp, { recursive: true, force: true });
+  });
+
+  it('should return agents whose installed hash differs from lock hash', () => {
+    const agents = [
+      { name: 'stale-agent', category: 'general', mode: 'subagent' },
+      { name: 'fresh-agent', category: 'general', mode: 'subagent' },
+    ];
+    const manifest = makeManifest(agents);
+
+    // stale-agent: file differs from lock → outdated
+    writeAgentFile(tmp, agents[0], '# Modified version');
+    recordInstall('stale-agent', '# Original version', tmp);
+
+    // fresh-agent: file matches lock → installed
+    const freshContent = '# Fresh';
+    writeAgentFile(tmp, agents[1], freshContent);
+    recordInstall('fresh-agent', freshContent, tmp);
+
+    const outdated = findOutdatedAgents(manifest, tmp);
+    assert.equal(outdated.length, 1);
+    assert.equal(outdated[0].name, 'stale-agent');
+  });
+
+  it('should return empty when all hashes match', () => {
+    const agents = [
+      { name: 'ok-agent-a', category: 'a', mode: 'subagent' },
+      { name: 'ok-agent-b', category: 'b', mode: 'subagent' },
+    ];
+    const manifest = makeManifest(agents);
+
+    const contentA = '# Agent A';
+    writeAgentFile(tmp, agents[0], contentA);
+    recordInstall('ok-agent-a', contentA, tmp);
+
+    const contentB = '# Agent B';
+    writeAgentFile(tmp, agents[1], contentB);
+    recordInstall('ok-agent-b', contentB, tmp);
+
+    const outdated = findOutdatedAgents(manifest, tmp);
+    assert.equal(outdated.length, 0);
+  });
+
+  it('should not include new or unknown agents', () => {
+    const agents = [
+      { name: 'new-agent', category: 'a', mode: 'subagent' },     // no file → 'new'
+      { name: 'unknown-agent', category: 'b', mode: 'subagent' }, // file, no lock → 'unknown'
+    ];
+    const manifest = makeManifest(agents);
+
+    writeAgentFile(tmp, agents[1], '# Unknown');
+
+    const outdated = findOutdatedAgents(manifest, tmp);
+    assert.equal(outdated.length, 0);
+  });
+
+  it('should return full AgentEntry objects', () => {
+    const agents = [
+      { name: 'stale', category: 'cat', mode: 'subagent', description: 'A stale agent', tags: ['test'] },
+    ];
+    const manifest = makeManifest(agents);
+    writeAgentFile(tmp, agents[0], '# v2');
+    recordInstall('stale', '# v1', tmp);
+
+    const outdated = findOutdatedAgents(manifest, tmp);
+    assert.equal(outdated.length, 1);
+    assert.equal(outdated[0].name, 'stale');
+    assert.equal(outdated[0].category, 'cat');
+    assert.ok(outdated[0].description);
+  });
+
+  it('should return empty for empty manifest', () => {
+    const manifest = makeManifest([]);
+    const outdated = findOutdatedAgents(manifest, tmp);
+    assert.equal(outdated.length, 0);
+  });
+});
+
+// ─── verifyLockIntegrity ─────────────────────────────────────────────────────
+
+describe('verifyLockIntegrity', () => {
+  /** @type {string} */
+  let tmp;
+
+  beforeEach(() => {
+    tmp = mkdtempSync(join(tmpdir(), 'lock-verify-'));
+  });
+
+  afterEach(() => {
+    rmSync(tmp, { recursive: true, force: true });
+  });
+
+  it('should detect ok, mismatch, and missing correctly', () => {
+    const agents = [
+      { name: 'ok-agent', category: 'a', mode: 'subagent' },
+      { name: 'bad-agent', category: 'b', mode: 'subagent' },
+      { name: 'gone-agent', category: 'c', mode: 'subagent' },
+    ];
+    const manifest = makeManifest(agents);
+
+    // ok-agent: file matches lock
+    const okContent = '# OK';
+    writeAgentFile(tmp, agents[0], okContent);
+    recordInstall('ok-agent', okContent, tmp);
+
+    // bad-agent: file differs from lock
+    writeAgentFile(tmp, agents[1], '# Modified');
+    recordInstall('bad-agent', '# Original', tmp);
+
+    // gone-agent: lock entry exists but file removed
+    recordInstall('gone-agent', '# Was here', tmp);
+
+    const result = verifyLockIntegrity(manifest, tmp);
+    assert.deepEqual(result.ok, ['ok-agent']);
+    assert.deepEqual(result.mismatch, ['bad-agent']);
+    assert.deepEqual(result.missing, ['gone-agent']);
+  });
+
+  it('should return all empty arrays when lock is empty', () => {
+    const manifest = makeManifest([{ name: 'any', category: 'x', mode: 'subagent' }]);
+    const result = verifyLockIntegrity(manifest, tmp);
+    assert.deepEqual(result.ok, []);
+    assert.deepEqual(result.mismatch, []);
+    assert.deepEqual(result.missing, []);
+  });
+
+  it('should report all ok when everything matches', () => {
+    const agents = [
+      { name: 'good-a', category: 'a', mode: 'subagent' },
+      { name: 'good-b', category: 'b', mode: 'subagent' },
+    ];
+    const manifest = makeManifest(agents);
+
+    const contentA = '# Good A';
+    writeAgentFile(tmp, agents[0], contentA);
+    recordInstall('good-a', contentA, tmp);
+
+    const contentB = '# Good B';
+    writeAgentFile(tmp, agents[1], contentB);
+    recordInstall('good-b', contentB, tmp);
+
+    const result = verifyLockIntegrity(manifest, tmp);
+    assert.equal(result.ok.length, 2);
+    assert.equal(result.mismatch.length, 0);
+    assert.equal(result.missing.length, 0);
+  });
+
+  it('should handle primary agent paths', () => {
+    const agent = { name: 'primary-check', category: 'general', mode: 'primary' };
+    const manifest = makeManifest([agent]);
+    const content = '# Primary';
+    writeAgentFile(tmp, agent, content);
+    recordInstall('primary-check', content, tmp);
+
+    const result = verifyLockIntegrity(manifest, tmp);
+    assert.deepEqual(result.ok, ['primary-check']);
+    assert.equal(result.mismatch.length, 0);
+    assert.equal(result.missing.length, 0);
+  });
+});
+
+// ─── rehashLock ──────────────────────────────────────────────────────────────
+
+describe('rehashLock', () => {
+  /** @type {string} */
+  let tmp;
+
+  beforeEach(() => {
+    tmp = mkdtempSync(join(tmpdir(), 'lock-rehash-'));
+  });
+
+  afterEach(() => {
+    rmSync(tmp, { recursive: true, force: true });
+  });
+
+  it('should rebuild lock entries for all installed agents', () => {
+    const agents = [
+      { name: 'rehash-a', category: 'a', mode: 'subagent' },
+      { name: 'rehash-b', category: 'b', mode: 'subagent' },
+    ];
+    const manifest = makeManifest(agents);
+    const contentA = '# Rehash A';
+    const contentB = '# Rehash B';
+    writeAgentFile(tmp, agents[0], contentA);
+    writeAgentFile(tmp, agents[1], contentB);
+
+    const count = rehashLock(manifest, tmp);
+    assert.equal(count, 2);
+
+    const lock = readLock(tmp);
+    assert.equal(lock['rehash-a'].sha256, sha256(contentA));
+    assert.equal(lock['rehash-b'].sha256, sha256(contentB));
+  });
+
+  it('should overwrite existing lock entries', () => {
+    const agent = { name: 'overwrite-me', category: 'a', mode: 'subagent' };
+    const manifest = makeManifest([agent]);
+
+    // Record with old content
+    recordInstall('overwrite-me', '# Old', tmp);
+    const oldLock = readLock(tmp);
+    assert.equal(oldLock['overwrite-me'].sha256, sha256('# Old'));
+
+    // Write new content to disk, then rehash
+    writeAgentFile(tmp, agent, '# New');
+    rehashLock(manifest, tmp);
+    const newLock = readLock(tmp);
+    assert.equal(newLock['overwrite-me'].sha256, sha256('# New'));
+  });
+
+  it('should skip agents not on disk', () => {
+    const agents = [
+      { name: 'present', category: 'a', mode: 'subagent' },
+      { name: 'absent', category: 'b', mode: 'subagent' },
+    ];
+    const manifest = makeManifest(agents);
+    writeAgentFile(tmp, agents[0], '# Present');
+
+    const count = rehashLock(manifest, tmp);
+    assert.equal(count, 1);
+    const lock = readLock(tmp);
+    assert.ok(lock['present']);
+    assert.ok(!lock['absent']);
+  });
+
+  it('should return 0 for empty manifest', () => {
+    const manifest = makeManifest([]);
+    const count = rehashLock(manifest, tmp);
+    assert.equal(count, 0);
+  });
+
+  it('should remove orphan lock entries not in manifest', () => {
+    const manifest = makeManifest([]);
+    // Pre-populate lock with an orphan entry
+    recordInstall('orphan-agent', '# Orphan', tmp);
+    assert.ok(readLock(tmp)['orphan-agent']);
+
+    rehashLock(manifest, tmp);
+    const lock = readLock(tmp);
+    assert.ok(!lock['orphan-agent'], 'Orphan entry should be removed after rehash');
   });
 });

@@ -299,6 +299,81 @@ describe('CLI unknown command', () => {
   });
 });
 
+// ─── CLI: --update flag ─────────────────────────────────────────────────────────
+
+describe('CLI --update flag', () => {
+  it('should be recognized as install --update flag', () => {
+    const output = run(['install', '--update']);
+    // No outdated agents in a clean workspace, so we expect the "up to date" message
+    assert.ok(output.includes('up to date') || output.includes('Updating'),
+      '--update flag should be recognized');
+  });
+
+  it('should be recognized as standalone "update" command', () => {
+    const output = run(['update']);
+    assert.ok(output.includes('up to date') || output.includes('Updating'),
+      'update command should be recognized');
+  });
+
+  it('should not conflict with --all (mutually exclusive)', () => {
+    const output = run(['install', '--all', '--update'], { expectError: true });
+    assert.ok(output.includes('Cannot combine'),
+      '--update and --all should be mutually exclusive');
+  });
+});
+
+// ─── CLI: --rehash flag ─────────────────────────────────────────────────────────
+
+describe('CLI --rehash flag', () => {
+  it('should be recognized as standalone "rehash" command', () => {
+    const output = run(['rehash']);
+    assert.ok(output.includes('rehashed') || output.includes('rebuilt') || output.includes('Lock file'),
+      'rehash command should be recognized');
+  });
+
+  it('should be recognized as --rehash flag', () => {
+    const output = run(['--rehash']);
+    assert.ok(output.includes('rehashed') || output.includes('rebuilt') || output.includes('Lock file'),
+      '--rehash flag should be recognized');
+  });
+});
+
+// ─── CLI: --verify flag ─────────────────────────────────────────────────────────
+
+describe('CLI --verify flag', () => {
+  it('should be recognized as standalone "verify" command', () => {
+    // No lock entries → should show "No lock entries" message and exit 0
+    const output = run(['verify']);
+    assert.ok(output.includes('verification') || output.includes('integrity') || output.includes('OK') || output.includes('No lock entries'),
+      'verify command should be recognized');
+  });
+
+  it('should be recognized as --verify flag', () => {
+    const output = run(['--verify']);
+    assert.ok(output.includes('verification') || output.includes('integrity') || output.includes('OK') || output.includes('No lock entries'),
+      '--verify flag should be recognized');
+  });
+});
+
+// ─── CLI: help includes new commands ────────────────────────────────────────────
+
+describe('CLI help includes new commands', () => {
+  it('should show update command in help', () => {
+    const output = run(['--help']);
+    assert.ok(output.includes('update'), 'help should mention update command');
+  });
+
+  it('should show verify command in help', () => {
+    const output = run(['--help']);
+    assert.ok(output.includes('verify'), 'help should mention verify command');
+  });
+
+  it('should show rehash command in help', () => {
+    const output = run(['--help']);
+    assert.ok(output.includes('rehash'), 'help should mention rehash command');
+  });
+});
+
 // ─── Registry module ────────────────────────────────────────────────────────────
 
 describe('Registry module', () => {
