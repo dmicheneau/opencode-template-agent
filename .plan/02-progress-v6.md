@@ -2,7 +2,7 @@
 
 **Plan:** [00-plan-v6.md](00-plan-v6.md)
 **Tasks:** [01-tasks-v6.md](01-tasks-v6.md)
-**Updated:** 2026-02-19 (V6.1 Release: S6 ✅ S3 extras ✅ + Post-release CR hardening ✅ + Major CR fixes ✅ + Minor/Low CR fixes ✅ — ALL 21 CR issues resolved)
+**Updated:** 2026-02-19 (V7.0 Release: S4 Full Permissions ✅ — 38/38 tasks complete, 805 tests passing)
 
 ---
 
@@ -30,16 +30,16 @@
 | Code Review Minor/Low Fixes | 5 | 5 | 100% |
 | **V6.1 Total** | **46** | **46** | **100%** |
 
-### V7.0 — Permissions (S4)
+### V7.0 — Permissions (S4) ✅
 
 | Section | Done | Total | % |
 |---------|------|-------|---|
-| C1: Foundation | 0 | 8 | 0% |
-| C2: CLI & Resolution | 0 | 12 | 0% |
-| C3: TUI Editor | 0 | 8 | 0% |
-| C4: Integration | 0 | 7 | 0% |
-| V7.0 Release Tasks | 0 | 3 | 0% |
-| **V7.0 Total** | **0** | **38** | **0%** |
+| C1: Foundation | 8 | 8 | 100% |
+| C2: CLI & Resolution | 12 | 12 | 100% |
+| C3: TUI Editor | 8 | 8 | 100% |
+| C4: Integration | 7 | 7 | 100% |
+| V7.0 Release Tasks | 3 | 3 | 100% |
+| **V7.0 Total** | **38** | **38** | **100%** |
 
 ### S2 — Content Enrichment (continuous)
 
@@ -60,9 +60,9 @@
 |---------|------|-------|---|--------|
 | V6.0 MVP | 30 | 39 | 77% | **In Progress** |
 | V6.1 Lifecycle | 46 | 46 | 100% | **Done** |
-| V7.0 Permissions | 0 | 38 | 0% | Queued |
+| V7.0 Permissions | 38 | 38 | 100% | **Done** |
 | S2 Enrichment | 0 | 45 | 0% | Queued |
-| **Total** | **76** | **168** | **45%** | |
+| **Total** | **114** | **168** | **68%** | |
 
 ## Review Integration
 
@@ -80,6 +80,11 @@
 - [x] Post-release code review hardening (commit 127e098): C-1 atomic lock writes, C-2 download destroyed flag, C-3 scoped CLI flags, SEC-01 TOCTOU minimization — 544 tests passing (367 JS + 177 Python)
 - [x] Code review Major fixes (commit 8470601): M-1/M-5/M-6 lock hardening (getLockPath base_path, readLock corruption warning, isValidLockEntry), M-2/M-4 installer isolation (removeLockEntry failure, batch uninstall per-agent), M-1/M-2/M-5 TUI fixes (renderDone viewport scroll, dynamic import try block, paste multi-chars in search) — 562 tests passing (385 JS + 177 Python)
 - [x] Code review Minor/Low fixes (commit e18d2d5): TUI M-3 dead imports in state.mjs, TUI M-4 JSDoc on parseKey, CLI M-1 --flag=value normalization, CLI M-2 unknown flag warnings, CLI M-3 resolveAgentOrExit() DRY helper — 571 tests passing (394 JS + 177 Python). **ALL 21 code review issues now resolved** (3 Critical, 1 High, 12 Major, 5 Minor).
+- [x] V7.0 C1 Foundation: presets.mjs (17 permissions, 4 presets, ACTION_ALLOWLIST), writer.mjs (readFrontmatterBoundaries, buildPermissionYaml, spliceFrontmatter — SEC-01 write-only), warnings.mjs (4-level warning system, displayWarning)
+- [x] V7.0 C2 CLI & Resolution: cli.mjs (parsePermissionFlags, parseOverrideSpec, SAFE_NAME_RE validation — MF-5), resolve.mjs (layered precedence: built-in < saved < CLI preset < overrides), persistence.mjs (XDG_CONFIG_HOME — W-09, 0o600, atomic write, yolo persistence blocked)
+- [x] V7.0 C3 TUI Permission Editor: createPermissionState + updatePermission pure reducer (W-03), preset selector (skip/strict/balanced/permissive/yolo/custom — R1 opt-in), per-agent permission editor, bash pattern sub-editor, security warnings inline, "Apply to all agents", footer hints (R2)
+- [x] V7.0 C4 Integration: permission step in install flow (opt-in — R1), installAgent applies permissions, TUI confirm dialog shows permission summary, YOLO gated with CONFIRM typing (MF-3), S3 hash documentation (MF-6)
+- [x] V7.0 Release: version bump 7.0.0 (package.json + install.sh), 805 tests passing (628 JS + 177 Python)
 
 **Backlog (remaining V6.0 S3 core tasks):** S3.4 (corrupted JSON recovery), S3.5 (manifest sha256/size fields), S3.6 (Python sync hashes), S3.9-S3.10 (TUI state indicators), S3.12 (cache invalidation), S3.16 (Python sync tests)
 

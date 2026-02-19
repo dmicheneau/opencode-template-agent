@@ -151,58 +151,58 @@
 
 ## V7.0 — Full Permissions (S4)
 
-### C1 — Foundation (no UI, no integration)
+### C1 — Foundation (no UI, no integration) ✅
 
-- [ ] **S4.1** Create `src/permissions/presets.mjs` — PERMISSION_NAMES (17), PRESETS (strict/balanced/permissive/yolo), ACTION_ALLOWLIST (allow/ask/deny)
-- [ ] **S4.2** Create `src/permissions/writer.mjs` — readFrontmatterBoundaries() to find `---` markers (SEC-01: write-only, no YAML parsing)
-- [ ] **S4.3** Add buildPermissionYaml() to writer.mjs — generate permission block from JSON permission set
-- [ ] **S4.4** Add spliceFrontmatter() to writer.mjs — replace permission section between boundaries, preserve all other content
-- [ ] **S4.5** Create `src/permissions/warnings.mjs` — warning definitions (4 levels), displayWarning(), requireConfirmation()
-- [ ] **S4.6** Write round-trip tests for writer (read boundaries → build YAML → splice → verify)
-- [ ] **S4.7** Write edge case tests: no permission block, empty frontmatter, CRLF, UTF-8 BOM
-- [ ] **S4.8** Write tests for all 4 presets (verify all 17 permissions set correctly)
+- [x] **S4.1** Create `src/permissions/presets.mjs` — PERMISSION_NAMES (17), PRESETS (strict/balanced/permissive/yolo), ACTION_ALLOWLIST (allow/ask/deny)
+- [x] **S4.2** Create `src/permissions/writer.mjs` — readFrontmatterBoundaries() to find `---` markers (SEC-01: write-only, no YAML parsing)
+- [x] **S4.3** Add buildPermissionYaml() to writer.mjs — generate permission block from JSON permission set
+- [x] **S4.4** Add spliceFrontmatter() to writer.mjs — replace permission section between boundaries, preserve all other content
+- [x] **S4.5** Create `src/permissions/warnings.mjs` — warning definitions (4 levels), displayWarning(), requireConfirmation()
+- [x] **S4.6** Write round-trip tests for writer (read boundaries → build YAML → splice → verify)
+- [x] **S4.7** Write edge case tests: no permission block, empty frontmatter, CRLF, UTF-8 BOM
+- [x] **S4.8** Write tests for all 4 presets (verify all 17 permissions set correctly)
 
-### C2 — CLI & Resolution
+### C2 — CLI & Resolution ✅
 
-- [ ] **S4.9** Create `src/permissions/cli.mjs` — parsePermissionFlags(), parseOverrideSpec()
-- [ ] **S4.10** Create `src/permissions/resolve.mjs` — resolvePermissions() with layered precedence
-- [ ] **S4.11** Create `src/permissions/persistence.mjs` — loadPreferences(), savePreferences() using `${XDG_CONFIG_HOME || '~/.config'}/opencode/` (W-09)
-- [ ] **S4.12** Implement 0o600 file permissions for preferences file
-- [ ] **S4.13** Implement atomic write for preferences file
-- [ ] **S4.14** Refuse to persist yolo as default preset
-- [ ] **S4.15** Add --yolo, --permissions, --permission-override flags to `bin/cli.mjs`
-- [ ] **S4.16** Add --save-permissions, --no-saved-permissions, --no-interactive flags
-- [ ] **S4.17** Validate all permission override inputs against SAFE_NAME_RE + ACTION_ALLOWLIST (MF-5)
-- [ ] **S4.18** Write CLI flag parsing tests
-- [ ] **S4.19** Write resolution precedence tests
-- [ ] **S4.20** Write persistence tests (save/load/corrupt/missing/permissions)
+- [x] **S4.9** Create `src/permissions/cli.mjs` — parsePermissionFlags(), parseOverrideSpec()
+- [x] **S4.10** Create `src/permissions/resolve.mjs` — resolvePermissions() with layered precedence
+- [x] **S4.11** Create `src/permissions/persistence.mjs` — loadPreferences(), savePreferences() using `${XDG_CONFIG_HOME || '~/.config'}/opencode/` (W-09)
+- [x] **S4.12** Implement 0o600 file permissions for preferences file
+- [x] **S4.13** Implement atomic write for preferences file
+- [x] **S4.14** Refuse to persist yolo as default preset
+- [x] **S4.15** Add --yolo, --permissions, --permission-override flags to `bin/cli.mjs`
+- [x] **S4.16** Add --save-permissions, --no-saved-permissions, --no-interactive flags
+- [x] **S4.17** Validate all permission override inputs against SAFE_NAME_RE + ACTION_ALLOWLIST (MF-5)
+- [x] **S4.18** Write CLI flag parsing tests
+- [x] **S4.19** Write resolution precedence tests
+- [x] **S4.20** Write persistence tests (save/load/corrupt/missing/permissions)
 
-### C3 — TUI Permission Editor
+### C3 — TUI Permission Editor ✅
 
-- [ ] **S4.21** Create permission state with `createPermissionState()` + `updatePermission()` pure reducer (W-03: state+reducer, no class)
-- [ ] **S4.22** Implement preset selector screen — skip (default) / strict / balanced / permissive / yolo / custom (R1: opt-in)
-- [ ] **S4.23** Implement per-agent permission editor (up/down navigate, left/right cycle) — only shown when "custom" selected
-- [ ] **S4.24** Implement bash pattern sub-editor (add/delete/cycle patterns)
-- [ ] **S4.25** Implement security warnings inline in editor
-- [ ] **S4.26** Implement "Apply to all agents" feature
-- [ ] **S4.27** Add **footer hints** for all permission modes (R2 mandatory)
-- [ ] **S4.28** Write editor state machine tests
+- [x] **S4.21** Create permission state with `createPermissionState()` + `updatePermission()` pure reducer (W-03: state+reducer, no class)
+- [x] **S4.22** Implement preset selector screen — skip (default) / strict / balanced / permissive / yolo / custom (R1: opt-in)
+- [x] **S4.23** Implement per-agent permission editor (up/down navigate, left/right cycle) — only shown when "custom" selected
+- [x] **S4.24** Implement bash pattern sub-editor (add/delete/cycle patterns)
+- [x] **S4.25** Implement security warnings inline in editor
+- [x] **S4.26** Implement "Apply to all agents" feature
+- [x] **S4.27** Add **footer hints** for all permission modes (R2 mandatory)
+- [x] **S4.28** Write editor state machine tests
 
-### C4 — Integration
+### C4 — Integration ✅
 
-- [ ] **S4.29** Integrate permission configuration step into install flow — **opt-in only** (R1: default = skip, only "custom" opens editor)
-- [ ] **S4.30** Modify installAgent() to apply permission modifications before writing files
-- [ ] **S4.31** Show permission summary in TUI confirm dialog
-- [ ] **S4.32** Gate YOLO mode: require typing `CONFIRM` to activate (sets all 17 permissions to allow)
-- [ ] **S4.33** Document: S3 hashes are for change detection, NOT supply chain security (MF-6)
-- [ ] **S4.34** Run all tests — verify no regressions
-- [ ] **S4.35** Manual test: install with each preset, verify frontmatter output
+- [x] **S4.29** Integrate permission configuration step into install flow — **opt-in only** (R1: default = skip, only "custom" opens editor)
+- [x] **S4.30** Modify installAgent() to apply permission modifications before writing files
+- [x] **S4.31** Show permission summary in TUI confirm dialog
+- [x] **S4.32** Gate YOLO mode: require typing `CONFIRM` to activate (sets all 17 permissions to allow)
+- [x] **S4.33** Document: S3 hashes are for change detection, NOT supply chain security (MF-6)
+- [x] **S4.34** Run all tests — verify no regressions
+- [x] **S4.35** Manual test: install with each preset, verify frontmatter output
 
-### V7.0 Release Tasks
+### V7.0 Release Tasks ✅
 
-- [ ] **V7.0-R1** Version bump in package.json + install.sh (M-01)
-- [ ] **V7.0-R2** Update CHANGELOG.md
-- [ ] **V7.0-R3** Final full test run (JS + Python)
+- [x] **V7.0-R1** Version bump in package.json + install.sh (M-01)
+- [x] **V7.0-R2** Update CHANGELOG.md
+- [x] **V7.0-R3** Final full test run (JS + Python)
 
 ---
 
@@ -276,7 +276,7 @@
 |---------|-------|------------------|
 | V6.0 — MVP | 39 tasks | 3-4 days |
 | V6.1 — Lifecycle | 46 tasks (29 + 4 CR hardening + 8 Major fixes + 5 Minor/Low fixes) | 3-4 days |
-| V7.0 — Permissions | 38 tasks | 5-7 days |
+| V7.0 — Permissions | 38 tasks ✅ | 5-7 days |
 | S2 — Enrichment | 45 tasks | 10-14 weeks |
 | **Total** | **168 tasks** | — |
 

@@ -26,12 +26,12 @@ Following the PM recommendation, V6 is split into incremental releases:
 |---------|---------|-------|--------|-------|
 | **V6.0** (MVP) | S1 anti-flicker + S5 pack fix + S3 core detection | ~36 | 3-4 days | Quick wins + foundation |
 | **V6.1** | S6 uninstall (CLI+TUI) + S3 CLI extras | ~25 | 3-4 days | Lifecycle management |
-| **V7.0** | S4 full permissions + YOLO | ~34 | 5-7 days | Security posture |
+| **V7.0** | S4 full permissions + YOLO | ~34 | 5-7 days | Security posture ✅ |
 | **S2** (continuous) | Agent content enrichment | ~45 | 10-14 weeks | Parallel to all releases |
 | **Total** | | **~140** | | |
 
 Each release ships with:
-- All existing tests passing (571: 394 JS + 177 Python)
+- All existing tests passing (805: 628 JS + 177 Python)
 - Version bump in package.json + install.sh
 - CHANGELOG.md updated
 
@@ -366,7 +366,7 @@ S3 (manifest v2 hashes) ◇──→ S2 (each enrichment batch invalidates hashe
 
 - Zero npm dependencies — Node.js 20+ ESM
 - Python stdlib only for sync scripts
-- All 571 tests (394 JS + 177 Python) must pass at each release
+- All 805 tests (628 JS + 177 Python) must pass at each release
 - `permission:` only (never `tools:`)
 - Atomic file writes for lock file and permission modifications
 - **Footer hints mandatory** for every new TUI mode (R2)
