@@ -331,11 +331,6 @@ describe('CLI --rehash flag', () => {
       'rehash command should be recognized');
   });
 
-  it('should be recognized as --rehash flag', () => {
-    const output = run(['--rehash']);
-    assert.ok(output.includes('rehashed') || output.includes('rebuilt') || output.includes('Lock file'),
-      '--rehash flag should be recognized');
-  });
 });
 
 // ─── CLI: --verify flag ─────────────────────────────────────────────────────────
@@ -348,10 +343,39 @@ describe('CLI --verify flag', () => {
       'verify command should be recognized');
   });
 
-  it('should be recognized as --verify flag', () => {
-    const output = run(['--verify']);
+});
+
+// ─── C-3: --rehash and --verify no longer work as global flags ───────────────────
+
+describe('C-3: --rehash/--verify flags removed', () => {
+  it('should NOT produce rehash output when called as --rehash flag', () => {
+    const output = run(['--rehash'], { expectError: true });
+    // After C-3, --rehash is not a recognized global flag → unknown command or help
+    assert.ok(
+      !output.includes('rehashed') && !output.includes('rebuilt') && !output.includes('Lock file'),
+      '--rehash flag should no longer produce rehash output'
+    );
+  });
+
+  it('should NOT produce verify output when called as --verify flag', () => {
+    const output = run(['--verify'], { expectError: true });
+    // After C-3, --verify is not a recognized global flag → unknown command or help
+    assert.ok(
+      !output.includes('verification') && !output.includes('integrity') && !output.includes('OK') && !output.includes('No lock entries'),
+      '--verify flag should no longer produce verify output'
+    );
+  });
+
+  it('should still recognize "rehash" as a standalone command', () => {
+    const output = run(['rehash']);
+    assert.ok(output.includes('rehashed') || output.includes('rebuilt') || output.includes('Lock file'),
+      'rehash command should still work');
+  });
+
+  it('should still recognize "verify" as a standalone command', () => {
+    const output = run(['verify']);
     assert.ok(output.includes('verification') || output.includes('integrity') || output.includes('OK') || output.includes('No lock entries'),
-      '--verify flag should be recognized');
+      'verify command should still work');
   });
 });
 

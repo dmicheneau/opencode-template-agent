@@ -5,7 +5,7 @@
  * Zero npm deps — Node 20+ built-ins only.
  */
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, renameSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { join, dirname } from 'node:path';
 
@@ -62,14 +62,18 @@ export function readLock(cwd = process.cwd()) {
 }
 
 /**
- * Write the lock file. Creates parent directories if needed.
+ * Write the lock file atomically (write-to-temp + rename).
+ * Creates parent directories if needed.
  * @param {LockData} data
  * @param {string} [cwd]
  */
 export function writeLock(data, cwd = process.cwd()) {
   const p = getLockPath(cwd);
-  mkdirSync(dirname(p), { recursive: true });
-  writeFileSync(p, JSON.stringify(data, null, 2) + '\n');
+  const dir = dirname(p);
+  mkdirSync(dir, { recursive: true });
+  const tmp = join(dir, `.lock-tmp-${process.pid}`);
+  writeFileSync(tmp, JSON.stringify(data, null, 2) + '\n');
+  renameSync(tmp, p); // atomic on POSIX when same filesystem
 }
 
 // ─── Lock entry management ───────────────────────────────────────────────────

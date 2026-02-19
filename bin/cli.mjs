@@ -131,9 +131,7 @@ ${bold('Usage:')}
 ${bold('Options:')}
   --force      Overwrite existing agent files
   --dry-run    Preview without writing files
-  --update     Reinstall only outdated agents (hash mismatch)
-  --verify     Verify installed files match lock hashes
-  --rehash     Rebuild lock file from installed files
+  --update     Reinstall only outdated agents (use with install)
   --help       Show this help
   --version    Show version
 
@@ -566,17 +564,6 @@ async function main() {
 
   if (parsed.flags.help === true || parsed.command === 'help') {
     showHelp();
-    return;
-  }
-
-  // Global flags that act as standalone commands
-  if (parsed.flags.verify === true) {
-    cmdVerify();
-    return;
-  }
-
-  if (parsed.flags.rehash === true) {
-    cmdRehash();
     return;
   }
 

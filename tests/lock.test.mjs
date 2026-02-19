@@ -1,6 +1,6 @@
 import { describe, it, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdirSync, mkdtempSync, rmSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, existsSync, readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
@@ -225,6 +225,36 @@ describe('writeLock', () => {
     assert.ok(!data.first, 'First entry should be gone');
     assert.ok(data.second, 'Second entry should exist');
     assert.equal(data.second.sha256, 'b');
+  });
+
+  // ─── C-1: Atomic lock file writes ──────────────────────────────────────
+
+  it('C-1: lock file should exist and contain valid JSON after writeLock()', () => {
+    const data = { 'test-agent': { sha256: 'abc123', installedAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z' } };
+    writeLock(data, tmp);
+    const lockPath = getLockPath(tmp);
+    assert.ok(existsSync(lockPath), 'lock file should exist after writeLock()');
+    const raw = readFileSync(lockPath, 'utf-8');
+    const parsed = JSON.parse(raw);
+    assert.deepEqual(parsed, data, 'lock file should contain valid JSON matching input');
+  });
+
+  it('C-1: no .lock-tmp-* temp file should remain after successful writeLock()', () => {
+    writeLock({ agent: { sha256: 'x', installedAt: 'y', updatedAt: 'z' } }, tmp);
+    const lockDir = join(tmp, '.opencode', 'agents');
+    const files = readdirSync(lockDir);
+    const tempFiles = files.filter(f => f.startsWith('.lock-tmp-'));
+    assert.equal(tempFiles.length, 0, `temp files should be cleaned up, found: ${tempFiles.join(', ')}`);
+  });
+
+  it('C-1: lock data should round-trip correctly (write then read)', () => {
+    const original = {
+      'agent-a': { sha256: 'hash-a', installedAt: '2025-01-01T00:00:00Z', updatedAt: '2025-06-01T00:00:00Z' },
+      'agent-b': { sha256: 'hash-b', installedAt: '2025-02-01T00:00:00Z', updatedAt: '2025-07-01T00:00:00Z' },
+    };
+    writeLock(original, tmp);
+    const roundTripped = readLock(tmp);
+    assert.deepEqual(roundTripped, original, 'readLock() should return exactly what writeLock() wrote');
   });
 });
 

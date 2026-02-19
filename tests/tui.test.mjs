@@ -1893,6 +1893,33 @@ describe('uninstallAgent', () => {
     uninstallAgent(agent, { cwd: tmp });
     assert.ok(!existsSync(agentDir), 'empty category directory should be cleaned up');
   });
+
+  // ─── SEC-01: TOCTOU minimization ─────────────────────────────────────────
+
+  it('SEC-01: dryRun should return "removed" without calling lstat (symlink safe)', () => {
+    // When dryRun is true, the function should return before reaching lstat.
+    // Prove it by placing a symlink — without dryRun this would throw Security error.
+    const agent = { name: 'sec01-dry-sym', category: 'general', mode: 'subagent', description: 'test', tags: [] };
+    const agentDir = join(tmp, '.opencode', 'agents', 'general');
+    mkdirSync(agentDir, { recursive: true });
+    const realFile = join(tmp, 'sec01-real.md');
+    const symlinkFile = join(agentDir, 'sec01-dry-sym.md');
+    writeFileSync(realFile, '# Real', 'utf-8');
+    symlinkSync(realFile, symlinkFile);
+
+    // dryRun: true should return 'removed' without throwing Security error
+    const result = uninstallAgent(agent, { cwd: tmp, dryRun: true });
+    assert.equal(result, 'removed', 'dryRun should bypass lstat and return "removed"');
+    // Symlink should still exist (no deletion)
+    assert.ok(existsSync(symlinkFile), 'symlink should remain untouched in dry-run');
+  });
+
+  it('SEC-01: non-existent agent should return "not_found" (not throw)', () => {
+    const agent = { name: 'ghost-agent', category: 'general', mode: 'subagent', description: 'test', tags: [] };
+    // No file on disk — should return gracefully, not throw
+    const result = uninstallAgent(agent, { cwd: tmp });
+    assert.equal(result, 'not_found', 'missing agent should return "not_found" without throwing');
+  });
 });
 
 describe('uninstallAgents', () => {

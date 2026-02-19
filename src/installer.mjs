@@ -70,16 +70,20 @@ function download(url, _redirectCount = 0) {
       /** @type {Buffer[]} */
       const chunks = [];
       let totalSize = 0;
+      let destroyed = false;
 
       res.on('data', (chunk) => {
         totalSize += chunk.length;
         if (totalSize > MAX_RESPONSE_SIZE) {
+          destroyed = true;
           request.destroy(new Error(`Response exceeds ${MAX_RESPONSE_SIZE} bytes`));
           return;
         }
         chunks.push(chunk);
       });
-      res.on('end', () => resolve(Buffer.concat(chunks).toString('utf-8')));
+      res.on('end', () => {
+        if (!destroyed) resolve(Buffer.concat(chunks).toString('utf-8'));
+      });
       res.on('error', reject);
     });
 
@@ -234,22 +238,17 @@ export function uninstallAgent(agent, options = {}) {
     return 'not_found';
   }
 
-  // SEC-04: Refuse to delete symlinks
+  // Dry run: report without touching disk (avoids widening TOCTOU window)
+  if (options.dryRun) {
+    return 'removed';
+  }
+
+  // SEC-04: Refuse to delete symlinks — lstat + unlink kept tight to minimize TOCTOU window
   try {
     const stat = lstatSync(dest.absolute);
     if (stat.isSymbolicLink()) {
       throw new Error(`Security: "${dest.relative}" is a symlink. Refusing to delete.`);
     }
-  } catch (err) {
-    if (err.message.startsWith('Security:')) throw err;
-    return 'failed';
-  }
-
-  if (options.dryRun) {
-    return 'removed';
-  }
-
-  try {
     unlinkSync(dest.absolute);
     removeLockEntry(agent.name, cwd);
 
@@ -267,7 +266,9 @@ export function uninstallAgent(agent, options = {}) {
     }
 
     return 'removed';
-  } catch {
+  } catch (err) {
+    // Re-throw security errors — they must not be silenced
+    if (err && err.message && err.message.startsWith('Security:')) throw err;
     return 'failed';
   }
 }
