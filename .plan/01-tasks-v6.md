@@ -2,7 +2,7 @@
 
 **Plan:** [00-plan-v6.md](00-plan-v6.md)
 **Created:** 2026-02-18
-**Updated:** 2026-02-19 (post-review revision: release split + new tasks from 4 reviews + code review hardening)
+**Updated:** 2026-02-19 (post-review revision: release split + new tasks from 4 reviews + code review hardening + Major CR fixes)
 
 ---
 
@@ -109,6 +109,22 @@
 - [x] **CR-2** Download destroyed flag — abort install on truncated data (`src/installer.mjs`)
 - [x] **CR-3** Remove --verify/--rehash global flag hijacking — flags scoped to their commands only (`bin/cli.mjs`)
 - [x] **CR-SEC-01** TOCTOU minimization in uninstallAgent — tighter check-then-act window (`src/installer.mjs`)
+
+### Code Review Major Fixes (commit 8470601)
+
+**Lock fixes (M-1, M-5, M-6):**
+- [x] **CR-M1-lock** getLockPath() respects manifest base_path (`src/lock.mjs`)
+- [x] **CR-M5-lock** readLock() warns on corruption instead of silent swallow (`src/lock.mjs`)
+- [x] **CR-M6-lock** Lock entries validated with isValidLockEntry() (`src/lock.mjs`)
+
+**Installer fixes (M-2, M-4):**
+- [x] **CR-M2-inst** removeLockEntry failure isolated — no more broken state (`src/installer.mjs`)
+- [x] **CR-M4-inst** Batch uninstall error isolation per agent (`src/installer.mjs`)
+
+**TUI fixes (M-1, M-2, M-5):**
+- [x] **CR-M1-tui** renderDone viewport scrolling (`src/tui/renderer.mjs`)
+- [x] **CR-M2-tui** Dynamic import in try block (`src/tui/index.mjs`)
+- [x] **CR-M5-tui** Paste multi-chars in search mode (`src/tui/input.mjs`)
 
 **Backlog — remaining code review issues (Major/Minor):**
 
@@ -248,10 +264,10 @@
 | Release | Tasks | Estimated Effort |
 |---------|-------|------------------|
 | V6.0 — MVP | 39 tasks | 3-4 days |
-| V6.1 — Lifecycle | 33 tasks (29 + 4 CR hardening) | 3-4 days |
+| V6.1 — Lifecycle | 41 tasks (29 + 4 CR hardening + 8 Major fixes) | 3-4 days |
 | V7.0 — Permissions | 38 tasks | 5-7 days |
 | S2 — Enrichment | 45 tasks | 10-14 weeks |
-| **Total** | **155 tasks** | — |
+| **Total** | **163 tasks** | — |
 
 ### Key Review Findings Incorporated
 

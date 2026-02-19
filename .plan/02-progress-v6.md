@@ -2,7 +2,7 @@
 
 **Plan:** [00-plan-v6.md](00-plan-v6.md)
 **Tasks:** [01-tasks-v6.md](01-tasks-v6.md)
-**Updated:** 2026-02-19 (V6.1 Release: S6 ✅ S3 extras ✅ + Post-release CR hardening ✅)
+**Updated:** 2026-02-19 (V6.1 Release: S6 ✅ S3 extras ✅ + Post-release CR hardening ✅ + Major CR fixes ✅)
 
 ---
 
@@ -26,7 +26,8 @@
 | S3 extras: CLI Flags | 6 | 6 | 100% |
 | V6.1 Release Tasks | 3 | 3 | 100% |
 | Post-release CR Hardening | 4 | 4 | 100% |
-| **V6.1 Total** | **33** | **33** | **100%** |
+| Code Review Major Fixes | 8 | 8 | 100% |
+| **V6.1 Total** | **41** | **41** | **100%** |
 
 ### V7.0 — Permissions (S4)
 
@@ -57,10 +58,10 @@
 | Release | Done | Total | % | Status |
 |---------|------|-------|---|--------|
 | V6.0 MVP | 30 | 39 | 77% | **In Progress** |
-| V6.1 Lifecycle | 33 | 33 | 100% | **Done** |
+| V6.1 Lifecycle | 41 | 41 | 100% | **Done** |
 | V7.0 Permissions | 0 | 38 | 0% | Queued |
 | S2 Enrichment | 0 | 45 | 0% | Queued |
-| **Total** | **63** | **155** | **41%** | |
+| **Total** | **71** | **163** | **44%** | |
 
 ## Review Integration
 
@@ -76,6 +77,7 @@
 - [x] S3 extras: --update, --verify, --rehash CLI commands, 24 new tests
 - [x] V6.1 Release: version bump 6.0.0, CHANGELOG, 537 tests passing
 - [x] Post-release code review hardening (commit 127e098): C-1 atomic lock writes, C-2 download destroyed flag, C-3 scoped CLI flags, SEC-01 TOCTOU minimization — 544 tests passing (367 JS + 177 Python)
+- [x] Code review Major fixes (commit 8470601): M-1/M-5/M-6 lock hardening (getLockPath base_path, readLock corruption warning, isValidLockEntry), M-2/M-4 installer isolation (removeLockEntry failure, batch uninstall per-agent), M-1/M-2/M-5 TUI fixes (renderDone viewport scroll, dynamic import try block, paste multi-chars in search) — 562 tests passing (385 JS + 177 Python)
 
 **Backlog (remaining V6.0 S3 core tasks):** S3.4 (corrupted JSON recovery), S3.5 (manifest sha256/size fields), S3.6 (Python sync hashes), S3.9-S3.10 (TUI state indicators), S3.12 (cache invalidation), S3.16 (Python sync tests)
 
@@ -101,3 +103,4 @@
 | 2026-02-19 | State+reducer for permissions (no class) | W-03: consistent with existing TUI architecture |
 | 2026-02-19 | XDG_CONFIG_HOME for persistence | W-09: respect platform conventions |
 | 2026-02-19 | Ship CR hardening post-V6.1 release | 4 fixes (C-1, C-2, C-3, SEC-01), remaining Major/Minor issues in backlog |
+| 2026-02-19 | Ship CR Major fixes post-hardening | 8 fixes (lock M-1/M-5/M-6, installer M-2/M-4, TUI M-1/M-2/M-5), 562 tests |
