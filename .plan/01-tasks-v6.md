@@ -236,15 +236,15 @@
 
 ### D1 — Template & Infrastructure
 
-- [ ] **S2.1** Design universal agent template structure (Identity, Workflow, Decision, Tools, Quality)
-- [ ] **S2.2** Define 5 permission archetypes (Builder, Auditor, Analyst, Orchestrator, Specialist)
-- [ ] **S2.3** Define 10 category colors (WCAG AA, semantically grouped)
-- [ ] **S2.4** Design quality scoring rubric (8-10 dimensions, 1-5 scale)
-- [ ] **S2.5** Update `scripts/sync-agents.py` to support richer agent generation
-- [ ] **S2.6** Add YAML schema validation to sync pipeline
-- [ ] **S2.7** Add template conformance checks to sync pipeline
-- [ ] **S2.8** Add quality score computation to sync pipeline
-- [ ] **S2.9** Write tests for sync pipeline changes
+- [x] **S2.1** Design universal agent template structure (Identity, Workflow, Decision, Tools, Quality)
+- [x] **S2.2** Define 5 permission archetypes (Builder, Auditor, Analyst, Orchestrator, Specialist)
+- [x] **S2.3** Define 10 category colors (WCAG AA, semantically grouped)
+- [x] **S2.4** Design quality scoring rubric (8-10 dimensions, 1-5 scale)
+- [x] **S2.5** Update `scripts/sync-agents.py` to support richer agent generation
+- [x] **S2.6** Add YAML schema validation to sync pipeline
+- [x] **S2.7** Add template conformance checks to sync pipeline
+- [x] **S2.8** Add quality score computation to sync pipeline
+- [x] **S2.9** Write tests for sync pipeline changes
 
 ### D2 — Languages & DevTools (20 agents)
 
