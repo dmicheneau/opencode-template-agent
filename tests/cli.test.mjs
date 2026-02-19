@@ -1,6 +1,6 @@
 import { describe, it, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { mkdirSync, rmSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -33,6 +33,27 @@ function run(args, { cwd, expectError = false } = {}) {
     }
     throw err;
   }
+}
+
+/**
+ * Run the CLI and return { stdout, stderr } separately.
+ * Works for both exit-0 and non-zero processes.
+ * @param {string[]} args
+ * @param {{ cwd?: string }} options
+ * @returns {{ stdout: string; stderr: string; status: number | null }}
+ */
+function runFull(args, { cwd } = {}) {
+  const result = spawnSync('node', [CLI, ...args], {
+    cwd: cwd ?? ROOT,
+    encoding: 'utf-8',
+    timeout: 15_000,
+    env: { ...process.env, NO_COLOR: '1' },
+  });
+  return {
+    stdout: result.stdout ?? '',
+    stderr: result.stderr ?? '',
+    status: result.status,
+  };
 }
 
 // ─── --version ──────────────────────────────────────────────────────────────────
@@ -824,5 +845,86 @@ describe('CLI uninstall command', () => {
     const output = run(['uninstall', '--pack', 'backend', '--category', 'data-api'], { expectError: true, cwd: TEMP_DIR });
     assert.ok(output.includes('Cannot combine'),
       'uninstall --pack --category should be mutually exclusive');
+  });
+});
+
+// ─── CLI: --flag=value normalization ─────────────────────────────────────────────
+
+describe('CLI --flag=value normalization', () => {
+  const TEMP_DIR = join(ROOT, '.test-flagvalue-workspace');
+
+  beforeEach(() => {
+    mkdirSync(TEMP_DIR, { recursive: true });
+  });
+
+  afterEach(() => {
+    rmSync(TEMP_DIR, { recursive: true, force: true });
+  });
+
+  it('should treat --category=security the same as --category security', () => {
+    const withEquals = run(['install', '--category=security', '--dry-run'], { cwd: TEMP_DIR });
+    const withSpace = run(['install', '--category', 'security', '--dry-run'], { cwd: TEMP_DIR });
+    // Both should mention the same agents
+    assert.ok(withEquals.includes('security-auditor'),
+      '--category=security should resolve the security category');
+    assert.ok(withSpace.includes('security-auditor'),
+      '--category security should resolve the security category');
+  });
+
+  it('should treat --pack=backend the same as --pack backend', () => {
+    const withEquals = run(['install', '--pack=backend', '--dry-run'], { cwd: TEMP_DIR });
+    const withSpace = run(['install', '--pack', 'backend', '--dry-run'], { cwd: TEMP_DIR });
+    assert.ok(withEquals.includes('postgres-pro'),
+      '--pack=backend should resolve the backend pack');
+    assert.ok(withSpace.includes('postgres-pro'),
+      '--pack backend should resolve the backend pack');
+  });
+
+  it('should handle --dry-run without = (regression)', () => {
+    const output = run(['install', 'postgres-pro', '--dry-run'], { cwd: TEMP_DIR });
+    assert.ok(output.includes('would install'),
+      '--dry-run without = should still work');
+  });
+});
+
+// ─── CLI: Unknown flags warning ──────────────────────────────────────────────────
+
+describe('CLI unknown flags warning', () => {
+  it('should warn about unknown flags on stderr', () => {
+    const { stderr } = runFull(['list', '--foo']);
+    assert.ok(stderr.includes('unknown flag'),
+      `Expected "unknown flag" in stderr, got: "${stderr}"`);
+    assert.ok(stderr.includes('--foo'),
+      'Warning should mention the specific unknown flag');
+  });
+
+  it('should warn about multiple unknown flags', () => {
+    const { stderr } = runFull(['list', '--foo', '--bar']);
+    assert.ok(stderr.includes('--foo'), 'Warning should mention --foo');
+    assert.ok(stderr.includes('--bar'), 'Warning should mention --bar');
+  });
+
+  it('should NOT warn about --dry-run', () => {
+    const { stderr } = runFull(['install', 'postgres-pro', '--dry-run']);
+    assert.ok(!stderr.includes('unknown flag'),
+      '--dry-run should not trigger unknown flag warning');
+  });
+
+  it('should NOT warn about --json', () => {
+    const { stderr } = runFull(['list', '--json']);
+    assert.ok(!stderr.includes('unknown flag'),
+      '--json should not trigger unknown flag warning');
+  });
+
+  it('should NOT warn about --force', () => {
+    const { stderr } = runFull(['list', '--force']);
+    assert.ok(!stderr.includes('unknown flag'),
+      '--force should not trigger unknown flag warning');
+  });
+
+  it('should NOT warn about --version', () => {
+    const { stderr } = runFull(['--version']);
+    assert.ok(!stderr.includes('unknown flag'),
+      '--version should not trigger unknown flag warning');
   });
 });

@@ -58,7 +58,18 @@ import {
  * @returns {ParsedArgs}
  */
 function parseArgs(argv) {
-  const raw = argv.slice(2); // Remove node and script path
+  const rawArgs = argv.slice(2); // Remove node and script path
+
+  // Normalize --flag=value to --flag value
+  const raw = [];
+  for (const arg of rawArgs) {
+    if (arg.startsWith('--') && arg.includes('=')) {
+      const eqIdx = arg.indexOf('=');
+      raw.push(arg.slice(0, eqIdx), arg.slice(eqIdx + 1));
+    } else {
+      raw.push(arg);
+    }
+  }
   /** @type {string[]} */
   const args = [];
   /** @type {Record<string, string | string[] | boolean>} */
@@ -185,6 +196,27 @@ function formatLabel(singular, names) {
   return `${plural} "${names.join('", "')}"`;
 }
 
+/**
+ * Resolve a single agent by name, with fuzzy suggestions on failure.
+ * Prints an error and calls process.exit(1) if the agent is not found.
+ * @param {string} name     Agent name to look up
+ * @param {string} command  Command label for the usage hint (e.g. 'install', 'uninstall')
+ * @returns {import('../src/registry.mjs').AgentEntry}
+ */
+function resolveAgentOrExit(name, command) {
+  const agent = getAgent(name);
+  if (!agent) {
+    const suggestions = searchAgents(name);
+    errorMessage(`Agent "${name}" not found.`);
+    if (suggestions.length > 0) {
+      console.error(`  Did you mean: ${suggestions.slice(0, 5).map((a) => boldCyan(a.name)).join(', ')}?`);
+      console.error();
+    }
+    process.exit(1);
+  }
+  return agent;
+}
+
 // ─── Command: install ───────────────────────────────────────────────────────────
 
 /**
@@ -298,18 +330,7 @@ async function cmdInstall(parsed) {
     process.exit(1);
   }
 
-  const agent = getAgent(agentName);
-  if (!agent) {
-    // Try fuzzy suggestion
-    const suggestions = searchAgents(agentName);
-    errorMessage(`Agent "${agentName}" not found.`);
-    if (suggestions.length > 0) {
-      console.error(`  Did you mean: ${suggestions.slice(0, 5).map((a) => boldCyan(a.name)).join(', ')}?`);
-      console.error();
-    }
-    process.exit(1);
-  }
-
+  const agent = resolveAgentOrExit(agentName, 'install');
   const result = await installAgents([agent], options);
   process.exit(result.failed > 0 ? 1 : 0);
 }
@@ -410,17 +431,7 @@ async function cmdUninstall(parsed) {
     process.exit(1);
   }
 
-  const agent = getAgent(agentName);
-  if (!agent) {
-    const suggestions = searchAgents(agentName);
-    errorMessage(`Agent "${agentName}" not found.`);
-    if (suggestions.length > 0) {
-      console.error(`  Did you mean: ${suggestions.slice(0, 5).map((a) => boldCyan(a.name)).join(', ')}?`);
-      console.error();
-    }
-    process.exit(1);
-  }
-
+  const agent = resolveAgentOrExit(agentName, 'uninstall');
   const result = uninstallAgents([agent], options);
   if (result.removed > 0) {
     console.log(`  Agent "${agentName}" removed.`);
@@ -555,6 +566,16 @@ function cmdRehash() {
 
 async function main() {
   const parsed = parseArgs(process.argv);
+
+  // Warn about unknown flags (don't error — just inform)
+  const KNOWN_FLAGS = new Set([
+    'help', 'version', 'dry-run', 'json', 'force', 'yes',
+    'category', 'pack', 'all', 'confirm', 'packs', 'update',
+  ]);
+  const unknownFlags = Object.keys(parsed.flags).filter((f) => !KNOWN_FLAGS.has(f));
+  if (unknownFlags.length > 0) {
+    console.error(`Warning: unknown flag(s): ${unknownFlags.map((f) => '--' + f).join(', ')}`);
+  }
 
   // Global flags
   if (parsed.flags.version === true) {

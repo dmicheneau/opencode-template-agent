@@ -104,10 +104,18 @@ const SEQ_RESULTS = Object.freeze(
  */
 
 /**
- * Parse raw stdin data into a semantic action.
- * @param {Buffer} data  - Raw bytes from stdin
- * @param {string} mode  - Current TUI mode ('browse' | 'search' | 'confirm' | 'pack_detail')
- * @returns {ParsedKey}
+ * Parse raw stdin data into a semantic action based on the current TUI mode.
+ *
+ * Handles escape sequences (arrow keys, page up/down), control characters
+ * (Ctrl+C, Ctrl+W, backspace, tab, enter), and context-dependent single-key
+ * mappings (e.g. `y`/`n` in confirm mode, `/` for search in browse mode).
+ *
+ * @param {Buffer | string} data  Raw bytes (or string) from stdin
+ * @param {TuiMode} mode          Current TUI mode — determines how ambiguous keys
+ *                                 are interpreted ('browse' | 'search' | 'confirm' |
+ *                                 'pack_detail' | 'done' | 'uninstall_confirm')
+ * @returns {ParsedKey}            Frozen object with `action` (Action enum value)
+ *                                 and optional `char` (only when action is CHAR)
  */
 export function parseKey(data, mode) {
   if (!data || data.length === 0) return R_NONE;

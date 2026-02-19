@@ -3,8 +3,6 @@
 // detectInstalled() performs filesystem I/O to detect pre-installed agents.
 
 import { Action } from './input.mjs';
-import { existsSync } from 'node:fs';
-import { join } from 'node:path';
 import { detectInstalledSet } from '../lock.mjs';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
