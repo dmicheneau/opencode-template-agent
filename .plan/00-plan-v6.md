@@ -31,7 +31,7 @@ Following the PM recommendation, V6 is split into incremental releases:
 | **Total** | | **~140** | | |
 
 Each release ships with:
-- All existing tests passing (427+)
+- All existing tests passing (544: 367 JS + 177 Python)
 - Version bump in package.json + install.sh
 - CHANGELOG.md updated
 
@@ -366,7 +366,7 @@ S3 (manifest v2 hashes) ◇──→ S2 (each enrichment batch invalidates hashe
 
 - Zero npm dependencies — Node.js 20+ ESM
 - Python stdlib only for sync scripts
-- All 427 tests (250 JS + 177 Python) must pass at each release
+- All 544 tests (367 JS + 177 Python) must pass at each release
 - `permission:` only (never `tools:`)
 - Atomic file writes for lock file and permission modifications
 - **Footer hints mandatory** for every new TUI mode (R2)

@@ -2,7 +2,7 @@
 
 **Plan:** [00-plan-v6.md](00-plan-v6.md)
 **Created:** 2026-02-18
-**Updated:** 2026-02-19 (post-review revision: release split + new tasks from 4 reviews)
+**Updated:** 2026-02-19 (post-review revision: release split + new tasks from 4 reviews + code review hardening)
 
 ---
 
@@ -39,7 +39,7 @@
 
 - [x] **S3.1** Create `src/lock.mjs` — computeHash(), computeFileHash(), readLockFile(), writeLockFile()
 - [x] **S3.2** Add upsertLockEntry(), removeLockEntry(), createEmptyLock() to lock.mjs
-- [ ] **S3.3** Implement atomic write (tmp+rename) in writeLockFile()
+- [x] **S3.3** Implement atomic write (tmp+rename) in writeLockFile()
 - [ ] **S3.4** Implement corrupted JSON recovery: display warning + backup to .bak + return empty lock (MF-4)
 - [ ] **S3.5** Add **optional** `sha256` and `size` fields to manifest.json agent entries (W-02: optional to not break makeManifest test fixtures)
 - [ ] **S3.6** Update `scripts/update-manifest.py` to compute SHA-256 hashes during sync
@@ -102,6 +102,23 @@
 - [x] **V6.1-R1** Version bump in package.json + install.sh (M-01)
 - [x] **V6.1-R2** Update CHANGELOG.md
 - [x] **V6.1-R3** Final full test run (JS + Python)
+
+### Post-release Code Review Hardening (commit 127e098)
+
+- [x] **CR-1** Atomic lock file writes — tmp+rename in writeLockFile() (`src/lock.mjs`) (fixes S3.3)
+- [x] **CR-2** Download destroyed flag — abort install on truncated data (`src/installer.mjs`)
+- [x] **CR-3** Remove --verify/--rehash global flag hijacking — flags scoped to their commands only (`bin/cli.mjs`)
+- [x] **CR-SEC-01** TOCTOU minimization in uninstallAgent — tighter check-then-act window (`src/installer.mjs`)
+
+**Backlog — remaining code review issues (Major/Minor):**
+
+- [ ] **S3.4** Implement corrupted JSON recovery: display warning + backup to .bak + return empty lock (MF-4)
+- [ ] **S3.5** Add optional `sha256` and `size` fields to manifest.json agent entries (W-02)
+- [ ] **S3.6** Update `scripts/update-manifest.py` to compute SHA-256 hashes during sync
+- [ ] **S3.9** Update `src/tui/renderer.mjs` to display state indicators (checkmark green, up-arrow yellow, ? gray)
+- [ ] **S3.10** Update `src/tui/ansi.mjs` with state indicator colors
+- [ ] **S3.12** Invalidate registry.mjs singleton cache when manifest version changes (M-05)
+- [ ] **S3.16** Write tests for manifest hash computation in Python sync
 
 ---
 
@@ -231,10 +248,10 @@
 | Release | Tasks | Estimated Effort |
 |---------|-------|------------------|
 | V6.0 — MVP | 39 tasks | 3-4 days |
-| V6.1 — Lifecycle | 26 tasks | 3-4 days |
+| V6.1 — Lifecycle | 33 tasks (29 + 4 CR hardening) | 3-4 days |
 | V7.0 — Permissions | 38 tasks | 5-7 days |
 | S2 — Enrichment | 45 tasks | 10-14 weeks |
-| **Total** | **148 tasks** | — |
+| **Total** | **155 tasks** | — |
 
 ### Key Review Findings Incorporated
 
