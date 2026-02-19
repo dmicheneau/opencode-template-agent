@@ -5,11 +5,12 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
 import { parseKey, Action } from '../src/tui/input.mjs';
-import { createInitialState, update, computeFilteredList, getViewportHeight } from '../src/tui/state.mjs';
+import { createInitialState, update, computeFilteredList, getViewportHeight, createPermState, enterPresetSelect, getPresetDescription } from '../src/tui/state.mjs';
 import { visibleLength, truncate, padEnd, charWidth, stripAnsi, bgRow, catColor, tabColor } from '../src/tui/ansi.mjs';
 import { render } from '../src/tui/renderer.mjs';
 import { uninstallAgent, uninstallAgents } from '../src/installer.mjs';
 import { recordInstall, readLock } from '../src/lock.mjs';
+import { PERMISSION_NAMES, ACTION_ALLOWLIST } from '../src/permissions/presets.mjs';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -621,18 +622,18 @@ describe('update — confirm mode', () => {
     return state;
   }
 
-  it('YES transitions to installing', () => {
+  it('YES transitions to preset-select', () => {
     const state = confirmState();
     const s1 = update(state, { action: Action.YES });
-    assert.equal(s1.mode, 'installing');
-    assert.ok(s1.install);
+    assert.equal(s1.mode, 'preset-select');
+    assert.ok(s1.perm);
     assert.ok(s1.install.agents.length > 0);
   });
 
-  it('CONFIRM also transitions to installing', () => {
+  it('CONFIRM also transitions to preset-select', () => {
     const state = confirmState();
     const s1 = update(state, { action: Action.CONFIRM });
-    assert.equal(s1.mode, 'installing');
+    assert.equal(s1.mode, 'preset-select');
   });
 
   it('NO returns to browse with empty selection', () => {
@@ -2090,5 +2091,826 @@ describe('uninstallAgents', () => {
     // Verify the last agent was actually processed (not aborted after middle failure)
     assert.ok(!existsSync(join(tmp, '.opencode', 'agents', 'c', 'real-last.md')),
       'last agent file should be deleted — batch did not abort');
+  });
+});
+
+// ─── Permission Editor — State tests ─────────────────────────────────────────
+
+/** Build a test state that is in confirm mode with install.agents set. */
+function permTestAgents() {
+  const s = makeState();
+  // Select first agent and confirm to get install.agents
+  const s2 = update(s, { action: Action.CONFIRM }); // browse → confirm with agent[0]
+  return { state: s2, agents: s2.install.agents };
+}
+
+/** Navigate from confirm to preset-select. */
+function presetSelectState() {
+  const { state } = permTestAgents();
+  return update(state, { action: Action.YES }); // confirm → preset-select
+}
+
+describe('createPermState', () => {
+  it('returns correct shape', () => {
+    const agents = makeState().allAgents.slice(0, 2);
+    const ps = createPermState(agents);
+    assert.equal(ps.presetCursor, 0);
+    assert.deepStrictEqual(ps.presetOptions, ['skip', 'strict', 'balanced', 'permissive', 'yolo', 'custom']);
+    assert.equal(ps.agentIndex, 0);
+    assert.equal(ps.permCursor, 0);
+    assert.deepStrictEqual(ps.bashPatterns, []);
+    assert.equal(ps.bashCursor, 0);
+    assert.equal(ps.bashEditingNew, false);
+    assert.equal(ps.bashInput, '');
+    assert.equal(ps.selectedPreset, null);
+  });
+
+  it('initialises permissions for each agent with balanced preset', () => {
+    const agents = makeState().allAgents.slice(0, 2);
+    const ps = createPermState(agents);
+    for (const a of agents) {
+      assert.ok(ps.permissions[a.name], `permissions for ${a.name} should exist`);
+      assert.equal(ps.permissions[a.name].read, 'allow');
+      assert.equal(ps.permissions[a.name].write, 'allow');
+      // bash should be an object (balanced preset)
+      assert.equal(typeof ps.permissions[a.name].bash, 'object');
+    }
+  });
+});
+
+describe('enterPresetSelect', () => {
+  it('transitions to preset-select mode with perm state', () => {
+    const s = makeState();
+    const agents = s.allAgents.slice(0, 2);
+    const next = enterPresetSelect(s, agents);
+    assert.equal(next.mode, 'preset-select');
+    assert.ok(next.perm, 'perm sub-state should be created');
+    assert.equal(next.perm.presetCursor, 0);
+  });
+
+  it('does not mutate original state', () => {
+    const s = makeState();
+    const agents = s.allAgents.slice(0, 1);
+    const next = enterPresetSelect(s, agents);
+    assert.equal(s.mode, 'browse');
+    assert.equal(s.perm, null);
+    assert.equal(next.mode, 'preset-select');
+  });
+});
+
+describe('getPresetDescription', () => {
+  it('returns description for known presets', () => {
+    for (const name of ['skip', 'strict', 'balanced', 'permissive', 'yolo', 'custom']) {
+      const d = getPresetDescription(name);
+      assert.ok(d.length > 0, `description for ${name} should be non-empty`);
+    }
+  });
+
+  it('returns empty string for unknown preset', () => {
+    assert.equal(getPresetDescription('nonexistent'), '');
+  });
+});
+
+// ─── Preset-select mode ──────────────────────────────────────────────────────
+
+describe('update — preset-select mode', () => {
+  it('UP decrements cursor (clamped at 0)', () => {
+    const s = presetSelectState();
+    assert.equal(s.perm.presetCursor, 0);
+    const s2 = update(s, { action: Action.UP });
+    assert.equal(s2.perm.presetCursor, 0, 'already at 0, should stay');
+  });
+
+  it('DOWN increments cursor', () => {
+    const s = presetSelectState();
+    const s2 = update(s, { action: Action.DOWN });
+    assert.equal(s2.perm.presetCursor, 1);
+  });
+
+  it('DOWN clamps at last option', () => {
+    let s = presetSelectState();
+    for (let i = 0; i < 10; i++) s = update(s, { action: Action.DOWN });
+    assert.equal(s.perm.presetCursor, 5); // 6 options: 0..5
+  });
+
+  it('CONFIRM on skip → installing, perm null', () => {
+    const s = presetSelectState(); // cursor=0 → skip
+    const s2 = update(s, { action: Action.CONFIRM });
+    assert.equal(s2.mode, 'installing');
+    assert.equal(s2.perm, null);
+  });
+
+  it('CONFIRM on strict → installing with strict preset applied', () => {
+    let s = presetSelectState();
+    s = update(s, { action: Action.DOWN }); // cursor=1 → strict
+    const s2 = update(s, { action: Action.CONFIRM });
+    assert.equal(s2.mode, 'installing');
+    assert.equal(s2.perm.selectedPreset, 'strict');
+    // Check a strict value was applied
+    const agentName = s2.install.agents[0].name;
+    assert.equal(s2.perm.permissions[agentName].write, 'deny');
+  });
+
+  it('CONFIRM on yolo → installing with yolo preset', () => {
+    let s = presetSelectState();
+    // yolo is index 4
+    for (let i = 0; i < 4; i++) s = update(s, { action: Action.DOWN });
+    const s2 = update(s, { action: Action.CONFIRM });
+    assert.equal(s2.mode, 'installing');
+    assert.equal(s2.perm.selectedPreset, 'yolo');
+    const agentName = s2.install.agents[0].name;
+    assert.equal(s2.perm.permissions[agentName].mcp, 'allow');
+  });
+
+  it('CONFIRM on custom → permission-edit mode', () => {
+    let s = presetSelectState();
+    // custom is index 5
+    for (let i = 0; i < 5; i++) s = update(s, { action: Action.DOWN });
+    const s2 = update(s, { action: Action.CONFIRM });
+    assert.equal(s2.mode, 'permission-edit');
+    assert.equal(s2.perm.selectedPreset, 'custom');
+  });
+
+  it('ESCAPE → back to confirm, perm cleared', () => {
+    const s = presetSelectState();
+    const s2 = update(s, { action: Action.ESCAPE });
+    assert.equal(s2.mode, 'confirm');
+    assert.equal(s2.perm, null);
+  });
+
+  it('null perm guard: returns state unchanged if perm is null', () => {
+    const s = { ...presetSelectState(), perm: null };
+    const s2 = update(s, { action: Action.DOWN });
+    assert.equal(s2.mode, 'browse'); // guard returns browse
+  });
+});
+
+// ─── Permission-edit mode ────────────────────────────────────────────────────
+
+/** Get a state in permission-edit mode (via custom preset). */
+function permEditState() {
+  let s = presetSelectState();
+  // Navigate to custom (index 5) and confirm
+  for (let i = 0; i < 5; i++) s = update(s, { action: Action.DOWN });
+  return update(s, { action: Action.CONFIRM }); // → permission-edit
+}
+
+describe('update — permission-edit mode', () => {
+  it('starts with permCursor=0', () => {
+    const s = permEditState();
+    assert.equal(s.mode, 'permission-edit');
+    assert.equal(s.perm.permCursor, 0);
+  });
+
+  it('UP at 0 stays at 0', () => {
+    const s = permEditState();
+    const s2 = update(s, { action: Action.UP });
+    assert.equal(s2.perm.permCursor, 0);
+  });
+
+  it('DOWN increments permCursor', () => {
+    const s = permEditState();
+    const s2 = update(s, { action: Action.DOWN });
+    assert.equal(s2.perm.permCursor, 1);
+  });
+
+  it('DOWN clamps at PERMISSION_NAMES.length - 1', () => {
+    let s = permEditState();
+    for (let i = 0; i < 50; i++) s = update(s, { action: Action.DOWN });
+    assert.equal(s.perm.permCursor, PERMISSION_NAMES.length - 1);
+  });
+
+  it('RIGHT cycles action: allow → ask', () => {
+    const s = permEditState();
+    // permCursor=0 → 'read' which is 'allow' in balanced
+    const s2 = update(s, { action: Action.RIGHT });
+    const agentName = s2.install.agents[0].name;
+    assert.equal(s2.perm.permissions[agentName].read, 'ask');
+  });
+
+  it('LEFT cycles action: allow → deny', () => {
+    const s = permEditState();
+    const s2 = update(s, { action: Action.LEFT });
+    const agentName = s2.install.agents[0].name;
+    assert.equal(s2.perm.permissions[agentName].read, 'deny');
+  });
+
+  it('cycling on bash (object) updates the * pattern', () => {
+    let s = permEditState();
+    // Navigate to bash (index 3)
+    for (let i = 0; i < 3; i++) s = update(s, { action: Action.DOWN });
+    assert.equal(PERMISSION_NAMES[s.perm.permCursor], 'bash');
+    const agentName = s.install.agents[0].name;
+    const bashBefore = s.perm.permissions[agentName].bash;
+    assert.equal(typeof bashBefore, 'object');
+    const s2 = update(s, { action: Action.RIGHT }); // ask → deny on *
+    assert.equal(typeof s2.perm.permissions[agentName].bash, 'object');
+    assert.equal(s2.perm.permissions[agentName].bash['*'], 'deny');
+    // Other patterns preserved
+    assert.equal(s2.perm.permissions[agentName].bash['git status*'], 'allow');
+  });
+
+  it('CONFIRM on bash → bash-edit mode', () => {
+    let s = permEditState();
+    for (let i = 0; i < 3; i++) s = update(s, { action: Action.DOWN });
+    const s2 = update(s, { action: Action.CONFIRM });
+    assert.equal(s2.mode, 'bash-edit');
+    assert.ok(s2.perm.bashPatterns.length > 0, 'patterns should be populated');
+  });
+
+  it('CONFIRM on non-bash → no mode change', () => {
+    const s = permEditState(); // cursor=0 → read
+    const s2 = update(s, { action: Action.CONFIRM });
+    assert.equal(s2.mode, 'permission-edit');
+  });
+
+  it('TAB switches to next agent', () => {
+    // Need multiple agents — select two before confirming
+    let s = makeState();
+    // Toggle selection on first two agents
+    s = update(s, { action: Action.SELECT }); // select ai-engineer
+    s = update(s, { action: Action.DOWN });
+    s = update(s, { action: Action.SELECT }); // select ml-engineer
+    s = update(s, { action: Action.CONFIRM }); // → confirm
+    s = update(s, { action: Action.YES }); // → preset-select
+    for (let i = 0; i < 5; i++) s = update(s, { action: Action.DOWN }); // → custom
+    s = update(s, { action: Action.CONFIRM }); // → permission-edit
+    assert.equal(s.perm.agentIndex, 0);
+    const s2 = update(s, { action: Action.TAB });
+    assert.equal(s2.perm.agentIndex, 1);
+    assert.equal(s2.perm.permCursor, 0, 'permCursor should reset');
+  });
+
+  it('TAB clamps at last agent', () => {
+    const s = permEditState(); // single agent
+    const s2 = update(s, { action: Action.TAB });
+    assert.equal(s2.perm.agentIndex, 0); // only 1 agent, can't go further
+  });
+
+  it('SHIFT_TAB switches to previous agent', () => {
+    const s = permEditState();
+    // Already at 0
+    const s2 = update(s, { action: Action.SHIFT_TAB });
+    assert.equal(s2.perm.agentIndex, 0, 'clamped at 0');
+  });
+
+  it('PERM_APPLY_ALL copies permissions to all agents and sets flash', () => {
+    // Setup with 2 agents
+    let s = makeState();
+    s = update(s, { action: Action.SELECT });
+    s = update(s, { action: Action.DOWN });
+    s = update(s, { action: Action.SELECT });
+    s = update(s, { action: Action.CONFIRM });
+    s = update(s, { action: Action.YES });
+    for (let i = 0; i < 5; i++) s = update(s, { action: Action.DOWN });
+    s = update(s, { action: Action.CONFIRM }); // permission-edit
+
+    // Change first agent's 'read' to 'deny'
+    s = update(s, { action: Action.LEFT }); // allow → deny
+
+    // Apply all
+    s = update(s, { action: Action.PERM_APPLY_ALL });
+    const agents = s.install.agents;
+    assert.equal(s.perm.permissions[agents[0].name].read, 'deny');
+    assert.equal(s.perm.permissions[agents[1].name].read, 'deny');
+    assert.ok(s.flash, 'flash message should be set');
+  });
+
+  it('ESCAPE → installing mode', () => {
+    const s = permEditState();
+    const s2 = update(s, { action: Action.ESCAPE });
+    assert.equal(s2.mode, 'installing');
+  });
+
+  it('null perm guard: returns browse if perm is null', () => {
+    const s = { ...permEditState(), perm: null };
+    const s2 = update(s, { action: Action.DOWN });
+    assert.equal(s2.mode, 'browse');
+  });
+});
+
+// ─── Bash-edit mode ──────────────────────────────────────────────────────────
+
+/** Get a state in bash-edit mode. */
+function bashEditState() {
+  let s = permEditState();
+  // Navigate to bash (index 3) and enter
+  for (let i = 0; i < 3; i++) s = update(s, { action: Action.DOWN });
+  return update(s, { action: Action.CONFIRM }); // → bash-edit
+}
+
+describe('update — bash-edit mode', () => {
+  it('starts with patterns from balanced preset bash', () => {
+    const s = bashEditState();
+    assert.equal(s.mode, 'bash-edit');
+    assert.ok(s.perm.bashPatterns.length >= 2, 'balanced bash has multiple patterns');
+    assert.equal(s.perm.bashCursor, 0);
+  });
+
+  it('UP at 0 stays at 0', () => {
+    const s = bashEditState();
+    const s2 = update(s, { action: Action.UP });
+    assert.equal(s2.perm.bashCursor, 0);
+  });
+
+  it('DOWN increments cursor', () => {
+    const s = bashEditState();
+    const s2 = update(s, { action: Action.DOWN });
+    assert.equal(s2.perm.bashCursor, 1);
+  });
+
+  it('DOWN clamps at last row (patterns + Add)', () => {
+    let s = bashEditState();
+    const totalRows = s.perm.bashPatterns.length + 1; // +1 for "+Add"
+    for (let i = 0; i < totalRows + 5; i++) s = update(s, { action: Action.DOWN });
+    assert.equal(s.perm.bashCursor, totalRows - 1);
+  });
+
+  it('LEFT/RIGHT cycles action on pattern', () => {
+    const s = bashEditState();
+    // cursor=0, first pattern action (balanced: '*' → 'ask')
+    assert.equal(s.perm.bashPatterns[0].action, 'ask');
+    const s2 = update(s, { action: Action.RIGHT }); // ask → deny
+    assert.equal(s2.perm.bashPatterns[0].action, 'deny');
+    const s3 = update(s2, { action: Action.LEFT }); // deny → ask
+    assert.equal(s3.perm.bashPatterns[0].action, 'ask');
+  });
+
+  it('LEFT/RIGHT on +Add row is no-op', () => {
+    let s = bashEditState();
+    // Move to +Add row
+    const addIdx = s.perm.bashPatterns.length;
+    for (let i = 0; i < addIdx; i++) s = update(s, { action: Action.DOWN });
+    assert.equal(s.perm.bashCursor, addIdx);
+    const s2 = update(s, { action: Action.RIGHT });
+    assert.equal(s2.perm.bashCursor, addIdx); // unchanged
+  });
+
+  it('BASH_ADD → bash-input mode', () => {
+    const s = bashEditState();
+    const s2 = update(s, { action: Action.BASH_ADD });
+    assert.equal(s2.mode, 'bash-input');
+    assert.equal(s2.perm.bashEditingNew, true);
+    assert.equal(s2.perm.bashInput, '');
+  });
+
+  it('CONFIRM on +Add row → bash-input', () => {
+    let s = bashEditState();
+    const addIdx = s.perm.bashPatterns.length;
+    for (let i = 0; i < addIdx; i++) s = update(s, { action: Action.DOWN });
+    const s2 = update(s, { action: Action.CONFIRM });
+    assert.equal(s2.mode, 'bash-input');
+  });
+
+  it('CONFIRM on pattern row → no-op', () => {
+    const s = bashEditState(); // cursor=0 → pattern row
+    const s2 = update(s, { action: Action.CONFIRM });
+    assert.equal(s2.mode, 'bash-edit');
+  });
+
+  it('BASH_DELETE removes pattern (not the last)', () => {
+    const s = bashEditState();
+    const countBefore = s.perm.bashPatterns.length;
+    assert.ok(countBefore > 1, 'balanced bash has multiple patterns');
+    const s2 = update(s, { action: Action.BASH_DELETE });
+    assert.equal(s2.perm.bashPatterns.length, countBefore - 1);
+  });
+
+  it('BASH_DELETE on last remaining pattern → flash, not removed', () => {
+    let s = bashEditState();
+    // Delete all but one
+    while (s.perm.bashPatterns.length > 1) {
+      s = update(s, { action: Action.BASH_DELETE });
+    }
+    assert.equal(s.perm.bashPatterns.length, 1);
+    const s2 = update(s, { action: Action.BASH_DELETE });
+    assert.equal(s2.perm.bashPatterns.length, 1, 'last pattern should remain');
+    assert.ok(s2.flash, 'flash message should warn');
+    assert.ok(s2.flash.message.includes('last'), 'flash mentions last pattern');
+  });
+
+  it('BASH_DELETE on +Add row → no-op', () => {
+    let s = bashEditState();
+    const addIdx = s.perm.bashPatterns.length;
+    for (let i = 0; i < addIdx; i++) s = update(s, { action: Action.DOWN });
+    const countBefore = s.perm.bashPatterns.length;
+    const s2 = update(s, { action: Action.BASH_DELETE });
+    assert.equal(s2.perm.bashPatterns.length, countBefore);
+  });
+
+  it('ESCAPE saves patterns back and returns to permission-edit', () => {
+    let s = bashEditState();
+    // Cycle first pattern's action
+    s = update(s, { action: Action.RIGHT }); // ask → deny
+    const s2 = update(s, { action: Action.ESCAPE });
+    assert.equal(s2.mode, 'permission-edit');
+    // Patterns should be saved to agent permissions
+    const agentName = s2.install.agents[s2.perm.agentIndex].name;
+    const bashVal = s2.perm.permissions[agentName].bash;
+    assert.equal(typeof bashVal, 'object', 'multi-pattern bash should be saved as object');
+    assert.equal(bashVal['*'], 'deny', 'changed action should be persisted');
+  });
+
+  it('ESCAPE with single * pattern saves as flat string', () => {
+    let s = bashEditState();
+    // Delete all patterns except first (which is '*')
+    while (s.perm.bashPatterns.length > 1) {
+      // Move cursor to second pattern and delete
+      s = update(s, { action: Action.DOWN });
+      s = update(s, { action: Action.BASH_DELETE });
+      // Reset cursor
+      s = { ...s, perm: { ...s.perm, bashCursor: 0 } };
+    }
+    assert.equal(s.perm.bashPatterns[0].pattern, '*');
+    const s2 = update(s, { action: Action.ESCAPE });
+    const agentName = s2.install.agents[s2.perm.agentIndex].name;
+    const bashVal = s2.perm.permissions[agentName].bash;
+    assert.equal(typeof bashVal, 'string', 'single * pattern should save as flat string');
+  });
+
+  it('null perm guard: returns browse if perm is null', () => {
+    const s = { ...bashEditState(), perm: null };
+    const s2 = update(s, { action: Action.DOWN });
+    assert.equal(s2.mode, 'browse');
+  });
+});
+
+// ─── Bash-input mode ─────────────────────────────────────────────────────────
+
+/** Get a state in bash-input mode. */
+function bashInputState() {
+  const s = bashEditState();
+  return update(s, { action: Action.BASH_ADD }); // → bash-input
+}
+
+describe('update — bash-input mode', () => {
+  it('CHAR appends to bashInput', () => {
+    const s = bashInputState();
+    assert.equal(s.perm.bashInput, '');
+    const s2 = update(s, { action: Action.CHAR, char: 'g' });
+    assert.equal(s2.perm.bashInput, 'g');
+    const s3 = update(s2, { action: Action.CHAR, char: 'i' });
+    assert.equal(s3.perm.bashInput, 'gi');
+  });
+
+  it('BACKSPACE removes last character', () => {
+    let s = bashInputState();
+    s = update(s, { action: Action.CHAR, char: 'a' });
+    s = update(s, { action: Action.CHAR, char: 'b' });
+    s = update(s, { action: Action.BACKSPACE });
+    assert.equal(s.perm.bashInput, 'a');
+  });
+
+  it('BACKSPACE on empty input is safe', () => {
+    const s = bashInputState();
+    const s2 = update(s, { action: Action.BACKSPACE });
+    assert.equal(s2.perm.bashInput, '');
+    assert.equal(s2.mode, 'bash-input');
+  });
+
+  it('CONFIRM with text adds pattern and returns to bash-edit', () => {
+    let s = bashInputState();
+    s = update(s, { action: Action.CHAR, char: 'n' });
+    s = update(s, { action: Action.CHAR, char: 'p' });
+    s = update(s, { action: Action.CHAR, char: 'm' });
+    s = update(s, { action: Action.CHAR, char: ' ' });
+    s = update(s, { action: Action.CHAR, char: '*' });
+    const patternCount = s.perm.bashPatterns.length;
+    s = update(s, { action: Action.CONFIRM });
+    assert.equal(s.mode, 'bash-edit');
+    assert.equal(s.perm.bashPatterns.length, patternCount + 1);
+    const last = s.perm.bashPatterns[s.perm.bashPatterns.length - 1];
+    assert.equal(last.pattern, 'npm *');
+    assert.equal(last.action, 'ask');
+  });
+
+  it('CONFIRM with empty/whitespace input returns to bash-edit without adding', () => {
+    const s = bashInputState();
+    const patternCount = s.perm.bashPatterns.length;
+    const s2 = update(s, { action: Action.CONFIRM });
+    assert.equal(s2.mode, 'bash-edit');
+    assert.equal(s2.perm.bashPatterns.length, patternCount);
+  });
+
+  it('ESCAPE cancels and returns to bash-edit', () => {
+    let s = bashInputState();
+    s = update(s, { action: Action.CHAR, char: 'x' });
+    const patternCount = s.perm.bashPatterns.length;
+    s = update(s, { action: Action.ESCAPE });
+    assert.equal(s.mode, 'bash-edit');
+    assert.equal(s.perm.bashInput, '');
+    assert.equal(s.perm.bashPatterns.length, patternCount, 'no pattern added');
+  });
+
+  it('DELETE_WORD removes last word', () => {
+    let s = bashInputState();
+    s = update(s, { action: Action.CHAR, char: 'g' });
+    s = update(s, { action: Action.CHAR, char: 'i' });
+    s = update(s, { action: Action.CHAR, char: 't' });
+    s = update(s, { action: Action.CHAR, char: ' ' });
+    s = update(s, { action: Action.CHAR, char: 's' });
+    s = update(s, { action: Action.CHAR, char: 't' });
+    assert.equal(s.perm.bashInput, 'git st');
+    s = update(s, { action: Action.DELETE_WORD });
+    assert.equal(s.perm.bashInput, 'git ');
+  });
+
+  it('null perm guard: returns bash-edit if perm is null', () => {
+    const s = { ...bashInputState(), perm: null };
+    const s2 = update(s, { action: Action.CHAR, char: 'x' });
+    assert.equal(s2.mode, 'bash-edit');
+  });
+});
+
+// ─── cycleAction — indirect testing via permission-edit ──────────────────────
+
+describe('cycleAction (indirect via permission-edit)', () => {
+  it('full RIGHT cycle: allow → ask → deny → allow', () => {
+    let s = permEditState(); // cursor=0 → read=allow
+    const agentName = s.install.agents[0].name;
+    assert.equal(s.perm.permissions[agentName].read, 'allow');
+
+    s = update(s, { action: Action.RIGHT }); // allow → ask
+    assert.equal(s.perm.permissions[agentName].read, 'ask');
+
+    s = update(s, { action: Action.RIGHT }); // ask → deny
+    assert.equal(s.perm.permissions[agentName].read, 'deny');
+
+    s = update(s, { action: Action.RIGHT }); // deny → allow
+    assert.equal(s.perm.permissions[agentName].read, 'allow');
+  });
+
+  it('full LEFT cycle: allow → deny → ask → allow', () => {
+    let s = permEditState();
+    const agentName = s.install.agents[0].name;
+
+    s = update(s, { action: Action.LEFT }); // allow → deny
+    assert.equal(s.perm.permissions[agentName].read, 'deny');
+
+    s = update(s, { action: Action.LEFT }); // deny → ask
+    assert.equal(s.perm.permissions[agentName].read, 'ask');
+
+    s = update(s, { action: Action.LEFT }); // ask → allow
+    assert.equal(s.perm.permissions[agentName].read, 'allow');
+  });
+});
+
+// ─── parseKey — Permission Editor modes ──────────────────────────────────────
+
+describe('parseKey — preset-select mode', () => {
+  const mode = 'preset-select';
+
+  it('Arrow Up → UP', () => {
+    assert.deepStrictEqual(parseKey(buf('\x1b[A'), mode), { action: 'UP' });
+  });
+  it('Arrow Down → DOWN', () => {
+    assert.deepStrictEqual(parseKey(buf('\x1b[B'), mode), { action: 'DOWN' });
+  });
+  it('Enter → CONFIRM', () => {
+    assert.deepStrictEqual(parseKey(buf('\r'), mode), { action: 'CONFIRM' });
+  });
+  it('Escape → ESCAPE', () => {
+    assert.deepStrictEqual(parseKey(buf('\x1b'), mode), { action: 'ESCAPE' });
+  });
+  it('random letter → NONE', () => {
+    assert.deepStrictEqual(parseKey(buf('z'), mode), { action: 'NONE' });
+  });
+  it('space → NONE (no SELECT in preset-select)', () => {
+    assert.deepStrictEqual(parseKey(buf(' '), mode), { action: 'NONE' });
+  });
+  it('Ctrl+C → QUIT', () => {
+    assert.deepStrictEqual(parseKey(buf('\x03'), mode), { action: 'QUIT' });
+  });
+});
+
+describe('parseKey — permission-edit mode', () => {
+  const mode = 'permission-edit';
+
+  it('a → PERM_APPLY_ALL', () => {
+    assert.deepStrictEqual(parseKey(buf('a'), mode), { action: 'PERM_APPLY_ALL' });
+  });
+  it('A → PERM_APPLY_ALL', () => {
+    assert.deepStrictEqual(parseKey(buf('A'), mode), { action: 'PERM_APPLY_ALL' });
+  });
+  it('Arrow Up → UP', () => {
+    assert.deepStrictEqual(parseKey(buf('\x1b[A'), mode), { action: 'UP' });
+  });
+  it('Arrow Down → DOWN', () => {
+    assert.deepStrictEqual(parseKey(buf('\x1b[B'), mode), { action: 'DOWN' });
+  });
+  it('Arrow Left → LEFT', () => {
+    assert.deepStrictEqual(parseKey(buf('\x1b[D'), mode), { action: 'LEFT' });
+  });
+  it('Arrow Right → RIGHT', () => {
+    assert.deepStrictEqual(parseKey(buf('\x1b[C'), mode), { action: 'RIGHT' });
+  });
+  it('Enter → CONFIRM', () => {
+    assert.deepStrictEqual(parseKey(buf('\r'), mode), { action: 'CONFIRM' });
+  });
+  it('Escape → ESCAPE', () => {
+    assert.deepStrictEqual(parseKey(buf('\x1b'), mode), { action: 'ESCAPE' });
+  });
+  it('Tab → TAB', () => {
+    assert.deepStrictEqual(parseKey(buf('\x09'), mode), { action: 'TAB' });
+  });
+  it('Shift+Tab → SHIFT_TAB', () => {
+    assert.deepStrictEqual(parseKey(buf('\x1b[Z'), mode), { action: 'SHIFT_TAB' });
+  });
+  it('random letter → NONE', () => {
+    assert.deepStrictEqual(parseKey(buf('z'), mode), { action: 'NONE' });
+  });
+});
+
+describe('parseKey — bash-edit mode', () => {
+  const mode = 'bash-edit';
+
+  it('n → BASH_ADD', () => {
+    assert.deepStrictEqual(parseKey(buf('n'), mode), { action: 'BASH_ADD' });
+  });
+  it('N → BASH_ADD', () => {
+    assert.deepStrictEqual(parseKey(buf('N'), mode), { action: 'BASH_ADD' });
+  });
+  it('d → BASH_DELETE', () => {
+    assert.deepStrictEqual(parseKey(buf('d'), mode), { action: 'BASH_DELETE' });
+  });
+  it('D → BASH_DELETE', () => {
+    assert.deepStrictEqual(parseKey(buf('D'), mode), { action: 'BASH_DELETE' });
+  });
+  it('Arrow Up → UP', () => {
+    assert.deepStrictEqual(parseKey(buf('\x1b[A'), mode), { action: 'UP' });
+  });
+  it('Arrow Down → DOWN', () => {
+    assert.deepStrictEqual(parseKey(buf('\x1b[B'), mode), { action: 'DOWN' });
+  });
+  it('Arrow Left → LEFT', () => {
+    assert.deepStrictEqual(parseKey(buf('\x1b[D'), mode), { action: 'LEFT' });
+  });
+  it('Arrow Right → RIGHT', () => {
+    assert.deepStrictEqual(parseKey(buf('\x1b[C'), mode), { action: 'RIGHT' });
+  });
+  it('Enter → CONFIRM', () => {
+    assert.deepStrictEqual(parseKey(buf('\r'), mode), { action: 'CONFIRM' });
+  });
+  it('Escape → ESCAPE', () => {
+    assert.deepStrictEqual(parseKey(buf('\x1b'), mode), { action: 'ESCAPE' });
+  });
+  it('random letter → NONE', () => {
+    assert.deepStrictEqual(parseKey(buf('z'), mode), { action: 'NONE' });
+  });
+});
+
+describe('parseKey — bash-input mode', () => {
+  const mode = 'bash-input';
+
+  it('printable char → CHAR', () => {
+    assert.deepStrictEqual(parseKey(buf('g'), mode), { action: 'CHAR', char: 'g' });
+  });
+  it('space → CHAR', () => {
+    assert.deepStrictEqual(parseKey(buf(' '), mode), { action: 'CHAR', char: ' ' });
+  });
+  it('digit → CHAR', () => {
+    assert.deepStrictEqual(parseKey(buf('5'), mode), { action: 'CHAR', char: '5' });
+  });
+  it('asterisk → CHAR', () => {
+    assert.deepStrictEqual(parseKey(buf('*'), mode), { action: 'CHAR', char: '*' });
+  });
+  it('Backspace → BACKSPACE', () => {
+    assert.deepStrictEqual(parseKey(buf('\x7f'), mode), { action: 'BACKSPACE' });
+  });
+  it('Enter → CONFIRM', () => {
+    assert.deepStrictEqual(parseKey(buf('\r'), mode), { action: 'CONFIRM' });
+  });
+  it('Escape → ESCAPE', () => {
+    assert.deepStrictEqual(parseKey(buf('\x1b'), mode), { action: 'ESCAPE' });
+  });
+  it('Ctrl+W → DELETE_WORD', () => {
+    assert.deepStrictEqual(parseKey(buf('\x17'), mode), { action: 'DELETE_WORD' });
+  });
+  it('multi-char paste → CHAR', () => {
+    const r = parseKey(buf('npm run'), mode);
+    assert.equal(r.action, 'CHAR');
+    assert.equal(r.char, 'npm run');
+  });
+  it('Ctrl+C → QUIT', () => {
+    assert.deepStrictEqual(parseKey(buf('\x03'), mode), { action: 'QUIT' });
+  });
+});
+
+// ─── Renderer — Permission Editor modes ──────────────────────────────────────
+
+describe('render — preset-select mode', () => {
+  it('contains preset option names', () => {
+    const s = presetSelectState();
+    const output = render(s);
+    for (const name of ['Skip', 'Strict', 'Balanced', 'Permissive', 'Yolo', 'Custom']) {
+      assert.ok(output.includes(name), `should contain "${name}"`);
+    }
+  });
+
+  it('contains Permission Preset title', () => {
+    const output = render(presetSelectState());
+    assert.ok(stripAnsi(output).includes('Permission Preset'), 'title should be present');
+  });
+
+  it('contains footer hints', () => {
+    const output = render(presetSelectState());
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('Navigate'), 'should contain Navigate');
+    assert.ok(plain.includes('Select'), 'should contain Select');
+    assert.ok(plain.includes('Cancel'), 'should contain Cancel');
+  });
+
+  it('shows description for hovered preset', () => {
+    const s = presetSelectState(); // cursor=0 → skip
+    const output = render(s);
+    const desc = getPresetDescription('skip');
+    assert.ok(stripAnsi(output).includes(desc), `should show description: "${desc}"`);
+  });
+});
+
+describe('render — permission-edit mode', () => {
+  it('contains permission names', () => {
+    const s = permEditState();
+    const output = render(s);
+    const plain = stripAnsi(output);
+    // Check a few permission names visible in the default 24-row viewport
+    for (const name of ['read', 'write', 'bash', 'webfetch']) {
+      assert.ok(plain.includes(name), `should contain "${name}"`);
+    }
+  });
+
+  it('contains agent name in title', () => {
+    const s = permEditState();
+    const output = render(s);
+    const agentName = s.install.agents[0].name;
+    assert.ok(stripAnsi(output).includes(agentName), `should contain agent name "${agentName}"`);
+  });
+
+  it('contains footer hints', () => {
+    const output = render(permEditState());
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('Nav'), 'should contain Nav');
+    assert.ok(plain.includes('Cycle'), 'should contain Cycle');
+    assert.ok(plain.includes('Done'), 'should contain Done');
+    assert.ok(plain.includes('Apply all'), 'should contain Apply all');
+  });
+
+  it('shows cursor indicator', () => {
+    const output = render(permEditState());
+    assert.ok(output.includes('▸'), 'should contain cursor indicator ▸');
+  });
+});
+
+describe('render — bash-edit mode', () => {
+  it('contains Add pattern row', () => {
+    const s = bashEditState();
+    const output = render(s);
+    assert.ok(stripAnsi(output).includes('Add pattern'), 'should contain Add pattern');
+  });
+
+  it('contains Bash Patterns title', () => {
+    const output = render(bashEditState());
+    assert.ok(stripAnsi(output).includes('Bash Patterns'), 'should contain title');
+  });
+
+  it('contains footer hints', () => {
+    const output = render(bashEditState());
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('Nav'), 'should contain Nav');
+    assert.ok(plain.includes('New'), 'should contain New');
+    assert.ok(plain.includes('Delete'), 'should contain Delete');
+    assert.ok(plain.includes('Back'), 'should contain Back');
+  });
+
+  it('shows existing patterns', () => {
+    const s = bashEditState();
+    const output = render(s);
+    const plain = stripAnsi(output);
+    // balanced bash has '*' and 'git status*' among others
+    assert.ok(plain.includes('*'), 'should show wildcard pattern');
+  });
+
+  it('shows action labels', () => {
+    const s = bashEditState();
+    const output = render(s);
+    const plain = stripAnsi(output);
+    // Should have at least one action label
+    const hasAction = plain.includes('[ask]') || plain.includes('[allow]') || plain.includes('[deny]');
+    assert.ok(hasAction, 'should show action labels');
+  });
+});
+
+describe('render — bash-input sub-mode', () => {
+  it('shows Pattern: input label', () => {
+    const s = bashInputState();
+    const output = render(s);
+    assert.ok(stripAnsi(output).includes('Pattern:'), 'should show Pattern: label');
+  });
+
+  it('shows Confirm and Cancel hints', () => {
+    const output = render(bashInputState());
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('Confirm'), 'should contain Confirm');
+    assert.ok(plain.includes('Cancel'), 'should contain Cancel');
   });
 });

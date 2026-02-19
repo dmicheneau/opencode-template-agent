@@ -4,6 +4,8 @@
 
 import { Action } from './input.mjs';
 import { detectInstalledSet } from '../lock.mjs';
+import { PRESETS, PRESET_NAMES, PERMISSION_NAMES, getPreset, ACTION_ALLOWLIST } from '../permissions/presets.mjs';
+import { getWarningsForPreset, getWarningsForPermission } from '../permissions/warnings.mjs';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -13,7 +15,7 @@ const MIN_VIEWPORT = 5;
 // ─── Types (JSDoc) ───────────────────────────────────────────────────────────
 
 /**
- * @typedef {'browse'|'search'|'confirm'|'installing'|'pack_detail'|'done'|'uninstall_confirm'|'uninstalling'|'quit'} TuiMode
+ * @typedef {'browse'|'search'|'confirm'|'installing'|'pack_detail'|'done'|'uninstall_confirm'|'uninstalling'|'quit'|'preset-select'|'permission-edit'|'bash-edit'|'bash-input'} TuiMode
  */
 
 /**
@@ -40,6 +42,21 @@ const MIN_VIEWPORT = 5;
  * @property {{ message: string, ts: number }|null} flash
  * @property {{ type: string, label?: string, count: number }|null} confirmContext
  * @property {{ agent: AgentEntry, name: string }|null} uninstallTarget
+ * @property {PermState|null} perm
+ */
+
+/**
+ * @typedef {Object} PermState
+ * @property {number} presetCursor         — cursor in preset list
+ * @property {string[]} presetOptions      — ['skip','strict','balanced','permissive','yolo','custom']
+ * @property {number} agentIndex           — which agent we're editing (index into install.agents)
+ * @property {number} permCursor           — cursor in permission list
+ * @property {Record<string, Record<string, string|Record<string,string>>>} permissions — { agentName: { perm: action } }
+ * @property {string[]} bashPatterns       — current patterns being edited
+ * @property {number} bashCursor           — cursor in pattern list (includes +Add row)
+ * @property {boolean} bashEditingNew      — adding a new pattern
+ * @property {string} bashInput            — current pattern input text
+ * @property {string|null} selectedPreset  — name of the selected preset (for display)
  */
 
 // ─── Exports ─────────────────────────────────────────────────────────────────
@@ -95,6 +112,7 @@ export function createInitialState(manifest, terminal) {
     flash: null,
     confirmContext: null,
     uninstallTarget: null,
+    perm: null,
     terminal,
     manifest,
     allAgents,
@@ -118,6 +136,10 @@ export function update(state, parsed) {
       return updateDone(state, parsed);
     case 'uninstall_confirm': return updateUninstallConfirm(state, parsed);
     case 'uninstalling':      return state;
+    case 'preset-select':     return updatePresetSelect(state, parsed);
+    case 'permission-edit':   return updatePermissionEdit(state, parsed);
+    case 'bash-edit':         return updateBashEdit(state, parsed);
+    case 'bash-input':        return updateBashInput(state, parsed);
     case 'quit':        return state;
     default:            return state;
   }
@@ -237,11 +259,7 @@ function updateConfirm(state, { action }) {
     case Action.YES:
     case Action.CONFIRM: {
       const agents = state.install?.agents || [];
-      return {
-        ...state,
-        mode: 'installing',
-        install: { agents, progress: 0, current: 0, results: [], error: null, doneCursor: 0, doneScrollOffset: 0, forceSelection: new Set() },
-      };
+      return enterPresetSelect(state, agents);
     }
     case Action.NO:
     case Action.ESCAPE:
@@ -419,6 +437,382 @@ function updateUninstallConfirm(state, { action }) {
     case Action.NO:
     case Action.ESCAPE:
       return { ...state, mode: 'browse', uninstallTarget: null };
+    default:
+      return state;
+  }
+}
+
+// ─── Permission Editor: State Factory ────────────────────────────────────────
+
+/** @type {readonly string[]} Preset options shown in the selector. */
+const PRESET_OPTIONS = Object.freeze(['skip', 'strict', 'balanced', 'permissive', 'yolo', 'custom']);
+
+/** Descriptions for each preset option (shown on hover). */
+const PRESET_DESCRIPTIONS = Object.freeze({
+  skip:       'Use built-in permissions, don\'t modify',
+  strict:     'Mostly deny, no bash — safe default',
+  balanced:   'Read/write allowed, bash requires approval',
+  permissive: 'Almost everything allowed',
+  yolo:       'Everything allowed — no restrictions',
+  custom:     'Fine-tune each permission per agent',
+});
+
+/**
+ * Get the description for a preset option.
+ * @param {string} name
+ * @returns {string}
+ */
+export function getPresetDescription(name) {
+  return PRESET_DESCRIPTIONS[name] || '';
+}
+
+/**
+ * Create the initial perm sub-state for the permission editor.
+ * @param {AgentEntry[]} agents — agents being installed
+ * @returns {PermState}
+ */
+export function createPermState(agents) {
+  const permissions = {};
+  for (const a of agents) {
+    permissions[a.name] = getPreset('balanced');
+  }
+  return {
+    presetCursor: 0,
+    presetOptions: [...PRESET_OPTIONS],
+    agentIndex: 0,
+    permCursor: 0,
+    permissions,
+    bashPatterns: [],
+    bashCursor: 0,
+    bashEditingNew: false,
+    bashInput: '',
+    selectedPreset: null,
+  };
+}
+
+/**
+ * Enter the preset-select mode. Call this after confirm to show the preset picker.
+ * @param {TuiState} state
+ * @param {AgentEntry[]} agents — agents to configure permissions for
+ * @returns {TuiState}
+ */
+export function enterPresetSelect(state, agents) {
+  return {
+    ...state,
+    mode: 'preset-select',
+    perm: createPermState(agents),
+  };
+}
+
+// ─── Permission Editor: Reducers ─────────────────────────────────────────────
+
+/** @param {TuiState} state @param {{ action: string }} parsed */
+function updatePresetSelect(state, { action }) {
+  if (!state.perm) return { ...state, mode: 'browse' };
+  const opts = state.perm.presetOptions;
+
+  switch (action) {
+    case Action.UP: {
+      const cursor = Math.max(0, state.perm.presetCursor - 1);
+      return { ...state, perm: { ...state.perm, presetCursor: cursor } };
+    }
+    case Action.DOWN: {
+      const cursor = Math.min(opts.length - 1, state.perm.presetCursor + 1);
+      return { ...state, perm: { ...state.perm, presetCursor: cursor } };
+    }
+    case Action.CONFIRM: {
+      const selected = opts[state.perm.presetCursor];
+      if (selected === 'skip') {
+        // Skip — clear perm state, proceed to installing
+        return {
+          ...state,
+          mode: 'installing',
+          perm: null,
+          install: { ...state.install, progress: 0, current: 0, results: [], error: null, doneCursor: 0, doneScrollOffset: 0, forceSelection: new Set() },
+        };
+      }
+      if (selected === 'custom') {
+        // Enter per-agent permission editor
+        return {
+          ...state,
+          mode: 'permission-edit',
+          perm: { ...state.perm, selectedPreset: 'custom', agentIndex: 0, permCursor: 0 },
+        };
+      }
+      // Apply a named preset to all agents
+      const preset = getPreset(selected);
+      const permissions = {};
+      const agents = state.install?.agents || [];
+      for (const a of agents) {
+        permissions[a.name] = { ...preset };
+      }
+      // Go straight to installing with the preset applied
+      return {
+        ...state,
+        mode: 'installing',
+        perm: { ...state.perm, permissions, selectedPreset: selected },
+        install: { ...state.install, progress: 0, current: 0, results: [], error: null, doneCursor: 0, doneScrollOffset: 0, forceSelection: new Set() },
+      };
+    }
+    case Action.ESCAPE: {
+      // Cancel — go back to confirm
+      return { ...state, mode: 'confirm', perm: null };
+    }
+    default:
+      return state;
+  }
+}
+
+/**
+ * Cycle a permission action: allow → ask → deny → allow.
+ * @param {string} current
+ * @param {number} direction — +1 for right, -1 for left
+ * @returns {string}
+ */
+function cycleAction(current, direction) {
+  const idx = ACTION_ALLOWLIST.indexOf(current);
+  if (idx < 0) return 'ask';
+  const next = (idx + direction + ACTION_ALLOWLIST.length) % ACTION_ALLOWLIST.length;
+  return ACTION_ALLOWLIST[next];
+}
+
+/**
+ * Get the flat action string for a permission value.
+ * For pattern-based perms (bash, task), returns the '*' pattern action or 'ask'.
+ * @param {string|Record<string,string>} value
+ * @returns {string}
+ */
+function flatAction(value) {
+  if (typeof value === 'string') return value;
+  if (typeof value === 'object' && value !== null) return value['*'] || 'ask';
+  return 'ask';
+}
+
+/** @param {TuiState} state @param {{ action: string }} parsed */
+function updatePermissionEdit(state, { action }) {
+  if (!state.perm) return { ...state, mode: 'browse' };
+  const agents = state.install?.agents || [];
+  if (agents.length === 0) return { ...state, mode: 'browse' };
+
+  const agent = agents[state.perm.agentIndex];
+  if (!agent) return { ...state, mode: 'browse' };
+  const agentPerms = state.perm.permissions[agent.name] || {};
+
+  switch (action) {
+    case Action.UP: {
+      const cursor = Math.max(0, state.perm.permCursor - 1);
+      return { ...state, perm: { ...state.perm, permCursor: cursor } };
+    }
+    case Action.DOWN: {
+      const cursor = Math.min(PERMISSION_NAMES.length - 1, state.perm.permCursor + 1);
+      return { ...state, perm: { ...state.perm, permCursor: cursor } };
+    }
+    case Action.LEFT:
+    case Action.RIGHT: {
+      const permName = PERMISSION_NAMES[state.perm.permCursor];
+      if (!permName) return state;
+      const currentVal = agentPerms[permName] || 'ask';
+      const direction = action === Action.RIGHT ? 1 : -1;
+      const newAction = cycleAction(flatAction(currentVal), direction);
+      // For bash permission, preserve pattern structure if cycling
+      let newVal = newAction;
+      if (permName === 'bash' && typeof currentVal === 'object') {
+        // Replace the '*' wildcard action, keep specific patterns
+        newVal = { ...currentVal, '*': newAction };
+      }
+      const newPerms = { ...agentPerms, [permName]: newVal };
+      return {
+        ...state,
+        perm: {
+          ...state.perm,
+          permissions: { ...state.perm.permissions, [agent.name]: newPerms },
+        },
+      };
+    }
+    case Action.CONFIRM: {
+      // Enter on bash permission → bash-edit mode
+      const permName = PERMISSION_NAMES[state.perm.permCursor];
+      if (permName === 'bash') {
+        const bashVal = agentPerms.bash;
+        // Convert to pattern array
+        let patterns;
+        if (typeof bashVal === 'object' && bashVal !== null) {
+          patterns = Object.entries(bashVal).map(([pattern, act]) => ({ pattern, action: act }));
+        } else {
+          patterns = [{ pattern: '*', action: typeof bashVal === 'string' ? bashVal : 'ask' }];
+        }
+        return {
+          ...state,
+          mode: 'bash-edit',
+          perm: {
+            ...state.perm,
+            bashPatterns: patterns,
+            bashCursor: 0,
+            bashEditingNew: false,
+            bashInput: '',
+          },
+        };
+      }
+      return state;
+    }
+    case Action.TAB: {
+      // Next agent
+      const nextIdx = Math.min(agents.length - 1, state.perm.agentIndex + 1);
+      return { ...state, perm: { ...state.perm, agentIndex: nextIdx, permCursor: 0 } };
+    }
+    case Action.SHIFT_TAB: {
+      // Previous agent
+      const prevIdx = Math.max(0, state.perm.agentIndex - 1);
+      return { ...state, perm: { ...state.perm, agentIndex: prevIdx, permCursor: 0 } };
+    }
+    case Action.PERM_APPLY_ALL: {
+      // Copy current agent's permissions to all agents
+      const currentPerms = { ...agentPerms };
+      const permissions = {};
+      for (const a of agents) {
+        permissions[a.name] = { ...currentPerms };
+      }
+      return {
+        ...state,
+        perm: { ...state.perm, permissions },
+        flash: { message: `Applied ${agent.name}'s permissions to all agents`, ts: Date.now() },
+      };
+    }
+    case Action.ESCAPE: {
+      // Done editing — proceed to installing
+      return {
+        ...state,
+        mode: 'installing',
+        install: { ...state.install, progress: 0, current: 0, results: [], error: null, doneCursor: 0, doneScrollOffset: 0, forceSelection: new Set() },
+      };
+    }
+    default:
+      return state;
+  }
+}
+
+/** @param {TuiState} state @param {{ action: string }} parsed */
+function updateBashEdit(state, { action }) {
+  if (!state.perm) return { ...state, mode: 'browse' };
+  const patterns = state.perm.bashPatterns;
+  // Total rows = patterns + 1 (the "+ Add pattern" row)
+  const totalRows = patterns.length + 1;
+
+  switch (action) {
+    case Action.UP: {
+      const cursor = Math.max(0, state.perm.bashCursor - 1);
+      return { ...state, perm: { ...state.perm, bashCursor: cursor } };
+    }
+    case Action.DOWN: {
+      const cursor = Math.min(totalRows - 1, state.perm.bashCursor + 1);
+      return { ...state, perm: { ...state.perm, bashCursor: cursor } };
+    }
+    case Action.LEFT:
+    case Action.RIGHT: {
+      // Cycle action on current pattern
+      const idx = state.perm.bashCursor;
+      if (idx >= patterns.length) return state; // on "+ Add" row
+      const pat = patterns[idx];
+      const direction = action === Action.RIGHT ? 1 : -1;
+      const newAction = cycleAction(pat.action, direction);
+      const newPatterns = [...patterns];
+      newPatterns[idx] = { ...pat, action: newAction };
+      return { ...state, perm: { ...state.perm, bashPatterns: newPatterns } };
+    }
+    case Action.BASH_ADD:
+    case Action.CONFIRM: {
+      // 'n' or Enter on "+ Add" row → start typing a new pattern
+      if (action === Action.CONFIRM && state.perm.bashCursor < patterns.length) return state;
+      return {
+        ...state,
+        mode: 'bash-input',
+        perm: { ...state.perm, bashEditingNew: true, bashInput: '' },
+      };
+    }
+    case Action.BASH_DELETE: {
+      // Delete pattern under cursor
+      const idx = state.perm.bashCursor;
+      if (idx >= patterns.length) return state;
+      // Don't allow deleting the last pattern
+      if (patterns.length <= 1) {
+        return { ...state, flash: { message: 'Cannot delete last pattern', ts: Date.now() } };
+      }
+      const newPatterns = patterns.filter((_, i) => i !== idx);
+      const newCursor = Math.min(idx, newPatterns.length);
+      return { ...state, perm: { ...state.perm, bashPatterns: newPatterns, bashCursor: newCursor } };
+    }
+    case Action.ESCAPE: {
+      // Save patterns back to agent permissions and return to permission-edit
+      const agents = state.install?.agents || [];
+      const agent = agents[state.perm.agentIndex];
+      if (!agent) return { ...state, mode: 'permission-edit' };
+      // Convert patterns array back to object
+      const bashObj = {};
+      for (const p of patterns) {
+        bashObj[p.pattern] = p.action;
+      }
+      const agentPerms = state.perm.permissions[agent.name] || {};
+      const newPerms = { ...agentPerms, bash: patterns.length === 1 && patterns[0].pattern === '*' ? patterns[0].action : bashObj };
+      return {
+        ...state,
+        mode: 'permission-edit',
+        perm: {
+          ...state.perm,
+          permissions: { ...state.perm.permissions, [agent.name]: newPerms },
+          bashPatterns: [],
+          bashCursor: 0,
+          bashEditingNew: false,
+          bashInput: '',
+        },
+      };
+    }
+    default:
+      return state;
+  }
+}
+
+/** @param {TuiState} state @param {{ action: string, char?: string }} parsed */
+function updateBashInput(state, { action, char }) {
+  if (!state.perm) return { ...state, mode: 'bash-edit' };
+
+  switch (action) {
+    case Action.CHAR: {
+      const input = state.perm.bashInput + (char || '');
+      return { ...state, perm: { ...state.perm, bashInput: input } };
+    }
+    case Action.BACKSPACE: {
+      const input = state.perm.bashInput.slice(0, -1);
+      return { ...state, perm: { ...state.perm, bashInput: input } };
+    }
+    case Action.DELETE_WORD: {
+      const q = state.perm.bashInput;
+      const lastSpace = q.trimEnd().lastIndexOf(' ');
+      const input = lastSpace >= 0 ? q.slice(0, lastSpace + 1) : '';
+      return { ...state, perm: { ...state.perm, bashInput: input } };
+    }
+    case Action.CONFIRM: {
+      // Add the new pattern
+      const pattern = state.perm.bashInput.trim();
+      if (!pattern) {
+        return { ...state, mode: 'bash-edit', perm: { ...state.perm, bashEditingNew: false, bashInput: '' } };
+      }
+      const newPatterns = [...state.perm.bashPatterns, { pattern, action: 'ask' }];
+      return {
+        ...state,
+        mode: 'bash-edit',
+        perm: {
+          ...state.perm,
+          bashPatterns: newPatterns,
+          bashCursor: newPatterns.length - 1,
+          bashEditingNew: false,
+          bashInput: '',
+        },
+      };
+    }
+    case Action.ESCAPE: {
+      // Cancel input
+      return { ...state, mode: 'bash-edit', perm: { ...state.perm, bashEditingNew: false, bashInput: '' } };
+    }
     default:
       return state;
   }
@@ -645,6 +1039,7 @@ function resetToBrowse(state) {
     flash: null,
     confirmContext: null,
     uninstallTarget: null,
+    perm: null,
   };
   return refilter(updated);
 }

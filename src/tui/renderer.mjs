@@ -10,7 +10,9 @@ import {
   visibleLength, padEnd, padEndAscii, truncate,
   SPINNER_INTERVAL_MS,
 } from './ansi.mjs';
-import { getViewportHeight } from './state.mjs';
+import { getViewportHeight, getPresetDescription } from './state.mjs';
+import { PERMISSION_NAMES } from '../permissions/presets.mjs';
+import { getWarningsForPreset, getWarningsForPermission } from '../permissions/warnings.mjs';
 
 // ─── Layout Constants ───────────────────────────────────────────────────────
 
@@ -382,6 +384,200 @@ function renderUninstalling(state, out, W) {
   out.push(bdr('', W));
 }
 
+// ─── Empty State ────────────────────────────────────────────────────────
+
+// ─── Preset Selector ─────────────────────────────────────────────────────
+
+function renderPresetSelect(state, out, W) {
+  const perm = state.perm;
+  if (!perm) return;
+  const innerWidth = W - 4;
+  const dialogWidth = Math.min(50, innerWidth - 10);
+  const pad = ' '.repeat(Math.max(0, Math.floor((innerWidth - dialogWidth) / 2)));
+  const dialogInner = dialogWidth - 4;
+  const dialogLine = (c) => {
+    const g = Math.max(0, dialogInner - visibleLength(c));
+    return `${pad}${cyan(BOX.vertical)} ${c}${' '.repeat(g)} ${cyan(BOX.vertical)}`;
+  };
+  const dTop = `${pad}${cyan(BOX.topLeft + BOX.horizontal)} ${boldCyan('Permission Preset')} ${cyan(BOX.horizontal.repeat(Math.max(0, dialogWidth - 22)) + BOX.topRight)}`;
+  const dBot = `${pad}${cyan(BOX.bottomLeft + BOX.horizontal.repeat(Math.max(0, dialogWidth - 2)) + BOX.bottomRight)}`;
+
+  out.push(bdr('', W));
+  out.push(bdr(dTop, W));
+  out.push(bdr(dialogLine(''), W));
+
+  const opts = perm.presetOptions;
+  for (let i = 0; i < opts.length; i++) {
+    const name = opts[i];
+    const cur = i === perm.presetCursor;
+    const radio = cur ? bold(brightCyan('●')) : dim('○');
+    const label = name.charAt(0).toUpperCase() + name.slice(1);
+    const suffix = name === 'yolo' ? ` ${yellow('⚠')}` : name === 'custom' ? dim('...') : '';
+    const styled = cur ? bold(brightWhite(label)) : white(label);
+    out.push(bdr(dialogLine(`  ${radio} ${styled}${suffix}`), W));
+  }
+
+  out.push(bdr(dialogLine(''), W));
+
+  // Info line for currently hovered preset
+  const hoveredName = opts[perm.presetCursor];
+  const desc = getPresetDescription(hoveredName);
+  const warnings = getWarningsForPreset(hoveredName);
+  if (warnings.length > 0 && warnings[0].level === 'critical') {
+    out.push(bdr(dialogLine(`  ${red('⚠')} ${red(desc)}`), W));
+  } else if (warnings.length > 0 && warnings[0].level === 'high') {
+    out.push(bdr(dialogLine(`  ${yellow('⚠')} ${yellow(desc)}`), W));
+  } else {
+    out.push(bdr(dialogLine(`  ${cyan('ℹ')} ${dim(desc)}`), W));
+  }
+
+  out.push(bdr(dBot, W));
+  out.push(bdr('', W));
+  out.push(bdr(`  ${cyan('[↑↓]')} ${white('Navigate')}  ${cyan('[Enter]')} ${white('Select')}  ${cyan('[Esc]')} ${white('Cancel')}`, W));
+}
+
+// ─── Per-Agent Permission Editor ─────────────────────────────────────────
+
+function renderPermissionEdit(state, out, W) {
+  const perm = state.perm;
+  if (!perm) return;
+  const agents = state.install?.agents || [];
+  const agent = agents[perm.agentIndex];
+  if (!agent) return;
+
+  const innerWidth = W - 4;
+  const agentPerms = perm.permissions[agent.name] || {};
+
+  // Title with agent name + agent navigation
+  const navHint = agents.length > 1
+    ? dim(` (${perm.agentIndex + 1}/${agents.length})  Tab/Shift-Tab: switch agent`)
+    : '';
+  out.push(bdr(`  ${bold(brightCyan('Permissions:'))} ${bold(brightWhite(agent.name))}${navHint}`, W));
+  out.push(bdr('', W));
+
+  const colName = 16;
+  const vh = Math.max(5, getViewportHeight(state) - 6);
+
+  // Scroll if needed
+  let scrollOffset = 0;
+  if (PERMISSION_NAMES.length > vh) {
+    scrollOffset = Math.max(0, Math.min(perm.permCursor - Math.floor(vh / 2), PERMISSION_NAMES.length - vh));
+  }
+
+  if (scrollOffset > 0) {
+    out.push(bdr(cyan(`  ↑ ${scrollOffset} more above`), W));
+  }
+
+  const end = Math.min(PERMISSION_NAMES.length, scrollOffset + vh);
+  for (let i = scrollOffset; i < end; i++) {
+    const permName = PERMISSION_NAMES[i];
+    const cur = i === perm.permCursor;
+    const rawVal = agentPerms[permName] || 'ask';
+    const action = typeof rawVal === 'string' ? rawVal : (rawVal['*'] || 'ask');
+
+    // Color the action badge
+    const actionStyled = action === 'allow' ? bold(green(`[${action}]`))
+      : action === 'deny' ? bold(red(`[${action}]`))
+      : bold(yellow(`[${action}]`));
+
+    const ptr = cur ? bold(brightCyan('▸')) : ' ';
+    const nameStyled = cur ? bold(brightWhite(padEnd(permName, colName))) : white(padEnd(permName, colName));
+    const arrows = cur ? dim(' ←→') : '';
+    const bashHint = permName === 'bash' && typeof rawVal === 'object' ? dim(' → (patterns...)') : '';
+
+    const row = `  ${ptr} ${nameStyled}${actionStyled}${arrows}${bashHint}`;
+    out.push(bdr(row, W, cur ? bgRow : undefined));
+
+    // Inline warning for risky values
+    if (cur) {
+      const warnings = getWarningsForPermission(permName, action);
+      if (warnings.length > 0) {
+        const w = warnings[0];
+        const warnIcon = w.level === 'critical' || w.level === 'high' ? red('⚠') : yellow('⚠');
+        const warnText = w.level === 'critical' || w.level === 'high' ? red(w.message) : yellow(w.message);
+        out.push(bdr(`     ${warnIcon} ${warnText}`, W));
+      }
+    }
+  }
+
+  const remaining = PERMISSION_NAMES.length - end;
+  if (remaining > 0) {
+    out.push(bdr(cyan(`  ↓ ${remaining} more below`), W));
+  }
+
+  // Flash message
+  if (state.flash) {
+    out.push(bdr('', W));
+    out.push(bdr(`  ${green('✓')} ${green(state.flash.message)}`, W));
+  }
+
+  out.push(bdr('', W));
+  out.push(bdr(`  ${cyan('[↑↓]')} ${white('Nav')}  ${cyan('[←→]')} ${white('Cycle')}  ${cyan('[Enter]')} ${white('Bash patterns')}  ${cyan('[a]')} ${white('Apply all')}  ${cyan('[Esc]')} ${white('Done')}`, W));
+}
+
+// ─── Bash Pattern Sub-Editor ─────────────────────────────────────────────
+
+function renderBashEdit(state, out, W) {
+  const perm = state.perm;
+  if (!perm) return;
+  const agents = state.install?.agents || [];
+  const agent = agents[perm.agentIndex];
+  if (!agent) return;
+
+  const innerWidth = W - 4;
+  const dialogWidth = Math.min(55, innerWidth - 6);
+  const pad = ' '.repeat(Math.max(0, Math.floor((innerWidth - dialogWidth) / 2)));
+  const dialogInner = dialogWidth - 4;
+  const dialogLine = (c) => {
+    const g = Math.max(0, dialogInner - visibleLength(c));
+    return `${pad}${cyan(BOX.vertical)} ${c}${' '.repeat(g)} ${cyan(BOX.vertical)}`;
+  };
+  const dTop = `${pad}${cyan(BOX.topLeft + BOX.horizontal)} ${boldCyan('Bash Patterns:')} ${bold(brightWhite(agent.name))} ${cyan(BOX.horizontal.repeat(Math.max(0, dialogWidth - 20 - visibleLength(agent.name))) + BOX.topRight)}`;
+  const dBot = `${pad}${cyan(BOX.bottomLeft + BOX.horizontal.repeat(Math.max(0, dialogWidth - 2)) + BOX.bottomRight)}`;
+
+  out.push(bdr('', W));
+  out.push(bdr(dTop, W));
+  out.push(bdr(dialogLine(''), W));
+
+  const patterns = perm.bashPatterns;
+  for (let i = 0; i < patterns.length; i++) {
+    const p = patterns[i];
+    const cur = i === perm.bashCursor;
+    const ptr = cur ? bold(brightCyan('▸')) : ' ';
+    const actionStyled = p.action === 'allow' ? bold(green(`[${p.action}]`))
+      : p.action === 'deny' ? bold(red(`[${p.action}]`))
+      : bold(yellow(`[${p.action}]`));
+    const patText = cur ? bold(brightWhite(`"${p.pattern}"`)) : white(`"${p.pattern}"`);
+    out.push(bdr(dialogLine(`  ${ptr} ${padEnd(patText, Math.max(20, dialogInner - 16))}${actionStyled}`), W));
+  }
+
+  // "+ Add pattern" row
+  const addCur = perm.bashCursor === patterns.length;
+  if (state.mode === 'bash-input' && perm.bashEditingNew) {
+    out.push(bdr(dialogLine(`  ${bold(brightCyan('▸'))} ${cyan('Pattern:')} ${white(perm.bashInput)}${cyan('█')}`), W));
+  } else {
+    const ptr = addCur ? bold(brightCyan('▸')) : ' ';
+    const addText = addCur ? bold(brightCyan('+ Add pattern')) : dim('+ Add pattern');
+    out.push(bdr(dialogLine(`  ${ptr} ${addText}`), W));
+  }
+
+  // Flash message
+  if (state.flash) {
+    out.push(bdr(dialogLine(''), W));
+    out.push(bdr(dialogLine(`  ${yellow('⚠')} ${yellow(state.flash.message)}`), W));
+  }
+
+  out.push(bdr(dialogLine(''), W));
+  out.push(bdr(dBot, W));
+  out.push(bdr('', W));
+
+  if (state.mode === 'bash-input') {
+    out.push(bdr(`  ${cyan('[Enter]')} ${white('Confirm')}  ${cyan('[Esc]')} ${white('Cancel')}`, W));
+  } else {
+    out.push(bdr(`  ${cyan('[↑↓]')} ${white('Nav')}  ${cyan('[←→]')} ${white('Cycle action')}  ${cyan('[n]')} ${white('New')}  ${cyan('[d]')} ${white('Delete')}  ${cyan('[Esc]')} ${white('Back')}`, W));
+  }
+}
+
 // ─── Empty State ────────────────────────────────────────────────────────────
 
 function renderEmpty(state, out, W, vh) {
@@ -464,6 +660,10 @@ export function render(state) {
     case 'done':                  renderDone(state, out, cols);      break;
     case 'uninstall_confirm':     renderUninstallConfirm(state, out, cols); break;
     case 'uninstalling':          renderUninstalling(state, out, cols); break;
+    case 'preset-select':         renderPresetSelect(state, out, cols); break;
+    case 'permission-edit':       renderPermissionEdit(state, out, cols); break;
+    case 'bash-edit':
+    case 'bash-input':            renderBashEdit(state, out, cols); break;
     default: break;
   }
 

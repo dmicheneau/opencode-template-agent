@@ -41,6 +41,11 @@ export const Action = Object.freeze({
   // Uninstall
   UNINSTALL:   'UNINSTALL',
 
+  // Permission editor
+  PERM_APPLY_ALL: 'PERM_APPLY_ALL',
+  BASH_ADD:       'BASH_ADD',
+  BASH_DELETE:    'BASH_DELETE',
+
   // Fallback
   NONE:        'NONE',
 });
@@ -90,6 +95,9 @@ const R_YES        = Object.freeze({ action: Action.YES });
 const R_NO         = Object.freeze({ action: Action.NO });
 const R_FORCE      = Object.freeze({ action: Action.FORCE });
 const R_UNINSTALL  = Object.freeze({ action: Action.UNINSTALL });
+const R_PERM_APPLY = Object.freeze({ action: Action.PERM_APPLY_ALL });
+const R_BASH_ADD   = Object.freeze({ action: Action.BASH_ADD });
+const R_BASH_DEL   = Object.freeze({ action: Action.BASH_DELETE });
 const R_NONE       = Object.freeze({ action: Action.NONE });
 
 // Pre-allocated results for frequent ANSI escape sequences (avoid allocation per keypress)
@@ -180,6 +188,42 @@ export function parseKey(data, mode) {
     if (raw === 'q' || raw === 'Q') return R_QUIT;
     if (raw === ENTER) return R_CONFIRM;
     return R_NONE;                     // ignore unknown keys
+  }
+
+  // ── Preset-select mode ──────────────────────────────────────────────
+  if (mode === 'preset-select') {
+    // Only navigation + confirm + escape. No character input.
+    return R_NONE;
+  }
+
+  // ── Permission-edit mode ────────────────────────────────────────────
+  if (mode === 'permission-edit') {
+    if (raw === 'a' || raw === 'A') return R_PERM_APPLY;
+    return R_NONE;
+  }
+
+  // ── Bash-edit mode ──────────────────────────────────────────────────
+  if (mode === 'bash-edit') {
+    if (raw === 'n' || raw === 'N') return R_BASH_ADD;
+    if (raw === 'd' || raw === 'D') return R_BASH_DEL;
+    return R_NONE;
+  }
+
+  // ── Bash-input sub-mode (typing a new pattern) ─────────────────────
+  if (mode === 'bash-input') {
+    // Same as search: single printable char → CHAR
+    if (raw.length === 1 && raw.charCodeAt(0) >= 0x20) {
+      return { action: Action.CHAR, char: raw };
+    }
+    if (raw.length > 1) {
+      let printable = true;
+      for (let i = 0; i < raw.length; i++) {
+        const c = raw.charCodeAt(i);
+        if (c < 0x20 || c > 0x7E) { printable = false; break; }
+      }
+      if (printable) return { action: Action.CHAR, char: raw };
+    }
+    return R_NONE;
   }
 
   if (raw === SPACE) return R_SELECT;
