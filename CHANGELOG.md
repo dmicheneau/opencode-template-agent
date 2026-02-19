@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [5.0.0] - 2026-02-19
+
+### Added
+- **S1 Anti-Flicker**: DEC 2026 synchronized output, line-diffing flush (only repaints changed lines), microtask-coalesced redraw, shared `SPINNER_INTERVAL_MS` constant
+- **S5 Pack Fix**: auto-select uninstalled agents when pressing Enter in pack detail with no selection
+- **S5 Flash Messages**: yellow ⚠ flash messages with 3-second auto-dismiss, pack context in confirm dialog
+- **S3 Hash-Based Lock**: `lock.mjs` module with SHA-256 tracking, `.manifest-lock.json` lock file, 4 agent states (`installed`/`outdated`/`new`/`unknown`), `bootstrapLock()` migration for existing installations
+- 473 tests (296 JS + 177 Python), all passing
+
+### Changed
+- `screen.mjs` flush() now uses line diffing + SYNC_START/SYNC_END markers instead of full repaints
+- Spinner interval 80ms → 120ms via shared constant
+- `detectInstalled()` now delegates to lock-based `detectInstalledSet()`
+- `installer.mjs` records SHA-256 in lock file on every install
+
 ## [4.0.0] - 2026-02-18
 
 ### Added

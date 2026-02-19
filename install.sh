@@ -26,7 +26,7 @@ set -euo pipefail
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
-readonly VERSION="4.0.0"
+readonly VERSION="5.0.0"
 readonly REPO_URL="https://github.com/dmicheneau/opencode-template-agent.git"
 readonly REPO_INSTALL_DIR="${HOME}/.local/share/opencode-agents"
 readonly LOG_FILE="${REPO_INSTALL_DIR}/install.log"

@@ -1,6 +1,6 @@
 {
   "name": "opencode-agents",
-  "version": "4.0.0",
+  "version": "5.0.0",
   "description": "Curated AI agent registry for OpenCode — install expert agents in seconds",
   "license": "MIT",
   "author": "dmicheneau",
@@ -32,7 +32,7 @@
     "code-templates"
   ],
   "scripts": {
-    "test": "node --test tests/cli.test.mjs tests/tui.test.mjs",
+    "test": "node --test tests/cli.test.mjs tests/tui.test.mjs tests/lock.test.mjs",
     "lint": "node --check bin/cli.mjs src/*.mjs src/tui/*.mjs",
     "prepublishOnly": "npm test"
   }
