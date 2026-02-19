@@ -15,7 +15,7 @@ const MIN_VIEWPORT = 5;
 // ─── Types (JSDoc) ───────────────────────────────────────────────────────────
 
 /**
- * @typedef {'browse'|'search'|'confirm'|'installing'|'pack_detail'|'done'|'quit'} TuiMode
+ * @typedef {'browse'|'search'|'confirm'|'installing'|'pack_detail'|'done'|'uninstall_confirm'|'uninstalling'|'quit'} TuiMode
  */
 
 /**
@@ -41,6 +41,7 @@ const MIN_VIEWPORT = 5;
  * @property {AgentEntry[]} allAgents
  * @property {{ message: string, ts: number }|null} flash
  * @property {{ type: string, label?: string, count: number }|null} confirmContext
+ * @property {{ agent: AgentEntry, name: string }|null} uninstallTarget
  */
 
 // ─── Exports ─────────────────────────────────────────────────────────────────
@@ -95,6 +96,7 @@ export function createInitialState(manifest, terminal) {
     install: null,
     flash: null,
     confirmContext: null,
+    uninstallTarget: null,
     terminal,
     manifest,
     allAgents,
@@ -116,6 +118,8 @@ export function update(state, parsed) {
     case 'installing':  return state;
     case 'done':
       return updateDone(state, parsed);
+    case 'uninstall_confirm': return updateUninstallConfirm(state, parsed);
+    case 'uninstalling':      return state;
     case 'quit':        return state;
     default:            return state;
   }
@@ -181,6 +185,18 @@ function updateBrowse(state, { action }) {
     case Action.SELECT_ALL: return toggleSelectAll(state);
     case Action.CONFIRM:   return handleConfirm(state);
     case Action.SEARCH:    return { ...state, mode: 'search', search: { active: true, query: '' } };
+    case Action.UNINSTALL: {
+      const item = state.list.items[state.list.cursor];
+      if (!item?.name) return state;
+      if (!state.installed?.has(item.name)) {
+        return { ...state, flash: { message: `"${item.name}" is not installed`, ts: Date.now() } };
+      }
+      return {
+        ...state,
+        mode: 'uninstall_confirm',
+        uninstallTarget: { agent: item, name: item.name },
+      };
+    }
     case Action.QUIT:
     case Action.ESCAPE:    return { ...state, mode: 'quit' };
     default:               return state;
@@ -395,6 +411,20 @@ function updateDone(state, { action }) {
   }
 }
 
+/** @param {TuiState} state @param {{ action: string }} parsed */
+function updateUninstallConfirm(state, { action }) {
+  switch (action) {
+    case Action.YES:
+    case Action.CONFIRM:
+      return { ...state, mode: 'uninstalling' };
+    case Action.NO:
+    case Action.ESCAPE:
+      return { ...state, mode: 'browse', uninstallTarget: null };
+    default:
+      return state;
+  }
+}
+
 /**
  * Adjust scrollOffset for pack detail so cursor stays within the viewport.
  * @param {TuiState} state
@@ -595,6 +625,7 @@ function resetToBrowse(state) {
     search: { active: false, query: '' },
     flash: null,
     confirmContext: null,
+    uninstallTarget: null,
   };
   return refilter(updated);
 }

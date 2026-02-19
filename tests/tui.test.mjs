@@ -1,10 +1,15 @@
-import { describe, it } from 'node:test';
+import { describe, it, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
+import { mkdirSync, mkdtempSync, rmSync, existsSync, writeFileSync, symlinkSync } from 'node:fs';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 
 import { parseKey, Action } from '../src/tui/input.mjs';
 import { createInitialState, update, computeFilteredList, getViewportHeight } from '../src/tui/state.mjs';
 import { visibleLength, truncate, padEnd, charWidth, stripAnsi, bgRow, catColor, tabColor } from '../src/tui/ansi.mjs';
 import { render } from '../src/tui/renderer.mjs';
+import { uninstallAgent, uninstallAgents } from '../src/installer.mjs';
+import { recordInstall, readLock } from '../src/lock.mjs';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -1621,5 +1626,336 @@ describe('tabColor', () => {
     const packs = tabColor('packs')('x');
     const mobile = tabColor('mobile')('x');
     assert.notEqual(packs, mobile, 'packs and mobile tabs must not share the same color');
+  });
+});
+
+// ─── parseKey — UNINSTALL action ─────────────────────────────────────────────
+
+describe('parseKey — UNINSTALL action', () => {
+  it('x in browse mode → UNINSTALL', () => {
+    assert.deepStrictEqual(parseKey(buf('x'), 'browse'), { action: 'UNINSTALL' });
+  });
+
+  it('X in browse mode → UNINSTALL', () => {
+    assert.deepStrictEqual(parseKey(buf('X'), 'browse'), { action: 'UNINSTALL' });
+  });
+
+  it('x in search mode → CHAR with char "x" (not UNINSTALL)', () => {
+    const result = parseKey(buf('x'), 'search');
+    assert.equal(result.action, 'CHAR');
+    assert.equal(result.char, 'x');
+  });
+
+  it('x in confirm mode → NONE', () => {
+    assert.deepStrictEqual(parseKey(buf('x'), 'confirm'), { action: 'NONE' });
+  });
+
+  it('x in uninstall_confirm mode → NONE', () => {
+    assert.deepStrictEqual(parseKey(buf('x'), 'uninstall_confirm'), { action: 'NONE' });
+  });
+
+  it('x in done mode → NONE', () => {
+    assert.deepStrictEqual(parseKey(buf('x'), 'done'), { action: 'NONE' });
+  });
+});
+
+// ─── state.mjs — update (uninstall_confirm mode) ────────────────────────────
+
+describe('update — uninstall_confirm mode', () => {
+  it('UNINSTALL in browse with installed agent → transitions to uninstall_confirm', () => {
+    let state = makeState();
+    // Manually mark the first agent as installed
+    state = { ...state, installed: new Set([state.list.items[0].name]) };
+    const s1 = update(state, { action: Action.UNINSTALL });
+    assert.equal(s1.mode, 'uninstall_confirm');
+    assert.ok(s1.uninstallTarget);
+    assert.equal(s1.uninstallTarget.name, state.list.items[0].name);
+    assert.equal(s1.uninstallTarget.agent.name, state.list.items[0].name);
+  });
+
+  it('UNINSTALL in browse with NOT installed agent → stays in browse, shows flash', () => {
+    let state = makeState();
+    // No agents installed
+    state = { ...state, installed: new Set() };
+    const s1 = update(state, { action: Action.UNINSTALL });
+    assert.equal(s1.mode, 'browse');
+    assert.ok(s1.flash);
+    assert.ok(s1.flash.message.includes('not installed'));
+  });
+
+  it('UNINSTALL in browse with empty list → stays in browse', () => {
+    let state = makeState();
+    // Empty list: switch to a category tab with no agents, or manually clear
+    state = { ...state, list: { items: [], cursor: 0, scrollOffset: 0 } };
+    const s1 = update(state, { action: Action.UNINSTALL });
+    assert.equal(s1.mode, 'browse');
+  });
+
+  it('YES in uninstall_confirm → transitions to uninstalling', () => {
+    let state = makeState();
+    state = { ...state, installed: new Set([state.list.items[0].name]) };
+    state = update(state, { action: Action.UNINSTALL });
+    assert.equal(state.mode, 'uninstall_confirm');
+    const s1 = update(state, { action: Action.YES });
+    assert.equal(s1.mode, 'uninstalling');
+  });
+
+  it('NO in uninstall_confirm → transitions back to browse, clears uninstallTarget', () => {
+    let state = makeState();
+    state = { ...state, installed: new Set([state.list.items[0].name]) };
+    state = update(state, { action: Action.UNINSTALL });
+    assert.equal(state.mode, 'uninstall_confirm');
+    const s1 = update(state, { action: Action.NO });
+    assert.equal(s1.mode, 'browse');
+    assert.equal(s1.uninstallTarget, null);
+  });
+
+  it('ESCAPE in uninstall_confirm → transitions back to browse, clears uninstallTarget', () => {
+    let state = makeState();
+    state = { ...state, installed: new Set([state.list.items[0].name]) };
+    state = update(state, { action: Action.UNINSTALL });
+    assert.equal(state.mode, 'uninstall_confirm');
+    const s1 = update(state, { action: Action.ESCAPE });
+    assert.equal(s1.mode, 'browse');
+    assert.equal(s1.uninstallTarget, null);
+  });
+
+  it('uninstalling mode ignores all actions (no-op)', () => {
+    let state = makeState();
+    state = { ...state, mode: 'uninstalling' };
+    const s1 = update(state, { action: Action.UP });
+    assert.equal(s1, state);
+    const s2 = update(state, { action: Action.QUIT });
+    assert.equal(s2, state);
+  });
+
+  it('CONFIRM in uninstall_confirm → transitions to uninstalling', () => {
+    let state = makeState();
+    state = { ...state, installed: new Set([state.list.items[0].name]) };
+    state = update(state, { action: Action.UNINSTALL });
+    const s1 = update(state, { action: Action.CONFIRM });
+    assert.equal(s1.mode, 'uninstalling');
+  });
+});
+
+// ─── renderer.mjs — uninstall dialogs ────────────────────────────────────────
+
+describe('render — uninstall_confirm dialog', () => {
+  function uninstallConfirmState() {
+    let state = makeState();
+    const agentName = state.list.items[0].name;
+    state = { ...state, installed: new Set([agentName]) };
+    state = update(state, { action: Action.UNINSTALL });
+    assert.equal(state.mode, 'uninstall_confirm');
+    return state;
+  }
+
+  it('contains "Uninstall" text', () => {
+    const state = uninstallConfirmState();
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('Uninstall'), 'missing "Uninstall" text in dialog');
+  });
+
+  it('contains the agent name from uninstallTarget', () => {
+    const state = uninstallConfirmState();
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes(state.uninstallTarget.name),
+      `missing agent name "${state.uninstallTarget.name}" in dialog`);
+  });
+
+  it('contains [y] and [n] hints', () => {
+    const state = uninstallConfirmState();
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('[y]'), 'missing [y] hint');
+    assert.ok(plain.includes('[n]'), 'missing [n] hint');
+  });
+});
+
+describe('render — uninstalling mode', () => {
+  it('contains "Removing" text', () => {
+    let state = makeState();
+    const agentName = state.list.items[0].name;
+    state = {
+      ...state,
+      mode: 'uninstalling',
+      uninstallTarget: { agent: state.list.items[0], name: agentName },
+    };
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('Removing'), 'missing "Removing" text in uninstalling view');
+    assert.ok(plain.includes(agentName),
+      `missing agent name "${agentName}" in uninstalling view`);
+  });
+});
+
+// ─── installer.mjs — uninstallAgent / uninstallAgents ────────────────────────
+
+describe('uninstallAgent', () => {
+  /** @type {string} */
+  let tmp;
+
+  beforeEach(() => {
+    tmp = mkdtempSync(join(tmpdir(), 'uninstall-agent-'));
+  });
+
+  afterEach(() => {
+    rmSync(tmp, { recursive: true, force: true });
+  });
+
+  it('should return "not_found" when agent file does not exist', () => {
+    const agent = { name: 'nonexistent', category: 'general', mode: 'subagent', description: 'test', tags: [] };
+    const result = uninstallAgent(agent, { cwd: tmp });
+    assert.equal(result, 'not_found');
+  });
+
+  it('should remove an installed agent file and return "removed"', () => {
+    const agent = { name: 'test-agent', category: 'general', mode: 'subagent', description: 'test', tags: [] };
+    const agentDir = join(tmp, '.opencode', 'agents', 'general');
+    const agentFile = join(agentDir, 'test-agent.md');
+    mkdirSync(agentDir, { recursive: true });
+    writeFileSync(agentFile, '# Test Agent', 'utf-8');
+    recordInstall('test-agent', '# Test Agent', tmp);
+
+    const result = uninstallAgent(agent, { cwd: tmp });
+    assert.equal(result, 'removed');
+    assert.ok(!existsSync(agentFile), 'agent file should be deleted');
+  });
+
+  it('should remove lock entry after uninstall', () => {
+    const agent = { name: 'locked-agent', category: 'general', mode: 'subagent', description: 'test', tags: [] };
+    const agentDir = join(tmp, '.opencode', 'agents', 'general');
+    const agentFile = join(agentDir, 'locked-agent.md');
+    mkdirSync(agentDir, { recursive: true });
+    writeFileSync(agentFile, '# Locked', 'utf-8');
+    recordInstall('locked-agent', '# Locked', tmp);
+
+    assert.ok(readLock(tmp)['locked-agent'], 'lock entry should exist before uninstall');
+    uninstallAgent(agent, { cwd: tmp });
+    assert.ok(!readLock(tmp)['locked-agent'], 'lock entry should be removed after uninstall');
+  });
+
+  it('should reject symlinks with a Security error', () => {
+    const agent = { name: 'symlink-agent', category: 'general', mode: 'subagent', description: 'test', tags: [] };
+    const agentDir = join(tmp, '.opencode', 'agents', 'general');
+    mkdirSync(agentDir, { recursive: true });
+    // Create a real file and a symlink pointing to it
+    const realFile = join(tmp, 'real-file.md');
+    const symlinkFile = join(agentDir, 'symlink-agent.md');
+    writeFileSync(realFile, '# Real', 'utf-8');
+    symlinkSync(realFile, symlinkFile);
+
+    assert.throws(
+      () => uninstallAgent(agent, { cwd: tmp }),
+      (err) => {
+        assert.ok(err instanceof Error);
+        assert.ok(err.message.includes('Security'), `Expected "Security" in error but got: ${err.message}`);
+        return true;
+      }
+    );
+    // Symlink should NOT be deleted
+    assert.ok(existsSync(symlinkFile), 'symlink should not be deleted');
+  });
+
+  it('should NOT delete file in dry-run mode', () => {
+    const agent = { name: 'dry-agent', category: 'general', mode: 'subagent', description: 'test', tags: [] };
+    const agentDir = join(tmp, '.opencode', 'agents', 'general');
+    const agentFile = join(agentDir, 'dry-agent.md');
+    mkdirSync(agentDir, { recursive: true });
+    writeFileSync(agentFile, '# Dry', 'utf-8');
+
+    const result = uninstallAgent(agent, { cwd: tmp, dryRun: true });
+    assert.equal(result, 'removed');
+    assert.ok(existsSync(agentFile), 'file should NOT be deleted in dry-run mode');
+  });
+
+  it('should handle primary agent paths (root agents dir)', () => {
+    const agent = { name: 'primary-agent', category: 'general', mode: 'primary', description: 'test', tags: [] };
+    const agentDir = join(tmp, '.opencode', 'agents');
+    const agentFile = join(agentDir, 'primary-agent.md');
+    mkdirSync(agentDir, { recursive: true });
+    writeFileSync(agentFile, '# Primary', 'utf-8');
+
+    const result = uninstallAgent(agent, { cwd: tmp });
+    assert.equal(result, 'removed');
+    assert.ok(!existsSync(agentFile), 'primary agent file should be deleted');
+  });
+
+  it('should cleanup empty parent directory for subagents', () => {
+    const agent = { name: 'cleanup-agent', category: 'cleanup-cat', mode: 'subagent', description: 'test', tags: [] };
+    const agentDir = join(tmp, '.opencode', 'agents', 'cleanup-cat');
+    const agentFile = join(agentDir, 'cleanup-agent.md');
+    mkdirSync(agentDir, { recursive: true });
+    writeFileSync(agentFile, '# Cleanup', 'utf-8');
+
+    uninstallAgent(agent, { cwd: tmp });
+    assert.ok(!existsSync(agentDir), 'empty category directory should be cleaned up');
+  });
+});
+
+describe('uninstallAgents', () => {
+  /** @type {string} */
+  let tmp;
+
+  beforeEach(() => {
+    tmp = mkdtempSync(join(tmpdir(), 'uninstall-batch-'));
+  });
+
+  afterEach(() => {
+    rmSync(tmp, { recursive: true, force: true });
+  });
+
+  it('should return correct counts for batch uninstall', () => {
+    const agents = [
+      { name: 'exists-agent', category: 'a', mode: 'subagent', description: 'test', tags: [] },
+      { name: 'missing-agent', category: 'b', mode: 'subagent', description: 'test', tags: [] },
+    ];
+
+    // Create only the first agent
+    const dir = join(tmp, '.opencode', 'agents', 'a');
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(join(dir, 'exists-agent.md'), '# Exists', 'utf-8');
+
+    const result = uninstallAgents(agents, { cwd: tmp });
+    assert.equal(result.removed, 1);
+    assert.equal(result.not_found, 1);
+    assert.equal(result.failed, 0);
+  });
+
+  it('should handle dry-run batch (no files deleted)', () => {
+    const agents = [
+      { name: 'dry-a', category: 'x', mode: 'subagent', description: 'test', tags: [] },
+      { name: 'dry-b', category: 'y', mode: 'subagent', description: 'test', tags: [] },
+    ];
+
+    // Create both agents
+    for (const a of agents) {
+      const dir = join(tmp, '.opencode', 'agents', a.category);
+      mkdirSync(dir, { recursive: true });
+      writeFileSync(join(dir, `${a.name}.md`), '# Agent', 'utf-8');
+    }
+
+    const result = uninstallAgents(agents, { cwd: tmp, dryRun: true });
+    assert.equal(result.removed, 2);
+    assert.equal(result.not_found, 0);
+    assert.equal(result.failed, 0);
+
+    // Verify files still exist
+    assert.ok(existsSync(join(tmp, '.opencode', 'agents', 'x', 'dry-a.md')));
+    assert.ok(existsSync(join(tmp, '.opencode', 'agents', 'y', 'dry-b.md')));
+  });
+
+  it('should return all not_found when no agents exist', () => {
+    const agents = [
+      { name: 'ghost-a', category: 'x', mode: 'subagent', description: 'test', tags: [] },
+      { name: 'ghost-b', category: 'y', mode: 'subagent', description: 'test', tags: [] },
+    ];
+
+    const result = uninstallAgents(agents, { cwd: tmp });
+    assert.equal(result.removed, 0);
+    assert.equal(result.not_found, 2);
+    assert.equal(result.failed, 0);
   });
 });

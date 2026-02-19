@@ -199,8 +199,8 @@ function renderStatus(state, out, W) {
   const bar = state.search?.active
     ? `  ${cyan('[Enter]')} ${white('Apply')}  ${cyan('[Esc]')} ${white('Cancel')}`
     : state.search?.query
-      ? `  ${white('Filter:')} ${cyan('"' + state.search.query + '"')}  ${cyan('[/]')} ${white('Search')}  ${cyan('[Space]')} ${white('Select')}  ${cyan('[Enter]')} ${white('Install')}  ${cyan('[Tab]')} ${white('Next')}  ${cyan('[q]')} ${white('Quit')}`
-      : `  ${cyan('[/]')} ${white('Search')}  ${cyan('[Space]')} ${white('Select')}  ${cyan('[Enter]')} ${white('Install')}  ${cyan('[Tab]')} ${white('Next tab')}  ${cyan('[q]')} ${white('Quit')}`;
+      ? `  ${white('Filter:')} ${cyan('"' + state.search.query + '"')}  ${cyan('[/]')} ${white('Search')}  ${cyan('[Space]')} ${white('Select')}  ${cyan('[Enter]')} ${white('Install')}  ${cyan('[x]')} ${white('Uninstall')}  ${cyan('[Tab]')} ${white('Next')}  ${cyan('[q]')} ${white('Quit')}`
+      : `  ${cyan('[/]')} ${white('Search')}  ${cyan('[Space]')} ${white('Select')}  ${cyan('[Enter]')} ${white('Install')}  ${cyan('[x]')} ${white('Uninstall')}  ${cyan('[Tab]')} ${white('Next tab')}  ${cyan('[q]')} ${white('Quit')}`;
   out.push(bdr(bar, W));
 }
 
@@ -330,6 +330,45 @@ function renderDone(state, out, W) {
   }
 }
 
+// ─── Uninstall Confirm Dialog ────────────────────────────────────────────────
+
+function renderUninstallConfirm(state, out, W) {
+  const innerWidth = W - 4;
+  const target = state.uninstallTarget;
+  if (!target) return;
+
+  const dialogWidth = Math.min(50, innerWidth - 10);
+  const pad = ' '.repeat(Math.max(0, Math.floor((innerWidth - dialogWidth) / 2)));
+  const dialogInner = dialogWidth - 4;
+  const dialogLine = (c) => {
+    const g = Math.max(0, dialogInner - visibleLength(c));
+    return `${pad}${cyan(BOX.vertical)} ${c}${' '.repeat(g)} ${cyan(BOX.vertical)}`;
+  };
+  const dTop = `${pad}${red(BOX.topLeft + BOX.horizontal)} ${bold(red('⚠ Uninstall'))} ${red(BOX.horizontal.repeat(Math.max(0, dialogWidth - 16)) + BOX.topRight)}`;
+  const dBot = `${pad}${red(BOX.bottomLeft + BOX.horizontal.repeat(Math.max(0, dialogWidth - 2)) + BOX.bottomRight)}`;
+
+  out.push(bdr('', W));
+  out.push(bdr(dTop, W));
+  out.push(bdr(dialogLine(''), W));
+  out.push(bdr(dialogLine(bold(white(`Remove agent "${target.name}"?`))), W));
+  out.push(bdr(dialogLine(''), W));
+  out.push(bdr(dialogLine(dim('This will delete the agent file and its lock entry.')), W));
+  out.push(bdr(dialogLine(''), W));
+  out.push(bdr(dialogLine(`  ${green('[y]')} Yes  ${red('[n]')} No`), W));
+  out.push(bdr(dBot, W));
+  out.push(bdr('', W));
+}
+
+// ─── Uninstalling Spinner ────────────────────────────────────────────────────
+
+function renderUninstalling(state, out, W) {
+  const fr = SPINNER[Math.floor(Date.now() / SPINNER_INTERVAL_MS) % SPINNER.length];
+  const name = state.uninstallTarget?.name || 'agent';
+  out.push(bdr('', W));
+  out.push(bdr(`  ${cyan(fr)} ${bold(white(`Removing ${name}...`))}`, W));
+  out.push(bdr('', W));
+}
+
 // ─── Empty State ────────────────────────────────────────────────────────────
 
 function renderEmpty(state, out, W, vh) {
@@ -410,6 +449,8 @@ export function render(state) {
     case 'installing':            renderProgress(state, out, cols);  break;
     case 'pack_detail':           renderPackDetail(state, out, cols); break;
     case 'done':                  renderDone(state, out, cols);      break;
+    case 'uninstall_confirm':     renderUninstallConfirm(state, out, cols); break;
+    case 'uninstalling':          renderUninstalling(state, out, cols); break;
     default: break;
   }
 

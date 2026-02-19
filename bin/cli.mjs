@@ -18,7 +18,7 @@ import {
   getManifest,
 } from '../src/registry.mjs';
 
-import { installAgents } from '../src/installer.mjs';
+import { installAgents, uninstallAgents } from '../src/installer.mjs';
 
 import {
   bold,
@@ -108,6 +108,10 @@ ${bold('Usage:')}
   opencode-agents list                            List all available agents
   opencode-agents list --packs                    List available packs
   opencode-agents search <query>                  Search agents
+  opencode-agents uninstall <agent>               Uninstall a single agent
+  opencode-agents uninstall --category <cat,...>   Uninstall all agents in categories
+  opencode-agents uninstall --pack <pack,...>      Uninstall agents from packs
+  opencode-agents uninstall --all                  Uninstall all agents
   opencode-agents tui                             Interactive agent browser
 
 ${bold('Options:')}
@@ -125,6 +129,9 @@ ${bold('Examples:')}
   ${dim('$')} npx opencode-agents install --all
   ${dim('$')} npx opencode-agents search docker
   ${dim('$')} npx opencode-agents list --packs
+  ${dim('$')} npx opencode-agents uninstall postgres-pro
+  ${dim('$')} npx opencode-agents uninstall --category devops
+  ${dim('$')} npx opencode-agents uninstall --all
 
 ${dim('Documentation: https://github.com/dmicheneau/opencode-template-agent')}
 `);
@@ -270,6 +277,124 @@ async function cmdInstall(parsed) {
   process.exit(result.failed > 0 ? 1 : 0);
 }
 
+// ─── Command: uninstall ─────────────────────────────────────────────────────────
+
+/**
+ * Handle the "uninstall" command.
+ * @param {ParsedArgs} parsed
+ */
+async function cmdUninstall(parsed) {
+  const dryRun = Boolean(parsed.flags['dry-run']);
+  const options = { dryRun };
+
+  // Guard: mutually exclusive modes
+  const modes = ['all', 'pack', 'category'].filter((f) => parsed.flags[f]);
+  if (modes.length > 1) {
+    errorMessage(`Cannot combine --${modes.join(' and --')}. Use one at a time.`);
+    process.exit(1);
+  }
+
+  // --all: uninstall every agent
+  if (parsed.flags.all === true) {
+    const agents = listAll();
+    header(`Uninstalling all ${agents.length} agents...`);
+    const result = uninstallAgents(agents, options);
+    console.log(`  ${result.removed} removed, ${result.not_found} not found, ${result.failed} failed`);
+    process.exit(result.failed > 0 ? 1 : 0);
+    return;
+  }
+
+  // --category <name...>
+  if (parsed.flags.category) {
+    if (parsed.flags.category === true) {
+      errorMessage('Missing category name. Usage: opencode-agents uninstall --category <name...>');
+      process.exit(1);
+    }
+    const catIds = /** @type {string[]} */ (parsed.flags.category);
+
+    const validIds = getCategoryIds();
+    for (const catId of catIds) {
+      if (!validIds.includes(catId)) {
+        errorMessage(`Unknown category "${catId}". Valid categories: ${validIds.join(', ')}`);
+        process.exit(1);
+      }
+    }
+
+    const uniqueAgents = deduplicateAgents(
+      catIds.flatMap((catId) => getCategory(catId))
+    );
+
+    if (uniqueAgents.length === 0) {
+      errorMessage(`No agents found in ${formatLabel('category', catIds)}.`);
+      process.exit(1);
+    }
+
+    header(`Uninstalling ${uniqueAgents.length} agents from ${formatLabel('category', catIds)}...`);
+    const result = uninstallAgents(uniqueAgents, options);
+    console.log(`  ${result.removed} removed, ${result.not_found} not found, ${result.failed} failed`);
+    process.exit(result.failed > 0 ? 1 : 0);
+    return;
+  }
+
+  // --pack <name...>
+  if (parsed.flags.pack) {
+    if (parsed.flags.pack === true) {
+      errorMessage('Missing pack name. Usage: opencode-agents uninstall --pack <name...>');
+      process.exit(1);
+    }
+    const packNames = /** @type {string[]} */ (parsed.flags.pack);
+
+    const manifest = getManifest();
+    const validPacks = Object.keys(manifest.packs);
+    for (const name of packNames) {
+      if (!validPacks.includes(name)) {
+        errorMessage(`Unknown pack "${name}". Available packs: ${validPacks.join(', ')}`);
+        process.exit(1);
+      }
+    }
+
+    const uniqueAgents = deduplicateAgents(
+      packNames.flatMap((name) => resolvePackAgents(name))
+    );
+
+    header(`Uninstalling ${formatLabel('pack', packNames)} (${uniqueAgents.length} agents)...`);
+    const result = uninstallAgents(uniqueAgents, options);
+    console.log(`  ${result.removed} removed, ${result.not_found} not found, ${result.failed} failed`);
+    process.exit(result.failed > 0 ? 1 : 0);
+    return;
+  }
+
+  // uninstall <agent-name>
+  const agentName = parsed.args[0];
+  if (!agentName) {
+    errorMessage('Missing agent name. Usage: opencode-agents uninstall <agent>');
+    console.error(`  Run ${cyan('opencode-agents list')} to see available agents.`);
+    console.error();
+    process.exit(1);
+  }
+
+  const agent = getAgent(agentName);
+  if (!agent) {
+    const suggestions = searchAgents(agentName);
+    errorMessage(`Agent "${agentName}" not found.`);
+    if (suggestions.length > 0) {
+      console.error(`  Did you mean: ${suggestions.slice(0, 5).map((a) => boldCyan(a.name)).join(', ')}?`);
+      console.error();
+    }
+    process.exit(1);
+  }
+
+  const result = uninstallAgents([agent], options);
+  if (result.removed > 0) {
+    console.log(`  Agent "${agentName}" removed.`);
+  } else if (result.not_found > 0) {
+    console.log(`  Agent "${agentName}" is not installed.`);
+  } else {
+    console.error(`  Failed to remove "${agentName}".`);
+  }
+  process.exit(result.failed > 0 ? 1 : 0);
+}
+
 // ─── Command: list ──────────────────────────────────────────────────────────────
 
 /**
@@ -336,6 +461,12 @@ async function main() {
     case 'search':
     case 'find':
       cmdSearch(parsed);
+      break;
+
+    case 'uninstall':
+    case 'remove':
+    case 'rm':
+      await cmdUninstall(parsed);
       break;
 
     case 'tui':

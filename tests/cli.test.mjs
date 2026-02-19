@@ -639,3 +639,91 @@ describe('Display: NO_COLOR', () => {
     assert.ok(output.includes('postgres-pro'), 'Output should still list agents');
   });
 });
+
+// ─── CLI uninstall command ───────────────────────────────────────────────────────
+
+describe('CLI uninstall command', () => {
+  const TEMP_DIR = join(ROOT, '.test-uninstall-workspace');
+
+  beforeEach(() => {
+    mkdirSync(TEMP_DIR, { recursive: true });
+  });
+
+  afterEach(() => {
+    rmSync(TEMP_DIR, { recursive: true, force: true });
+  });
+
+  it('should route "uninstall" to uninstall command', () => {
+    // Agent not installed → reports "not installed" (not an error in the sense of unknown command)
+    const output = run(['uninstall', 'postgres-pro'], { cwd: TEMP_DIR });
+    assert.ok(output.includes('not installed') || output.includes('postgres-pro'),
+      'uninstall should recognize the command');
+  });
+
+  it('should accept "remove" as alias for "uninstall"', () => {
+    const output = run(['remove', 'postgres-pro'], { cwd: TEMP_DIR });
+    assert.ok(output.includes('not installed') || output.includes('postgres-pro'),
+      'remove alias should work');
+  });
+
+  it('should accept "rm" as alias for "uninstall"', () => {
+    const output = run(['rm', 'postgres-pro'], { cwd: TEMP_DIR });
+    assert.ok(output.includes('not installed') || output.includes('postgres-pro'),
+      'rm alias should work');
+  });
+
+  it('should recognize --all flag', () => {
+    const output = run(['uninstall', '--all'], { cwd: TEMP_DIR });
+    assert.ok(output.includes('not found') || output.includes('removed') || output.includes('Uninstalling'),
+      'uninstall --all should be recognized');
+  });
+
+  it('should recognize --pack flag', () => {
+    const output = run(['uninstall', '--pack', 'backend'], { cwd: TEMP_DIR });
+    assert.ok(output.includes('not found') || output.includes('removed') || output.includes('Uninstalling'),
+      'uninstall --pack should be recognized');
+  });
+
+  it('should recognize --category flag', () => {
+    const output = run(['uninstall', '--category', 'data-api'], { cwd: TEMP_DIR });
+    assert.ok(output.includes('not found') || output.includes('removed') || output.includes('Uninstalling'),
+      'uninstall --category should be recognized');
+  });
+
+  it('should recognize --dry-run flag', () => {
+    // With --all --dry-run, all agents would be "removed" (dry-run returns removed) or not_found
+    const output = run(['uninstall', '--all', '--dry-run'], { cwd: TEMP_DIR });
+    assert.ok(output.includes('Dry run') || output.includes('removed') || output.includes('not found'),
+      'uninstall --dry-run should be recognized');
+  });
+
+  it('should error when no agent name provided', () => {
+    const output = run(['uninstall'], { expectError: true, cwd: TEMP_DIR });
+    assert.ok(output.includes('Missing agent name'),
+      'uninstall with no args should show error');
+  });
+
+  it('should error when combining --all and --pack', () => {
+    const output = run(['uninstall', '--all', '--pack', 'backend'], { expectError: true, cwd: TEMP_DIR });
+    assert.ok(output.includes('Cannot combine'),
+      'uninstall --all --pack should be mutually exclusive');
+  });
+
+  it('should error for unknown agent', () => {
+    const output = run(['uninstall', 'nonexistent-agent-xyz'], { expectError: true, cwd: TEMP_DIR });
+    assert.ok(output.includes('not found'),
+      'uninstall unknown agent should report not found');
+  });
+
+  it('should error for unknown pack', () => {
+    const output = run(['uninstall', '--pack', 'nonexistent'], { expectError: true, cwd: TEMP_DIR });
+    assert.ok(output.includes('Unknown pack'),
+      'uninstall --pack nonexistent should report unknown pack');
+  });
+
+  it('should error when combining --pack and --category', () => {
+    const output = run(['uninstall', '--pack', 'backend', '--category', 'data-api'], { expectError: true, cwd: TEMP_DIR });
+    assert.ok(output.includes('Cannot combine'),
+      'uninstall --pack --category should be mutually exclusive');
+  });
+});

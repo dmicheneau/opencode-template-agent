@@ -1,4 +1,4 @@
-import { mkdirSync, existsSync, writeFileSync } from 'node:fs';
+import { mkdirSync, existsSync, writeFileSync, lstatSync, unlinkSync, readdirSync, rmdirSync } from 'node:fs';
 import { join, dirname, resolve as pathResolve, sep } from 'node:path';
 import https from 'node:https';
 import { loadManifest } from './registry.mjs';
@@ -11,7 +11,7 @@ import {
   infoMessage,
 } from './display.mjs';
 import { USER_AGENT } from './meta.mjs';
-import { recordInstall } from './lock.mjs';
+import { recordInstall, removeLockEntry } from './lock.mjs';
 
 // ─── Constants ───────────────────────────────────────────────────────────────────
 
@@ -206,5 +206,91 @@ export async function installAgents(agents, options = {}) {
   }
 
   installSummary(counts);
+  return counts;
+}
+
+// ─── Uninstall Single Agent ─────────────────────────────────────────────────
+
+/**
+ * @typedef {{
+ *   dryRun?: boolean;
+ *   cwd?: string;
+ * }} UninstallOptions
+ */
+
+/**
+ * Uninstall a single agent file.
+ * SEC-04: refuses to delete symlinks to prevent directory-traversal attacks.
+ *
+ * @param {import('./registry.mjs').AgentEntry} agent
+ * @param {UninstallOptions} options
+ * @returns {'removed' | 'not_found' | 'failed'}
+ */
+export function uninstallAgent(agent, options = {}) {
+  const cwd = options.cwd ?? process.cwd();
+  const dest = getDestination(agent, cwd);
+
+  if (!existsSync(dest.absolute)) {
+    return 'not_found';
+  }
+
+  // SEC-04: Refuse to delete symlinks
+  try {
+    const stat = lstatSync(dest.absolute);
+    if (stat.isSymbolicLink()) {
+      throw new Error(`Security: "${dest.relative}" is a symlink. Refusing to delete.`);
+    }
+  } catch (err) {
+    if (err.message.startsWith('Security:')) throw err;
+    return 'failed';
+  }
+
+  if (options.dryRun) {
+    return 'removed';
+  }
+
+  try {
+    unlinkSync(dest.absolute);
+    removeLockEntry(agent.name, cwd);
+
+    // Cleanup empty parent directories for non-primary agents (category dirs)
+    if (agent.mode !== 'primary') {
+      const parentDir = dirname(dest.absolute);
+      try {
+        const remaining = readdirSync(parentDir);
+        if (remaining.length === 0) {
+          rmdirSync(parentDir);
+        }
+      } catch {
+        // Ignore cleanup errors — the agent file is already removed
+      }
+    }
+
+    return 'removed';
+  } catch {
+    return 'failed';
+  }
+}
+
+// ─── Batch Uninstall ────────────────────────────────────────────────────────
+
+/**
+ * Uninstall multiple agents and return a summary.
+ * @param {import('./registry.mjs').AgentEntry[]} agents
+ * @param {UninstallOptions} options
+ * @returns {{ removed: number; not_found: number; failed: number }}
+ */
+export function uninstallAgents(agents, options = {}) {
+  if (options.dryRun) {
+    infoMessage('Dry run — no files will be deleted\n');
+  }
+
+  const counts = { removed: 0, not_found: 0, failed: 0 };
+
+  for (const agent of agents) {
+    const result = uninstallAgent(agent, options);
+    counts[result]++;
+  }
+
   return counts;
 }

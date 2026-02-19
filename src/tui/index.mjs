@@ -160,6 +160,58 @@ export async function launchTUI(options = {}) {
           return;
         }
 
+        // Transition to uninstalling → run uninstall sequence
+        if (newState.mode === 'uninstalling' && state.mode !== 'uninstalling') {
+          state = newState;
+          redraw();
+
+          try {
+            const { uninstallAgent } = await import('../installer.mjs');
+            const target = state.uninstallTarget;
+            if (target) {
+              const result = uninstallAgent(target.agent, { cwd: process.cwd() });
+
+              // Refresh installed set
+              const installed = detectInstalled(state.manifest);
+
+              const flashMsg = result === 'removed'
+                ? `✓ Agent "${target.name}" removed`
+                : result === 'not_found'
+                  ? `Agent "${target.name}" was not found`
+                  : `✗ Failed to remove "${target.name}"`;
+
+              state = {
+                ...state,
+                mode: 'browse',
+                installed,
+                uninstallTarget: null,
+                flash: { message: flashMsg, ts: Date.now() },
+              };
+              redraw();
+
+              // Auto-clear flash after 3s
+              if (flashTimeout) clearTimeout(flashTimeout);
+              flashTimeout = setTimeout(() => {
+                state = { ...state, flash: null };
+                flashTimeout = null;
+                redraw();
+              }, 3000);
+            } else {
+              state = { ...state, mode: 'browse', uninstallTarget: null };
+              redraw();
+            }
+          } catch (err) {
+            state = {
+              ...state,
+              mode: 'browse',
+              uninstallTarget: null,
+              flash: { message: `Error: ${err.message || err}`, ts: Date.now() },
+            };
+            redraw();
+          }
+          return;
+        }
+
         state = newState;
         redraw();
 

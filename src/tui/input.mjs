@@ -38,6 +38,9 @@ export const Action = Object.freeze({
   // Done mode
   FORCE:       'FORCE',
 
+  // Uninstall
+  UNINSTALL:   'UNINSTALL',
+
   // Fallback
   NONE:        'NONE',
 });
@@ -86,6 +89,7 @@ const R_SELECT_ALL = Object.freeze({ action: Action.SELECT_ALL });
 const R_YES        = Object.freeze({ action: Action.YES });
 const R_NO         = Object.freeze({ action: Action.NO });
 const R_FORCE      = Object.freeze({ action: Action.FORCE });
+const R_UNINSTALL  = Object.freeze({ action: Action.UNINSTALL });
 const R_NONE       = Object.freeze({ action: Action.NONE });
 
 // Pre-allocated results for frequent ANSI escape sequences (avoid allocation per keypress)
@@ -144,7 +148,7 @@ export function parseKey(data, mode) {
     return R_NONE;
   }
 
-  if (mode === 'confirm') {
+  if (mode === 'confirm' || mode === 'uninstall_confirm') {
     if (raw === 'y' || raw === 'Y' || raw === 'o' || raw === 'O') return R_YES;
     if (raw === 'n' || raw === 'N') return R_NO;
     return R_NONE;
@@ -163,6 +167,7 @@ export function parseKey(data, mode) {
   if (raw === '/')   return R_SEARCH;
   if (raw === 'q' || raw === 'Q') return R_QUIT;
   if (raw === 'a' || raw === 'A') return R_SELECT_ALL;
+  if (raw === 'x' || raw === 'X') return R_UNINSTALL;
 
   return R_NONE;
 }
