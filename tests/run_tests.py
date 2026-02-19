@@ -35,7 +35,7 @@ def main() -> int:
     test_dir = Path(__file__).resolve().parent
 
     # Charger test_agents.py
-    print("[1/3] Chargement de test_agents.py...")
+    print("[1/4] Chargement de test_agents.py...")
     try:
         agents_suite = loader.discover(
             str(test_dir),
@@ -47,7 +47,7 @@ def main() -> int:
         print(f"      ERREUR: {exc}")
 
     # Charger test_sync_script.py
-    print("[2/3] Chargement de test_sync_script.py...")
+    print("[2/4] Chargement de test_sync_script.py...")
     try:
         sync_suite = loader.discover(
             str(test_dir),
@@ -59,13 +59,25 @@ def main() -> int:
         print(f"      ERREUR: {exc}")
 
     # Charger test_update_manifest.py
-    print("[3/3] Chargement de test_update_manifest.py...")
+    print("[3/4] Chargement de test_update_manifest.py...")
     try:
         manifest_suite = loader.discover(
             str(test_dir),
             pattern="test_update_manifest.py",
         )
         suite.addTests(manifest_suite)
+        print("      OK")
+    except Exception as exc:
+        print(f"      ERREUR: {exc}")
+
+    # Charger test_enrichment.py
+    print("[4/4] Chargement de test_enrichment.py...")
+    try:
+        enrichment_suite = loader.discover(
+            str(test_dir),
+            pattern="test_enrichment.py",
+        )
+        suite.addTests(enrichment_suite)
         print("      OK")
     except Exception as exc:
         print(f"      ERREUR: {exc}")

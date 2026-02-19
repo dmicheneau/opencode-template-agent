@@ -48,6 +48,8 @@ from sync_common import (
     validate_output_path,
     is_synced_file,
     clean_synced_files,
+    validate_agent_schema,
+    check_template_conformance,
 )
 
 # ---------------------------------------------------------------------------
@@ -291,7 +293,463 @@ UNKNOWN_PERMISSIONS: Dict[str, PermissionValue] = {
 
 
 # ---------------------------------------------------------------------------
-# Permission building
+# Archetype system (S2 — Agent Enrichment)
+# ---------------------------------------------------------------------------
+
+# 5 archetypes: Builder, Auditor, Analyst, Orchestrator, Specialist
+# Each maps to a full 17-permission set + optional bash patterns.
+
+# Universal safe set — allow for ALL archetypes (read-only / reasoning tools)
+_UNIVERSAL_SAFE: Dict[str, str] = {
+    "read": "allow",
+    "glob": "allow",
+    "grep": "allow",
+    "distill": "allow",
+    "prune": "allow",
+    "sequentialthinking": "allow",
+    "skill": "allow",
+}
+
+# Full 17-permission maps per archetype (excluding bash patterns, handled separately)
+ARCHETYPE_PERMISSIONS: Dict[str, Dict[str, PermissionValue]] = {
+    "Builder": {
+        **_UNIVERSAL_SAFE,
+        "write": "allow",
+        "edit": "allow",
+        "bash": "patterns",  # placeholder — replaced by bash pattern map
+        "webfetch": "allow",
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny",
+    },
+    "Auditor": {
+        **_UNIVERSAL_SAFE,
+        "write": "deny",
+        "edit": "deny",
+        "bash": "deny",
+        "webfetch": "ask",
+        "task": "allow",
+        "mcp": "deny",
+        "todoread": "allow",
+        "todowrite": "deny",
+        "memory": "allow",
+        "browsermcp": "deny",
+    },
+    "Analyst": {
+        **_UNIVERSAL_SAFE,
+        "write": "allow",
+        "edit": "ask",
+        "bash": "patterns",  # placeholder
+        "webfetch": "allow",
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny",
+    },
+    "Orchestrator": {
+        **_UNIVERSAL_SAFE,
+        "write": "deny",
+        "edit": "deny",
+        "bash": "deny",
+        "webfetch": "ask",
+        "task": "allow",
+        "mcp": "deny",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny",
+    },
+    "Specialist": {
+        **_UNIVERSAL_SAFE,
+        "write": "allow",
+        "edit": "allow",
+        "bash": "patterns",  # placeholder — replaced by sub-profile
+        "webfetch": "allow",
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny",
+    },
+}
+
+# Builder bash patterns (broad language ecosystem coverage)
+BUILDER_BASH_PATTERNS: Dict[str, str] = {
+    "*": "ask",
+    # Git
+    "git *": "allow",
+    # JS/TS
+    "npm *": "allow",
+    "npx *": "allow",
+    "yarn *": "allow",
+    "pnpm *": "allow",
+    "node *": "allow",
+    "bun *": "allow",
+    "deno *": "allow",
+    "tsc *": "allow",
+    # Python
+    "pytest*": "allow",
+    "python -m pytest*": "allow",
+    "python *": "allow",
+    "python3 *": "allow",
+    "pip *": "allow",
+    "pip3 *": "allow",
+    "uv *": "allow",
+    "ruff *": "allow",
+    "mypy *": "allow",
+    # Go
+    "go test*": "allow",
+    "go build*": "allow",
+    "go run*": "allow",
+    "go mod*": "allow",
+    "go vet*": "allow",
+    "golangci-lint*": "allow",
+    # Rust
+    "cargo test*": "allow",
+    "cargo build*": "allow",
+    "cargo run*": "allow",
+    "cargo clippy*": "allow",
+    "cargo fmt*": "allow",
+    # JVM
+    "mvn *": "allow",
+    "gradle *": "allow",
+    "gradlew *": "allow",
+    # .NET
+    "dotnet *": "allow",
+    # C/C++
+    "make*": "allow",
+    "cmake*": "allow",
+    "gcc *": "allow",
+    "g++ *": "allow",
+    "clang*": "allow",
+    # General build tools
+    "just *": "allow",
+    "task *": "allow",
+    # Safe read commands
+    "ls*": "allow",
+    "cat *": "allow",
+    "head *": "allow",
+    "tail *": "allow",
+    "wc *": "allow",
+    "which *": "allow",
+    "echo *": "allow",
+    "mkdir *": "allow",
+    "pwd": "allow",
+    "env": "allow",
+    "printenv*": "allow",
+}
+
+# Analyst bash patterns (data tools + read-only git)
+ANALYST_BASH_PATTERNS: Dict[str, str] = {
+    "*": "ask",
+    # Python data stack
+    "python *": "allow",
+    "python3 *": "allow",
+    "pip *": "allow",
+    "pip3 *": "allow",
+    "uv *": "allow",
+    "jupyter *": "allow",
+    "ipython*": "allow",
+    # R
+    "Rscript *": "allow",
+    # Data tools
+    "sqlite3 *": "allow",
+    "jq *": "allow",
+    "csvkit*": "allow",
+    "csvtool*": "allow",
+    # Safe read commands
+    "cat *": "allow",
+    "head *": "allow",
+    "tail *": "allow",
+    "wc *": "allow",
+    "sort *": "allow",
+    "uniq *": "allow",
+    "cut *": "allow",
+    "ls*": "allow",
+    "pwd": "allow",
+    "echo *": "allow",
+    # Git (read-only)
+    "git log*": "allow",
+    "git status*": "allow",
+    "git diff*": "allow",
+    "git show*": "allow",
+}
+
+# Specialist sub-profile bash patterns (domain-scoped)
+SPECIALIST_BASH_PATTERNS: Dict[str, Dict[str, str]] = {
+    "infra": {
+        "*": "ask",
+        "terraform *": "allow",
+        "tf *": "allow",
+        "kubectl *": "allow",
+        "helm *": "allow",
+        "docker *": "allow",
+        "docker-compose *": "allow",
+        "aws *": "allow",
+        "gcloud *": "allow",
+        "az *": "allow",
+        "ansible*": "allow",
+        "systemctl *": "ask",
+        "journalctl *": "allow",
+        "ss *": "allow",
+        "ip *": "allow",
+        "dig *": "allow",
+        "nslookup *": "allow",
+        "ping *": "allow",
+        "traceroute *": "allow",
+        "curl *": "ask",
+        "wget *": "ask",
+        "git *": "allow",
+        "ls*": "allow",
+        "cat *": "allow",
+        "head *": "allow",
+        "tail *": "allow",
+        "wc *": "allow",
+        "which *": "allow",
+        "echo *": "allow",
+        "mkdir *": "allow",
+        "pwd": "allow",
+        "env": "allow",
+        "printenv*": "allow",
+        "ssh *": "ask",
+        "scp *": "ask",
+    },
+    "data": {
+        "*": "ask",
+        "psql *": "allow",
+        "pg_dump*": "ask",
+        "pg_restore*": "ask",
+        "redis-cli *": "allow",
+        "mysql *": "allow",
+        "mongosh *": "allow",
+        "sqlite3 *": "allow",
+        "curl *": "ask",
+        "httpie *": "ask",
+        "grpcurl *": "allow",
+        "git *": "allow",
+        "ls*": "allow",
+        "cat *": "allow",
+        "head *": "allow",
+        "tail *": "allow",
+        "jq *": "allow",
+        "wc *": "allow",
+        "echo *": "allow",
+        "mkdir *": "allow",
+        "pwd": "allow",
+    },
+    "security": {
+        "*": "ask",
+        "nmap *": "ask",
+        "nikto *": "ask",
+        "dig *": "allow",
+        "whois *": "allow",
+        "nslookup *": "allow",
+        "ping *": "allow",
+        "traceroute *": "allow",
+        "curl *": "ask",
+        "git log*": "allow",
+        "git status*": "allow",
+        "git diff*": "allow",
+        "git show*": "allow",
+        "ls*": "allow",
+        "cat *": "allow",
+        "head *": "allow",
+        "tail *": "allow",
+        "which *": "allow",
+        "echo *": "allow",
+        "pwd": "allow",
+    },
+    "docs": {
+        "*": "deny",
+    },
+    "ai-infra": {
+        "*": "ask",
+        "python *": "allow",
+        "python3 *": "allow",
+        "pip *": "allow",
+        "pip3 *": "allow",
+        "uv *": "allow",
+        "docker *": "allow",
+        "kubectl *": "allow",
+        "mlflow *": "allow",
+        "wandb *": "allow",
+        "dvc *": "allow",
+        "bentoml *": "allow",
+        "triton*": "allow",
+        "git *": "allow",
+        "ls*": "allow",
+        "cat *": "allow",
+        "head *": "allow",
+        "tail *": "allow",
+        "wc *": "allow",
+        "echo *": "allow",
+        "mkdir *": "allow",
+        "pwd": "allow",
+        "nvidia-smi*": "allow",
+    },
+    "architecture": {
+        "*": "ask",
+        "docker *": "allow",
+        "docker-compose *": "allow",
+        "kubectl *": "allow",
+        "curl *": "ask",
+        "git *": "allow",
+        "ls*": "allow",
+        "cat *": "allow",
+        "head *": "allow",
+        "tail *": "allow",
+        "echo *": "allow",
+        "pwd": "allow",
+    },
+}
+
+# Per-agent exceptions that override archetype defaults
+SPECIALIST_EXCEPTIONS: Dict[str, Dict[str, PermissionValue]] = {
+    "penetration-tester": {"browsermcp": "ask"},
+    "ui-designer": {"browsermcp": "ask"},
+    "diagram-architect": {
+        "bash": {
+            "*": "deny",
+            "mmdc *": "allow",
+            "plantuml *": "allow",
+        },
+    },
+}
+
+# Full 70-agent-to-archetype mapping: name -> (archetype, sub_profile | None)
+AGENT_ARCHETYPE_MAP: Dict[str, tuple] = {
+    "accessibility": ("Auditor", None),
+    "ai-engineer": ("Builder", None),
+    "angular-architect": ("Builder", None),
+    "api-architect": ("Specialist", "data"),
+    "api-documenter": ("Specialist", "docs"),
+    "aws-specialist": ("Specialist", "infra"),
+    "business-analyst": ("Analyst", None),
+    "ci-cd-engineer": ("Builder", None),
+    "cloud-architect": ("Specialist", "infra"),
+    "code-reviewer": ("Auditor", None),
+    "cpp-pro": ("Builder", None),
+    "csharp-developer": ("Builder", None),
+    "data-analyst": ("Analyst", None),
+    "data-engineer": ("Builder", None),
+    "data-scientist": ("Analyst", None),
+    "database-architect": ("Specialist", "data"),
+    "debugger": ("Builder", None),
+    "devops-engineer": ("Specialist", "infra"),
+    "diagram-architect": ("Specialist", "docs"),
+    "docker-specialist": ("Builder", None),
+    "documentation-engineer": ("Specialist", "docs"),
+    "episode-orchestrator": ("Orchestrator", None),
+    "expert-nextjs-developer": ("Builder", None),
+    "expert-react-frontend-engineer": ("Builder", None),
+    "fullstack-developer": ("Builder", None),
+    "golang-pro": ("Builder", None),
+    "graphql-architect": ("Specialist", "data"),
+    "java-architect": ("Builder", None),
+    "kotlin-specialist": ("Builder", None),
+    "kubernetes-specialist": ("Specialist", "infra"),
+    "linux-admin": ("Specialist", "infra"),
+    "llm-architect": ("Specialist", "ai-infra"),
+    "mcp-developer": ("Builder", None),
+    "mcp-protocol-specialist": ("Auditor", None),
+    "mcp-security-auditor": ("Auditor", None),
+    "mcp-server-architect": ("Builder", None),
+    "microservices-architect": ("Specialist", "architecture"),
+    "ml-engineer": ("Builder", None),
+    "mlops-engineer": ("Specialist", "ai-infra"),
+    "mobile-developer": ("Builder", None),
+    "penetration-tester": ("Specialist", "security"),
+    "performance-engineer": ("Auditor", None),
+    "php-pro": ("Builder", None),
+    "platform-engineer": ("Specialist", "infra"),
+    "postgres-pro": ("Specialist", "data"),
+    "prd": ("Orchestrator", None),
+    "product-manager": ("Orchestrator", None),
+    "project-manager": ("Orchestrator", None),
+    "prompt-engineer": ("Analyst", None),
+    "python-pro": ("Builder", None),
+    "qa-expert": ("Auditor", None),
+    "rails-expert": ("Builder", None),
+    "redis-specialist": ("Specialist", "data"),
+    "refactoring-specialist": ("Builder", None),
+    "rust-pro": ("Builder", None),
+    "screenshot-ui-analyzer": ("Auditor", None),
+    "scrum-master": ("Orchestrator", None),
+    "search-specialist": ("Analyst", None),
+    "security-auditor": ("Auditor", None),
+    "security-engineer": ("Specialist", "security"),
+    "smart-contract-auditor": ("Auditor", None),
+    "sre-engineer": ("Specialist", "infra"),
+    "swift-expert": ("Builder", None),
+    "technical-writer": ("Specialist", "docs"),
+    "terraform-specialist": ("Builder", None),
+    "test-automator": ("Builder", None),
+    "typescript-pro": ("Builder", None),
+    "ui-designer": ("Specialist", "docs"),
+    "ux-researcher": ("Analyst", None),
+    "vue-expert": ("Builder", None),
+}
+
+
+def get_archetype(agent_name: str) -> tuple:
+    """Look up an agent's archetype and sub-profile.
+
+    Returns:
+        ``(archetype, sub_profile)`` for known agents, e.g.
+        ``("Builder", None)`` or ``("Specialist", "infra")``.
+        ``(None, None)`` for agents not in the archetype map.
+    """
+    return AGENT_ARCHETYPE_MAP.get(agent_name, (None, None))
+
+
+def build_archetype_permissions(
+    agent_name: str,
+) -> Optional[Dict[str, PermissionValue]]:
+    """Assemble a full permission dict from archetype + bash patterns + exceptions.
+
+    Returns ``None`` for agents not in the archetype map (caller should
+    fall back to :func:`build_permissions`).
+    """
+    archetype, sub_profile = get_archetype(agent_name)
+    if archetype is None:
+        return None
+
+    # Start with a copy of the archetype base permissions
+    perms: Dict[str, PermissionValue] = dict(ARCHETYPE_PERMISSIONS[archetype])
+
+    # Resolve bash patterns for archetypes that use them
+    if perms.get("bash") == "patterns":
+        if archetype == "Builder":
+            perms["bash"] = dict(BUILDER_BASH_PATTERNS)
+        elif archetype == "Analyst":
+            perms["bash"] = dict(ANALYST_BASH_PATTERNS)
+        elif archetype == "Specialist" and sub_profile:
+            bash_patterns = SPECIALIST_BASH_PATTERNS.get(sub_profile)
+            if bash_patterns:
+                perms["bash"] = dict(bash_patterns)
+            else:
+                perms["bash"] = {"*": "ask"}
+        else:
+            # Fallback — should not happen with well-formed data
+            perms["bash"] = {"*": "ask"}
+
+    # Apply per-agent exceptions (overrides archetype defaults)
+    exceptions = SPECIALIST_EXCEPTIONS.get(agent_name)
+    if exceptions:
+        for key, value in exceptions.items():
+            perms[key] = value if isinstance(value, str) else dict(value)
+
+    return perms
+
+
+# ---------------------------------------------------------------------------
+# Permission building (legacy — used for agents not in archetype map)
 # ---------------------------------------------------------------------------
 
 
@@ -751,19 +1209,24 @@ def sync_agent(
 
     # Build permission dict (used for both the agent file and the manifest)
     #
-    # SECURITY NOTE: Curated agent permissions are derived from the upstream
-    # 'tools:' frontmatter field. If the upstream repository is compromised,
-    # permissions could be silently escalated. Reviewers MUST check permission
-    # diffs carefully in sync PRs. Consider hardcoding permissions in a future
-    # version (see SEC-M1 in code review).
-    perms = (
-        permissions
-        if permissions is not None
-        else build_permissions(meta.get("tools", ""))
-    )
+    # Priority: explicit override > archetype system > legacy tool-based detection
+    if permissions is not None:
+        perms = permissions
+    else:
+        perms = build_archetype_permissions(name)
+        if perms is None:
+            perms = build_permissions(meta.get("tools", ""))
 
     # Build OpenCode agent
     agent_md = build_opencode_agent(name, meta, body, category, permissions=perms)
+
+    # S2 validation — log warnings, never block sync
+    schema_warnings = validate_agent_schema(agent_md)
+    for w in schema_warnings:
+        logger.debug("  [schema] %s: %s", name, w)
+    conformance_warnings = check_template_conformance(agent_md)
+    for w in conformance_warnings:
+        logger.debug("  [template] %s: %s", name, w)
 
     # Determine output path using category subdirectories
     relative_path = _get_agent_relative_path(name, category)
@@ -968,6 +1431,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Verbose output",
     )
+    parser.add_argument(
+        "--score",
+        action="store_true",
+        help="Run quality scorer on each synced agent and include scores in the manifest",
+    )
     return parser
 
 
@@ -1143,7 +1611,8 @@ def main() -> int:
                 UNKNOWN_PERMISSIONS
             )
         else:
-            agent_permissions = None  # will use build_permissions() auto-detection
+            # Try archetype system first; fall back to legacy auto-detection
+            agent_permissions = build_archetype_permissions(name)
 
         try:
             entry = sync_agent(
@@ -1172,6 +1641,24 @@ def main() -> int:
                     if name not in curated_names:
                         uncurated_count += 1
                     print(" done")
+
+                # Quality scoring (optional, --score flag)
+                if args.score and status == "synced":
+                    rel = entry.get("path", "")
+                    agent_file = output_dir / f"{rel}.md"
+                    if agent_file.is_file():
+                        from quality_scorer import score_agent
+
+                        agent_content = agent_file.read_text(encoding="utf-8")
+                        result = score_agent(agent_content)
+                        entry["quality_score"] = result
+                        if args.verbose:
+                            logger.debug(
+                                "  [score] %s: %.2f (%s)",
+                                name,
+                                result["overall"],
+                                result["label"],
+                            )
             else:
                 failed += 1
                 print(" not found")

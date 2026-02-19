@@ -66,6 +66,9 @@ __all__ = [
     "is_synced_file",
     "clean_synced_files",
     "_parse_retry_after",
+    "parse_nested_frontmatter",
+    "validate_agent_schema",
+    "check_template_conformance",
 ]
 
 # ---------------------------------------------------------------------------
@@ -654,3 +657,241 @@ def clean_synced_files(
                         )
 
     return removed
+
+
+# ---------------------------------------------------------------------------
+# Nested frontmatter parser (for validation — does NOT replace parse_frontmatter)
+# ---------------------------------------------------------------------------
+
+
+def _parse_yaml_value(val: str) -> Union[str, int, bool]:
+    """Coerce a scalar YAML value to its Python type."""
+    stripped = val.strip()
+    if stripped.startswith('"') and stripped.endswith('"'):
+        return stripped[1:-1]
+    if stripped.startswith("'") and stripped.endswith("'"):
+        return stripped[1:-1]
+    low = stripped.lower()
+    if low in ("true", "yes"):
+        return True
+    if low in ("false", "no"):
+        return False
+    try:
+        return int(stripped)
+    except ValueError:
+        pass
+    return stripped
+
+
+def parse_nested_frontmatter(content: str) -> Tuple[Dict[str, Any], str]:
+    """Parse YAML frontmatter with up to 3 levels of nesting.
+
+    Unlike :func:`parse_frontmatter` (flat key→string only), this parser
+    handles nested dicts (``permission:`` blocks) and folded scalars
+    (``description: >``).
+
+    Returns ``(metadata_dict, body)`` — same contract as
+    :func:`parse_frontmatter` but values can be dicts or typed scalars.
+    """
+    content = content.strip()
+    if not content.startswith("---"):
+        return {}, content
+
+    end_idx = content.find("\n---", 3)
+    if end_idx == -1:
+        return {}, content
+
+    raw = content[3:end_idx].strip()
+    body = content[end_idx + 4 :].strip()
+
+    result: Dict[str, Any] = {}
+    lines = raw.split("\n")
+    i = 0
+
+    while i < len(lines):
+        line = lines[i]
+        if not line.strip():
+            i += 1
+            continue
+
+        indent = len(line) - len(line.lstrip())
+        if indent > 0:
+            i += 1
+            continue
+
+        match = re.match(r"^([\w][\w-]*)\s*:\s*(.*)", line.lstrip())
+        if not match:
+            i += 1
+            continue
+
+        key = match.group(1)
+        value_part = match.group(2).strip()
+
+        # Folded scalar (description: >)
+        if value_part == ">":
+            folded: List[str] = []
+            i += 1
+            while i < len(lines):
+                nxt = lines[i]
+                if not nxt.strip():
+                    break
+                if len(nxt) - len(nxt.lstrip()) < 2:
+                    break
+                folded.append(nxt.strip())
+                i += 1
+            result[key] = " ".join(folded)
+            continue
+
+        # Inline value
+        if value_part:
+            result[key] = _parse_yaml_value(value_part)
+            i += 1
+            continue
+
+        # Nested dict (key with no value → sub-keys follow)
+        sub: Dict[str, Any] = {}
+        i += 1
+        while i < len(lines):
+            sline = lines[i]
+            if not sline.strip():
+                i += 1
+                continue
+            sindent = len(sline) - len(sline.lstrip())
+            if sindent < 2:
+                break
+            sm = re.match(r'^(["\']?[^:]+["\']?)\s*:\s*(.*)', sline.lstrip())
+            if not sm:
+                i += 1
+                continue
+            skey = sm.group(1).strip().strip("\"'")
+            sval = sm.group(2).strip()
+            if not sval:
+                # Third level
+                ssub: Dict[str, Any] = {}
+                i += 1
+                while i < len(lines):
+                    ssline = lines[i]
+                    if not ssline.strip():
+                        i += 1
+                        continue
+                    ssindent = len(ssline) - len(ssline.lstrip())
+                    if ssindent < 4:
+                        break
+                    ssm = re.match(r'^(["\']?[^:]+["\']?)\s*:\s*(.*)', ssline.lstrip())
+                    if ssm:
+                        sskey = ssm.group(1).strip().strip("\"'")
+                        ssub[sskey] = _parse_yaml_value(ssm.group(2))
+                    i += 1
+                sub[skey] = ssub
+                continue
+            else:
+                sub[skey] = _parse_yaml_value(sval)
+            i += 1
+
+        result[key] = sub
+
+    return result, body
+
+
+# ---------------------------------------------------------------------------
+# Schema validation (S2.6)
+# ---------------------------------------------------------------------------
+
+_VALID_MODES = frozenset({"primary", "subagent", "all"})
+
+
+def validate_agent_schema(content: str) -> List[str]:
+    """Validate an agent file's frontmatter against the required schema.
+
+    Checks:
+    - ``description`` is present and non-empty
+    - ``mode`` is present and one of ``primary``, ``subagent``, ``all``
+    - ``permission`` is present and is a dict (nested block)
+
+    Returns a list of warning strings (empty = valid).
+    """
+    warnings: List[str] = []
+
+    meta, _body = parse_nested_frontmatter(content)
+
+    if not meta:
+        warnings.append("missing or empty frontmatter")
+        return warnings
+
+    # description
+    desc = meta.get("description")
+    if not desc:
+        warnings.append("missing required field: description")
+    elif isinstance(desc, str) and not desc.strip():
+        warnings.append("description is empty")
+
+    # mode
+    mode = meta.get("mode")
+    if not mode:
+        warnings.append("missing required field: mode")
+    elif isinstance(mode, str) and mode not in _VALID_MODES:
+        warnings.append(f"invalid mode '{mode}': must be one of {sorted(_VALID_MODES)}")
+
+    # permission
+    perm = meta.get("permission")
+    if perm is None:
+        warnings.append("missing required field: permission")
+    elif not isinstance(perm, dict):
+        warnings.append(f"permission must be a dict block, got {type(perm).__name__}")
+
+    return warnings
+
+
+# ---------------------------------------------------------------------------
+# Template conformance (S2.7)
+# ---------------------------------------------------------------------------
+
+_REQUIRED_SECTIONS = [
+    "## Workflow",
+    "## Decisions",
+    "## Tools",
+    "## Quality Gate",
+]
+
+
+def check_template_conformance(content: str) -> List[str]:
+    """Check that an agent file body contains the required template sections.
+
+    Required sections:
+    - Identity prose (first prose block after frontmatter, no heading required)
+    - ``## Workflow``
+    - ``## Decisions``
+    - ``## Tools``
+    - ``## Quality Gate``
+
+    Returns a list of warning strings (empty = conformant).
+    """
+    warnings: List[str] = []
+
+    _meta, body = parse_nested_frontmatter(content)
+
+    if not body.strip():
+        warnings.append("empty body — no sections found")
+        return warnings
+
+    # Check identity: there should be prose before the first ## heading
+    first_heading = re.search(r"^##\s", body, re.MULTILINE)
+    if first_heading:
+        preamble = body[: first_heading.start()].strip()
+        if len(preamble) < 20:
+            warnings.append(
+                "missing or too short identity section (prose before first ## heading)"
+            )
+    else:
+        # No headings at all — body is just prose, no structured sections
+        warnings.append("no ## headings found — missing all required sections")
+        return warnings
+
+    # Check required section headings
+    for section in _REQUIRED_SECTIONS:
+        # Match heading at start of line, case-insensitive
+        pattern = r"^" + re.escape(section)
+        if not re.search(pattern, body, re.MULTILINE | re.IGNORECASE):
+            warnings.append(f"missing required section: {section}")
+
+    return warnings
