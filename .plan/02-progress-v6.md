@@ -1,43 +1,92 @@
-# V6 Progress Tracker
+# V6 Progress
 
 **Plan:** [00-plan-v6.md](00-plan-v6.md)
 **Tasks:** [01-tasks-v6.md](01-tasks-v6.md)
-**Started:** 2026-02-18
+**Updated:** 2026-02-19
 
 ---
 
-## Current Status
+## Release Progress
 
-| Phase | Status | Progress | Notes |
-|-------|--------|----------|-------|
-| A — Quick Wins | 🔲 Not Started | 0/16 | S1 + S5 |
-| B — Core Features | 🔲 Not Started | 0/35 | S3 + S6 |
-| C — Full Permissions | 🔲 Not Started | 0/32 | S4 |
-| D — Content Enrichment | 🔲 Not Started | 0/45 | S2 |
-| **Total** | | **0/128** | |
+### V6.0 — MVP (S1 + S5 + S3 core)
 
-## Completion Log
+| Section | Done | Total | % |
+|---------|------|-------|---|
+| S1: TUI Anti-Flicker | 0 | 11 | 0% |
+| S5: Pack Fix + Flash | 0 | 10 | 0% |
+| S3 core: Hash Detection | 0 | 17 | 0% |
+| V6.0 Release Tasks | 0 | 3 | 0% |
+| **V6.0 Total** | **0** | **39** | **0%** |
 
-<!-- Format: YYYY-MM-DD | Task ID | Description | Commit -->
+### V6.1 — Lifecycle (S6 + S3 extras)
 
-| Date | Task | Description | Commit |
-|------|------|-------------|--------|
-| — | — | Plan created | — |
+| Section | Done | Total | % |
+|---------|------|-------|---|
+| S6: Agent Uninstall | 0 | 20 | 0% |
+| S3 extras: CLI Flags | 0 | 6 | 0% |
+| V6.1 Release Tasks | 0 | 3 | 0% |
+| **V6.1 Total** | **0** | **26** | **0%** |
 
-## Test Results
+### V7.0 — Permissions (S4)
 
-| Date | JS Tests | Python Tests | Total | Status |
-|------|----------|-------------|-------|--------|
-| 2026-02-18 | 250 ✅ | 177 ✅ | 427 ✅ | Baseline |
+| Section | Done | Total | % |
+|---------|------|-------|---|
+| C1: Foundation | 0 | 8 | 0% |
+| C2: CLI & Resolution | 0 | 12 | 0% |
+| C3: TUI Editor | 0 | 8 | 0% |
+| C4: Integration | 0 | 7 | 0% |
+| V7.0 Release Tasks | 0 | 3 | 0% |
+| **V7.0 Total** | **0** | **38** | **0%** |
 
-## Notes
+### S2 — Content Enrichment (continuous)
 
-### 2026-02-18 — Plan Creation
-- Multi-agent analysis completed: 5 specialized subagents dispatched
-  - Performance Engineer → TUI anti-flicker (3-phase solution)
-  - Prompt Engineer → Agent enrichment strategy (template + archetypes)
-  - TypeScript Pro → Hash-based detection (lock.mjs + 4 states)
-  - Security Engineer → Permission system (presets + YOLO + persistence)
-  - UI Designer → Pack fix + Uninstall UX (CLI + TUI modes)
-- 128 tasks identified across 4 phases
-- V5 archived, V6 plan files created
+| Section | Done | Total | % |
+|---------|------|-------|---|
+| D1: Template & Infrastructure | 0 | 9 | 0% |
+| D2: Languages & DevTools | 0 | 20 | 0% |
+| D3: AI, Security, DevOps | 0 | 5 | 0% |
+| D4: Web, Data-API, Docs | 0 | 5 | 0% |
+| D5: Business, MCP, Primary | 0 | 6 | 0% |
+| **S2 Total** | **0** | **45** | **0%** |
+
+---
+
+## Overall
+
+| Release | Done | Total | % | Status |
+|---------|------|-------|---|--------|
+| V6.0 MVP | 0 | 39 | 0% | **Next** |
+| V6.1 Lifecycle | 0 | 26 | 0% | Queued |
+| V7.0 Permissions | 0 | 38 | 0% | Queued |
+| S2 Enrichment | 0 | 45 | 0% | Queued |
+| **Total** | **0** | **148** | **0%** | |
+
+## Review Integration
+
+- [x] Plan revised with 4 review findings (2026-02-19)
+- [x] Release split V6.0/V6.1/V7.0 adopted (PM recommendation)
+- [x] 12 new tasks added from reviews (F-01, F-02, F-03, MF-2, W-04, etc.)
+- [x] 8 tasks modified based on review feedback (SEC-01, W-03, W-08, R1, etc.)
+- [ ] Begin V6.0 Phase A implementation
+
+## Timeline Estimate
+
+| Release | Start | Duration | End (est.) |
+|---------|-------|----------|------------|
+| V6.0 | TBD | 3-4 days | — |
+| V6.1 | V6.0+1 | 3-4 days | — |
+| V7.0 | V6.1+1 | 5-7 days | — |
+| S2 | Parallel | 10-14 weeks | — |
+
+## Decision Log
+
+| Date | Decision | Rationale |
+|------|----------|-----------|
+| 2026-02-19 | Split V6 into V6.0/V6.1/V7.0 | PM review: reduce risk, ship incrementally |
+| 2026-02-19 | Write-only frontmatter (no YAML parser) | SEC-01 Critical: eliminate parser differential risk |
+| 2026-02-19 | YOLO = all permissions allow + CONFIRM | Clarification: convenience preset, not security bypass |
+| 2026-02-19 | Permission screen opt-in only | UX R1: default=skip, only custom opens editor |
+| 2026-02-19 | Footer hints mandatory for new modes | UX R2: consistent discoverability |
+| 2026-02-19 | Symlink protection in uninstall | SEC-04 High: lstat+realpath before unlink |
+| 2026-02-19 | State+reducer for permissions (no class) | W-03: consistent with existing TUI architecture |
+| 2026-02-19 | XDG_CONFIG_HOME for persistence | W-09: respect platform conventions |
