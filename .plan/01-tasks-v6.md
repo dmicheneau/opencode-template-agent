@@ -2,7 +2,7 @@
 
 **Plan:** [00-plan-v6.md](00-plan-v6.md)
 **Created:** 2026-02-18
-**Updated:** 2026-02-19 (post-review revision: release split + new tasks from 4 reviews + code review hardening + Major CR fixes)
+**Updated:** 2026-02-19 (post-review revision: release split + new tasks from 4 reviews + code review hardening + Major CR fixes + Minor/Low CR fixes — ALL 21 CR issues resolved)
 
 ---
 
@@ -126,7 +126,7 @@
 - [x] **CR-M2-tui** Dynamic import in try block (`src/tui/index.mjs`)
 - [x] **CR-M5-tui** Paste multi-chars in search mode (`src/tui/input.mjs`)
 
-**Backlog — remaining code review issues (Major/Minor):**
+**Backlog — remaining V6.0 S3 core tasks:**
 
 - [ ] **S3.4** Implement corrupted JSON recovery: display warning + backup to .bak + return empty lock (MF-4)
 - [ ] **S3.5** Add optional `sha256` and `size` fields to manifest.json agent entries (W-02)
@@ -135,6 +135,17 @@
 - [ ] **S3.10** Update `src/tui/ansi.mjs` with state indicator colors
 - [ ] **S3.12** Invalidate registry.mjs singleton cache when manifest version changes (M-05)
 - [ ] **S3.16** Write tests for manifest hash computation in Python sync
+
+### Code Review Minor/Low Fixes (commit e18d2d5)
+
+**TUI fixes (M-3, M-4):**
+- [x] **CR-M3-tui** Removed dead imports in `src/tui/state.mjs`
+- [x] **CR-M4-tui** Completed JSDoc on parseKey() in `src/tui/input.mjs`
+
+**CLI fixes (M-1, M-2, M-3):**
+- [x] **CR-M1-cli** Added `--flag=value` normalization in `bin/cli.mjs`
+- [x] **CR-M2-cli** Warning on unknown flags in `bin/cli.mjs`
+- [x] **CR-M3-cli** DRY refactor — `resolveAgentOrExit()` helper in `bin/cli.mjs`
 
 ---
 
@@ -264,10 +275,10 @@
 | Release | Tasks | Estimated Effort |
 |---------|-------|------------------|
 | V6.0 — MVP | 39 tasks | 3-4 days |
-| V6.1 — Lifecycle | 41 tasks (29 + 4 CR hardening + 8 Major fixes) | 3-4 days |
+| V6.1 — Lifecycle | 46 tasks (29 + 4 CR hardening + 8 Major fixes + 5 Minor/Low fixes) | 3-4 days |
 | V7.0 — Permissions | 38 tasks | 5-7 days |
 | S2 — Enrichment | 45 tasks | 10-14 weeks |
-| **Total** | **163 tasks** | — |
+| **Total** | **168 tasks** | — |
 
 ### Key Review Findings Incorporated
 
