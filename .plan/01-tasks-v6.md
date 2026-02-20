@@ -300,6 +300,19 @@
 
 ---
 
+## S7 — Agent Separation
+
+> Status: **Done** — 6/6 tasks (2026-02-20)
+
+- [x] P0 — Préparation (créer agents/, vérifier .gitignore, baseline 866 tests)
+- [x] P1 — Migration des fichiers (git mv 72 agents + manifest + lock)
+- [x] P2 — Mise à jour du code (src/, scripts/, CI/CD, install.sh, manifest, 8 nouveaux tests)
+- [x] P3 — Nettoyage et documentation (architecture.md, progress-v6.md)
+- [x] P4 — Validation (874 tests, 0 failure)
+- [x] Review — 2 rounds (R1: CHANGES_REQUESTED → R2: APPROVED)
+
+---
+
 ## Summary
 
 | Release | Tasks | Estimated Effort |
@@ -309,7 +322,8 @@
 | V7.0 — Permissions | 38 tasks ✅ | 5-7 days |
 | V7.0 Post-release CR | 16 tasks ✅ (1 critical + 3 high + 6 medium + 6 low) | 1 day |
 | S2 — Enrichment | 46 tasks (45 + 1 CR3) | 10-14 weeks |
-| **Total** | **185 tasks** | — |
+| S7 — Agent Separation | 6 tasks ✅ | ~3 hours |
+| **Total** | **191 tasks** | — |
 
 ### Key Review Findings Incorporated
 
