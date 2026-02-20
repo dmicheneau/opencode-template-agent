@@ -10,6 +10,7 @@ permission:
   bash: deny
   task:
     "*": allow
+
 ---
 
 <!-- Synced from aitmpl.com | source: davila7/claude-code-templates | category: ui-analysis -->

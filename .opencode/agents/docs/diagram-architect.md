@@ -6,12 +6,11 @@ description: >
 mode: subagent
 permission:
   write: allow
-  edit: ask
+  edit: allow
   bash:
-    "*": ask
-    git status: allow
-    "git diff*": allow
-    "git log*": allow
+    "*": deny
+    "mmdc *": allow
+    "plantuml *": allow
   task:
     "*": allow
 ---

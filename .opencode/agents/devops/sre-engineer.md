@@ -8,12 +8,43 @@ description: >
 mode: subagent
 permission:
   write: allow
-  edit: ask
+  edit: allow
   bash:
     "*": ask
-    git status: allow
-    "git diff*": allow
-    "git log*": allow
+    "terraform *": allow
+    "tf *": allow
+    "kubectl *": allow
+    "helm *": allow
+    "docker *": allow
+    "docker-compose *": allow
+    "aws *": allow
+    "gcloud *": allow
+    "az *": allow
+    "ansible*": allow
+    "systemctl *": ask
+    "journalctl *": allow
+    "ss *": allow
+    "ip *": allow
+    "dig *": allow
+    "nslookup *": allow
+    "ping *": allow
+    "traceroute *": allow
+    "curl *": ask
+    "wget *": ask
+    "git *": allow
+    "ls*": allow
+    "cat *": allow
+    "head *": allow
+    "tail *": allow
+    "wc *": allow
+    "which *": allow
+    "echo *": allow
+    "mkdir *": allow
+    "pwd": allow
+    "env": allow
+    "printenv*": allow
+    "ssh *": ask
+    "scp *": ask
   task:
     "*": allow
 ---

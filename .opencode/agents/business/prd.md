@@ -6,7 +6,7 @@ mode: all
 permission:
   read: allow
   write: allow
-  edit: allow
+  edit: deny
   bash: deny
   webfetch: allow
   task:

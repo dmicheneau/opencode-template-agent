@@ -6,12 +6,20 @@ description: >
 mode: subagent
 permission:
   write: allow
-  edit: ask
+  edit: allow
   bash:
     "*": ask
-    git status: allow
-    "git diff*": allow
-    "git log*": allow
+    "docker *": allow
+    "docker-compose *": allow
+    "kubectl *": allow
+    "curl *": ask
+    "git *": allow
+    "ls*": allow
+    "cat *": allow
+    "head *": allow
+    "tail *": allow
+    "echo *": allow
+    "pwd": allow
   task:
     "*": allow
 ---

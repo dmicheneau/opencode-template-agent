@@ -5,12 +5,60 @@ description: >
 mode: subagent
 permission:
   write: allow
-  edit: ask
+  edit: allow
   bash:
     "*": ask
-    git status: allow
-    "git diff*": allow
-    "git log*": allow
+    "git *": allow
+    "npm *": allow
+    "npx *": allow
+    "yarn *": allow
+    "pnpm *": allow
+    "node *": allow
+    "bun *": allow
+    "deno *": allow
+    "tsc *": allow
+    "pytest*": allow
+    "python -m pytest*": allow
+    "python *": allow
+    "python3 *": allow
+    "pip *": allow
+    "pip3 *": allow
+    "uv *": allow
+    "ruff *": allow
+    "mypy *": allow
+    "go test*": allow
+    "go build*": allow
+    "go run*": allow
+    "go mod*": allow
+    "go vet*": allow
+    "golangci-lint*": allow
+    "cargo test*": allow
+    "cargo build*": allow
+    "cargo run*": allow
+    "cargo clippy*": allow
+    "cargo fmt*": allow
+    "mvn *": allow
+    "gradle *": allow
+    "gradlew *": allow
+    "dotnet *": allow
+    "make*": allow
+    "cmake*": allow
+    "gcc *": allow
+    "g++ *": allow
+    "clang*": allow
+    "just *": allow
+    "task *": allow
+    "ls*": allow
+    "cat *": allow
+    "head *": allow
+    "tail *": allow
+    "wc *": allow
+    "which *": allow
+    "echo *": allow
+    "mkdir *": allow
+    "pwd": allow
+    "env": allow
+    "printenv*": allow
   task:
     "*": allow
 ---

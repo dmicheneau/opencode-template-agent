@@ -8,10 +8,9 @@ permission:
   write: allow
   edit: ask
   bash:
-    "*": ask
-    git status: allow
-    "git diff*": allow
-    "git log*": allow
+    "*": deny
+    "npx storybook*": allow
+    "npx stylelint*": allow
   task:
     "*": allow
 ---

@@ -5,8 +5,8 @@ description: >
   maintaining standards across the ecosystem.
 mode: subagent
 permission:
-  write: allow
-  edit: ask
+  write: deny
+  edit: deny
   bash: deny
   webfetch: allow
   task:

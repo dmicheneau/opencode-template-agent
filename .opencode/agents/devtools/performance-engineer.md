@@ -5,13 +5,9 @@ description: >
   performance metrics need improvement.
 mode: subagent
 permission:
-  write: allow
-  edit: ask
-  bash:
-    "*": ask
-    git status: allow
-    "git diff*": allow
-    "git log*": allow
+  write: deny
+  edit: deny
+  bash: deny
   task:
     "*": allow
 ---

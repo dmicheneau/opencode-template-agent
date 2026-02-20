@@ -5,7 +5,7 @@ description: >
 mode: subagent
 permission:
   write: allow
-  edit: ask
+  edit: deny
   bash: deny
   webfetch: allow
   task:

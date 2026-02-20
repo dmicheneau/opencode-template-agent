@@ -4,13 +4,9 @@ description: >
   code quality, security vulnerabilities, and best practices.
 mode: subagent
 permission:
-  write: allow
-  edit: ask
-  bash:
-    "*": ask
-    git status: allow
-    "git diff*": allow
-    "git log*": allow
+  write: deny
+  edit: deny
+  bash: deny
   task:
     "*": allow
 ---

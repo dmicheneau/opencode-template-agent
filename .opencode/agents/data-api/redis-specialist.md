@@ -7,12 +7,29 @@ description: >
 mode: subagent
 permission:
   write: allow
-  edit: ask
+  edit: allow
   bash:
     "*": ask
-    git status: allow
-    "git diff*": allow
-    "git log*": allow
+    "psql *": allow
+    "pg_dump*": ask
+    "pg_restore*": ask
+    "redis-cli *": allow
+    "mysql *": allow
+    "mongosh *": allow
+    "sqlite3 *": allow
+    "curl *": ask
+    "httpie *": ask
+    "grpcurl *": allow
+    "git *": allow
+    "ls*": allow
+    "cat *": allow
+    "head *": allow
+    "tail *": allow
+    "jq *": allow
+    "wc *": allow
+    "echo *": allow
+    "mkdir *": allow
+    "pwd": allow
   task:
     "*": allow
 ---

@@ -6,12 +6,31 @@ description: >
 mode: subagent
 permission:
   write: allow
-  edit: ask
+  edit: allow
   bash:
     "*": ask
-    git status: allow
-    "git diff*": allow
-    "git log*": allow
+    "python *": allow
+    "python3 *": allow
+    "pip *": allow
+    "pip3 *": allow
+    "uv *": allow
+    "docker *": allow
+    "kubectl *": allow
+    "mlflow *": allow
+    "wandb *": allow
+    "dvc *": allow
+    "bentoml *": allow
+    "triton*": allow
+    "git *": allow
+    "ls*": allow
+    "cat *": allow
+    "head *": allow
+    "tail *": allow
+    "wc *": allow
+    "echo *": allow
+    "mkdir *": allow
+    "pwd": allow
+    "nvidia-smi*": allow
   task:
     "*": allow
 ---

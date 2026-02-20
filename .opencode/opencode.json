@@ -14,20 +14,27 @@
       ],
       "enabled": true
     },
-    "memory": {
-      "type": "local",
-      "command": [
-        "docker",
-        "run",
-        "-i",
-        "-v",
-        "opencode-agents-memory:/app/dist",
-        "--name",
-        "opencode-agents-memory",
-        "--rm",
-        "mcp/memory"
-      ],
-      "enabled": true
+    // "memory": {
+    //   "type": "local",
+    //   "command": [
+    //     "docker",
+    //     "run",
+    //     "-i",
+    //     "-v",
+    //     "opencode-agents-memory:/app/dist",
+    //     "--name",
+    //     "opencode-agents-memory",
+    //     "--rm",
+    //     "mcp/memory"
+    //   ],
+    //   "enabled": true
+    // },
+    "memoai": {
+      "type": "remote",
+      "url": "https://mcp.dev.memoai.azrod.me/mcp",
+      "headers": {
+        "MEMOAI_PROJECT": "opencode-template-agent"
+      },
     },
     "browsermcp": {
       "type": "local",
@@ -44,7 +51,50 @@
     },
     "bash": {
       "*": "ask",
-      "git *": "allow"
+      "git *": "allow",
+      "npm *": "allow",
+      "npx *": "allow",
+      "yarn *": "allow",
+      "pnpm *": "allow",
+      "node *": "allow",
+      "bun *": "allow",
+      "deno *": "allow",
+      "tsc *": "allow",
+      "pytest*": "allow",
+      "python -m pytest*": "allow",
+      "python *": "allow",
+      "python3 *": "allow",
+      "pip *": "allow",
+      "pip3 *": "allow",
+      "uv *": "allow",
+      "ruff *": "allow",
+      "mypy *": "allow",
+      "go test*": "allow",
+      "go build*": "allow",
+      "go run*": "allow",
+      "go mod*": "allow",
+      "go vet*": "allow",
+      "cargo test*": "allow",
+      "cargo build*": "allow",
+      "cargo run*": "allow",
+      "cargo clippy*": "allow",
+      "cargo fmt*": "allow",
+      "make*": "allow",
+      "cmake*": "allow",
+      "docker *": "allow",
+      "docker-compose *": "allow",
+      "just *": "allow",
+      "ls*": "allow",
+      "cat *": "allow",
+      "head *": "allow",
+      "tail *": "allow",
+      "wc *": "allow",
+      "which *": "allow",
+      "echo *": "allow",
+      "mkdir *": "allow",
+      "pwd": "allow",
+      "env": "allow",
+      "printenv*": "allow"
     }
   }
 }

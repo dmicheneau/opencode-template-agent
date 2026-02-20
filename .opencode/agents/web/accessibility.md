@@ -7,10 +7,10 @@ permission:
   write: allow
   edit: ask
   bash:
-    "*": ask
-    git status: allow
-    "git diff*": allow
-    "git log*": allow
+    "*": deny
+    "npx @axe-core*": allow
+    "npx pa11y*": allow
+    "npx lhci*": allow
   webfetch: allow
   task:
     "*": allow

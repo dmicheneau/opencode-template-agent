@@ -4,9 +4,36 @@ description: >
   search operators, result filtering, and multi-source verification.
 mode: subagent
 permission:
-  write: deny
-  edit: deny
-  bash: deny
+  write: allow
+  edit: ask
+  bash:
+    "*": ask
+    "python *": allow
+    "python3 *": allow
+    "pip *": allow
+    "pip3 *": allow
+    "uv *": allow
+    "jupyter *": allow
+    "ipython*": allow
+    "Rscript *": allow
+    "sqlite3 *": allow
+    "jq *": allow
+    "csvkit*": allow
+    "csvtool*": allow
+    "cat *": allow
+    "head *": allow
+    "tail *": allow
+    "wc *": allow
+    "sort *": allow
+    "uniq *": allow
+    "cut *": allow
+    "ls*": allow
+    "pwd": allow
+    "echo *": allow
+    "git log*": allow
+    "git status*": allow
+    "git diff*": allow
+    "git show*": allow
   task:
     "*": allow
 ---

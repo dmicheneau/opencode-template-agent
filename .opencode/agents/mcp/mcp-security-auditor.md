@@ -8,9 +8,8 @@ permission:
   write: deny
   edit: deny
   bash: deny
-  mcp: deny
   task:
-    '*': allow
+    "*": allow
 ---
 
 <!-- Synced from aitmpl.com | source: davila7/claude-code-templates | category: mcp-dev-team -->

@@ -6,13 +6,29 @@ description: >
   exploitation, and hands-on risk demonstration.
 mode: subagent
 permission:
-  write: deny
-  edit: deny
+  write: allow
+  edit: ask
   bash:
     "*": ask
-    git status: allow
-    "git diff*": allow
+    "nmap *": ask
+    "nikto *": ask
+    "dig *": allow
+    "whois *": allow
+    "nslookup *": allow
+    "ping *": allow
+    "traceroute *": allow
+    "curl *": ask
     "git log*": allow
+    "git status*": allow
+    "git diff*": allow
+    "git show*": allow
+    "ls*": allow
+    "cat *": allow
+    "head *": allow
+    "tail *": allow
+    "which *": allow
+    "echo *": allow
+    "pwd": allow
   task:
     "*": allow
 ---
