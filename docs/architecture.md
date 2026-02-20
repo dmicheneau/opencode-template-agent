@@ -211,7 +211,7 @@ flowchart TB
     subgraph Pipeline["Pipeline GitHub Actions — 10 etapes"]
         Step1["1. Checkout<br/>actions/checkout@v4"]
         Step2["2. Setup Python 3.12<br/>actions/setup-python@v5"]
-        Step3["3. Snapshot pre-sync<br/>Sauvegarde etat courant<br/>de .opencode/agents/"]
+        Step3["3. Snapshot pre-sync<br/>Sauvegarde etat courant<br/>de agents/"]
         Step4["4. sync-agents.py<br/>Fetch upstream<br/>davila7/claude-code-templates"]
 
         subgraph SyncDetail["Details sync-agents.py"]
@@ -219,7 +219,7 @@ flowchart TB
             Convert["Conversion tools: → permission:<br/>dans le frontmatter"]
             Curated["CURATED_AGENTS dict<br/>Agents verifies manuellement"]
             Extended["EXTENDED_AGENTS dict<br/>Agents supplementaires"]
-            WriteFiles["Ecriture<br/>.opencode/agents/*.md<br/>.opencode/agents/manifest.json"]
+            WriteFiles["Ecriture<br/>agents/*.md<br/>agents/manifest.json"]
         end
 
         Step5["5. Detecter changements<br/>Nouveaux | Modifies | Supprimes"]
@@ -292,7 +292,7 @@ flowchart TB
   ou manuellement via `workflow_dispatch` avec des parametres (`tier`, `force`, `dry_run`).
 - **Synchronisation** : `sync-agents.py` (environ 1200 lignes) telecharge les agents depuis
   `davila7/claude-code-templates`, convertit les champs `tools:` deprecies en `permission:`,
-  et ecrit les fichiers dans `.opencode/agents/`. Il distingue les agents curates (verifies
+  et ecrit les fichiers dans `agents/`. Il distingue les agents curates (verifies
   manuellement, dictionnaire `CURATED_AGENTS`) des agents etendus (`EXTENDED_AGENTS`).
 - **Mise a jour du manifest** : `update-manifest.py` fusionne le manifest de synchronisation dans
   le `manifest.json` racine. Les nouveaux agents recoivent le prefix `[NEEDS_REVIEW]` pour

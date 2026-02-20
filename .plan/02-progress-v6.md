@@ -8,6 +8,12 @@
 
 ## Release Progress
 
+### S7 — Agent Separation (2026-02-20)
+- Migrated 72 agent files from `.opencode/agents/` to `agents/` (68 category + 4 root)
+- Added `source_path: "agents"` to manifest.json with fallback `source_path || base_path`
+- Updated src/, scripts/, CI/CD, install.sh, tests
+- 7 new tests for source_path behavior (635 JS + 238 Python = 873 total)
+
 ### V6.0 — MVP (S1 + S5 + S3 core)
 
 | Section | Done | Total | % |
@@ -58,8 +64,8 @@
 
 | Section | Done | Total | % |
 |---------|------|-------|---|
-| S7: Agent Separation | 0 | 6 | 0% |
-| **S7 Total** | **0** | **6** | **0%** |
+| S7: Agent Separation | 6 | 6 | 100% |
+| **S7 Total** | **6** | **6** | **100%** |
 
 ---
 
@@ -71,8 +77,8 @@
 | V6.1 Lifecycle | 46 | 46 | 100% | **Done** |
 | V7.0 Permissions | 54 | 54 | 100% | **Done** |
 | S2 Enrichment | 10 | 46 | 22% | **In Progress — D2 next** |
-| S7 Agent Separation | 0 | 6 | 0% | **Planned — plan v2.1 ready** |
-| **Total** | **140** | **191** | **73%** | |
+| S7 Agent Separation | 6 | 6 | 100% | **Done** |
+| **Total** | **146** | **191** | **76%** | |
 
 ## Review Integration
 

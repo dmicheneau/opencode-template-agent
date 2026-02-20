@@ -37,6 +37,7 @@ import { dirname, join, isAbsolute } from 'node:path';
  *   repo: string;
  *   branch: string;
  *   base_path: string;
+ *   source_path?: string;
  *   agent_count: number;
  *   categories: Record<string, CategoryMeta>;
  *   agents: AgentEntry[];
@@ -59,10 +60,23 @@ export const SAFE_NAME_RE = /^[a-z0-9][a-z0-9._-]*$/i;
  * Validate manifest schema for security-sensitive fields.
  * @param {Manifest} manifest
  */
-function validateManifest(manifest) {
+export function validateManifest(manifest) {
   // Validate base_path
   if (typeof manifest.base_path !== 'string' || manifest.base_path.includes('..') || isAbsolute(manifest.base_path)) {
     throw new Error(`Invalid manifest base_path: "${manifest.base_path}"`);
+  }
+  if (manifest.base_path.includes('\0')) {
+    throw new Error(`Invalid null byte in base_path`);
+  }
+
+  // Validate source_path (optional — used for download URLs when source differs from install path)
+  if (manifest.source_path !== undefined) {
+    if (typeof manifest.source_path !== 'string' || manifest.source_path === '' || manifest.source_path.trim() === '' || manifest.source_path.includes('..') || isAbsolute(manifest.source_path)) {
+      throw new Error(`Invalid manifest source_path: "${manifest.source_path}"`);
+    }
+    if (manifest.source_path.includes('\0')) {
+      throw new Error(`Invalid null byte in source_path`);
+    }
   }
 
   // Validate agents

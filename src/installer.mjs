@@ -139,9 +139,10 @@ function getDestination(agent, cwd) {
  * @param {import('./registry.mjs').AgentEntry} agent
  * @returns {string}
  */
-function getDownloadUrl(agent) {
+export function getDownloadUrl(agent) {
   const manifest = loadManifest();
-  const filePath = `${manifest.base_path}/${agent.path}`;
+  const sourcePath = manifest.source_path || manifest.base_path;
+  const filePath = `${sourcePath}/${agent.path}`;
 
   // Ensure the path ends with the agent filename
   const url = `https://raw.githubusercontent.com/${manifest.repo}/${manifest.branch}/${filePath}.md`;

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Update the root manifest.json with new agents from the sync manifest.
 
-Merges agent entries from the sync-generated manifest (.opencode/agents/manifest.json)
+Merges agent entries from the sync-generated manifest (agents/manifest.json)
 into the root project manifest (manifest.json). New agents are added with a
 [NEEDS_REVIEW] marker so humans can curate them before release.
 
@@ -15,7 +15,7 @@ Usage:
     # Custom paths:
     python3 scripts/update-manifest.py \\
         --root-manifest manifest.json \\
-        --sync-manifest .opencode/agents/manifest.json \\
+        --sync-manifest agents/manifest.json \\
         --metadata-output /tmp/sync-metadata.json
 
     # Dry run (no writes):
@@ -129,7 +129,7 @@ CATEGORY_MAP: Dict[str, str] = {
 """Maps upstream sync categories to our curated category names."""
 
 DEFAULT_ROOT_MANIFEST = "manifest.json"
-DEFAULT_SYNC_MANIFEST = ".opencode/agents/manifest.json"
+DEFAULT_SYNC_MANIFEST = "agents/manifest.json"
 DEFAULT_METADATA_OUTPUT = os.path.join(tempfile.gettempdir(), "sync-metadata.json")
 
 NEEDS_REVIEW_PREFIX = "[NEEDS_REVIEW]"
@@ -248,7 +248,7 @@ def merge_manifests(
           found in the sync manifest.
     """
     project_root = Path(project_root)
-    base_path = root.get("base_path", ".opencode/agents")
+    base_path = root.get("source_path") or root.get("base_path", "agents")
 
     # Build lookup of existing agents by name
     existing: Dict[str, Dict[str, Any]] = {}

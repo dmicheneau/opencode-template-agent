@@ -3,7 +3,7 @@
 test_agents.py - Validation des fichiers agents OpenCode (.md).
 
 Verifie la structure, le frontmatter YAML, les permissions et les conventions
-de nommage pour chaque agent present dans .opencode/agents/.
+de nommage pour chaque agent present dans agents/.
 """
 
 from __future__ import annotations
@@ -19,7 +19,7 @@ from typing import Any, Dict, List, Optional, Tuple
 # ---------------------------------------------------------------------------
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-AGENTS_DIR = PROJECT_ROOT / ".opencode" / "agents"
+AGENTS_DIR = PROJECT_ROOT / "agents"
 
 VALID_MODES = {"primary", "subagent", "all", "byline", "ask"}
 REQUIRED_FIELDS = {"description", "mode"}
@@ -461,7 +461,7 @@ class TestPrimaryAgents(unittest.TestCase):
         )
 
     def test_primary_agents_at_root(self):
-        """Verifie que les agents primary sont a la racine de .opencode/agents/."""
+        """Verifie que les agents primary sont a la racine de agents/."""
         for filepath, meta in self.primary_agents:
             with self.subTest(agent=filepath.name):
                 # Le parent direct doit etre AGENTS_DIR

@@ -305,7 +305,7 @@ get_source_dir() {
     local script_dir
     script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-    if [[ -d "${script_dir}/.opencode/agents" ]]; then
+    if [[ -d "${script_dir}/agents" ]]; then
         printf "%s" "${script_dir}"
         return
     fi
@@ -397,7 +397,7 @@ install_merge() {
     log_info "Existing configuration detected at: ${BOLD}${target_opencode}${RESET}"
     log_info "Your ${BOLD}opencode.json${RESET} and existing agents will NOT be modified."
 
-    local source_agents="${source_dir}/.opencode/agents"
+    local source_agents="${source_dir}/agents"
     local target_agents="${target_opencode}/agents"
     local source_skills="${source_dir}/.opencode/skills"
     local target_skills="${target_opencode}/skills"

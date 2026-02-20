@@ -7,7 +7,7 @@ Reads each file, preserves frontmatter exactly, replaces body with enriched cont
 import os
 import re
 
-AGENTS_DIR = os.path.join(os.path.dirname(__file__), "..", ".opencode", "agents")
+AGENTS_DIR = os.path.join(os.path.dirname(__file__), "..", "agents")
 
 # Agent metadata: (filename_relative_to_AGENTS_DIR, short_identity, archetype, domain_specifics)
 # Archetypes: Builder, Auditor, Analyst, Orchestrator, Specialist

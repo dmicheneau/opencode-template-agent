@@ -1,0 +1,352 @@
+{
+  "accessibility": {
+    "sha256": "009173065d6d9ca4e51788409e15f058f82517b4053594289caf091a6f155976",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "ai-engineer": {
+    "sha256": "54501dfd21b21a9f0f9f71548eb50ecb1ba56917266de6cbad204ae2d77b6f1d",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "angular-architect": {
+    "sha256": "ac36b625ddf9a4f409b199413b5fe5e7303f60367453dbdfe0674cecc6422451",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "api-architect": {
+    "sha256": "1e9e0a120ae31d92a04175ae5d7902d2780f8c75491fa2cd88859f5d946581b7",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "api-documenter": {
+    "sha256": "f9d0acf5e6ac5527d0fa1d55d76d7165555af679a1a74911fe4eb527b98c34d0",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "aws-specialist": {
+    "sha256": "4d4ec14ccf80054c110f56dab4f58479bc563a4bba29f316f0d8cdb65db1ebab",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "business-analyst": {
+    "sha256": "d2eba0eb82767e43cc95b457e73e14057ae6d1e1a5d71650925173f846fdb43a",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "ci-cd-engineer": {
+    "sha256": "dd65dfff999fc6bcd34ca1819e704a5fdd770959b88cecc8415b1428621bc9e4",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "cloud-architect": {
+    "sha256": "95a186ad10e74dc39563b8dc3f451a5ae1fc9ef711bd88282606f5cbc7a76dff",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "code-reviewer": {
+    "sha256": "fad3e1082d68fa5e62ecf3af5bc58f34b24c2c125ade852a7fe2abdf921f1c51",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "cpp-pro": {
+    "sha256": "f959e0aeb5c16d5e033015208f4c6ff186b7b15e4d56e61eec39c70818bb7985",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "csharp-developer": {
+    "sha256": "96a4b5ff482883964bef8792d8aaa734b0199f7157743e75fd74d1c86d969856",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "data-analyst": {
+    "sha256": "58a169f2da0282348eac21b67eec8965d2434b4291190502cbfde23930a70a3a",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "data-engineer": {
+    "sha256": "fd800e180e92d9fc3bf907c1acb396817fa91f84f20684b6377e5cd62bea5f4e",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "data-scientist": {
+    "sha256": "8f1ab0500b649f543a2652f8374467c22f24aa7cd143bdfe0160f36882a6abd2",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "database-architect": {
+    "sha256": "ac0f4b37adaeee63113563b01c9f8ac4d7d2415e59ffdd521bb6bdf73b9cb5d7",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "debugger": {
+    "sha256": "d4cc4f2c7ff89c044e09e149c07092122aade3b0976e167ef46485b64ba08c0f",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "devops-engineer": {
+    "sha256": "43aab8d9683640bfaa65d20226f72e8c5ab9229dc2e1a8f9b7104b3b451dd459",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "diagram-architect": {
+    "sha256": "a8cf0c67b7f84a045afb389937deeda7599585cee825535fd67f2b6406e0aa3d",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "docker-specialist": {
+    "sha256": "225e3414ee005d3013e68847b37b70ef3fb117040460e76aed1845556731b1bd",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "documentation-engineer": {
+    "sha256": "e7b07d58b2b3c9ed1e21266018fadb94d5f3996f1f30f9cb122501fb77445867",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "episode-orchestrator": {
+    "sha256": "45bc79e7ba11ff71f4747e6fc415c580387122655837139e29b3ebe2c881aa31",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "expert-nextjs-developer": {
+    "sha256": "f0889af3111b59c09d10f38c472ea4f9ba7b93cae566005e9ecb1790fd8b355e",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "expert-react-frontend-engineer": {
+    "sha256": "e3ed3f0d9ffa342072ff477fa0f811e03e1ff1776251d11ac5c0d553f48ec2bd",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "fullstack-developer": {
+    "sha256": "ae6e94283f08baa9372627e68de8e3efda75d21552dd96d4b105822789c76a57",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "golang-pro": {
+    "sha256": "af96cb357779148d1714420825ffea66aac3d8910867e6cee32663b8e63cacf2",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "graphql-architect": {
+    "sha256": "08f847e25f21c74fb3c3b20e9efdfb94741be256ea8b1ebc89b88b378ebf87fe",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "java-architect": {
+    "sha256": "6a42ecb1d5953ddb44124fed040a72f4f7b826b2658cde42e8769b643f06d3f9",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "kotlin-specialist": {
+    "sha256": "cb6be22390cb7f2bad9422c3bd1fa2efcf1be92b981bfbe4cc5e28705da0347a",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "kubernetes-specialist": {
+    "sha256": "f2d5fd8ed2aa4200cb667ca3474b449b28e664ac198103edc1d1786cb884e394",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "linux-admin": {
+    "sha256": "3a3ad3b3aaaab154cc86c71c8bae4bb9bfcbb7206d41d84799352809fbecbe0b",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "llm-architect": {
+    "sha256": "9488edbb2ec886d03183664cddaf827cfe11e95ee5c5d0d000a742a650fafa43",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "mcp-developer": {
+    "sha256": "7e8e02139d62591f805dfda7e3be388af2a944971d354dbc6ce71a0df82f3b9e",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "mcp-protocol-specialist": {
+    "sha256": "7cc9a53ecdeb1d9be1cb4bc535fb8462b60ea8eaa15196fc8d7a156998034fdd",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "mcp-security-auditor": {
+    "sha256": "2f1c3acf2b9102dd6b458cf1b878cb6900dcea74e0e21118f2c4a7f3eff516b3",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "mcp-server-architect": {
+    "sha256": "6aceb151fa88ced492c5750fbec2fb0737e0e6be11ec3a3924cc7e21a2becb44",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "microservices-architect": {
+    "sha256": "1419cd0bf7f10c0752ddac6db4ea8fba2fce63a183800d41288cd1cef655ade8",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "ml-engineer": {
+    "sha256": "ddec19077979096b69f5840bea9dc8e35e5d9c9d2a5ee7a70eae67bda6df1c6f",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "mlops-engineer": {
+    "sha256": "3afe0c10bb5764213ce07d3b9a77edc38e8c60c0025928fa189e4ba16d9f8a72",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "mobile-developer": {
+    "sha256": "f971e173e9e5ea88a2bfe2427ae5c40f5f82b01ebaf2441ac3c7c23393bb0ffb",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "penetration-tester": {
+    "sha256": "2148f855892d50d8ad5f810423b7a8cc5fc7762a8d03ac9742d2a5e038dfe521",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "performance-engineer": {
+    "sha256": "0523368e3fbb2580b14d48a5b7927cd90bd63a871fa68532fd4e17e57c766c0a",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "php-pro": {
+    "sha256": "f3eb2d8b145093efb3d9127aa0ebbb933663ea5b17ecd40c196e5b6a969b1d5d",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "platform-engineer": {
+    "sha256": "70cdde925746beaec8ba96cdbd598e0f11763d1e79c112fb2810f46b2d03afa4",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "postgres-pro": {
+    "sha256": "d833578fa2942dce55aca0200103d45ec49587221ae99f438dafaac343f65f7e",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "prd": {
+    "sha256": "3fd06e329fa9edc998af12bfc31fd55dd190abdd6422e92152cdd6fe01da1243",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "product-manager": {
+    "sha256": "77f8a526880b3a2139692e1098a85179ba51be63aeb79692cca2c42445ea9867",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "project-manager": {
+    "sha256": "2d9862df1385577adb1a385a43b14194cb360385dd2be131c92d030333feec46",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "prompt-engineer": {
+    "sha256": "5a922263fa2a18734aaafb797a1e4b0f7ea530d883a81735eb0b34fc0bbf036c",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "python-pro": {
+    "sha256": "1513487f20ab6c4cd6f9682dee088120ae014032a4373ef41ea179a6ed2cda8d",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "qa-expert": {
+    "sha256": "27d0142a5484261fe3676e08bc9b12d90e98873a3ab67fc80729fbf87b898f0f",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "rails-expert": {
+    "sha256": "db3c408491ab0840691e5f126c558bdb7ff7a3015b76ae2a4dbcb72ea6a506f1",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "redis-specialist": {
+    "sha256": "f93f4654421a86e58cb7bbc25ec79936ee8ffed27b4d6546433edcdd6be0645c",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "refactoring-specialist": {
+    "sha256": "b0e84c3ce2b74aa060ad1da9e2e2866a1247d953ed3d73dee0a0698ec72e6e3c",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "rust-pro": {
+    "sha256": "bf3592efd9f4755d1484f0180c313e2f1f2017bf510ac10fb415416de3d7360c",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "screenshot-ui-analyzer": {
+    "sha256": "4f7572e8e10ea4f81fda41875a40608b1d7bf26489567acd5da12654a726eea4",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "scrum-master": {
+    "sha256": "b49ea7b66ff9faec0c21d1923c7d5856bde85acdbddf102f50a004b2c5a626ad",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "search-specialist": {
+    "sha256": "8dd248fa1751daa021c9dd849dba8a2fb18d7296d397be06df9bdddae8093d08",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "security-auditor": {
+    "sha256": "a4b0ef85edacd3b72a537cce1af6bfedb90cc9353cfdd81c38896c08d6012a2e",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "security-engineer": {
+    "sha256": "3b35083d2f5664b1340914566d607db42fa6f453bd0b34af8d98ea97fae9bbf1",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "smart-contract-auditor": {
+    "sha256": "b0c275101a6cdc903f0cd7664a368d0c9f56dd74e9f1f3d9ee85b5845c5e51eb",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "sre-engineer": {
+    "sha256": "53cc59fdcd7f52529143482c76a2308fac0365a870ae628a21bf58a526373725",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "swift-expert": {
+    "sha256": "718d716b0da211d919ea3ec0289bd6a0dde257d3b1c310f5edd70e61b9d2026d",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "technical-writer": {
+    "sha256": "0a2b50b7f7941cca9fdd86898f4d4d70cc203548e60a211b043a18e367c7853b",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "terraform-specialist": {
+    "sha256": "d0fb8c0d2fd804d67e3d0a302cf6ba803f29e7b8f10b99cf09777467ca91e6f5",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "test-automator": {
+    "sha256": "08c50986f80f24d109d531f0c5f8a6e6a0490e5ab1ec162d06c9888036d4c64a",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "typescript-pro": {
+    "sha256": "12a437295305c95ea6367c1857c8bfdfebbf696d6f646a57c839d8e635d9d9cf",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "ui-designer": {
+    "sha256": "d9d953f9213376987695bfc93cfbbbab3d47ff6c959e1b77bc89c28eea9c0286",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "ux-researcher": {
+    "sha256": "5bba85e7667634e63b0885df8a0ad67bc0b47b11162d439b05132dd97b5f6f2f",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  },
+  "vue-expert": {
+    "sha256": "74da26559d8981bfebba7a52bac2efdaba572bad5bebed30cbea2090fe151751",
+    "installedAt": "2026-02-20T16:54:11.234Z",
+    "updatedAt": "2026-02-20T16:54:11.234Z"
+  }
+}

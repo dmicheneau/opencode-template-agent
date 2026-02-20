@@ -92,7 +92,7 @@ jobs:
           import sys, os, re
 
           errors = []
-          agents_dir = '.opencode/agents'
+          agents_dir = 'agents'
 
           for root, dirs, files in os.walk(agents_dir):
               for fname in files:
@@ -181,7 +181,7 @@ jobs:
               echo "ERROR: $f contains deprecated 'tools:' field (use 'permission:' instead)"
               found=1
             fi
-          done < <(find .opencode/agents -name '*.md' -print0)
+          done < <(find agents -name '*.md' -print0)
           if [ "$found" -eq 1 ]; then
             exit 1
           fi
@@ -195,7 +195,7 @@ jobs:
               echo "ERROR: $f contains the artifact 'Specifically:.'"
               found=1
             fi
-          done < <(find .opencode/agents -name '*.md' -print0)
+          done < <(find agents -name '*.md' -print0)
           if [ "$found" -eq 1 ]; then
             exit 1
           fi
@@ -210,7 +210,7 @@ jobs:
               manifest = json.load(f)
 
           errors = []
-          base = manifest.get('base_path', '.opencode/agents')
+          base = manifest.get('source_path') or manifest.get('base_path', 'agents')
 
           for agent in manifest.get('agents', []):
               path = agent.get('path', '')

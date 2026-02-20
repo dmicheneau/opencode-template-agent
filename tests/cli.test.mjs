@@ -928,3 +928,152 @@ describe('CLI unknown flags warning', () => {
       '--version should not trigger unknown flag warning');
   });
 });
+
+// ─── source_path: getDownloadUrl ─────────────────────────────────────────────
+
+describe('source_path: getDownloadUrl', () => {
+  it('should use source_path when present in manifest', async () => {
+    const { getDownloadUrl } = await import('../src/installer.mjs');
+    const { loadManifest, getAgent } = await import('../src/registry.mjs');
+    const manifest = loadManifest();
+    // Real manifest has source_path: "agents" and base_path: ".opencode/agents"
+    assert.ok(manifest.source_path, 'Real manifest should have source_path');
+    assert.notEqual(manifest.source_path, manifest.base_path);
+
+    const agent = getAgent('postgres-pro');
+    assert.ok(agent);
+    const url = getDownloadUrl(agent);
+    // URL should use source_path ("agents"), NOT base_path (".opencode/agents")
+    assert.ok(
+      url.includes(`/${manifest.source_path}/`),
+      `URL should contain source_path "${manifest.source_path}", got: ${url}`
+    );
+    assert.ok(
+      !url.includes(`/${manifest.base_path}/`),
+      `URL should NOT contain base_path "${manifest.base_path}", got: ${url}`
+    );
+  });
+
+  it('should fall back to base_path when source_path is absent', async () => {
+    const { getDownloadUrl } = await import('../src/installer.mjs');
+    const { loadManifest, getAgent } = await import('../src/registry.mjs');
+    const manifest = loadManifest();
+    const agent = getAgent('postgres-pro');
+    assert.ok(agent);
+
+    // Temporarily remove source_path from the cached manifest
+    const saved = manifest.source_path;
+    delete manifest.source_path;
+    try {
+      const url = getDownloadUrl(agent);
+      // Without source_path the URL should fall back to base_path
+      assert.ok(
+        url.includes(`/${manifest.base_path}/`),
+        `URL should contain base_path "${manifest.base_path}" when source_path is absent, got: ${url}`
+      );
+    } finally {
+      manifest.source_path = saved;
+    }
+  });
+
+  it('should reject empty source_path at validation time', async () => {
+    const { validateManifest } = await import('../src/registry.mjs');
+    const bad = {
+      version: '1.0.0',
+      repo: 'test/repo',
+      branch: 'main',
+      base_path: '.opencode/agents',
+      source_path: '',
+      agent_count: 1,
+      categories: { test: { label: 'Test', icon: '🧪', description: 'Test' } },
+      agents: [
+        { name: 'test-agent', category: 'test', path: 'test/test-agent', mode: 'subagent', description: 'Test', tags: ['test'] },
+      ],
+      packs: {},
+    };
+    assert.throws(
+      () => validateManifest(bad),
+      (err) => {
+        assert.ok(err instanceof Error);
+        assert.ok(err.message.includes('source_path'), `Expected "source_path" in error: ${err.message}`);
+        return true;
+      },
+      'Empty source_path should be rejected by validateManifest'
+    );
+  });
+});
+
+// ─── source_path: validateManifest ───────────────────────────────────────────
+
+describe('source_path: validateManifest', () => {
+  /** Build a minimal valid manifest for validation tests. */
+  function validManifest(overrides = {}) {
+    return {
+      version: '1.0.0',
+      repo: 'test/repo',
+      branch: 'main',
+      base_path: '.opencode/agents',
+      agent_count: 1,
+      categories: { test: { label: 'Test', icon: '🧪', description: 'Test' } },
+      agents: [
+        { name: 'test-agent', category: 'test', path: 'test/test-agent', mode: 'subagent', description: 'Test agent', tags: ['test'] },
+      ],
+      packs: {},
+      ...overrides,
+    };
+  }
+
+  it('should accept valid source_path', async () => {
+    const { validateManifest } = await import('../src/registry.mjs');
+    // Should not throw
+    assert.doesNotThrow(
+      () => validateManifest(validManifest({ source_path: 'agents' })),
+      'Manifest with valid source_path should pass validation'
+    );
+  });
+
+  it('should reject source_path containing ".."', async () => {
+    const { validateManifest } = await import('../src/registry.mjs');
+    assert.throws(
+      () => validateManifest(validManifest({ source_path: '../agents' })),
+      (err) => {
+        assert.ok(err instanceof Error);
+        assert.ok(err.message.includes('source_path'), `Expected "source_path" in error: ${err.message}`);
+        return true;
+      },
+      'source_path with ".." should be rejected'
+    );
+  });
+
+  it('should reject absolute source_path', async () => {
+    const { validateManifest } = await import('../src/registry.mjs');
+    assert.throws(
+      () => validateManifest(validManifest({ source_path: '/etc/agents' })),
+      (err) => {
+        assert.ok(err instanceof Error);
+        assert.ok(err.message.includes('source_path'), `Expected "source_path" in error: ${err.message}`);
+        return true;
+      },
+      'Absolute source_path should be rejected'
+    );
+  });
+
+  it('should accept manifest without source_path', async () => {
+    const { validateManifest } = await import('../src/registry.mjs');
+    const manifest = validManifest();
+    delete manifest.source_path;
+    assert.doesNotThrow(
+      () => validateManifest(manifest),
+      'Manifest without source_path should pass validation (it is optional)'
+    );
+  });
+
+  it('should reject source_path containing null byte', async () => {
+    const { validateManifest } = await import('../src/registry.mjs');
+    assert.throws(
+      () => validateManifest(validManifest({ source_path: 'agents\0evil' })),
+      /source_path/i,
+      'source_path with null byte should be rejected'
+    );
+  });
+});

@@ -2,6 +2,7 @@
   "version": "1.0.0",
   "repo": "dmicheneau/opencode-template-agent",
   "branch": "main",
+  "source_path": "agents",
   "base_path": ".opencode/agents",
   "agent_count": 70,
   "categories": {

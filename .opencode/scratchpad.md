@@ -1,26 +1,27 @@
-# Current Mission
-Séparation agents produit / agents de développement (S7)
+# Current Mission — COMPLETE
+S7 — Séparation agents produit / agents de développement
 
-## Plan
-1. [done] Analyser l'architecture actuelle — identifier le problème de dual-usage de `.opencode/agents/`
-2. [done] Auditer tous les fichiers impactés (src/, scripts/, tests/, CI, docs)
-3. [done] Rédiger le plan `.plan/07-agent-separation.md`
-4. [pending] Validation du plan par l'utilisateur
-5. [pending] Exécution Phase 0-4 de la migration
+## Status: DONE ✅
+Migration exécutée, reviewée (2 rounds), tous fixes appliqués.
 
-## Agent Results
-- explore agent: 70 agents produit dans `.opencode/agents/`, 16 skills dans `.opencode/skills/`, pas de `templates/` existant
-- general agent (audit): Découverte critique — `manifest.json` `base_path` sert à la fois pour source (GitHub raw URL) ET destination (install chez l'utilisateur). Doit être splitté en `source_path` + `base_path`.
-- Fichiers impactés: manifest.json, src/installer.mjs, src/registry.mjs, scripts/sync-agents.py, scripts/update-manifest.py, scripts/enrich_agents.py, tests/test_agents.py, tests/cli.test.mjs, .github/workflows/ci.yml, .github/workflows/sync-agents.yml, install.sh, README.md, docs/architecture.md
+## What was done
+1. 72 fichiers migrés de `.opencode/agents/` vers `agents/` via `git mv`
+2. `source_path: "agents"` ajouté à manifest.json (fallback `source_path || base_path`)
+3. Code mis à jour : src/installer.mjs, src/registry.mjs, 3 scripts Python, 2 workflows CI, install.sh
+4. 8 nouveaux tests (source_path validation, fallback, null byte)
+5. Documentation mise à jour (architecture.md, progress-v6.md)
+6. Nettoyage : répertoires vides supprimés, README.md agents/ supprimé (conflit glob tests)
 
-## Decisions
-- D1: Agents produit déplacés vers `agents/` à la racine (choix utilisateur, option recommandée)
-- D2: manifest.json aura un nouveau champ `source_path: "agents"` (pour GitHub raw download), `base_path` reste `.opencode/agents` (destination d'installation chez l'utilisateur)
-- D3: Rétrocompatibilité via fallback `source_path || base_path` dans getDownloadUrl()
+## Test Results
+- JS: 636/636 pass
+- Python: 238/237 pass + 1 skip (attendu)
+- Total: 874 tests, 0 failure (baseline était 866)
 
-## Open Questions
-- Validation du plan par l'utilisateur avant exécution
+## Review
+- R1: CHANGES_REQUESTED (1 critical CI validation, 1 major test quality, 2 minor validation)
+- R2: APPROVED (all fixes verified + 6 additional polish items applied)
 
-## Parked Scopes
-- S2 Content Enrichment (D2-D5): bloqué par S7, à reprendre après migration
+## Next Steps
+- Commit quand l'utilisateur le demande
+- S2 Content Enrichment est débloqué
 - V6.0 MVP: 9 tasks restantes (S3 core + release)

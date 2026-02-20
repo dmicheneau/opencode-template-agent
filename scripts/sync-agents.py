@@ -1429,8 +1429,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--output-dir",
         type=str,
-        default=".opencode/agents",
-        help="Output directory for agent files (default: .opencode/agents)",
+        default="agents",
+        help="Output directory for agent files (default: agents)",
     )
     parser.add_argument(
         "--list",
