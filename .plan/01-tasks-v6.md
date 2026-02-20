@@ -2,7 +2,7 @@
 
 **Plan:** [00-plan-v6.md](00-plan-v6.md)
 **Created:** 2026-02-18
-**Updated:** 2026-02-19 (post-review revision: release split + new tasks from 4 reviews + code review hardening + Major CR fixes + Minor/Low CR fixes — ALL 21 CR issues resolved + V7.0 post-release code review: 16 issues fixed)
+**Updated:** 2026-02-19 (post-review revision: release split + new tasks from 4 reviews + code review hardening + Major CR fixes + Minor/Low CR fixes — ALL 21 CR issues resolved + V7.0 post-release code review: 16 issues fixed + S2 D1 code review CR3: 29 issues fixed)
 
 ---
 
@@ -246,6 +246,10 @@
 - [x] **S2.8** Add quality score computation to sync pipeline
 - [x] **S2.9** Write tests for sync pipeline changes
 
+### Post-D1 Code Review (CR3 — 29 issues fixed)
+
+- [x] **CR3** Code review of S2 D1 enrichment infrastructure — 29 issues fixed (12 code + 17 design docs), commit `657cae4`, 866 tests passing (628 JS + 238 Python)
+
 ### D2 — Languages & DevTools (20 agents)
 
 - [ ] **S2.10** Enrich `languages/typescript-pro.md`
@@ -304,8 +308,8 @@
 | V6.1 — Lifecycle | 46 tasks (29 + 4 CR hardening + 8 Major fixes + 5 Minor/Low fixes) | 3-4 days |
 | V7.0 — Permissions | 38 tasks ✅ | 5-7 days |
 | V7.0 Post-release CR | 16 tasks ✅ (1 critical + 3 high + 6 medium + 6 low) | 1 day |
-| S2 — Enrichment | 45 tasks | 10-14 weeks |
-| **Total** | **184 tasks** | — |
+| S2 — Enrichment | 46 tasks (45 + 1 CR3) | 10-14 weeks |
+| **Total** | **185 tasks** | — |
 
 ### Key Review Findings Incorporated
 

@@ -24,7 +24,6 @@ AGENTS_DIR = PROJECT_ROOT / ".opencode" / "agents"
 VALID_MODES = {"primary", "subagent", "all", "byline", "ask"}
 REQUIRED_FIELDS = {"description", "mode"}
 FILENAME_PATTERN = re.compile(r"^[a-z0-9-]+\.md$")
-SYNC_HEADER_PATTERN = re.compile(r"<!--\s*Synced from aitmpl\.com\b")
 
 
 # ---------------------------------------------------------------------------
@@ -375,42 +374,26 @@ class TestAgentFiles(unittest.TestCase):
                 )
 
 
-class TestSyncedAgents(unittest.TestCase):
-    """Validation specifique aux agents synchronises depuis aitmpl.com."""
+class TestEnrichedAgents(unittest.TestCase):
+    """Validation structurelle des agents enrichis (independante du header sync)."""
+
+    HEADING_PATTERN = re.compile(r"^#{1,4}\s+\S", re.MULTILINE)
+    HTML_COMMENT_PATTERN = re.compile(r"<!--.*?-->", re.DOTALL)
 
     @classmethod
     def setUpClass(cls):
-        """Identifie les agents synchronises."""
-        cls.synced_agents: List[Tuple[Path, Dict[str, Any], str]] = []
+        """Charge tous les agents."""
+        cls.all_agents: List[Tuple[Path, Dict[str, Any], str]] = []
         for filepath in discover_agents():
             try:
                 meta, body, raw_fm = load_agent(filepath)
-                content = filepath.read_text(encoding="utf-8")
-                if SYNC_HEADER_PATTERN.search(content):
-                    cls.synced_agents.append((filepath, meta, body))
+                cls.all_agents.append((filepath, meta, body))
             except ValueError:
                 continue
 
-    def test_synced_agents_exist(self):
-        """Verifie qu'il y a au moins un agent synchronise."""
-        self.assertGreater(
-            len(self.synced_agents),
-            0,
-            "Aucun agent synchronise trouve",
-        )
-
-    def test_sync_header_present(self):
-        """Verifie que le header de synchronisation est present dans le body."""
-        for filepath, meta, body in self.synced_agents:
-            with self.subTest(agent=filepath.name):
-                self.assertTrue(
-                    SYNC_HEADER_PATTERN.search(body),
-                    f"{filepath.name}: header de sync manquant dans le body",
-                )
-
-    def test_task_permission_with_wildcard_allow(self):
-        """Verifie que les agents synced ont task: '*': allow dans permission."""
-        for filepath, meta, body in self.synced_agents:
+    def test_all_agents_have_task_permission(self):
+        """Verifie que chaque agent a task: '*': allow dans permission."""
+        for filepath, meta, body in self.all_agents:
             with self.subTest(agent=filepath.name):
                 perms = meta.get("permission", {})
                 self.assertIn(
@@ -429,6 +412,28 @@ class TestSyncedAgents(unittest.TestCase):
                     "allow",
                     f"{filepath.name}: task.'*' doit etre 'allow', "
                     f"recu: {task_val.get('*')}",
+                )
+
+    def test_agents_have_role_definition(self):
+        """Verifie que le body contient du contenu substantiel (role, instructions)."""
+        for filepath, meta, body in self.all_agents:
+            with self.subTest(agent=filepath.name):
+                # Retirer les commentaires HTML pour mesurer le contenu reel
+                clean_body = self.HTML_COMMENT_PATTERN.sub("", body).strip()
+                self.assertGreater(
+                    len(clean_body),
+                    200,
+                    f"{filepath.name}: body trop court apres suppression des commentaires "
+                    f"({len(clean_body)} <= 200 chars)",
+                )
+
+    def test_agents_body_has_structured_content(self):
+        """Verifie que le body contient au moins un heading markdown."""
+        for filepath, meta, body in self.all_agents:
+            with self.subTest(agent=filepath.name):
+                self.assertTrue(
+                    self.HEADING_PATTERN.search(body),
+                    f"{filepath.name}: aucun heading markdown trouve dans le body",
                 )
 
 
