@@ -1,30 +1,26 @@
 # Current Mission
-Fix bash permission issues across global config and 70 agent frontmatters
+Séparation agents produit / agents de développement (S7)
 
 ## Plan
-1. [done] Fix global config opencode.json — expanded bash patterns for common dev tools
-2. [done] Fix 70 agent frontmatters — applied 5 archetype permission profiles (Builder/Auditor/Analyst/Orchestrator/Specialist)
-3. [done] Restored webfetch: allow on agents that needed it
-4. [done] Fixed 3 major review issues (accessibility bash whitelist, ui-designer bash whitelist, docs webfetch)
-5. [done] Review passed — archetype consistency verified across all 70 agents
-6. [done] Tests: 866/866 passing (628 JS + 238 Python)
+1. [done] Analyser l'architecture actuelle — identifier le problème de dual-usage de `.opencode/agents/`
+2. [done] Auditer tous les fichiers impactés (src/, scripts/, tests/, CI, docs)
+3. [done] Rédiger le plan `.plan/07-agent-separation.md`
+4. [pending] Validation du plan par l'utilisateur
+5. [pending] Exécution Phase 0-4 de la migration
 
 ## Agent Results
-- Builder (28 agents): edit upgraded to allow, comprehensive bash whitelist (50+ patterns)
-- Auditor (9 agents): write/edit/bash all deny, task only
-- Analyst (6 agents): data-focused bash whitelist (python, jupyter, sqlite3, csvkit, git read)
-- Orchestrator (5 agents): write allow, edit/bash deny, task allow. episode-orchestrator kept full access.
-- Specialist (22 agents): 6 sub-profiles with domain-specific bash patterns (infra, data, security, docs, ai-infra, architecture)
+- explore agent: 70 agents produit dans `.opencode/agents/`, 16 skills dans `.opencode/skills/`, pas de `templates/` existant
+- general agent (audit): Découverte critique — `manifest.json` `base_path` sert à la fois pour source (GitHub raw URL) ET destination (install chez l'utilisateur). Doit être splitté en `source_path` + `base_path`.
+- Fichiers impactés: manifest.json, src/installer.mjs, src/registry.mjs, scripts/sync-agents.py, scripts/update-manifest.py, scripts/enrich_agents.py, tests/test_agents.py, tests/cli.test.mjs, .github/workflows/ci.yml, .github/workflows/sync-agents.yml, install.sh, README.md, docs/architecture.md
 
 ## Decisions
-- accessibility.md and ui-designer.md: hybrid Auditor+tools profile (bash deny except specific npx tools they need)
-- webfetch: allow restored on 10 agents that use it in their workflow
-- Global config uses JSONC (comments) — valid for opencode, noted as minor
-- docker-specialist and terraform-specialist use Builder profile (not Infra) since they're in the Builder archetype mapping
+- D1: Agents produit déplacés vers `agents/` à la racine (choix utilisateur, option recommandée)
+- D2: manifest.json aura un nouveau champ `source_path: "agents"` (pour GitHub raw download), `base_path` reste `.opencode/agents` (destination d'installation chez l'utilisateur)
+- D3: Rétrocompatibilité via fallback `source_path || base_path` dans getDownloadUrl()
 
 ## Open Questions
-- None — ready for commit if user wants
+- Validation du plan par l'utilisateur avant exécution
 
 ## Parked Scopes
-- S2 Content Enrichment (D2-D5): user questioning whether this is worth doing. May reduce scope.
-- V6.0 MVP: 9 tasks remaining (S3 core + release tasks)
+- S2 Content Enrichment (D2-D5): bloqué par S7, à reprendre après migration
+- V6.0 MVP: 9 tasks restantes (S3 core + release)

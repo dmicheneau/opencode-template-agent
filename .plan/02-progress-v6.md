@@ -2,7 +2,7 @@
 
 **Plan:** [00-plan-v6.md](00-plan-v6.md)
 **Tasks:** [01-tasks-v6.md](01-tasks-v6.md)
-**Updated:** 2026-02-19 (S2 D1 CR3 complete: 29 issues fixed, ready for D2)
+**Updated:** 2026-02-20 (S7 agent separation plan finalized v2.1, ready for execution)
 
 ---
 
@@ -54,6 +54,13 @@
 | D5: Business, MCP, Primary | 0 | 6 | 0% |
 | **S2 Total** | **10** | **46** | **22%** |
 
+### S7 — Agent Separation
+
+| Section | Done | Total | % |
+|---------|------|-------|---|
+| S7: Agent Separation | 0 | 6 | 0% |
+| **S7 Total** | **0** | **6** | **0%** |
+
 ---
 
 ## Overall
@@ -64,7 +71,8 @@
 | V6.1 Lifecycle | 46 | 46 | 100% | **Done** |
 | V7.0 Permissions | 54 | 54 | 100% | **Done** |
 | S2 Enrichment | 10 | 46 | 22% | **In Progress — D2 next** |
-| **Total** | **140** | **185** | **76%** | |
+| S7 Agent Separation | 0 | 6 | 0% | **Planned — plan v2.1 ready** |
+| **Total** | **140** | **191** | **73%** | |
 
 ## Review Integration
 
@@ -90,6 +98,7 @@
 - [x] V7.0 Post-release code review (CR2 — 16 issues): C-1 parsePermissionFlags --flag=value normalization, H-1 cmdUpdate permissions propagation, H-2 basePath in recordInstall/removeLockEntry, H-3 byline→subagent default mode, M-1 quoteKey alignment JS/Python, M-2 Esc permission-edit→preset-select, M-3 viewport overflow with inline warnings, M-4 CATEGORY_MAP alignment, M-5 comment fix, M-6 cache 304/404 distinction, L-1 dead flags removed, L-2 dead code removed, L-3 o/O hint added, L-4 padEndAscii, L-5 atomic write_manifest, L-6 symlink check in cache removal — 805 tests passing
 - [x] S2 D1 Template & Infrastructure (9/9): universal agent template structure (Identity/Workflow/Decision/Tools/Quality), 5 permission archetypes (Builder/Auditor/Analyst/Orchestrator/Specialist), 10 category colors (WCAG AA), quality scoring rubric (8 dimensions, 1-5 scale), sync pipeline enrichment (YAML schema validation, template conformance, quality score computation), tests for sync pipeline changes
 - [x] S2 D1 Code Review CR3 (commit 657cae4): 29 issues fixed (12 code + 17 design docs), 866 tests passing (628 JS + 238 Python). **D1 infrastructure validated — ready for D2 enrichment phase.**
+- [x] S7 Agent Separation plan (v2.1 — 2 review rounds): product agents in `.opencode/agents/` conflicted with OpenCode's active agent directory → silent write failures. Solution: move to `agents/` at root, split `manifest.json` `base_path` into `source_path` (GitHub repo) + `base_path` (local install destination). Key discovery: `base_path` was overloaded for both download and install. Deployment sequence: merge first, npm publish after (~5-10 min risk window). Full plan in `.plan/07-agent-separation.md`. **Plan ready, execution not started. Est. ~3h.**
 
 **Backlog (remaining V6.0 S3 core tasks):** S3.4 (corrupted JSON recovery), S3.5 (manifest sha256/size fields), S3.6 (Python sync hashes), S3.9-S3.10 (TUI state indicators), S3.12 (cache invalidation), S3.16 (Python sync tests)
 
@@ -116,3 +125,6 @@
 | 2026-02-19 | XDG_CONFIG_HOME for persistence | W-09: respect platform conventions |
 | 2026-02-19 | Ship CR hardening post-V6.1 release | 4 fixes (C-1, C-2, C-3, SEC-01), remaining Major/Minor issues in backlog |
 | 2026-02-19 | Ship CR Major fixes post-hardening | 8 fixes (lock M-1/M-5/M-6, installer M-2/M-4, TUI M-1/M-2/M-5), 562 tests |
+| 2026-02-20 | Move product agents from `.opencode/agents/` to `agents/` | S7: conflicts with OpenCode's active agent dir, silent write failures |
+| 2026-02-20 | Split `base_path` into `source_path` + `base_path` | S7: single field was overloaded for GitHub download and local install |
+| 2026-02-20 | Merge-first deploy sequence for S7 | ~5-10 min risk window acceptable vs. coordinated atomic deploy complexity |
