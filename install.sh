@@ -28,6 +28,12 @@ set -euo pipefail
 # ---------------------------------------------------------------------------
 readonly VERSION="7.0.0"
 readonly REPO_URL="https://github.com/dmicheneau/opencode-template-agent.git"
+
+if [[ -z "${HOME:-}" ]]; then
+    printf 'FATAL: $HOME is not set. Cannot determine installation paths.\n' >&2
+    exit 1
+fi
+
 readonly REPO_INSTALL_DIR="${HOME}/.local/share/opencode-agents"
 readonly LOG_FILE="${REPO_INSTALL_DIR}/install.log"
 readonly MARKER_FILE=".opencode-agents-installed"
@@ -192,8 +198,18 @@ confirm() {
     fi
 
     printf '%s?%s  %s %s ' "${BOLD}" "${RESET}" "${prompt}" "${yn_hint}"
-    read -r answer </dev/tty 2>/dev/null || answer=""
-    answer="${answer:-${default}}"
+    if [[ -t 0 ]] || [[ -e /dev/tty ]] && read -r answer </dev/tty 2>/dev/null; then
+        answer="${answer:-${default}}"
+    else
+        # No TTY available — cannot prompt the user
+        if [[ "${OPT_FORCE}" == true ]]; then
+            answer="y"
+        else
+            log_warn "No TTY available for confirmation prompt. Defaulting to 'no'."
+            log_warn "Use --force to skip confirmations in non-interactive environments."
+            answer="n"
+        fi
+    fi
 
     case "${answer}" in
         [Yy]|[Yy][Ee][Ss]) return 0 ;;
@@ -211,9 +227,11 @@ progress_bar() {
     local width=30
     local pct=0
 
-    if [[ "${total}" -gt 0 ]]; then
-        pct=$(( current * 100 / total ))
+    if [[ "${total}" -le 0 ]]; then
+        return
     fi
+
+    pct=$(( current * 100 / total ))
 
     local filled=$(( current * width / total ))
     local empty=$(( width - filled ))
@@ -272,6 +290,11 @@ detect_config() {
 # Ensure the source repo is cloned/updated locally
 # ---------------------------------------------------------------------------
 ensure_repo() {
+    if ! command -v git &>/dev/null; then
+        log_error "git is required but not found in PATH. Please install git first."
+        exit 1
+    fi
+
     if [[ -d "${REPO_INSTALL_DIR}/.git" ]]; then
         log_info "Updating agent repository..."
         if [[ "${OPT_DRY_RUN}" == true ]]; then
@@ -835,6 +858,9 @@ configure_shell_profile() {
 # ---------------------------------------------------------------------------
 main() {
     setup_colors
+
+    trap 'printf "\n"; log_warn "Installation interrupted. State may be incomplete."; exit 130' INT TERM
+
     parse_args "$@"
 
     printf '\n'

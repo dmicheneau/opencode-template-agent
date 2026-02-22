@@ -378,7 +378,10 @@ def extract_frontmatter(content):
     if not content.startswith("---"):
         return None, content
     # Find the closing ---
-    end = content.index("---", 3)
+    try:
+        end = content.index("---", 3)
+    except ValueError:
+        return None, content
     frontmatter = content[: end + 3]
     body = content[end + 3 :]
     return frontmatter, body
@@ -427,7 +430,7 @@ def process_file(relpath, meta):
         print(f"SKIP (not found): {relpath}")
         return False
 
-    with open(filepath, "r") as f:
+    with open(filepath, "r", encoding="utf-8") as f:
         content = f.read()
 
     frontmatter, _ = extract_frontmatter(content)
@@ -438,11 +441,11 @@ def process_file(relpath, meta):
     body = build_body(meta)
     new_content = frontmatter + "\n\n" + body
 
-    with open(filepath, "w") as f:
+    with open(filepath, "w", encoding="utf-8") as f:
         f.write(new_content)
 
     # Verify
-    with open(filepath, "r") as f:
+    with open(filepath, "r", encoding="utf-8") as f:
         written = f.read()
 
     lines = written.count("\n") + 1

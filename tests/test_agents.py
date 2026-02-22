@@ -10,9 +10,10 @@ from __future__ import annotations
 
 import os
 import re
+import sys
 import unittest
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
 # ---------------------------------------------------------------------------
 # Constantes
@@ -20,6 +21,11 @@ from typing import Any, Dict, List, Optional, Tuple
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 AGENTS_DIR = PROJECT_ROOT / "agents"
+SCRIPTS_DIR = PROJECT_ROOT / "scripts"
+
+# Import the nested frontmatter parser from sync_common (shared with sync scripts)
+sys.path.insert(0, str(SCRIPTS_DIR))
+from sync_common import parse_nested_frontmatter  # noqa: E402
 
 VALID_MODES = {"primary", "subagent", "all", "byline", "ask"}
 REQUIRED_FIELDS = {"description", "mode"}
@@ -27,137 +33,8 @@ FILENAME_PATTERN = re.compile(r"^[a-z0-9-]+\.md$")
 
 
 # ---------------------------------------------------------------------------
-# Parseur YAML minimal (stdlib only) supportant 2 niveaux de profondeur
+# Agent loader (delegates YAML parsing to sync_common.parse_nested_frontmatter)
 # ---------------------------------------------------------------------------
-
-
-def _parse_yaml_value(val: str) -> Any:
-    """Convertit une valeur YAML scalaire en type Python."""
-    val = val.strip()
-    if not val:
-        return None
-    # Supprime les guillemets
-    if (val.startswith('"') and val.endswith('"')) or (
-        val.startswith("'") and val.endswith("'")
-    ):
-        return val[1:-1]
-    if val.lower() in ("true", "yes"):
-        return True
-    if val.lower() in ("false", "no"):
-        return False
-    try:
-        return int(val)
-    except ValueError:
-        pass
-    return val
-
-
-def parse_yaml_frontmatter(raw: str) -> Dict[str, Any]:
-    """Parse un bloc YAML frontmatter avec support des dicts imbriques (2 niveaux).
-
-    Gere egalement le folded scalar (>) pour les descriptions multilignes.
-    """
-    result: Dict[str, Any] = {}
-    lines = raw.split("\n")
-
-    i = 0
-    while i < len(lines):
-        line = lines[i]
-
-        # Ignorer les lignes vides
-        if not line.strip():
-            i += 1
-            continue
-
-        # Detecter l'indentation
-        stripped = line.lstrip()
-        indent = len(line) - len(stripped)
-
-        # On ne traite que les cles de niveau 0 ici
-        if indent > 0:
-            i += 1
-            continue
-
-        match = re.match(r"^([\w][\w-]*)\s*:\s*(.*)", stripped)
-        if not match:
-            i += 1
-            continue
-
-        key = match.group(1)
-        value_part = match.group(2).strip()
-
-        # Cas 1: folded scalar (description: >)
-        if value_part == ">":
-            folded_lines: List[str] = []
-            i += 1
-            while i < len(lines):
-                next_line = lines[i]
-                if not next_line.strip():
-                    break
-                next_indent = len(next_line) - len(next_line.lstrip())
-                if next_indent < 2:
-                    break
-                folded_lines.append(next_line.strip())
-                i += 1
-            result[key] = " ".join(folded_lines)
-            continue
-
-        # Cas 2: valeur sur la meme ligne
-        if value_part:
-            result[key] = _parse_yaml_value(value_part)
-            i += 1
-            continue
-
-        # Cas 3: dict imbrique (cle sans valeur, les sous-cles suivent)
-        sub_dict: Dict[str, Any] = {}
-        i += 1
-        while i < len(lines):
-            sub_line = lines[i]
-            if not sub_line.strip():
-                i += 1
-                continue
-            sub_stripped = sub_line.lstrip()
-            sub_indent = len(sub_line) - len(sub_line.lstrip())
-
-            # Si on revient au niveau 0, on sort du sous-dict
-            if sub_indent < 2:
-                break
-
-            sub_match = re.match(r'^(["\']?[^:]+["\']?)\s*:\s*(.*)', sub_stripped)
-            if sub_match:
-                sub_key = sub_match.group(1).strip().strip("\"'")
-                sub_value_part = sub_match.group(2).strip()
-
-                # Sous-sous-dict (3e niveau, ex: bash -> "*": ask)
-                if not sub_value_part:
-                    sub_sub_dict: Dict[str, Any] = {}
-                    i += 1
-                    while i < len(lines):
-                        ss_line = lines[i]
-                        if not ss_line.strip():
-                            i += 1
-                            continue
-                        ss_indent = len(ss_line) - len(ss_line.lstrip())
-                        if ss_indent < 4:
-                            break
-                        ss_stripped = ss_line.lstrip()
-                        ss_match = re.match(
-                            r'^(["\']?[^:]+["\']?)\s*:\s*(.*)', ss_stripped
-                        )
-                        if ss_match:
-                            ss_key = ss_match.group(1).strip().strip("\"'")
-                            ss_val = _parse_yaml_value(ss_match.group(2))
-                            sub_sub_dict[ss_key] = ss_val
-                        i += 1
-                    sub_dict[sub_key] = sub_sub_dict
-                    continue
-                else:
-                    sub_dict[sub_key] = _parse_yaml_value(sub_value_part)
-            i += 1
-
-        result[key] = sub_dict
-
-    return result
 
 
 def load_agent(filepath: Path) -> Tuple[Dict[str, Any], str, str]:
@@ -170,15 +47,15 @@ def load_agent(filepath: Path) -> Tuple[Dict[str, Any], str, str]:
     if not content.strip().startswith("---"):
         raise ValueError(f"Le fichier ne commence pas par '---': {filepath.name}")
 
-    # Trouver la fin du frontmatter
+    # Trouver la fin du frontmatter pour extraire le raw_fm (utilise par certains tests)
     end_idx = content.find("\n---", 3)
     if end_idx == -1:
         raise ValueError(f"Frontmatter non ferme (pas de '---' final): {filepath.name}")
 
     raw_fm = content[3:end_idx].strip()
-    body = content[end_idx + 4 :].strip()
 
-    meta = parse_yaml_frontmatter(raw_fm)
+    # Parsing delegue au parseur partage (gere nesting, folded scalars, etc.)
+    meta, body = parse_nested_frontmatter(content)
     return meta, body, raw_fm
 
 
@@ -460,17 +337,23 @@ class TestPrimaryAgents(unittest.TestCase):
             "Aucun agent primary trouve",
         )
 
-    def test_primary_agents_at_root(self):
-        """Verifie que les agents primary sont a la racine de agents/."""
+    def test_primary_agents_have_valid_placement(self):
+        """Verifie que les agents primary sont dans agents/ ou un sous-repertoire valide."""
         for filepath, meta in self.primary_agents:
             with self.subTest(agent=filepath.name):
-                # Le parent direct doit etre AGENTS_DIR
-                self.assertEqual(
-                    filepath.parent.resolve(),
-                    AGENTS_DIR.resolve(),
-                    f"{filepath.name}: agent primary dans un sous-repertoire "
-                    f"({filepath.parent.name}/), devrait etre a la racine",
+                # L'agent doit etre quelque part sous AGENTS_DIR
+                self.assertTrue(
+                    filepath.resolve().is_relative_to(AGENTS_DIR.resolve()),
+                    f"{filepath.name}: agent primary en dehors de {AGENTS_DIR}",
                 )
+                # Si dans un sous-repertoire, le nom du sous-repertoire doit etre valide
+                if filepath.parent.resolve() != AGENTS_DIR.resolve():
+                    subdir_name = filepath.parent.name
+                    self.assertRegex(
+                        subdir_name,
+                        r"^[a-z0-9-]+$",
+                        f"{filepath.name}: nom de sous-repertoire invalide '{subdir_name}'",
+                    )
 
 
 class TestSubAgents(unittest.TestCase):

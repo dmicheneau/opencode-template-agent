@@ -2,7 +2,7 @@
 
 **Plan:** [00-plan-v6.md](00-plan-v6.md)
 **Tasks:** [01-tasks-v6.md](01-tasks-v6.md)
-**Updated:** 2026-02-20 (S7 agent separation plan finalized v2.1, ready for execution)
+**Updated:** 2026-02-22 (S2 complete — 70/70 agents enriched, avg 4.80)
 
 ---
 
@@ -54,11 +54,11 @@
 |---------|------|-------|---|
 | D1: Template & Infrastructure | 9 | 9 | 100% |
 | D1: Post-D1 Code Review (CR3) | 1 | 1 | 100% |
-| D2: Languages & DevTools | 0 | 20 | 0% |
-| D3: AI, Security, DevOps | 0 | 5 | 0% |
-| D4: Web, Data-API, Docs | 0 | 5 | 0% |
-| D5: Business, MCP, Primary | 0 | 6 | 0% |
-| **S2 Total** | **10** | **46** | **22%** |
+| D2: Languages & DevTools | 20 | 20 | 100% |
+| D3: AI, Security, DevOps | 5 | 5 | 100% |
+| D4: Web, Data-API, Docs | 5 | 5 | 100% |
+| D5: Business, MCP, Primary | 6 | 6 | 100% |
+| **S2 Total** | **46** | **46** | **100%** |
 
 ### S7 — Agent Separation
 
@@ -76,9 +76,9 @@
 | V6.0 MVP | 30 | 39 | 77% | **In Progress** |
 | V6.1 Lifecycle | 46 | 46 | 100% | **Done** |
 | V7.0 Permissions | 54 | 54 | 100% | **Done** |
-| S2 Enrichment | 10 | 46 | 22% | **In Progress — D2 next** |
+| S2 Enrichment | 46 | 46 | 100% | **Done** |
 | S7 Agent Separation | 6 | 6 | 100% | **Done** |
-| **Total** | **146** | **191** | **76%** | |
+| **Total** | **182** | **191** | **95%** | |
 
 ## Review Integration
 
@@ -104,6 +104,7 @@
 - [x] V7.0 Post-release code review (CR2 — 16 issues): C-1 parsePermissionFlags --flag=value normalization, H-1 cmdUpdate permissions propagation, H-2 basePath in recordInstall/removeLockEntry, H-3 byline→subagent default mode, M-1 quoteKey alignment JS/Python, M-2 Esc permission-edit→preset-select, M-3 viewport overflow with inline warnings, M-4 CATEGORY_MAP alignment, M-5 comment fix, M-6 cache 304/404 distinction, L-1 dead flags removed, L-2 dead code removed, L-3 o/O hint added, L-4 padEndAscii, L-5 atomic write_manifest, L-6 symlink check in cache removal — 805 tests passing
 - [x] S2 D1 Template & Infrastructure (9/9): universal agent template structure (Identity/Workflow/Decision/Tools/Quality), 5 permission archetypes (Builder/Auditor/Analyst/Orchestrator/Specialist), 10 category colors (WCAG AA), quality scoring rubric (8 dimensions, 1-5 scale), sync pipeline enrichment (YAML schema validation, template conformance, quality score computation), tests for sync pipeline changes
 - [x] S2 D1 Code Review CR3 (commit 657cae4): 29 issues fixed (12 code + 17 design docs), 866 tests passing (628 JS + 238 Python). **D1 infrastructure validated — ready for D2 enrichment phase.**
+- [x] S2 D2-D5 Agent Enrichment (70/70 agents): D2 Languages+DevTools (18 agents, avg 4.72), D3 AI+Security+DevOps (21 agents, avg 4.76), D4 Web+Business+Docs+MCP+Data-API+remaining DevOps+DevTools (31 agents, avg 4.91). All agents scored ≥3.5, no dimension below 2. Manifest updated with SHA256 hashes for all 70 agents, source=aitmpl removed from all entries.
 - [x] S7 Agent Separation plan (v2.1 — 2 review rounds): product agents in `.opencode/agents/` conflicted with OpenCode's active agent directory → silent write failures. Solution: move to `agents/` at root, split `manifest.json` `base_path` into `source_path` (GitHub repo) + `base_path` (local install destination). Key discovery: `base_path` was overloaded for both download and install. Deployment sequence: merge first, npm publish after (~5-10 min risk window). Full plan in `.plan/07-agent-separation.md`. **Plan ready, execution not started. Est. ~3h.**
 
 **Backlog (remaining V6.0 S3 core tasks):** S3.4 (corrupted JSON recovery), S3.5 (manifest sha256/size fields), S3.6 (Python sync hashes), S3.9-S3.10 (TUI state indicators), S3.12 (cache invalidation), S3.16 (Python sync tests)

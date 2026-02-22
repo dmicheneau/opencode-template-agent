@@ -8,9 +8,14 @@ d'appels reseau.
 
 from __future__ import annotations
 
+import json
+import os
+import shutil
 import sys
+import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 # ---------------------------------------------------------------------------
 # Import du module sync-agents.py (nom avec tiret -> import dynamique)
@@ -32,7 +37,7 @@ clean_body = sync_agents.clean_body
 _get_opencode_category = sync_agents._get_opencode_category
 _get_agent_relative_path = sync_agents._get_agent_relative_path
 PRIMARY_AGENTS = sync_agents.PRIMARY_AGENTS
-CATEGORY_MAPPING = sync_agents.CATEGORY_MAPPING
+CATEGORY_MAP = sync_agents.CATEGORY_MAP
 CURATED_AGENTS = sync_agents.CURATED_AGENTS
 EXTENDED_AGENTS = sync_agents.EXTENDED_AGENTS
 build_parser = sync_agents.build_parser
@@ -396,8 +401,8 @@ class TestGetOpencodeCategory(unittest.TestCase):
         )
 
     def test_all_mappings_covered(self):
-        """Verifie que tous les mappings du CATEGORY_MAPPING sont testes."""
-        for source_cat, oc_cat in CATEGORY_MAPPING.items():
+        """Verifie que tous les mappings du CATEGORY_MAP sont testes."""
+        for source_cat, oc_cat in CATEGORY_MAP.items():
             with self.subTest(category=source_cat):
                 self.assertEqual(_get_opencode_category(source_cat), oc_cat)
 
@@ -487,15 +492,15 @@ class TestExtendedAgents(unittest.TestCase):
         )
 
     def test_extended_agents_categories_mapped(self):
-        """Verifie que toutes les categories source des EXTENDED_AGENTS existent dans CATEGORY_MAPPING."""
+        """Verifie que toutes les categories source des EXTENDED_AGENTS existent dans CATEGORY_MAP."""
         for name, path in EXTENDED_AGENTS.items():
             with self.subTest(agent=name):
                 source_category = path.split("/")[0]
                 self.assertIn(
                     source_category,
-                    CATEGORY_MAPPING,
+                    CATEGORY_MAP,
                     f"La categorie source '{source_category}' de l'agent '{name}' "
-                    f"n'est pas dans CATEGORY_MAPPING",
+                    f"n'est pas dans CATEGORY_MAP",
                 )
 
     def test_combined_tiers_count(self):
@@ -547,11 +552,11 @@ class TestNewCategoryMappings(unittest.TestCase):
             with self.subTest(category=source_cat):
                 self.assertIn(
                     source_cat,
-                    CATEGORY_MAPPING,
-                    f"Le mapping '{source_cat}' est absent de CATEGORY_MAPPING",
+                    CATEGORY_MAP,
+                    f"Le mapping '{source_cat}' est absent de CATEGORY_MAP",
                 )
                 self.assertEqual(
-                    CATEGORY_MAPPING[source_cat],
+                    CATEGORY_MAP[source_cat],
                     expected_oc_cat,
                     f"Le mapping '{source_cat}' devrait pointer vers '{expected_oc_cat}'",
                 )
@@ -632,16 +637,9 @@ class TestTierArgument(unittest.TestCase):
 
 
 # ---------------------------------------------------------------------------
-# Additional imports for new tests
+# Additional function imports for new tests
 # ---------------------------------------------------------------------------
 
-import json
-import os
-import shutil
-import tempfile
-from unittest.mock import patch
-
-# Additional function imports for new tests
 build_opencode_agent = sync_agents.build_opencode_agent
 _yaml_serialize_permission = sync_agents._yaml_serialize_permission
 sync_agent = sync_agents.sync_agent

@@ -26,8 +26,11 @@ import json
 import logging
 import os
 import re
+import shutil
 import sys
+import tempfile
 import time
+import traceback
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -38,11 +41,7 @@ from sync_common import (
     GITHUB_API,
     RAW_BASE,
     SYNC_CACHE_FILENAME,
-    MAX_RATE_LIMIT_WAIT,
-    MAX_BACKOFF_WAIT,
     logger,
-    HttpResult,
-    SafeRedirectHandler,
     _get_headers,
     _http_request,
     _api_get,
@@ -56,7 +55,6 @@ from sync_common import (
     validate_output_path,
     is_synced_file,
     clean_synced_files,
-    _parse_retry_after,
 )
 
 # ---------------------------------------------------------------------------
@@ -394,8 +392,20 @@ def process_companion_file(
     # Ensure parent directory exists
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # Write file
-    output_path.write_text(final_content, encoding="utf-8")
+    # Write file (atomic: temp + rename)
+    tmp_fd, tmp_path = tempfile.mkstemp(
+        dir=str(output_path.parent), suffix=".tmp", prefix=".sync-"
+    )
+    try:
+        with os.fdopen(tmp_fd, "w", encoding="utf-8") as tmp:
+            tmp.write(final_content)
+        os.replace(tmp_path, str(output_path))
+    except BaseException:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+        raise
 
     if verbose:
         logger.debug(
@@ -656,8 +666,6 @@ def clean_synced_skills(
             logger.info("  [dry-run] Would remove: %s/", skill_dir.name)
         else:
             # Remove entire skill directory
-            import shutil
-
             shutil.rmtree(skill_dir)
             if verbose:
                 logger.debug("  [removed] %s/", skill_dir.name)
@@ -692,10 +700,20 @@ def write_manifest(
         return
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    manifest_path.write_text(
-        json.dumps(manifest, indent=2, ensure_ascii=False) + "\n",
-        encoding="utf-8",
+    manifest_content = json.dumps(manifest, indent=2, ensure_ascii=False) + "\n"
+    tmp_fd, tmp_path = tempfile.mkstemp(
+        dir=str(manifest_path.parent), suffix=".tmp", prefix=".sync-"
     )
+    try:
+        with os.fdopen(tmp_fd, "w", encoding="utf-8") as tmp:
+            tmp.write(manifest_content)
+        os.replace(tmp_path, str(manifest_path))
+    except BaseException:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+        raise
     logger.info("Manifest written: %s", manifest_path)
 
 
@@ -898,8 +916,6 @@ def main() -> int:
             failed += 1
             logger.error(" error: %s", exc)
             if args.verbose:
-                import traceback
-
                 traceback.print_exc()
 
         # Rate limiting: delay between skills

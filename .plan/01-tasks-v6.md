@@ -2,7 +2,7 @@
 
 **Plan:** [00-plan-v6.md](00-plan-v6.md)
 **Created:** 2026-02-18
-**Updated:** 2026-02-19 (post-review revision: release split + new tasks from 4 reviews + code review hardening + Major CR fixes + Minor/Low CR fixes — ALL 21 CR issues resolved + V7.0 post-release code review: 16 issues fixed + S2 D1 code review CR3: 29 issues fixed)
+**Updated:** 2026-02-22 (S2 enrichment complete: all 70 agents enriched, scored, manifest updated — D2-D4 checked off)
 
 ---
 
@@ -250,53 +250,47 @@
 
 - [x] **CR3** Code review of S2 D1 enrichment infrastructure — 29 issues fixed (12 code + 17 design docs), commit `657cae4`, 866 tests passing (628 JS + 238 Python)
 
-### D2 — Languages & DevTools (20 agents)
+### D2 — Languages & DevTools (20 agents) ✅
 
-- [ ] **S2.10** Enrich `languages/typescript-pro.md`
-- [ ] **S2.11** Enrich `languages/golang-pro.md`
-- [ ] **S2.12** Enrich `languages/python-pro.md`
-- [ ] **S2.13** Enrich `languages/java-architect.md`
-- [ ] **S2.14** Enrich `languages/rust-pro.md`
-- [ ] **S2.15** Enrich `languages/kotlin-specialist.md`
-- [ ] **S2.16** Enrich `languages/csharp-developer.md`
-- [ ] **S2.17** Enrich `languages/php-pro.md`
-- [ ] **S2.18** Enrich `languages/cpp-pro.md`
-- [ ] **S2.19** Enrich `languages/swift-expert.md`
-- [ ] **S2.20** Enrich `languages/rails-expert.md`
-- [ ] **S2.21** Enrich `devtools/code-reviewer.md`
-- [ ] **S2.22** Enrich `devtools/test-automator.md`
-- [ ] **S2.23** Enrich `devtools/debugger.md`
-- [ ] **S2.24** Enrich `devtools/performance-engineer.md`
-- [ ] **S2.25** Enrich `devtools/refactoring-specialist.md`
-- [ ] **S2.26** Enrich `devtools/qa-expert.md`
-- [ ] **S2.27** Enrich `devtools/microservices-architect.md`
-- [ ] **S2.28** Run quality scoring on all Phase D2 agents — verify >=3.5 average
-- [ ] **S2.29** Update manifest.json with enriched hashes
+- [x] **S2.10** Enrich `languages/typescript-pro.md`
+- [x] **S2.11** Enrich `languages/golang-pro.md`
+- [x] **S2.12** Enrich `languages/python-pro.md`
+- [x] **S2.13** Enrich `languages/java-architect.md`
+- [x] **S2.14** Enrich `languages/rust-pro.md`
+- [x] **S2.15** Enrich `languages/kotlin-specialist.md`
+- [x] **S2.16** Enrich `languages/csharp-developer.md`
+- [x] **S2.17** Enrich `languages/php-pro.md`
+- [x] **S2.18** Enrich `languages/cpp-pro.md`
+- [x] **S2.19** Enrich `languages/swift-expert.md`
+- [x] **S2.20** Enrich `languages/rails-expert.md`
+- [x] **S2.21** Enrich `devtools/code-reviewer.md`
+- [x] **S2.22** Enrich `devtools/test-automator.md`
+- [x] **S2.23** Enrich `devtools/debugger.md`
+- [x] **S2.24** Enrich `devtools/performance-engineer.md`
+- [x] **S2.25** Enrich `devtools/refactoring-specialist.md`
+- [x] **S2.26** Enrich `devtools/qa-expert.md`
+- [x] **S2.27** Enrich `devtools/microservices-architect.md`
+- [x] **S2.28** Run quality scoring on all Phase D2 agents — verify >=3.5 average
+- [x] **S2.29** Update manifest.json with enriched hashes
 
-### D3 — AI, Security, DevOps (18 agents)
+### D3 — AI, Security, DevOps (18 agents) ✅
 
-- [ ] **S2.30** Enrich all `ai/*.md` agents (6)
-- [ ] **S2.31** Enrich all `security/*.md` agents (4)
-- [ ] **S2.32** Enrich all `devops/*.md` agents (8)
-- [ ] **S2.33** Run quality scoring on Phase D3 — verify >=3.5 average
-- [ ] **S2.34** Update manifest.json with enriched hashes
+- [x] **S2.30** Enrich all `ai/*.md` agents (6)
+- [x] **S2.31** Enrich all `security/*.md` agents (4)
+- [x] **S2.32** Enrich all `devops/*.md` agents (8)
+- [x] **S2.33** Run quality scoring on Phase D3 — verify >=3.5 average
+- [x] **S2.34** Update manifest.json with enriched hashes
 
-### D4 — Web, Data-API, Docs (16 agents)
+### D4 — Web, Data-API, Docs, Business, MCP, Primary (31 agents) ✅
 
-- [ ] **S2.35** Enrich all `web/*.md` agents (7)
-- [ ] **S2.36** Enrich all `data-api/*.md` agents (5)
-- [ ] **S2.37** Enrich all `docs/*.md` agents (4)
-- [ ] **S2.38** Run quality scoring on Phase D4 — verify >=3.5 average
-- [ ] **S2.39** Update manifest.json with enriched hashes
-
-### D5 — Business, MCP, Primary (16 agents)
-
-- [ ] **S2.40** Enrich all `business/*.md` agents (6)
-- [ ] **S2.41** Enrich all `mcp/*.md` agents (4)
-- [ ] **S2.42** Enrich primary agents: `cloud-architect.md`, `devops-engineer.md`, `fullstack-developer.md`, `episode-orchestrator.md`
-- [ ] **S2.43** Enrich all-mode agent: `business/prd.md`
-- [ ] **S2.44** Run quality scoring on ALL 70 agents — verify >=3.5 average
-- [ ] **S2.45** Final manifest.json update with all enriched hashes
+- [x] **S2.35** Enrich all `web/*.md` agents (8)
+- [x] **S2.36** Enrich all `data-api/*.md` agents (5)
+- [x] **S2.37** Enrich all `docs/*.md` agents (4)
+- [x] **S2.38** Enrich all `business/*.md` agents (6)
+- [x] **S2.39** Enrich all `mcp/*.md` agents (4)
+- [x] **S2.40** Enrich primary agents: `cloud-architect.md`, `devops-engineer.md`, `fullstack-developer.md`, `episode-orchestrator.md`
+- [x] **S2.41** Run quality scoring on ALL 70 agents — verify >=3.5 average (avg ~4.80)
+- [x] **S2.42** Final manifest.json update with all enriched SHA256 hashes
 
 ---
 
@@ -321,7 +315,7 @@
 | V6.1 — Lifecycle | 46 tasks (29 + 4 CR hardening + 8 Major fixes + 5 Minor/Low fixes) | 3-4 days |
 | V7.0 — Permissions | 38 tasks ✅ | 5-7 days |
 | V7.0 Post-release CR | 16 tasks ✅ (1 critical + 3 high + 6 medium + 6 low) | 1 day |
-| S2 — Enrichment | 46 tasks (45 + 1 CR3) | 10-14 weeks |
+| S2 — Enrichment | 42 tasks (41 + 1 CR3) ✅ | 10-14 weeks |
 | S7 — Agent Separation | 6 tasks ✅ | ~3 hours |
 | **Total** | **191 tasks** | — |
 

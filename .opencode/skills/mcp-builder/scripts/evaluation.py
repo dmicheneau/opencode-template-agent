@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # ⚠️ AUTO-SYNCED from aitmpl.com — Review before executing
 """MCP Server Evaluation Harness
 
@@ -66,10 +67,12 @@ def parse_evaluation_file(file_path: Path) -> list[dict[str, Any]]:
             answer_elem = qa_pair.find("answer")
 
             if question_elem is not None and answer_elem is not None:
-                evaluations.append({
-                    "question": (question_elem.text or "").strip(),
-                    "answer": (answer_elem.text or "").strip(),
-                })
+                evaluations.append(
+                    {
+                        "question": (question_elem.text or "").strip(),
+                        "answer": (answer_elem.text or "").strip(),
+                    }
+                )
 
         return evaluations
     except Exception as e:
@@ -108,32 +111,42 @@ async def agent_loop(
     tool_metrics = {}
 
     while response.stop_reason == "tool_use":
-        tool_use = next(block for block in response.content if block.type == "tool_use")
-        tool_name = tool_use.name
-        tool_input = tool_use.input
+        tool_use_blocks = [
+            block for block in response.content if block.type == "tool_use"
+        ]
+        tool_results: list[dict[str, Any]] = []
 
-        tool_start_ts = time.time()
-        try:
-            tool_result = await connection.call_tool(tool_name, tool_input)
-            tool_response = json.dumps(tool_result) if isinstance(tool_result, (dict, list)) else str(tool_result)
-        except Exception as e:
-            tool_response = f"Error executing tool {tool_name}: {str(e)}\n"
-            tool_response += traceback.format_exc()
-        tool_duration = time.time() - tool_start_ts
+        for tool_use in tool_use_blocks:
+            tool_name = tool_use.name
+            tool_input = tool_use.input
 
-        if tool_name not in tool_metrics:
-            tool_metrics[tool_name] = {"count": 0, "durations": []}
-        tool_metrics[tool_name]["count"] += 1
-        tool_metrics[tool_name]["durations"].append(tool_duration)
+            tool_start_ts = time.time()
+            try:
+                tool_result = await connection.call_tool(tool_name, tool_input)
+                tool_response = (
+                    json.dumps(tool_result)
+                    if isinstance(tool_result, (dict, list))
+                    else str(tool_result)
+                )
+            except Exception as e:
+                tool_response = f"Error executing tool {tool_name}: {str(e)}\n"
+                tool_response += traceback.format_exc()
+            tool_duration = time.time() - tool_start_ts
 
-        messages.append({
-            "role": "user",
-            "content": [{
-                "type": "tool_result",
-                "tool_use_id": tool_use.id,
-                "content": tool_response,
-            }]
-        })
+            if tool_name not in tool_metrics:
+                tool_metrics[tool_name] = {"count": 0, "durations": []}
+            tool_metrics[tool_name]["count"] += 1
+            tool_metrics[tool_name]["durations"].append(tool_duration)
+
+            tool_results.append(
+                {
+                    "type": "tool_result",
+                    "tool_use_id": tool_use.id,
+                    "content": tool_response,
+                }
+            )
+
+        messages.append({"role": "user", "content": tool_results})
 
         response = await asyncio.to_thread(
             client.messages.create,
@@ -147,7 +160,7 @@ async def agent_loop(
 
     response_text = next(
         (block.text for block in response.content if hasattr(block, "text")),
-        None,
+        "",
     )
     return response_text, tool_metrics
 
@@ -164,7 +177,9 @@ async def evaluate_single_task(
     start_time = time.time()
 
     print(f"Task {task_index + 1}: Running task with question: {qa_pair['question']}")
-    response, tool_metrics = await agent_loop(client, model, qa_pair["question"], tools, connection)
+    response, tool_metrics = await agent_loop(
+        client, model, qa_pair["question"], tools, connection
+    )
 
     response_value = extract_xml_content(response, "response")
     summary = extract_xml_content(response, "summary")
@@ -179,7 +194,9 @@ async def evaluate_single_task(
         "score": int(response_value == qa_pair["answer"]) if response_value else 0,
         "total_duration": duration_seconds,
         "tool_calls": tool_metrics,
-        "num_tool_calls": sum(len(metrics["durations"]) for metrics in tool_metrics.values()),
+        "num_tool_calls": sum(
+            len(metrics["durations"]) for metrics in tool_metrics.values()
+        ),
         "summary": summary,
         "feedback": feedback,
     }
@@ -237,13 +254,19 @@ async def run_evaluation(
     results = []
     for i, qa_pair in enumerate(qa_pairs):
         print(f"Processing task {i + 1}/{len(qa_pairs)}")
-        result = await evaluate_single_task(client, model, qa_pair, tools, connection, i)
+        result = await evaluate_single_task(
+            client, model, qa_pair, tools, connection, i
+        )
         results.append(result)
 
     correct = sum(r["score"] for r in results)
     accuracy = (correct / len(results)) * 100 if results else 0
-    average_duration_s = sum(r["total_duration"] for r in results) / len(results) if results else 0
-    average_tool_calls = sum(r["num_tool_calls"] for r in results) / len(results) if results else 0
+    average_duration_s = (
+        sum(r["total_duration"] for r in results) / len(results) if results else 0
+    )
+    average_tool_calls = (
+        sum(r["num_tool_calls"] for r in results) / len(results) if results else 0
+    )
     total_tool_calls = sum(r["num_tool_calls"] for r in results)
 
     report = REPORT_HEADER.format(
@@ -255,20 +278,22 @@ async def run_evaluation(
         total_tool_calls=total_tool_calls,
     )
 
-    report += "".join([
-        TASK_TEMPLATE.format(
-            task_num=i + 1,
-            question=qa_pair["question"],
-            expected_answer=qa_pair["answer"],
-            actual_answer=result["actual"] or "N/A",
-            correct_indicator="✅" if result["score"] else "❌",
-            total_duration=result["total_duration"],
-            tool_calls=json.dumps(result["tool_calls"], indent=2),
-            summary=result["summary"] or "N/A",
-            feedback=result["feedback"] or "N/A",
-        )
-        for i, (qa_pair, result) in enumerate(zip(qa_pairs, results))
-    ])
+    report += "".join(
+        [
+            TASK_TEMPLATE.format(
+                task_num=i + 1,
+                question=qa_pair["question"],
+                expected_answer=qa_pair["answer"],
+                actual_answer=result["actual"] or "N/A",
+                correct_indicator="✅" if result["score"] else "❌",
+                total_duration=result["total_duration"],
+                tool_calls=json.dumps(result["tool_calls"], indent=2),
+                summary=result["summary"] or "N/A",
+                feedback=result["feedback"] or "N/A",
+            )
+            for i, (qa_pair, result) in enumerate(zip(qa_pairs, results))
+        ]
+    )
 
     return report
 
@@ -321,19 +346,50 @@ Examples:
     )
 
     parser.add_argument("eval_file", type=Path, help="Path to evaluation XML file")
-    parser.add_argument("-t", "--transport", choices=["stdio", "sse", "http"], default="stdio", help="Transport type (default: stdio)")
-    parser.add_argument("-m", "--model", default="claude-3-7-sonnet-20250219", help="Claude model to use (default: claude-3-7-sonnet-20250219)")
+    parser.add_argument(
+        "-t",
+        "--transport",
+        choices=["stdio", "sse", "http"],
+        default="stdio",
+        help="Transport type (default: stdio)",
+    )
+    parser.add_argument(
+        "-m",
+        "--model",
+        default="claude-3-7-sonnet-20250219",
+        help="Claude model to use (default: claude-3-7-sonnet-20250219)",
+    )
 
     stdio_group = parser.add_argument_group("stdio options")
-    stdio_group.add_argument("-c", "--command", help="Command to run MCP server (stdio only)")
-    stdio_group.add_argument("-a", "--args", nargs="+", help="Arguments for the command (stdio only)")
-    stdio_group.add_argument("-e", "--env", nargs="+", help="Environment variables in KEY=VALUE format (stdio only)")
+    stdio_group.add_argument(
+        "-c", "--command", help="Command to run MCP server (stdio only)"
+    )
+    stdio_group.add_argument(
+        "-a", "--args", nargs="+", help="Arguments for the command (stdio only)"
+    )
+    stdio_group.add_argument(
+        "-e",
+        "--env",
+        nargs="+",
+        help="Environment variables in KEY=VALUE format (stdio only)",
+    )
 
     remote_group = parser.add_argument_group("sse/http options")
     remote_group.add_argument("-u", "--url", help="MCP server URL (sse/http only)")
-    remote_group.add_argument("-H", "--header", nargs="+", dest="headers", help="HTTP headers in 'Key: Value' format (sse/http only)")
+    remote_group.add_argument(
+        "-H",
+        "--header",
+        nargs="+",
+        dest="headers",
+        help="HTTP headers in 'Key: Value' format (sse/http only)",
+    )
 
-    parser.add_argument("-o", "--output", type=Path, help="Output file for evaluation report (default: stdout)")
+    parser.add_argument(
+        "-o",
+        "--output",
+        type=Path,
+        help="Output file for evaluation report (default: stdout)",
+    )
 
     args = parser.parse_args()
 

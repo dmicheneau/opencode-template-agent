@@ -25,11 +25,13 @@ import re
 import sys
 import tempfile
 import time
+import traceback
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 from sync_common import (
+    CATEGORY_MAP,
     DEFAULT_REPO,
     DEFAULT_BRANCH,
     GITHUB_API,
@@ -69,38 +71,6 @@ PRIMARY_AGENTS = frozenset(
         "cloud-architect",
     }
 )
-
-# Source category -> OpenCode subdirectory for nested agent organization
-CATEGORY_MAPPING: Dict[str, str] = {
-    "programming-languages": "languages",
-    "development-tools": "devtools",
-    "data-ai": "ai",
-    "ai-specialists": "ai",
-    "devops-infrastructure": "devops",
-    "security": "security",
-    "blockchain-web3": "security",
-    "database": "data-api",
-    "web-tools": "web",
-    "api-graphql": "data-api",
-    "documentation": "docs",
-    "business-marketing": "business",
-    "development-team": "web",
-    "expert-advisors": "devtools",
-    # Phase 1.5 — Tier 2 source categories
-    "game-development": "specialist",
-    "mcp-dev-team": "mcp",
-    "modernization": "devops",
-    "realtime": "web",
-    "finance": "business",
-    "git": "devtools",
-    "performance-testing": "devtools",
-    "ui-analysis": "web",
-    "deep-research-team": "web",
-    "ffmpeg-clip-team": "media",
-    "obsidian-ops-team": "specialist",
-    "ocr-extraction-team": "specialist",
-    "podcast-creator-team": "media",
-}
 
 # ---------------------------------------------------------------------------
 # Curated agent list: OpenCode name -> source path (relative to AGENTS_BASE_PATH)
@@ -888,7 +858,7 @@ def _get_opencode_category(source_category: str) -> str:
     Falls back to the source category name (lowercased, stripped of common
     suffixes) when there is no explicit mapping.
     """
-    return CATEGORY_MAPPING.get(source_category, source_category)
+    return CATEGORY_MAP.get(source_category, source_category)
 
 
 def _get_agent_relative_path(name: str, source_category: str) -> str:
@@ -1228,7 +1198,10 @@ def sync_agent(
     # Use incremental (cached) GET when possible
     use_cache = incremental and sync_cache is not None and not force
     if use_cache:
-        assert sync_cache is not None  # narrowing for type checker
+        if sync_cache is None:  # narrowing for type checker
+            raise RuntimeError(
+                "sync_cache must not be None when incremental caching is enabled"
+            )
         content = _cached_get(raw_url, name, sync_cache)
         if content is None and name in sync_cache:
             # Could be 304 Not Modified or a 404 for a deleted agent.
@@ -1668,6 +1641,10 @@ def main() -> int:
     unchanged = 0
     uncurated_count = 0
 
+    # Import quality scorer once before the loop (conditional on --score flag)
+    if args.score:
+        from quality_scorer import score_agent
+
     for i, (name, path) in enumerate(sorted(agents.items()), 1):
         label = f"[{i}/{len(agents)}]"
         print(f"  {label} {name}...", end="", flush=True)
@@ -1714,8 +1691,6 @@ def main() -> int:
                     rel = entry.get("path", "")
                     agent_file = output_dir / f"{rel}.md"
                     if agent_file.is_file():
-                        from quality_scorer import score_agent
-
                         agent_content = agent_file.read_text(encoding="utf-8")
                         result = score_agent(agent_content)
                         entry["quality_score"] = result
@@ -1733,8 +1708,6 @@ def main() -> int:
             failed += 1
             logger.error(" error: %s", exc)
             if args.verbose:
-                import traceback
-
                 traceback.print_exc()
 
         # Polite delay to avoid hammering the API

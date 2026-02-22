@@ -36,8 +36,58 @@ SYNC_CACHE_FILENAME = ".sync-cache.json"
 MAX_RATE_LIMIT_WAIT = 300  # 5 minutes — cap to prevent abusive Retry-After values
 MAX_BACKOFF_WAIT = 60  # 1 minute — cap for exponential backoff
 
+# Source / upstream category -> OpenCode subdirectory for nested agent organization.
+# Used by both sync-agents.py (to place agent files) and update-manifest.py
+# (to categorize manifest entries).  Keep this as the single source of truth.
+CATEGORY_MAP: Dict[str, str] = {
+    # Identity mappings (upstream category == our category)
+    "languages": "languages",
+    "ai": "ai",
+    "web": "web",
+    "devops": "devops",
+    "devtools": "devtools",
+    "security": "security",
+    "mcp": "mcp",
+    "business": "business",
+    "docs": "docs",
+    "data-api": "data-api",
+    # Remapped categories — upstream source categories from aitmpl
+    "programming-languages": "languages",
+    "development-tools": "devtools",
+    "data-ai": "ai",
+    "ai-specialists": "ai",
+    "devops-infrastructure": "devops",
+    "blockchain-web3": "security",  # smart contracts & audit focus
+    "database": "data-api",
+    "web-tools": "web",
+    "api-graphql": "data-api",
+    "api": "data-api",
+    "documentation": "docs",
+    "business-marketing": "business",
+    "development-team": "web",  # full-stack team workflows
+    "team": "web",  # multi-agent team patterns
+    "expert-advisors": "devtools",
+    "specialist": "devtools",
+    "media": "devtools",  # A/V processing tools
+    # Tier 2 source categories
+    "game-development": "specialist",  # game engines & tooling
+    "mcp-dev-team": "mcp",
+    "modernization": "devops",
+    "realtime": "web",
+    "finance": "business",
+    "git": "devtools",
+    "performance-testing": "devtools",
+    "ui-analysis": "web",
+    "deep-research-team": "web",  # web research & scraping workflows
+    "ffmpeg-clip-team": "media",
+    "obsidian-ops-team": "specialist",
+    "ocr-extraction-team": "specialist",
+    "podcast-creator-team": "media",
+}
+
 __all__ = [
     # Constants
+    "CATEGORY_MAP",
     "DEFAULT_REPO",
     "DEFAULT_BRANCH",
     "GITHUB_API",
@@ -299,7 +349,11 @@ def _api_get(url: str, *, retries: int = 3, backoff: float = 2.0) -> Any:
     Handles rate limiting and retries via :func:`_http_request`.
     """
     result = _http_request(
-        url, headers=_get_headers(), max_retries=retries, backoff=backoff
+        url,
+        headers=_get_headers(),
+        max_retries=retries,
+        backoff=backoff,
+        max_read_bytes=10_485_760,
     )
     if result is None:
         return None

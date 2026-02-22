@@ -53,6 +53,20 @@ parse_frontmatter = sync_common.parse_frontmatter
 is_synced_file = sync_common.is_synced_file
 
 
+def _safe_tmpdir(prefix: str) -> str:
+    """Create a temp dir safe for symlink checks on macOS.
+
+    On macOS, /tmp -> /private/tmp which triggers symlink detection.
+    Use /private/tmp directly to get a resolved physical path.
+    """
+    base = (
+        "/private/tmp"
+        if sys.platform == "darwin" and os.path.isdir("/private/tmp")
+        else None
+    )
+    return tempfile.mkdtemp(prefix=prefix, dir=base)
+
+
 # ---------------------------------------------------------------------------
 # Tests transform_skill_md() - Frontmatter parsing and transformation
 # ---------------------------------------------------------------------------
@@ -263,8 +277,7 @@ class TestCheckSymlink(unittest.TestCase):
 
     def setUp(self):
         """Create temporary directory for tests."""
-        # Use /private/tmp directly to avoid macOS symlink issues (/tmp -> private/tmp)
-        self.tmpdir = tempfile.mkdtemp(prefix="test_symlink_", dir="/private/tmp")
+        self.tmpdir = _safe_tmpdir(prefix="test_symlink_")
 
     def tearDown(self):
         """Clean up temporary directory."""
@@ -406,8 +419,7 @@ class TestIsHandwrittenSkill(unittest.TestCase):
 
     def setUp(self):
         """Create temporary directory for tests."""
-        # Use /private/tmp directly to avoid macOS symlink issues (/tmp -> private/tmp)
-        self.tmpdir = tempfile.mkdtemp(prefix="test_handwritten_", dir="/private/tmp")
+        self.tmpdir = _safe_tmpdir(prefix="test_handwritten_")
 
     def tearDown(self):
         """Clean up temporary directory."""
@@ -476,8 +488,7 @@ class TestCleanSyncedSkills(unittest.TestCase):
 
     def setUp(self):
         """Create temporary directory for tests."""
-        # Use /private/tmp directly to avoid macOS symlink issues (/tmp -> private/tmp)
-        self.tmpdir = tempfile.mkdtemp(prefix="test_clean_", dir="/private/tmp")
+        self.tmpdir = _safe_tmpdir(prefix="test_clean_")
         self.output_dir = Path(self.tmpdir)
 
     def tearDown(self):
@@ -542,8 +553,7 @@ class TestProcessCompanionFile(unittest.TestCase):
 
     def setUp(self):
         """Create temporary directory for tests."""
-        # Use /private/tmp directly to avoid macOS symlink issues (/tmp -> private/tmp)
-        self.tmpdir = tempfile.mkdtemp(prefix="test_process_", dir="/private/tmp")
+        self.tmpdir = _safe_tmpdir(prefix="test_process_")
         self.skill_dir = Path(self.tmpdir) / "test-skill"
         self.skill_dir.mkdir()
 
@@ -681,8 +691,7 @@ class TestSyncSkill(unittest.TestCase):
 
     def setUp(self):
         """Create temporary directory for tests."""
-        # Use /private/tmp directly to avoid macOS symlink issues (/tmp -> private/tmp)
-        self.tmpdir = tempfile.mkdtemp(prefix="test_sync_skill_", dir="/private/tmp")
+        self.tmpdir = _safe_tmpdir(prefix="test_sync_skill_")
         self.output_dir = Path(self.tmpdir) / "skills"
 
     def tearDown(self):

@@ -41,6 +41,8 @@ import tempfile
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
+from sync_common import CATEGORY_MAP
+
 # ---------------------------------------------------------------------------
 # Logger
 # ---------------------------------------------------------------------------
@@ -80,53 +82,6 @@ class ManifestNotFoundError(ManifestError):
 class SyncManifestNotFoundError(ManifestError):
     """Sync manifest not found (nothing to merge)."""
 
-
-CATEGORY_MAP: Dict[str, str] = {
-    # Direct mappings (upstream category == our category)
-    "languages": "languages",
-    "ai": "ai",
-    "web": "web",
-    "devops": "devops",
-    "devtools": "devtools",
-    "security": "security",
-    "mcp": "mcp",
-    "business": "business",
-    "docs": "docs",
-    "data-api": "data-api",
-    # Remapped categories — upstream source categories from aitmpl
-    "programming-languages": "languages",
-    "development-tools": "devtools",
-    "data-ai": "ai",
-    "ai-specialists": "ai",
-    "devops-infrastructure": "devops",
-    "blockchain-web3": "security",  # smart contracts & audit focus
-    "database": "data-api",
-    "web-tools": "web",
-    "api-graphql": "data-api",
-    "api": "data-api",
-    "documentation": "docs",
-    "business-marketing": "business",
-    "development-team": "web",  # full-stack team workflows
-    "team": "web",  # multi-agent team patterns
-    "expert-advisors": "devtools",
-    "specialist": "devtools",
-    "media": "devtools",  # A/V processing tools
-    # Tier 2 source categories
-    "game-development": "specialist",  # game engines & tooling
-    "mcp-dev-team": "mcp",
-    "modernization": "devops",
-    "realtime": "web",
-    "finance": "business",
-    "git": "devtools",
-    "performance-testing": "devtools",
-    "ui-analysis": "web",
-    "deep-research-team": "web",  # web research & scraping workflows
-    "ffmpeg-clip-team": "media",
-    "obsidian-ops-team": "specialist",
-    "ocr-extraction-team": "specialist",
-    "podcast-creator-team": "media",
-}
-"""Maps upstream sync categories to our curated category names."""
 
 DEFAULT_ROOT_MANIFEST = "manifest.json"
 DEFAULT_SYNC_MANIFEST = "agents/manifest.json"
