@@ -1,6 +1,6 @@
 import { describe, it, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdirSync, mkdtempSync, rmSync, existsSync, readFileSync, writeFileSync, readdirSync, chmodSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, existsSync, readFileSync, writeFileSync, readdirSync, chmodSync, symlinkSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
@@ -1087,5 +1087,518 @@ describe('readLock — corrupted JSON recovery', () => {
 
     assert.equal(readFileSync(bakPath, 'utf-8'), newCorrupted,
       '.bak should contain the latest corrupted content, not the old backup');
+  });
+});
+
+// ─── detectAgentStates — mode: "all" handling ────────────────────────────────
+
+describe('detectAgentStates — mode "all"', () => {
+  /** @type {string} */
+  let tmp;
+
+  beforeEach(() => {
+    tmp = mkdtempSync(join(tmpdir(), 'lock-mode-all-'));
+  });
+
+  afterEach(() => {
+    rmSync(tmp, { recursive: true, force: true });
+  });
+
+  it('should find agent with mode "all" at primary path', () => {
+    const agent = { name: 'prd', category: 'business', mode: 'all' };
+    const manifest = makeManifest([agent]);
+
+    // Place the file at the primary location (basePath root)
+    const primaryPath = join(tmp, '.opencode', 'agents', 'prd.md');
+    mkdirSync(join(primaryPath, '..'), { recursive: true });
+    writeFileSync(primaryPath, '# PRD Agent', 'utf-8');
+
+    const states = detectAgentStates(manifest, tmp);
+    assert.equal(states.get('prd'), 'unknown',
+      'mode "all" agent at primary path should be detected');
+  });
+
+  it('should find agent with mode "all" at subagent path when not at primary', () => {
+    const agent = { name: 'prd', category: 'business', mode: 'all' };
+    const manifest = makeManifest([agent]);
+
+    // Place the file at the subagent location (category subdir)
+    const subPath = join(tmp, '.opencode', 'agents', 'business', 'prd.md');
+    mkdirSync(join(subPath, '..'), { recursive: true });
+    writeFileSync(subPath, '# PRD Agent', 'utf-8');
+
+    const states = detectAgentStates(manifest, tmp);
+    assert.equal(states.get('prd'), 'unknown',
+      'mode "all" agent at subagent path should be detected');
+  });
+
+  it('should prefer primary path over subagent path for mode "all"', () => {
+    const agent = { name: 'prd', category: 'business', mode: 'all' };
+    const manifest = makeManifest([agent]);
+
+    // Place files at BOTH locations with different content
+    const primaryPath = join(tmp, '.opencode', 'agents', 'prd.md');
+    const subPath = join(tmp, '.opencode', 'agents', 'business', 'prd.md');
+    mkdirSync(join(primaryPath, '..'), { recursive: true });
+    mkdirSync(join(subPath, '..'), { recursive: true });
+    writeFileSync(primaryPath, '# Primary version', 'utf-8');
+    writeFileSync(subPath, '# Subagent version', 'utf-8');
+
+    // Record install with the PRIMARY content
+    recordInstall('prd', '# Primary version', tmp);
+
+    const states = detectAgentStates(manifest, tmp);
+    assert.equal(states.get('prd'), 'installed',
+      'should use primary path when both exist, and hash should match primary content');
+  });
+
+  it('should return "new" for mode "all" agent not on disk at either path', () => {
+    const agent = { name: 'prd', category: 'business', mode: 'all' };
+    const manifest = makeManifest([agent]);
+
+    const states = detectAgentStates(manifest, tmp);
+    assert.equal(states.get('prd'), 'new');
+  });
+});
+
+// ─── detectAgentStates — filesystem scan for local agents ───────────────────
+
+describe('detectAgentStates — filesystem scan', () => {
+  /** @type {string} */
+  let tmp;
+
+  beforeEach(() => {
+    tmp = mkdtempSync(join(tmpdir(), 'lock-scan-'));
+  });
+
+  afterEach(() => {
+    rmSync(tmp, { recursive: true, force: true });
+  });
+
+  it('should discover local .md files not in manifest', () => {
+    // Manifest has one agent
+    const manifest = makeManifest([
+      { name: 'known-agent', category: 'general', mode: 'subagent' },
+    ]);
+    writeAgentFile(tmp, manifest.agents[0], '# Known');
+
+    // Place an extra agent file NOT in the manifest
+    const localPath = join(tmp, '.opencode', 'agents', 'custom', 'local-agent.md');
+    mkdirSync(join(localPath, '..'), { recursive: true });
+    writeFileSync(localPath, '# Local custom agent', 'utf-8');
+
+    const states = detectAgentStates(manifest, tmp);
+    assert.equal(states.get('known-agent'), 'unknown', 'manifest agent should be detected');
+    assert.equal(states.get('local-agent'), 'unknown',
+      'local agent not in manifest should be discovered as "unknown"');
+    assert.ok(states.size >= 2, 'should have at least 2 agents');
+  });
+
+  it('should not duplicate agents already in manifest', () => {
+    const agent = { name: 'ai-engineer', category: 'ai', mode: 'subagent' };
+    const manifest = makeManifest([agent]);
+    writeAgentFile(tmp, agent, '# AI Engineer');
+
+    const states = detectAgentStates(manifest, tmp);
+    // Count entries — should be exactly 1, not duplicated by the scan
+    let count = 0;
+    for (const [name] of states) {
+      if (name === 'ai-engineer') count++;
+    }
+    assert.equal(count, 1, 'manifest agent should not be duplicated by filesystem scan');
+  });
+
+  it('should ignore non-.md files during scan', () => {
+    const manifest = makeManifest([]);
+
+    // Create the agents directory with some non-md files
+    const basePath = join(tmp, '.opencode', 'agents');
+    mkdirSync(basePath, { recursive: true });
+    writeFileSync(join(basePath, 'readme.txt'), 'not an agent', 'utf-8');
+    writeFileSync(join(basePath, '.manifest-lock.json'), '{}', 'utf-8');
+    writeFileSync(join(basePath, 'legit-agent.md'), '# Agent', 'utf-8');
+
+    const states = detectAgentStates(manifest, tmp);
+    assert.equal(states.size, 1, 'should only find .md files');
+    assert.equal(states.get('legit-agent'), 'unknown');
+  });
+});
+
+// ─── detectInstalledSet — includes locally-scanned agents ────────────────────
+
+describe('detectInstalledSet — local agents', () => {
+  /** @type {string} */
+  let tmp;
+
+  beforeEach(() => {
+    tmp = mkdtempSync(join(tmpdir(), 'lock-installed-local-'));
+  });
+
+  afterEach(() => {
+    rmSync(tmp, { recursive: true, force: true });
+  });
+
+  it('should include locally-scanned agents in installed set', () => {
+    const manifest = makeManifest([]);
+
+    // Place a local agent file not in manifest
+    const localPath = join(tmp, '.opencode', 'agents', 'local-only.md');
+    mkdirSync(join(localPath, '..'), { recursive: true });
+    writeFileSync(localPath, '# Local only agent', 'utf-8');
+
+    const set = detectInstalledSet(manifest, tmp);
+    assert.ok(set.has('local-only'),
+      'locally-scanned agent should appear in installed set');
+  });
+
+  it('should include mode "all" agents in installed set', () => {
+    const agent = { name: 'prd', category: 'business', mode: 'all' };
+    const manifest = makeManifest([agent]);
+
+    // Place at primary path
+    const primaryPath = join(tmp, '.opencode', 'agents', 'prd.md');
+    mkdirSync(join(primaryPath, '..'), { recursive: true });
+    writeFileSync(primaryPath, '# PRD', 'utf-8');
+
+    const set = detectInstalledSet(manifest, tmp);
+    assert.ok(set.has('prd'), 'mode "all" agent should be in installed set');
+  });
+});
+
+// ─── Acceptance tests: local agent detection (Bug 2 fix) ─────────────────────
+// Validates that manually placed .md files in .opencode/agents/ are detected
+// by the filesystem scan, even when they're absent from the manifest.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('Acceptance: manually placed agent files are detected (Bug 2)', () => {
+  /** @type {string} */
+  let tmp;
+
+  beforeEach(() => {
+    tmp = mkdtempSync(join(tmpdir(), 'lock-acceptance-'));
+  });
+
+  afterEach(() => {
+    rmSync(tmp, { recursive: true, force: true });
+  });
+
+  it('a manually placed .md in .opencode/agents/ shows up as "unknown"', () => {
+    // User drops a custom agent file — no manifest entry, no lock entry
+    const agentDir = join(tmp, '.opencode', 'agents');
+    mkdirSync(agentDir, { recursive: true });
+    writeFileSync(join(agentDir, 'my-custom-agent.md'), '# My Custom Agent\nDoes custom things.', 'utf-8');
+
+    const manifest = makeManifest([]); // empty manifest — no agents defined
+    const states = detectAgentStates(manifest, tmp);
+
+    assert.ok(states.has('my-custom-agent'),
+      'Manually placed agent should be detected by filesystem scan');
+    assert.equal(states.get('my-custom-agent'), 'unknown',
+      'Agent without lock entry should have state "unknown"');
+  });
+
+  it('mode "all" agent installed at root level is detected', () => {
+    const agent = { name: 'prd', category: 'business', mode: 'all' };
+    const manifest = makeManifest([agent]);
+
+    // Place at primary (root) path — .opencode/agents/prd.md
+    const agentDir = join(tmp, '.opencode', 'agents');
+    mkdirSync(agentDir, { recursive: true });
+    writeFileSync(join(agentDir, 'prd.md'), '# PRD Agent\nProduct requirements.', 'utf-8');
+
+    const states = detectAgentStates(manifest, tmp);
+
+    assert.ok(states.has('prd'), 'mode "all" agent at root should be detected');
+    assert.equal(states.get('prd'), 'unknown',
+      'Agent without lock entry should be "unknown" (not "new")');
+  });
+
+  it('mode "all" agent installed in category subdir is detected via fallback', () => {
+    const agent = { name: 'prd', category: 'business', mode: 'all' };
+    const manifest = makeManifest([agent]);
+
+    // Place at category subdir — .opencode/agents/business/prd.md (fallback path)
+    const catDir = join(tmp, '.opencode', 'agents', 'business');
+    mkdirSync(catDir, { recursive: true });
+    writeFileSync(join(catDir, 'prd.md'), '# PRD Agent\nProduct requirements.', 'utf-8');
+
+    const states = detectAgentStates(manifest, tmp);
+
+    assert.ok(states.has('prd'), 'mode "all" agent in category subdir should be detected');
+    assert.equal(states.get('prd'), 'unknown',
+      'Agent found via fallback path without lock entry should be "unknown"');
+  });
+
+  it('detectInstalledSet includes manually placed local agents', () => {
+    const manifest = makeManifest([]); // no manifest agents
+
+    // Drop a local-only agent file
+    const agentDir = join(tmp, '.opencode', 'agents');
+    mkdirSync(agentDir, { recursive: true });
+    writeFileSync(join(agentDir, 'rogue-helper.md'), '# Rogue Helper\nUser-created agent.', 'utf-8');
+
+    const set = detectInstalledSet(manifest, tmp);
+
+    assert.ok(set.has('rogue-helper'),
+      'detectInstalledSet should include local-only agents found by filesystem scan');
+  });
+
+  it('local agents coexist with manifest agents without duplication', () => {
+    const manifestAgent = { name: 'ai-engineer', category: 'ai', mode: 'subagent' };
+    const manifest = makeManifest([manifestAgent]);
+
+    // Install the manifest agent on disk
+    const catDir = join(tmp, '.opencode', 'agents', 'ai');
+    mkdirSync(catDir, { recursive: true });
+    writeFileSync(join(catDir, 'ai-engineer.md'), '# AI Engineer', 'utf-8');
+
+    // Also drop a local agent not in the manifest
+    const agentDir = join(tmp, '.opencode', 'agents');
+    writeFileSync(join(agentDir, 'my-local-tool.md'), '# My Local Tool', 'utf-8');
+
+    const states = detectAgentStates(manifest, tmp);
+
+    // Manifest agent exists on disk without lock entry → unknown
+    assert.equal(states.get('ai-engineer'), 'unknown',
+      'Manifest agent without lock entry should be "unknown"');
+
+    // Local agent not in manifest → also unknown
+    assert.ok(states.has('my-local-tool'),
+      'Local agent should be detected alongside manifest agents');
+    assert.equal(states.get('my-local-tool'), 'unknown',
+      'Local agent without lock entry should be "unknown"');
+
+    // No duplication: total entries = 2 (one manifest + one local)
+    assert.equal(states.size, 2,
+      `Expected exactly 2 entries (manifest + local), got ${states.size}`);
+  });
+});
+
+// ─── SEC: symlink files in agents dir are skipped (Issue 1) ──────────────────
+
+describe('Security: symlinks in agents dir are skipped by scanLocalAgents', () => {
+  /** @type {string} */
+  let tmp;
+
+  beforeEach(() => {
+    tmp = mkdtempSync(join(tmpdir(), 'lock-symlink-'));
+  });
+
+  afterEach(() => {
+    rmSync(tmp, { recursive: true, force: true });
+  });
+
+  it('symlinked .md file is NOT detected by detectAgentStates', () => {
+    const manifest = makeManifest([]);
+    const agentDir = join(tmp, '.opencode', 'agents');
+    mkdirSync(agentDir, { recursive: true });
+
+    // Create a real file outside the agents dir
+    const outsideFile = join(tmp, 'secret.md');
+    writeFileSync(outsideFile, '# Secret content', 'utf-8');
+
+    // Symlink from agents dir to the outside file
+    symlinkSync(outsideFile, join(agentDir, 'evil-agent.md'));
+
+    // Also place a legit (non-symlink) agent for sanity check
+    writeFileSync(join(agentDir, 'legit-agent.md'), '# Legit', 'utf-8');
+
+    const states = detectAgentStates(manifest, tmp);
+
+    assert.ok(!states.has('evil-agent'),
+      'Symlinked agent file should NOT appear in detected states');
+    assert.ok(states.has('legit-agent'),
+      'Non-symlink agent should still be detected');
+  });
+
+  it('symlinked .md in a subdirectory is also skipped', () => {
+    const manifest = makeManifest([]);
+    const subDir = join(tmp, '.opencode', 'agents', 'custom');
+    mkdirSync(subDir, { recursive: true });
+
+    const outsideFile = join(tmp, 'private-key.md');
+    writeFileSync(outsideFile, '# Private Key', 'utf-8');
+
+    symlinkSync(outsideFile, join(subDir, 'sneaky.md'));
+
+    const states = detectAgentStates(manifest, tmp);
+
+    assert.ok(!states.has('sneaky'),
+      'Symlink in subdirectory should be silently skipped');
+  });
+
+  it('rehashLock skips symlinked agent files', () => {
+    const manifest = makeManifest([]);
+    const agentDir = join(tmp, '.opencode', 'agents');
+    mkdirSync(agentDir, { recursive: true });
+
+    const outsideFile = join(tmp, 'outside.md');
+    writeFileSync(outsideFile, '# Outside', 'utf-8');
+    symlinkSync(outsideFile, join(agentDir, 'symlinked.md'));
+    writeFileSync(join(agentDir, 'real-agent.md'), '# Real', 'utf-8');
+
+    const count = rehashLock(manifest, tmp);
+
+    assert.equal(count, 1, 'Only the real (non-symlink) agent should be hashed');
+    const lock = readLock(tmp);
+    assert.ok(lock['real-agent'], 'Real agent should be in lock');
+    assert.ok(!lock['symlinked'], 'Symlinked agent should NOT be in lock');
+  });
+});
+
+// ─── SEC: path traversal keys filtered from lock file (Issue 2) ──────────────
+
+describe('Security: readLock filters path traversal keys', () => {
+  /** @type {string} */
+  let tmp;
+
+  beforeEach(() => {
+    tmp = mkdtempSync(join(tmpdir(), 'lock-traversal-'));
+  });
+
+  afterEach(() => {
+    rmSync(tmp, { recursive: true, force: true });
+  });
+
+  it('keys with path traversal patterns are filtered out', () => {
+    const agentDir = join(tmp, '.opencode', 'agents');
+    mkdirSync(agentDir, { recursive: true });
+
+    // Write a lock file with malicious keys
+    const lockPath = join(agentDir, '.manifest-lock.json');
+    const maliciousLock = {
+      'legit-agent': { sha256: 'abc123', installedAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z' },
+      '../../../../etc/passwd': { sha256: 'evil1', installedAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z' },
+      '../../../secrets': { sha256: 'evil2', installedAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z' },
+      'foo/bar': { sha256: 'evil3', installedAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z' },
+      '.hidden': { sha256: 'evil4', installedAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z' },
+    };
+    writeFileSync(lockPath, JSON.stringify(maliciousLock, null, 2), 'utf-8');
+
+    const lock = readLock(tmp);
+
+    assert.ok(lock['legit-agent'], 'Valid agent name should be kept');
+    assert.ok(!lock['../../../../etc/passwd'], 'Path traversal key should be filtered');
+    assert.ok(!lock['../../../secrets'], 'Relative path key should be filtered');
+    assert.ok(!lock['foo/bar'], 'Slash-containing key should be filtered');
+    assert.ok(!lock['.hidden'], 'Dot-prefixed key should be filtered');
+    assert.equal(Object.keys(lock).length, 1, 'Only the valid entry should remain');
+  });
+
+  it('verifyLockIntegrity never sees traversal keys', () => {
+    const manifest = makeManifest([]);
+    const agentDir = join(tmp, '.opencode', 'agents');
+    mkdirSync(agentDir, { recursive: true });
+
+    // Poisoned lock file
+    const lockPath = join(agentDir, '.manifest-lock.json');
+    writeFileSync(lockPath, JSON.stringify({
+      '../../etc/shadow': { sha256: 'bad', installedAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z' },
+    }), 'utf-8');
+
+    const result = verifyLockIntegrity(manifest, tmp);
+
+    // The traversal key should be filtered by readLock, so nothing to verify
+    assert.equal(result.ok.length, 0);
+    assert.equal(result.mismatch.length, 0);
+    assert.equal(result.missing.length, 0);
+  });
+
+  it('relativePath with path traversal is rejected by isValidLockEntry', () => {
+    const agentDir = join(tmp, '.opencode', 'agents');
+    mkdirSync(agentDir, { recursive: true });
+
+    // Lock file with valid key but malicious relativePath
+    const lockPath = join(agentDir, '.manifest-lock.json');
+    writeFileSync(lockPath, JSON.stringify({
+      'legit-agent': {
+        sha256: 'abc123',
+        installedAt: '2025-01-01T00:00:00Z',
+        updatedAt: '2025-01-01T00:00:00Z',
+        relativePath: '../../../../etc/shadow',
+      },
+    }), 'utf-8');
+
+    const lock = readLock(tmp);
+    assert.ok(!lock['legit-agent'],
+      'Entry with traversal relativePath should be filtered out by isValidLockEntry');
+  });
+});
+
+// ─── verifyLockIntegrity finds agents in subdirectories via relativePath (Issue 3) ──
+
+describe('verifyLockIntegrity uses relativePath for subdirectory agents', () => {
+  /** @type {string} */
+  let tmp;
+
+  beforeEach(() => {
+    tmp = mkdtempSync(join(tmpdir(), 'lock-relpath-'));
+  });
+
+  afterEach(() => {
+    rmSync(tmp, { recursive: true, force: true });
+  });
+
+  it('rehash stores relativePath and verify finds agent in subdirectory', () => {
+    const manifest = makeManifest([]);
+    const subDir = join(tmp, '.opencode', 'agents', 'custom');
+    mkdirSync(subDir, { recursive: true });
+
+    const content = '# My Custom Agent';
+    writeFileSync(join(subDir, 'my-agent.md'), content, 'utf-8');
+
+    // Rehash should discover the agent and store relativePath
+    rehashLock(manifest, tmp);
+    const lock = readLock(tmp);
+
+    assert.ok(lock['my-agent'], 'Agent should be in lock after rehash');
+    assert.equal(lock['my-agent'].relativePath, join('custom', 'my-agent.md'),
+      'relativePath should be stored relative to basePath');
+
+    // Now verify — it should find the file via relativePath, not root-level fallback
+    const result = verifyLockIntegrity(manifest, tmp);
+    assert.deepEqual(result.ok, ['my-agent'],
+      'Agent in subdirectory should be found via relativePath');
+    assert.deepEqual(result.missing, [],
+      'No agents should be missing');
+  });
+
+  it('bootstrapLock stores relativePath for discovered local agents', () => {
+    const manifest = makeManifest([]);
+    const subDir = join(tmp, '.opencode', 'agents', 'tools');
+    mkdirSync(subDir, { recursive: true });
+
+    writeFileSync(join(subDir, 'helper.md'), '# Helper', 'utf-8');
+
+    bootstrapLock(manifest, tmp);
+    const lock = readLock(tmp);
+
+    assert.ok(lock['helper'], 'Agent should be in lock after bootstrap');
+    assert.equal(lock['helper'].relativePath, join('tools', 'helper.md'),
+      'relativePath should be stored for bootstrapped local agents');
+  });
+
+  it('verify falls back to {name}.md for entries without relativePath', () => {
+    const manifest = makeManifest([]);
+    const agentDir = join(tmp, '.opencode', 'agents');
+    mkdirSync(agentDir, { recursive: true });
+
+    const content = '# Root Agent';
+    writeFileSync(join(agentDir, 'root-agent.md'), content, 'utf-8');
+
+    // Manually write a lock entry WITHOUT relativePath (backward compat)
+    const lockPath = join(agentDir, '.manifest-lock.json');
+    writeFileSync(lockPath, JSON.stringify({
+      'root-agent': {
+        sha256: sha256(content),
+        installedAt: '2025-01-01T00:00:00Z',
+        updatedAt: '2025-01-01T00:00:00Z',
+        // no relativePath — old lock format
+      },
+    }), 'utf-8');
+
+    const result = verifyLockIntegrity(manifest, tmp);
+    assert.deepEqual(result.ok, ['root-agent'],
+      'Agent without relativePath should be found via {name}.md fallback');
   });
 });

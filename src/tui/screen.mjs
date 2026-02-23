@@ -12,7 +12,6 @@ import {
   CURSOR_HOME,
   CLEAR_SCREEN,
   CLEAR_TO_END,
-  CLEAR_LINE,
   SYNC_START,
   SYNC_END,
   moveTo,
@@ -99,7 +98,7 @@ export function flush(buffer) {
     // Diff: only repaint changed lines
     for (let i = 0; i < nextLines.length; i++) {
       if (nextLines[i] !== prevLines[i]) {
-        out += moveTo(i + 1, 1) + CLEAR_LINE + nextLines[i];
+        out += moveTo(i + 1, 1) + nextLines[i];
       }
     }
   }

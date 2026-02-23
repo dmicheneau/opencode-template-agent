@@ -5,9 +5,10 @@
  * Zero npm deps — Node 20+ built-ins only.
  */
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync, renameSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, renameSync, readdirSync, lstatSync, realpathSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { join, dirname } from 'node:path';
+import { SAFE_NAME_RE } from './registry.mjs';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -16,7 +17,7 @@ const LOCK_FILENAME = '.manifest-lock.json';
 // ─── Types (JSDoc) ───────────────────────────────────────────────────────────
 
 /**
- * @typedef {{ sha256: string, installedAt: string, updatedAt: string }} LockEntry
+ * @typedef {{ sha256: string, installedAt: string, updatedAt: string, relativePath?: string }} LockEntry
  * @typedef {Record<string, LockEntry>} LockData
  * @typedef {'installed'|'outdated'|'new'|'unknown'} AgentState
  */
@@ -60,11 +61,14 @@ export function getLockPath(cwd = process.cwd(), basePath) {
  * @returns {entry is LockEntry}
  */
 export function isValidLockEntry(entry) {
-  return (
-    typeof entry === 'object' &&
-    entry !== null &&
-    typeof /** @type {any} */ (entry).sha256 === 'string'
-  );
+  if (typeof entry !== 'object' || entry === null) return false;
+  if (typeof /** @type {any} */ (entry).sha256 !== 'string') return false;
+  // SEC: validate relativePath — reject path traversal attempts
+  const rp = /** @type {any} */ (entry).relativePath;
+  if (rp !== undefined) {
+    if (typeof rp !== 'string' || rp.includes('..') || rp.startsWith('/') || rp.startsWith('\\')) return false;
+  }
+  return true;
 }
 
 /**
@@ -84,9 +88,11 @@ export function readLock(cwd = process.cwd(), basePath) {
     if (typeof data !== 'object' || data === null || Array.isArray(data)) return {};
 
     // M-6: filter out entries that don't have the required shape
+    // SEC: filter out keys that could cause path traversal
     /** @type {LockData} */
     const clean = {};
     for (const [name, entry] of Object.entries(data)) {
+      if (!SAFE_NAME_RE.test(name)) continue;
       if (isValidLockEntry(entry)) {
         clean[name] = entry;
       }
@@ -163,6 +169,86 @@ export function removeLockEntry(agentName, cwd = process.cwd(), basePath) {
 // ─── State detection ─────────────────────────────────────────────────────────
 
 /**
+ * Resolve the on-disk path for an agent entry.
+ * - mode 'primary': `{basePath}/{name}.md`
+ * - mode 'all':     primary path first, falls back to subagent path
+ * - mode 'subagent' (default): `{basePath}/{category}/{name}.md`
+ *
+ * @param {string} cwd
+ * @param {string} basePath
+ * @param {{ name: string, category?: string, mode?: string }} agent
+ * @returns {string}
+ */
+function resolveAgentPath(cwd, basePath, agent) {
+  if (agent.mode === 'primary') {
+    return join(cwd, basePath, `${agent.name}.md`);
+  }
+  if (agent.mode === 'all') {
+    const primary = join(cwd, basePath, `${agent.name}.md`);
+    if (existsSync(primary)) return primary;
+    return join(cwd, basePath, agent.category || '', `${agent.name}.md`);
+  }
+  // subagent (default)
+  return join(cwd, basePath, agent.category || '', `${agent.name}.md`);
+}
+
+/**
+ * Recursively scan basePath for .md files not already tracked in `known`.
+ * Returns an array of { name, filePath, relativePath } for each discovered file.
+ *
+ * Security: symlinks are silently skipped and resolved paths must stay inside absBase.
+ *
+ * @param {string} cwd
+ * @param {string} basePath
+ * @param {Set<string>} known  agent names already tracked
+ * @returns {Array<{ name: string, filePath: string, relativePath: string }>}
+ */
+function scanLocalAgents(cwd, basePath, known) {
+  const absBase = join(cwd, basePath);
+  if (!existsSync(absBase)) return [];
+
+  /** @type {Array<{ name: string, filePath: string, relativePath: string }>} */
+  const found = [];
+
+  /** @type {string[]} */
+  let entries;
+  try {
+    entries = /** @type {string[]} */ (readdirSync(absBase, { recursive: true }));
+  } catch (err) {
+    // ELOOP: symlink cycle — bail out gracefully
+    if (/** @type {NodeJS.ErrnoException} */ (err).code === 'ELOOP') return [];
+    throw err;
+  }
+
+  const resolvedBase = realpathSync(absBase);
+
+  for (const entry of entries) {
+    const rel = typeof entry === 'string' ? entry : entry.toString();
+    if (!rel.endsWith('.md')) continue;
+
+    const filePath = join(absBase, rel);
+
+    // SEC-04: skip symlinks
+    try {
+      if (lstatSync(filePath).isSymbolicLink()) continue;
+    } catch { continue; }
+
+    // SEC: containment check — resolved path must stay within agents dir
+    try {
+      const real = realpathSync(filePath);
+      if (!real.startsWith(resolvedBase + '/') && real !== resolvedBase) continue;
+    } catch { continue; }
+
+    // Extract agent name from filename (strip path + .md), handle both / and \
+    const name = rel.split(/[\\/]/).pop().replace(/\.md$/, '');
+    if (!name || !SAFE_NAME_RE.test(name)) continue;
+    if (known.has(name)) continue;
+    found.push({ name, filePath, relativePath: rel });
+  }
+  return found;
+}
+
+/**
  * Detect the state of each agent in the manifest.
  * Returns Map<name, AgentState> where:
  * - 'installed': file exists AND hash matches lock entry
@@ -180,9 +266,7 @@ export function detectAgentStates(manifest, cwd = process.cwd()) {
   const states = new Map();
 
   for (const agent of manifest.agents) {
-    const filePath = agent.mode === 'primary'
-      ? join(cwd, basePath, `${agent.name}.md`)
-      : join(cwd, basePath, agent.category, `${agent.name}.md`);
+    const filePath = resolveAgentPath(cwd, basePath, agent);
 
     if (!existsSync(filePath)) {
       states.set(agent.name, 'new');
@@ -199,6 +283,12 @@ export function detectAgentStates(manifest, cwd = process.cwd()) {
     const currentContent = readFileSync(filePath, 'utf-8');
     const currentHash = sha256(currentContent);
     states.set(agent.name, currentHash === entry.sha256 ? 'installed' : 'outdated');
+  }
+
+  // Filesystem scan: pick up local .md files not in the manifest
+  const known = new Set(states.keys());
+  for (const { name } of scanLocalAgents(cwd, basePath, known)) {
+    states.set(name, 'unknown');
   }
 
   return states;
@@ -257,11 +347,13 @@ export function verifyLockIntegrity(manifest, cwd = process.cwd()) {
 
   for (const [name, entry] of Object.entries(lock)) {
     const agent = agentMap.get(name);
+    const rp = entry.relativePath;
+    const safeRelPath = rp && typeof rp === 'string' && !rp.includes('..') && !rp.startsWith('/') && !rp.startsWith('\\') ? rp : null;
     const filePath = agent
-      ? (agent.mode === 'primary'
-          ? join(cwd, basePath, `${name}.md`)
-          : join(cwd, basePath, agent.category, `${name}.md`))
-      : join(cwd, basePath, `${name}.md`); // fallback for orphan lock entries
+      ? resolveAgentPath(cwd, basePath, agent)
+      : safeRelPath
+        ? join(cwd, basePath, safeRelPath)
+        : join(cwd, basePath, `${name}.md`); // fallback for orphan lock entries
 
     if (!existsSync(filePath)) {
       missing.push(name);
@@ -297,9 +389,7 @@ export function rehashLock(manifest, cwd = process.cwd()) {
   const now = new Date().toISOString();
 
   for (const agent of manifest.agents) {
-    const filePath = agent.mode === 'primary'
-      ? join(cwd, basePath, `${agent.name}.md`)
-      : join(cwd, basePath, agent.category, `${agent.name}.md`);
+    const filePath = resolveAgentPath(cwd, basePath, agent);
 
     if (!existsSync(filePath)) continue;
 
@@ -308,6 +398,19 @@ export function rehashLock(manifest, cwd = process.cwd()) {
       sha256: sha256(content),
       installedAt: now,
       updatedAt: now,
+    };
+  }
+
+  // Filesystem scan: pick up local .md files not in the manifest
+  const known = new Set(Object.keys(lock));
+  for (const manifestAgent of manifest.agents) known.add(manifestAgent.name);
+  for (const { name, filePath, relativePath } of scanLocalAgents(cwd, basePath, known)) {
+    const content = readFileSync(filePath, 'utf-8');
+    lock[name] = {
+      sha256: sha256(content),
+      installedAt: now,
+      updatedAt: now,
+      relativePath,
     };
   }
 
@@ -333,9 +436,7 @@ export function bootstrapLock(manifest, cwd = process.cwd()) {
   for (const agent of manifest.agents) {
     if (lock[agent.name]) continue;
 
-    const filePath = agent.mode === 'primary'
-      ? join(cwd, basePath, `${agent.name}.md`)
-      : join(cwd, basePath, agent.category, `${agent.name}.md`);
+    const filePath = resolveAgentPath(cwd, basePath, agent);
 
     if (!existsSync(filePath)) continue;
 
@@ -345,6 +446,22 @@ export function bootstrapLock(manifest, cwd = process.cwd()) {
       sha256: sha256(content),
       installedAt: now,
       updatedAt: now,
+    };
+    changed = true;
+  }
+
+  // Filesystem scan: pick up local .md files not in the manifest
+  const known = new Set(Object.keys(lock));
+  for (const manifestAgent of manifest.agents) known.add(manifestAgent.name);
+  for (const { name, filePath, relativePath } of scanLocalAgents(cwd, basePath, known)) {
+    if (lock[name]) continue;
+    const content = readFileSync(filePath, 'utf-8');
+    const now = new Date().toISOString();
+    lock[name] = {
+      sha256: sha256(content),
+      installedAt: now,
+      updatedAt: now,
+      relativePath,
     };
     changed = true;
   }
