@@ -1,32 +1,8 @@
 {
-  "_note": "Raw sync tracking file — NOT the curated catalog. See root manifest.json for the curated 70-agent registry.",
-  "synced_at": "2026-02-17T20:34:53.417667+00:00",
+  "synced_at": "2026-02-23T06:29:02.363454+00:00",
   "source_repo": "davila7/claude-code-templates",
-  "agent_count": 133,
+  "agent_count": 43,
   "agents": [
-    {
-      "name": "accessibility",
-      "path": "web/accessibility",
-      "category": "web-tools",
-      "opencode_category": "web",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "webfetch": "allow",
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/web-tools/accessibility.md",
-      "status": "skipped"
-    },
     {
       "name": "ai-engineer",
       "path": "ai/ai-engineer",
@@ -34,59 +10,78 @@
       "opencode_category": "ai",
       "mode": "subagent",
       "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
         "write": "allow",
-        "edit": "ask",
+        "edit": "allow",
         "bash": {
           "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
+          "git *": "allow",
+          "npm *": "allow",
+          "npx *": "allow",
+          "yarn *": "allow",
+          "pnpm *": "allow",
+          "node *": "allow",
+          "bun *": "allow",
+          "deno *": "allow",
+          "tsc *": "allow",
+          "pytest*": "allow",
+          "python -m pytest*": "allow",
+          "python *": "allow",
+          "python3 *": "allow",
+          "pip *": "allow",
+          "pip3 *": "allow",
+          "uv *": "allow",
+          "ruff *": "allow",
+          "mypy *": "allow",
+          "go test*": "allow",
+          "go build*": "allow",
+          "go run*": "allow",
+          "go mod*": "allow",
+          "go vet*": "allow",
+          "golangci-lint*": "allow",
+          "cargo test*": "allow",
+          "cargo build*": "allow",
+          "cargo run*": "allow",
+          "cargo clippy*": "allow",
+          "cargo fmt*": "allow",
+          "mvn *": "allow",
+          "gradle *": "allow",
+          "gradlew *": "allow",
+          "dotnet *": "allow",
+          "make*": "allow",
+          "cmake*": "allow",
+          "gcc *": "allow",
+          "g++ *": "allow",
+          "clang*": "allow",
+          "just *": "allow",
+          "task *": "allow",
+          "ls*": "allow",
+          "cat *": "allow",
+          "head *": "allow",
+          "tail *": "allow",
+          "wc *": "allow",
+          "which *": "allow",
+          "echo *": "allow",
+          "mkdir *": "allow",
+          "pwd": "allow",
+          "env": "allow",
+          "printenv*": "allow"
         },
-        "task": {
-          "*": "allow"
-        }
+        "webfetch": "allow",
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/data-ai/ai-engineer.md",
-      "status": "skipped"
-    },
-    {
-      "name": "ai-ethics-advisor",
-      "path": "ai/ai-ethics-advisor",
-      "category": "ai-specialists",
-      "opencode_category": "ai",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "deny",
-        "bash": "deny",
-        "webfetch": "allow",
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/ai-specialists/ai-ethics-advisor.md",
-      "status": "skipped"
-    },
-    {
-      "name": "angular-architect",
-      "path": "languages/angular-architect",
-      "category": "programming-languages",
-      "opencode_category": "languages",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/programming-languages/angular-architect.md",
       "status": "skipped"
     },
     {
@@ -96,41 +91,47 @@
       "opencode_category": "data-api",
       "mode": "subagent",
       "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
         "write": "allow",
-        "edit": "ask",
+        "edit": "allow",
         "bash": {
           "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
+          "psql *": "allow",
+          "pg_dump*": "ask",
+          "pg_restore*": "ask",
+          "redis-cli *": "allow",
+          "mysql *": "allow",
+          "mongosh *": "allow",
+          "sqlite3 *": "allow",
+          "curl *": "ask",
+          "httpie *": "ask",
+          "grpcurl *": "allow",
+          "git *": "allow",
+          "ls*": "allow",
+          "cat *": "allow",
+          "head *": "allow",
+          "tail *": "allow",
+          "jq *": "allow",
+          "wc *": "allow",
+          "echo *": "allow",
+          "mkdir *": "allow",
+          "pwd": "allow"
         },
-        "task": {
-          "*": "allow"
-        }
+        "webfetch": "allow",
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/api-graphql/api-architect.md",
-      "status": "skipped"
-    },
-    {
-      "name": "api-designer",
-      "path": "data-api/api-designer",
-      "category": "api-graphql",
-      "opencode_category": "data-api",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/api-graphql/api-designer.md",
       "status": "skipped"
     },
     {
@@ -140,187 +141,27 @@
       "opencode_category": "docs",
       "mode": "subagent",
       "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
         "write": "allow",
-        "edit": "ask",
-        "bash": "deny",
+        "edit": "allow",
+        "bash": {
+          "*": "deny"
+        },
         "webfetch": "allow",
-        "task": {
-          "*": "allow"
-        }
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/documentation/api-documenter.md",
-      "status": "skipped"
-    },
-    {
-      "name": "arch",
-      "path": "docs/arch",
-      "category": "documentation",
-      "opencode_category": "docs",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/documentation/arch.md",
-      "status": "skipped"
-    },
-    {
-      "name": "backend-architect",
-      "path": "web/backend-architect",
-      "category": "development-team",
-      "opencode_category": "web",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/development-team/backend-architect.md",
-      "status": "skipped"
-    },
-    {
-      "name": "blockchain-developer",
-      "path": "security/blockchain-developer",
-      "category": "blockchain-web3",
-      "opencode_category": "security",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/blockchain-web3/blockchain-developer.md",
-      "status": "skipped"
-    },
-    {
-      "name": "build-engineer",
-      "path": "devtools/build-engineer",
-      "category": "development-tools",
-      "opencode_category": "devtools",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/development-tools/build-engineer.md",
-      "status": "skipped"
-    },
-    {
-      "name": "business-analyst",
-      "path": "business/business-analyst",
-      "category": "business-marketing",
-      "opencode_category": "business",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": "deny",
-        "webfetch": "allow",
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/business-marketing/business-analyst.md",
-      "status": "skipped"
-    },
-    {
-      "name": "c-pro",
-      "path": "languages/c-pro",
-      "category": "programming-languages",
-      "opencode_category": "languages",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/programming-languages/c-pro.md",
-      "status": "skipped"
-    },
-    {
-      "name": "changelog-generator",
-      "path": "docs/changelog-generator",
-      "category": "documentation",
-      "opencode_category": "docs",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/documentation/changelog-generator.md",
-      "status": "skipped"
-    },
-    {
-      "name": "chaos-engineer",
-      "path": "devtools/chaos-engineer",
-      "category": "development-tools",
-      "opencode_category": "devtools",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/development-tools/chaos-engineer.md",
       "status": "skipped"
     },
     {
@@ -330,87 +171,61 @@
       "opencode_category": "devops",
       "mode": "primary",
       "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
         "write": "allow",
-        "edit": "ask",
+        "edit": "allow",
         "bash": {
           "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
+          "terraform *": "allow",
+          "tf *": "allow",
+          "kubectl *": "allow",
+          "helm *": "allow",
+          "docker *": "allow",
+          "docker-compose *": "allow",
+          "aws *": "allow",
+          "gcloud *": "allow",
+          "az *": "allow",
+          "ansible*": "allow",
+          "systemctl *": "ask",
+          "journalctl *": "allow",
+          "ss *": "allow",
+          "ip *": "allow",
+          "dig *": "allow",
+          "nslookup *": "allow",
+          "ping *": "allow",
+          "traceroute *": "allow",
+          "curl *": "ask",
+          "wget *": "ask",
+          "git *": "allow",
+          "ls*": "allow",
+          "cat *": "allow",
+          "head *": "allow",
+          "tail *": "allow",
+          "wc *": "allow",
+          "which *": "allow",
+          "echo *": "allow",
+          "mkdir *": "allow",
+          "pwd": "allow",
+          "env": "allow",
+          "printenv*": "allow",
+          "ssh *": "ask",
+          "scp *": "ask"
         },
-        "task": {
-          "*": "allow"
-        }
+        "webfetch": "allow",
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/devops-infrastructure/cloud-architect.md",
-      "status": "skipped"
-    },
-    {
-      "name": "cloud-migration-specialist",
-      "path": "devops/cloud-migration-specialist",
-      "category": "modernization",
-      "opencode_category": "devops",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/modernization/cloud-migration-specialist.md",
-      "status": "skipped"
-    },
-    {
-      "name": "code-architect",
-      "path": "web/code-architect",
-      "category": "development-team",
-      "opencode_category": "web",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "deny",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "webfetch": "allow",
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/development-team/code-architect.md",
-      "status": "skipped"
-    },
-    {
-      "name": "code-explorer",
-      "path": "web/code-explorer",
-      "category": "development-team",
-      "opencode_category": "web",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "deny",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "webfetch": "allow",
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/development-team/code-explorer.md",
       "status": "skipped"
     },
     {
@@ -420,120 +235,25 @@
       "opencode_category": "devtools",
       "mode": "subagent",
       "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
+        "write": "deny",
+        "edit": "deny",
+        "bash": "deny",
+        "webfetch": "ask",
+        "task": "allow",
+        "mcp": "deny",
+        "todoread": "allow",
+        "todowrite": "deny",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/development-tools/code-reviewer.md",
-      "status": "skipped"
-    },
-    {
-      "name": "codebase-pattern-finder",
-      "path": "devtools/codebase-pattern-finder",
-      "category": "development-tools",
-      "opencode_category": "devtools",
-      "mode": "subagent",
-      "permission": {
-        "write": "deny",
-        "edit": "deny",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/development-tools/codebase-pattern-finder.md",
-      "status": "skipped"
-    },
-    {
-      "name": "competitive-analyst",
-      "path": "business/competitive-analyst",
-      "category": "business-marketing",
-      "opencode_category": "business",
-      "mode": "subagent",
-      "permission": {
-        "write": "deny",
-        "edit": "deny",
-        "bash": "deny",
-        "webfetch": "allow",
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/business-marketing/competitive-analyst.md",
-      "status": "skipped"
-    },
-    {
-      "name": "compliance-auditor",
-      "path": "security/compliance-auditor",
-      "category": "security",
-      "opencode_category": "security",
-      "mode": "subagent",
-      "permission": {
-        "write": "deny",
-        "edit": "deny",
-        "bash": "deny",
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/security/compliance-auditor.md",
-      "status": "skipped"
-    },
-    {
-      "name": "compliance-specialist",
-      "path": "security/compliance-specialist",
-      "category": "security",
-      "opencode_category": "security",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/security/compliance-specialist.md",
-      "status": "skipped"
-    },
-    {
-      "name": "computer-vision-engineer",
-      "path": "ai/computer-vision-engineer",
-      "category": "data-ai",
-      "opencode_category": "ai",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/data-ai/computer-vision-engineer.md",
       "status": "skipped"
     },
     {
@@ -543,17 +263,76 @@
       "opencode_category": "languages",
       "mode": "subagent",
       "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
         "write": "allow",
-        "edit": "ask",
+        "edit": "allow",
         "bash": {
           "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
+          "git *": "allow",
+          "npm *": "allow",
+          "npx *": "allow",
+          "yarn *": "allow",
+          "pnpm *": "allow",
+          "node *": "allow",
+          "bun *": "allow",
+          "deno *": "allow",
+          "tsc *": "allow",
+          "pytest*": "allow",
+          "python -m pytest*": "allow",
+          "python *": "allow",
+          "python3 *": "allow",
+          "pip *": "allow",
+          "pip3 *": "allow",
+          "uv *": "allow",
+          "ruff *": "allow",
+          "mypy *": "allow",
+          "go test*": "allow",
+          "go build*": "allow",
+          "go run*": "allow",
+          "go mod*": "allow",
+          "go vet*": "allow",
+          "golangci-lint*": "allow",
+          "cargo test*": "allow",
+          "cargo build*": "allow",
+          "cargo run*": "allow",
+          "cargo clippy*": "allow",
+          "cargo fmt*": "allow",
+          "mvn *": "allow",
+          "gradle *": "allow",
+          "gradlew *": "allow",
+          "dotnet *": "allow",
+          "make*": "allow",
+          "cmake*": "allow",
+          "gcc *": "allow",
+          "g++ *": "allow",
+          "clang*": "allow",
+          "just *": "allow",
+          "task *": "allow",
+          "ls*": "allow",
+          "cat *": "allow",
+          "head *": "allow",
+          "tail *": "allow",
+          "wc *": "allow",
+          "which *": "allow",
+          "echo *": "allow",
+          "mkdir *": "allow",
+          "pwd": "allow",
+          "env": "allow",
+          "printenv*": "allow"
         },
-        "task": {
-          "*": "allow"
-        }
+        "webfetch": "allow",
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/programming-languages/cpp-pro.md",
       "status": "skipped"
@@ -565,63 +344,78 @@
       "opencode_category": "languages",
       "mode": "subagent",
       "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
         "write": "allow",
-        "edit": "ask",
+        "edit": "allow",
         "bash": {
           "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
+          "git *": "allow",
+          "npm *": "allow",
+          "npx *": "allow",
+          "yarn *": "allow",
+          "pnpm *": "allow",
+          "node *": "allow",
+          "bun *": "allow",
+          "deno *": "allow",
+          "tsc *": "allow",
+          "pytest*": "allow",
+          "python -m pytest*": "allow",
+          "python *": "allow",
+          "python3 *": "allow",
+          "pip *": "allow",
+          "pip3 *": "allow",
+          "uv *": "allow",
+          "ruff *": "allow",
+          "mypy *": "allow",
+          "go test*": "allow",
+          "go build*": "allow",
+          "go run*": "allow",
+          "go mod*": "allow",
+          "go vet*": "allow",
+          "golangci-lint*": "allow",
+          "cargo test*": "allow",
+          "cargo build*": "allow",
+          "cargo run*": "allow",
+          "cargo clippy*": "allow",
+          "cargo fmt*": "allow",
+          "mvn *": "allow",
+          "gradle *": "allow",
+          "gradlew *": "allow",
+          "dotnet *": "allow",
+          "make*": "allow",
+          "cmake*": "allow",
+          "gcc *": "allow",
+          "g++ *": "allow",
+          "clang*": "allow",
+          "just *": "allow",
+          "task *": "allow",
+          "ls*": "allow",
+          "cat *": "allow",
+          "head *": "allow",
+          "tail *": "allow",
+          "wc *": "allow",
+          "which *": "allow",
+          "echo *": "allow",
+          "mkdir *": "allow",
+          "pwd": "allow",
+          "env": "allow",
+          "printenv*": "allow"
         },
-        "task": {
-          "*": "allow"
-        }
+        "webfetch": "allow",
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/programming-languages/csharp-developer.md",
-      "status": "skipped"
-    },
-    {
-      "name": "data-analyst",
-      "path": "ai/data-analyst",
-      "category": "data-ai",
-      "opencode_category": "ai",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/data-ai/data-analyst.md",
-      "status": "synced"
-    },
-    {
-      "name": "data-engineer",
-      "path": "ai/data-engineer",
-      "category": "data-ai",
-      "opencode_category": "ai",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/data-ai/data-engineer.md",
       "status": "skipped"
     },
     {
@@ -631,41 +425,53 @@
       "opencode_category": "ai",
       "mode": "subagent",
       "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
         "write": "allow",
         "edit": "ask",
         "bash": {
           "*": "ask",
-          "git status": "allow",
+          "python *": "allow",
+          "python3 *": "allow",
+          "pip *": "allow",
+          "pip3 *": "allow",
+          "uv *": "allow",
+          "jupyter *": "allow",
+          "ipython*": "allow",
+          "Rscript *": "allow",
+          "sqlite3 *": "allow",
+          "jq *": "allow",
+          "csvkit*": "allow",
+          "csvtool*": "allow",
+          "cat *": "allow",
+          "head *": "allow",
+          "tail *": "allow",
+          "wc *": "allow",
+          "sort *": "allow",
+          "uniq *": "allow",
+          "cut *": "allow",
+          "ls*": "allow",
+          "pwd": "allow",
+          "echo *": "allow",
+          "git log*": "allow",
+          "git status*": "allow",
           "git diff*": "allow",
-          "git log*": "allow"
+          "git show*": "allow"
         },
-        "task": {
-          "*": "allow"
-        }
+        "webfetch": "allow",
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/data-ai/data-scientist.md",
-      "status": "skipped"
-    },
-    {
-      "name": "database-admin",
-      "path": "data-api/database-admin",
-      "category": "database",
-      "opencode_category": "data-api",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/database/database-admin.md",
       "status": "skipped"
     },
     {
@@ -675,41 +481,47 @@
       "opencode_category": "data-api",
       "mode": "subagent",
       "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
         "write": "allow",
-        "edit": "ask",
+        "edit": "allow",
         "bash": {
           "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
+          "psql *": "allow",
+          "pg_dump*": "ask",
+          "pg_restore*": "ask",
+          "redis-cli *": "allow",
+          "mysql *": "allow",
+          "mongosh *": "allow",
+          "sqlite3 *": "allow",
+          "curl *": "ask",
+          "httpie *": "ask",
+          "grpcurl *": "allow",
+          "git *": "allow",
+          "ls*": "allow",
+          "cat *": "allow",
+          "head *": "allow",
+          "tail *": "allow",
+          "jq *": "allow",
+          "wc *": "allow",
+          "echo *": "allow",
+          "mkdir *": "allow",
+          "pwd": "allow"
         },
-        "task": {
-          "*": "allow"
-        }
+        "webfetch": "allow",
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/database/database-architect.md",
-      "status": "skipped"
-    },
-    {
-      "name": "database-optimizer",
-      "path": "data-api/database-optimizer",
-      "category": "database",
-      "opencode_category": "data-api",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/database/database-optimizer.md",
       "status": "skipped"
     },
     {
@@ -719,63 +531,78 @@
       "opencode_category": "devtools",
       "mode": "subagent",
       "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
         "write": "allow",
-        "edit": "ask",
+        "edit": "allow",
         "bash": {
           "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
+          "git *": "allow",
+          "npm *": "allow",
+          "npx *": "allow",
+          "yarn *": "allow",
+          "pnpm *": "allow",
+          "node *": "allow",
+          "bun *": "allow",
+          "deno *": "allow",
+          "tsc *": "allow",
+          "pytest*": "allow",
+          "python -m pytest*": "allow",
+          "python *": "allow",
+          "python3 *": "allow",
+          "pip *": "allow",
+          "pip3 *": "allow",
+          "uv *": "allow",
+          "ruff *": "allow",
+          "mypy *": "allow",
+          "go test*": "allow",
+          "go build*": "allow",
+          "go run*": "allow",
+          "go mod*": "allow",
+          "go vet*": "allow",
+          "golangci-lint*": "allow",
+          "cargo test*": "allow",
+          "cargo build*": "allow",
+          "cargo run*": "allow",
+          "cargo clippy*": "allow",
+          "cargo fmt*": "allow",
+          "mvn *": "allow",
+          "gradle *": "allow",
+          "gradlew *": "allow",
+          "dotnet *": "allow",
+          "make*": "allow",
+          "cmake*": "allow",
+          "gcc *": "allow",
+          "g++ *": "allow",
+          "clang*": "allow",
+          "just *": "allow",
+          "task *": "allow",
+          "ls*": "allow",
+          "cat *": "allow",
+          "head *": "allow",
+          "tail *": "allow",
+          "wc *": "allow",
+          "which *": "allow",
+          "echo *": "allow",
+          "mkdir *": "allow",
+          "pwd": "allow",
+          "env": "allow",
+          "printenv*": "allow"
         },
-        "task": {
-          "*": "allow"
-        }
+        "webfetch": "allow",
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/development-tools/debugger.md",
-      "status": "skipped"
-    },
-    {
-      "name": "dependency-manager",
-      "path": "devtools/dependency-manager",
-      "category": "development-tools",
-      "opencode_category": "devtools",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/development-tools/dependency-manager.md",
-      "status": "skipped"
-    },
-    {
-      "name": "deployment-engineer",
-      "path": "devops/deployment-engineer",
-      "category": "devops-infrastructure",
-      "opencode_category": "devops",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/devops-infrastructure/deployment-engineer.md",
       "status": "skipped"
     },
     {
@@ -785,107 +612,61 @@
       "opencode_category": "devops",
       "mode": "primary",
       "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
         "write": "allow",
-        "edit": "ask",
+        "edit": "allow",
         "bash": {
           "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
+          "terraform *": "allow",
+          "tf *": "allow",
+          "kubectl *": "allow",
+          "helm *": "allow",
+          "docker *": "allow",
+          "docker-compose *": "allow",
+          "aws *": "allow",
+          "gcloud *": "allow",
+          "az *": "allow",
+          "ansible*": "allow",
+          "systemctl *": "ask",
+          "journalctl *": "allow",
+          "ss *": "allow",
+          "ip *": "allow",
+          "dig *": "allow",
+          "nslookup *": "allow",
+          "ping *": "allow",
+          "traceroute *": "allow",
+          "curl *": "ask",
+          "wget *": "ask",
+          "git *": "allow",
+          "ls*": "allow",
+          "cat *": "allow",
+          "head *": "allow",
+          "tail *": "allow",
+          "wc *": "allow",
+          "which *": "allow",
+          "echo *": "allow",
+          "mkdir *": "allow",
+          "pwd": "allow",
+          "env": "allow",
+          "printenv*": "allow",
+          "ssh *": "ask",
+          "scp *": "ask"
         },
-        "task": {
-          "*": "allow"
-        }
+        "webfetch": "allow",
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/devops-infrastructure/devops-engineer.md",
-      "status": "skipped"
-    },
-    {
-      "name": "devops-expert",
-      "path": "devops/devops-expert",
-      "category": "devops-infrastructure",
-      "opencode_category": "devops",
-      "mode": "subagent",
-      "permission": {
-        "write": "deny",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/devops-infrastructure/devops-expert.md",
-      "status": "skipped"
-    },
-    {
-      "name": "devops-troubleshooter",
-      "path": "devops/devops-troubleshooter",
-      "category": "devops-infrastructure",
-      "opencode_category": "devops",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/devops-infrastructure/devops-troubleshooter.md",
-      "status": "skipped"
-    },
-    {
-      "name": "diagram-architect",
-      "path": "docs/diagram-architect",
-      "category": "documentation",
-      "opencode_category": "docs",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/documentation/diagram-architect.md",
-      "status": "skipped"
-    },
-    {
-      "name": "django-developer",
-      "path": "languages/django-developer",
-      "category": "programming-languages",
-      "opencode_category": "languages",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/programming-languages/django-developer.md",
       "status": "skipped"
     },
     {
@@ -895,147 +676,27 @@
       "opencode_category": "docs",
       "mode": "subagent",
       "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
         "write": "allow",
-        "edit": "ask",
-        "bash": "deny",
+        "edit": "allow",
+        "bash": {
+          "*": "deny"
+        },
         "webfetch": "allow",
-        "task": {
-          "*": "allow"
-        }
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/documentation/documentation-engineer.md",
-      "status": "skipped"
-    },
-    {
-      "name": "docusaurus-expert",
-      "path": "docs/docusaurus-expert",
-      "category": "documentation",
-      "opencode_category": "docs",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/documentation/docusaurus-expert.md",
-      "status": "skipped"
-    },
-    {
-      "name": "dotnet-core-expert",
-      "path": "languages/dotnet-core-expert",
-      "category": "programming-languages",
-      "opencode_category": "languages",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/programming-languages/dotnet-core-expert.md",
-      "status": "skipped"
-    },
-    {
-      "name": "dx-optimizer",
-      "path": "devtools/dx-optimizer",
-      "category": "development-tools",
-      "opencode_category": "devtools",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/development-tools/dx-optimizer.md",
-      "status": "skipped"
-    },
-    {
-      "name": "elixir-expert",
-      "path": "languages/elixir-expert",
-      "category": "programming-languages",
-      "opencode_category": "languages",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/programming-languages/elixir-expert.md",
-      "status": "skipped"
-    },
-    {
-      "name": "embedded-systems",
-      "path": "languages/embedded-systems",
-      "category": "programming-languages",
-      "opencode_category": "languages",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/programming-languages/embedded-systems.md",
-      "status": "skipped"
-    },
-    {
-      "name": "error-detective",
-      "path": "devtools/error-detective",
-      "category": "development-tools",
-      "opencode_category": "devtools",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/development-tools/error-detective.md",
       "status": "skipped"
     },
     {
@@ -1045,18 +706,76 @@
       "opencode_category": "web",
       "mode": "subagent",
       "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
         "write": "allow",
-        "edit": "ask",
+        "edit": "allow",
         "bash": {
           "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
+          "git *": "allow",
+          "npm *": "allow",
+          "npx *": "allow",
+          "yarn *": "allow",
+          "pnpm *": "allow",
+          "node *": "allow",
+          "bun *": "allow",
+          "deno *": "allow",
+          "tsc *": "allow",
+          "pytest*": "allow",
+          "python -m pytest*": "allow",
+          "python *": "allow",
+          "python3 *": "allow",
+          "pip *": "allow",
+          "pip3 *": "allow",
+          "uv *": "allow",
+          "ruff *": "allow",
+          "mypy *": "allow",
+          "go test*": "allow",
+          "go build*": "allow",
+          "go run*": "allow",
+          "go mod*": "allow",
+          "go vet*": "allow",
+          "golangci-lint*": "allow",
+          "cargo test*": "allow",
+          "cargo build*": "allow",
+          "cargo run*": "allow",
+          "cargo clippy*": "allow",
+          "cargo fmt*": "allow",
+          "mvn *": "allow",
+          "gradle *": "allow",
+          "gradlew *": "allow",
+          "dotnet *": "allow",
+          "make*": "allow",
+          "cmake*": "allow",
+          "gcc *": "allow",
+          "g++ *": "allow",
+          "clang*": "allow",
+          "just *": "allow",
+          "task *": "allow",
+          "ls*": "allow",
+          "cat *": "allow",
+          "head *": "allow",
+          "tail *": "allow",
+          "wc *": "allow",
+          "which *": "allow",
+          "echo *": "allow",
+          "mkdir *": "allow",
+          "pwd": "allow",
+          "env": "allow",
+          "printenv*": "allow"
         },
         "webfetch": "allow",
-        "task": {
-          "*": "allow"
-        }
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/web-tools/expert-nextjs-developer.md",
       "status": "skipped"
@@ -1068,64 +787,78 @@
       "opencode_category": "web",
       "mode": "subagent",
       "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
         "write": "allow",
-        "edit": "ask",
+        "edit": "allow",
         "bash": {
           "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
+          "git *": "allow",
+          "npm *": "allow",
+          "npx *": "allow",
+          "yarn *": "allow",
+          "pnpm *": "allow",
+          "node *": "allow",
+          "bun *": "allow",
+          "deno *": "allow",
+          "tsc *": "allow",
+          "pytest*": "allow",
+          "python -m pytest*": "allow",
+          "python *": "allow",
+          "python3 *": "allow",
+          "pip *": "allow",
+          "pip3 *": "allow",
+          "uv *": "allow",
+          "ruff *": "allow",
+          "mypy *": "allow",
+          "go test*": "allow",
+          "go build*": "allow",
+          "go run*": "allow",
+          "go mod*": "allow",
+          "go vet*": "allow",
+          "golangci-lint*": "allow",
+          "cargo test*": "allow",
+          "cargo build*": "allow",
+          "cargo run*": "allow",
+          "cargo clippy*": "allow",
+          "cargo fmt*": "allow",
+          "mvn *": "allow",
+          "gradle *": "allow",
+          "gradlew *": "allow",
+          "dotnet *": "allow",
+          "make*": "allow",
+          "cmake*": "allow",
+          "gcc *": "allow",
+          "g++ *": "allow",
+          "clang*": "allow",
+          "just *": "allow",
+          "task *": "allow",
+          "ls*": "allow",
+          "cat *": "allow",
+          "head *": "allow",
+          "tail *": "allow",
+          "wc *": "allow",
+          "which *": "allow",
+          "echo *": "allow",
+          "mkdir *": "allow",
+          "pwd": "allow",
+          "env": "allow",
+          "printenv*": "allow"
         },
         "webfetch": "allow",
-        "task": {
-          "*": "allow"
-        }
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/web-tools/expert-react-frontend-engineer.md",
-      "status": "skipped"
-    },
-    {
-      "name": "fintech-engineer",
-      "path": "business/fintech-engineer",
-      "category": "finance",
-      "opencode_category": "business",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/finance/fintech-engineer.md",
-      "status": "skipped"
-    },
-    {
-      "name": "flutter-expert",
-      "path": "languages/flutter-expert",
-      "category": "programming-languages",
-      "opencode_category": "languages",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/programming-languages/flutter-expert.md",
       "status": "skipped"
     },
     {
@@ -1135,80 +868,78 @@
       "opencode_category": "web",
       "mode": "primary",
       "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
         "write": "allow",
-        "edit": "ask",
+        "edit": "allow",
         "bash": {
           "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
+          "git *": "allow",
+          "npm *": "allow",
+          "npx *": "allow",
+          "yarn *": "allow",
+          "pnpm *": "allow",
+          "node *": "allow",
+          "bun *": "allow",
+          "deno *": "allow",
+          "tsc *": "allow",
+          "pytest*": "allow",
+          "python -m pytest*": "allow",
+          "python *": "allow",
+          "python3 *": "allow",
+          "pip *": "allow",
+          "pip3 *": "allow",
+          "uv *": "allow",
+          "ruff *": "allow",
+          "mypy *": "allow",
+          "go test*": "allow",
+          "go build*": "allow",
+          "go run*": "allow",
+          "go mod*": "allow",
+          "go vet*": "allow",
+          "golangci-lint*": "allow",
+          "cargo test*": "allow",
+          "cargo build*": "allow",
+          "cargo run*": "allow",
+          "cargo clippy*": "allow",
+          "cargo fmt*": "allow",
+          "mvn *": "allow",
+          "gradle *": "allow",
+          "gradlew *": "allow",
+          "dotnet *": "allow",
+          "make*": "allow",
+          "cmake*": "allow",
+          "gcc *": "allow",
+          "g++ *": "allow",
+          "clang*": "allow",
+          "just *": "allow",
+          "task *": "allow",
+          "ls*": "allow",
+          "cat *": "allow",
+          "head *": "allow",
+          "tail *": "allow",
+          "wc *": "allow",
+          "which *": "allow",
+          "echo *": "allow",
+          "mkdir *": "allow",
+          "pwd": "allow",
+          "env": "allow",
+          "printenv*": "allow"
         },
-        "task": {
-          "*": "allow"
-        }
+        "webfetch": "allow",
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/development-team/fullstack-developer.md",
-      "status": "skipped"
-    },
-    {
-      "name": "game-developer",
-      "path": "specialist/game-developer",
-      "category": "game-development",
-      "opencode_category": "specialist",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/game-development/game-developer.md",
-      "status": "skipped"
-    },
-    {
-      "name": "general-purpose",
-      "path": "devtools/general-purpose",
-      "category": "development-tools",
-      "opencode_category": "devtools",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/development-tools/general-purpose.md",
-      "status": "skipped"
-    },
-    {
-      "name": "github-actions-expert",
-      "path": "security/github-actions-expert",
-      "category": "security",
-      "opencode_category": "security",
-      "mode": "subagent",
-      "permission": {
-        "write": "deny",
-        "edit": "ask",
-        "bash": "deny",
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/security/github-actions-expert.md",
       "status": "skipped"
     },
     {
@@ -1218,17 +949,76 @@
       "opencode_category": "languages",
       "mode": "subagent",
       "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
         "write": "allow",
-        "edit": "ask",
+        "edit": "allow",
         "bash": {
           "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
+          "git *": "allow",
+          "npm *": "allow",
+          "npx *": "allow",
+          "yarn *": "allow",
+          "pnpm *": "allow",
+          "node *": "allow",
+          "bun *": "allow",
+          "deno *": "allow",
+          "tsc *": "allow",
+          "pytest*": "allow",
+          "python -m pytest*": "allow",
+          "python *": "allow",
+          "python3 *": "allow",
+          "pip *": "allow",
+          "pip3 *": "allow",
+          "uv *": "allow",
+          "ruff *": "allow",
+          "mypy *": "allow",
+          "go test*": "allow",
+          "go build*": "allow",
+          "go run*": "allow",
+          "go mod*": "allow",
+          "go vet*": "allow",
+          "golangci-lint*": "allow",
+          "cargo test*": "allow",
+          "cargo build*": "allow",
+          "cargo run*": "allow",
+          "cargo clippy*": "allow",
+          "cargo fmt*": "allow",
+          "mvn *": "allow",
+          "gradle *": "allow",
+          "gradlew *": "allow",
+          "dotnet *": "allow",
+          "make*": "allow",
+          "cmake*": "allow",
+          "gcc *": "allow",
+          "g++ *": "allow",
+          "clang*": "allow",
+          "just *": "allow",
+          "task *": "allow",
+          "ls*": "allow",
+          "cat *": "allow",
+          "head *": "allow",
+          "tail *": "allow",
+          "wc *": "allow",
+          "which *": "allow",
+          "echo *": "allow",
+          "mkdir *": "allow",
+          "pwd": "allow",
+          "env": "allow",
+          "printenv*": "allow"
         },
-        "task": {
-          "*": "allow"
-        }
+        "webfetch": "allow",
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/programming-languages/golang-pro.md",
       "status": "skipped"
@@ -1240,63 +1030,47 @@
       "opencode_category": "data-api",
       "mode": "subagent",
       "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
         "write": "allow",
-        "edit": "ask",
+        "edit": "allow",
         "bash": {
           "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
+          "psql *": "allow",
+          "pg_dump*": "ask",
+          "pg_restore*": "ask",
+          "redis-cli *": "allow",
+          "mysql *": "allow",
+          "mongosh *": "allow",
+          "sqlite3 *": "allow",
+          "curl *": "ask",
+          "httpie *": "ask",
+          "grpcurl *": "allow",
+          "git *": "allow",
+          "ls*": "allow",
+          "cat *": "allow",
+          "head *": "allow",
+          "tail *": "allow",
+          "jq *": "allow",
+          "wc *": "allow",
+          "echo *": "allow",
+          "mkdir *": "allow",
+          "pwd": "allow"
         },
-        "task": {
-          "*": "allow"
-        }
+        "webfetch": "allow",
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/api-graphql/graphql-architect.md",
-      "status": "skipped"
-    },
-    {
-      "name": "graphql-performance-optimizer",
-      "path": "data-api/graphql-performance-optimizer",
-      "category": "api-graphql",
-      "opencode_category": "data-api",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "deny",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/api-graphql/graphql-performance-optimizer.md",
-      "status": "skipped"
-    },
-    {
-      "name": "incident-responder",
-      "path": "security/incident-responder",
-      "category": "security",
-      "opencode_category": "security",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/security/incident-responder.md",
       "status": "skipped"
     },
     {
@@ -1306,41 +1080,78 @@
       "opencode_category": "languages",
       "mode": "subagent",
       "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
         "write": "allow",
-        "edit": "ask",
+        "edit": "allow",
         "bash": {
           "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
+          "git *": "allow",
+          "npm *": "allow",
+          "npx *": "allow",
+          "yarn *": "allow",
+          "pnpm *": "allow",
+          "node *": "allow",
+          "bun *": "allow",
+          "deno *": "allow",
+          "tsc *": "allow",
+          "pytest*": "allow",
+          "python -m pytest*": "allow",
+          "python *": "allow",
+          "python3 *": "allow",
+          "pip *": "allow",
+          "pip3 *": "allow",
+          "uv *": "allow",
+          "ruff *": "allow",
+          "mypy *": "allow",
+          "go test*": "allow",
+          "go build*": "allow",
+          "go run*": "allow",
+          "go mod*": "allow",
+          "go vet*": "allow",
+          "golangci-lint*": "allow",
+          "cargo test*": "allow",
+          "cargo build*": "allow",
+          "cargo run*": "allow",
+          "cargo clippy*": "allow",
+          "cargo fmt*": "allow",
+          "mvn *": "allow",
+          "gradle *": "allow",
+          "gradlew *": "allow",
+          "dotnet *": "allow",
+          "make*": "allow",
+          "cmake*": "allow",
+          "gcc *": "allow",
+          "g++ *": "allow",
+          "clang*": "allow",
+          "just *": "allow",
+          "task *": "allow",
+          "ls*": "allow",
+          "cat *": "allow",
+          "head *": "allow",
+          "tail *": "allow",
+          "wc *": "allow",
+          "which *": "allow",
+          "echo *": "allow",
+          "mkdir *": "allow",
+          "pwd": "allow",
+          "env": "allow",
+          "printenv*": "allow"
         },
-        "task": {
-          "*": "allow"
-        }
+        "webfetch": "allow",
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/programming-languages/java-architect.md",
-      "status": "skipped"
-    },
-    {
-      "name": "javascript-pro",
-      "path": "languages/javascript-pro",
-      "category": "programming-languages",
-      "opencode_category": "languages",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/programming-languages/javascript-pro.md",
       "status": "skipped"
     },
     {
@@ -1350,17 +1161,76 @@
       "opencode_category": "languages",
       "mode": "subagent",
       "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
         "write": "allow",
-        "edit": "ask",
+        "edit": "allow",
         "bash": {
           "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
+          "git *": "allow",
+          "npm *": "allow",
+          "npx *": "allow",
+          "yarn *": "allow",
+          "pnpm *": "allow",
+          "node *": "allow",
+          "bun *": "allow",
+          "deno *": "allow",
+          "tsc *": "allow",
+          "pytest*": "allow",
+          "python -m pytest*": "allow",
+          "python *": "allow",
+          "python3 *": "allow",
+          "pip *": "allow",
+          "pip3 *": "allow",
+          "uv *": "allow",
+          "ruff *": "allow",
+          "mypy *": "allow",
+          "go test*": "allow",
+          "go build*": "allow",
+          "go run*": "allow",
+          "go mod*": "allow",
+          "go vet*": "allow",
+          "golangci-lint*": "allow",
+          "cargo test*": "allow",
+          "cargo build*": "allow",
+          "cargo run*": "allow",
+          "cargo clippy*": "allow",
+          "cargo fmt*": "allow",
+          "mvn *": "allow",
+          "gradle *": "allow",
+          "gradlew *": "allow",
+          "dotnet *": "allow",
+          "make*": "allow",
+          "cmake*": "allow",
+          "gcc *": "allow",
+          "g++ *": "allow",
+          "clang*": "allow",
+          "just *": "allow",
+          "task *": "allow",
+          "ls*": "allow",
+          "cat *": "allow",
+          "head *": "allow",
+          "tail *": "allow",
+          "wc *": "allow",
+          "which *": "allow",
+          "echo *": "allow",
+          "mkdir *": "allow",
+          "pwd": "allow",
+          "env": "allow",
+          "printenv*": "allow"
         },
-        "task": {
-          "*": "allow"
-        }
+        "webfetch": "allow",
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/programming-languages/kotlin-specialist.md",
       "status": "skipped"
@@ -1372,63 +1242,61 @@
       "opencode_category": "devops",
       "mode": "subagent",
       "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
         "write": "allow",
-        "edit": "ask",
+        "edit": "allow",
         "bash": {
           "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
+          "terraform *": "allow",
+          "tf *": "allow",
+          "kubectl *": "allow",
+          "helm *": "allow",
+          "docker *": "allow",
+          "docker-compose *": "allow",
+          "aws *": "allow",
+          "gcloud *": "allow",
+          "az *": "allow",
+          "ansible*": "allow",
+          "systemctl *": "ask",
+          "journalctl *": "allow",
+          "ss *": "allow",
+          "ip *": "allow",
+          "dig *": "allow",
+          "nslookup *": "allow",
+          "ping *": "allow",
+          "traceroute *": "allow",
+          "curl *": "ask",
+          "wget *": "ask",
+          "git *": "allow",
+          "ls*": "allow",
+          "cat *": "allow",
+          "head *": "allow",
+          "tail *": "allow",
+          "wc *": "allow",
+          "which *": "allow",
+          "echo *": "allow",
+          "mkdir *": "allow",
+          "pwd": "allow",
+          "env": "allow",
+          "printenv*": "allow",
+          "ssh *": "ask",
+          "scp *": "ask"
         },
-        "task": {
-          "*": "allow"
-        }
+        "webfetch": "allow",
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/devops-infrastructure/kubernetes-specialist.md",
-      "status": "skipped"
-    },
-    {
-      "name": "laravel-specialist",
-      "path": "languages/laravel-specialist",
-      "category": "programming-languages",
-      "opencode_category": "languages",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/programming-languages/laravel-specialist.md",
-      "status": "skipped"
-    },
-    {
-      "name": "legacy-modernizer",
-      "path": "devops/legacy-modernizer",
-      "category": "modernization",
-      "opencode_category": "devops",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/modernization/legacy-modernizer.md",
       "status": "skipped"
     },
     {
@@ -1438,204 +1306,49 @@
       "opencode_category": "ai",
       "mode": "subagent",
       "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
         "write": "allow",
-        "edit": "ask",
+        "edit": "allow",
         "bash": {
           "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
+          "python *": "allow",
+          "python3 *": "allow",
+          "pip *": "allow",
+          "pip3 *": "allow",
+          "uv *": "allow",
+          "docker *": "allow",
+          "kubectl *": "allow",
+          "mlflow *": "allow",
+          "wandb *": "allow",
+          "dvc *": "allow",
+          "bentoml *": "allow",
+          "triton*": "allow",
+          "git *": "allow",
+          "ls*": "allow",
+          "cat *": "allow",
+          "head *": "allow",
+          "tail *": "allow",
+          "wc *": "allow",
+          "echo *": "allow",
+          "mkdir *": "allow",
+          "pwd": "allow",
+          "nvidia-smi*": "allow"
         },
-        "task": {
-          "*": "allow"
-        }
+        "webfetch": "allow",
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/ai-specialists/llm-architect.md",
-      "status": "skipped"
-    },
-    {
-      "name": "llms-maintainer",
-      "path": "ai/llms-maintainer",
-      "category": "ai-specialists",
-      "opencode_category": "ai",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "deny",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/ai-specialists/llms-maintainer.md",
-      "status": "skipped"
-    },
-    {
-      "name": "machine-learning-engineer",
-      "path": "ai/machine-learning-engineer",
-      "category": "data-ai",
-      "opencode_category": "ai",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/data-ai/machine-learning-engineer.md",
-      "status": "skipped"
-    },
-    {
-      "name": "market-researcher",
-      "path": "business/market-researcher",
-      "category": "business-marketing",
-      "opencode_category": "business",
-      "mode": "subagent",
-      "permission": {
-        "write": "deny",
-        "edit": "deny",
-        "bash": "deny",
-        "webfetch": "allow",
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/business-marketing/market-researcher.md",
-      "status": "skipped"
-    },
-    {
-      "name": "mcp-developer",
-      "path": "mcp/mcp-developer",
-      "category": "mcp-dev-team",
-      "opencode_category": "mcp",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/mcp-dev-team/mcp-developer.md",
-      "status": "skipped"
-    },
-    {
-      "name": "mcp-expert",
-      "path": "devtools/mcp-expert",
-      "category": "development-tools",
-      "opencode_category": "devtools",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": "deny",
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/development-tools/mcp-expert.md",
-      "status": "skipped"
-    },
-    {
-      "name": "mcp-integration-engineer",
-      "path": "mcp/mcp-integration-engineer",
-      "category": "mcp-dev-team",
-      "opencode_category": "mcp",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/mcp-dev-team/mcp-integration-engineer.md",
-      "status": "skipped"
-    },
-    {
-      "name": "mcp-protocol-specialist",
-      "path": "mcp/mcp-protocol-specialist",
-      "category": "mcp-dev-team",
-      "opencode_category": "mcp",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": "deny",
-        "webfetch": "allow",
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/mcp-dev-team/mcp-protocol-specialist.md",
-      "status": "skipped"
-    },
-    {
-      "name": "mcp-server-architect",
-      "path": "mcp/mcp-server-architect",
-      "category": "mcp-dev-team",
-      "opencode_category": "mcp",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/mcp-dev-team/mcp-server-architect.md",
-      "status": "skipped"
-    },
-    {
-      "name": "microservices-architect",
-      "path": "devops/microservices-architect",
-      "category": "devops-infrastructure",
-      "opencode_category": "devops",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/devops-infrastructure/microservices-architect.md",
       "status": "skipped"
     },
     {
@@ -1645,41 +1358,78 @@
       "opencode_category": "ai",
       "mode": "subagent",
       "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
         "write": "allow",
-        "edit": "ask",
+        "edit": "allow",
         "bash": {
           "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
+          "git *": "allow",
+          "npm *": "allow",
+          "npx *": "allow",
+          "yarn *": "allow",
+          "pnpm *": "allow",
+          "node *": "allow",
+          "bun *": "allow",
+          "deno *": "allow",
+          "tsc *": "allow",
+          "pytest*": "allow",
+          "python -m pytest*": "allow",
+          "python *": "allow",
+          "python3 *": "allow",
+          "pip *": "allow",
+          "pip3 *": "allow",
+          "uv *": "allow",
+          "ruff *": "allow",
+          "mypy *": "allow",
+          "go test*": "allow",
+          "go build*": "allow",
+          "go run*": "allow",
+          "go mod*": "allow",
+          "go vet*": "allow",
+          "golangci-lint*": "allow",
+          "cargo test*": "allow",
+          "cargo build*": "allow",
+          "cargo run*": "allow",
+          "cargo clippy*": "allow",
+          "cargo fmt*": "allow",
+          "mvn *": "allow",
+          "gradle *": "allow",
+          "gradlew *": "allow",
+          "dotnet *": "allow",
+          "make*": "allow",
+          "cmake*": "allow",
+          "gcc *": "allow",
+          "g++ *": "allow",
+          "clang*": "allow",
+          "just *": "allow",
+          "task *": "allow",
+          "ls*": "allow",
+          "cat *": "allow",
+          "head *": "allow",
+          "tail *": "allow",
+          "wc *": "allow",
+          "which *": "allow",
+          "echo *": "allow",
+          "mkdir *": "allow",
+          "pwd": "allow",
+          "env": "allow",
+          "printenv*": "allow"
         },
-        "task": {
-          "*": "allow"
-        }
+        "webfetch": "allow",
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/data-ai/ml-engineer.md",
-      "status": "skipped"
-    },
-    {
-      "name": "mlops-engineer",
-      "path": "ai/mlops-engineer",
-      "category": "data-ai",
-      "opencode_category": "ai",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/data-ai/mlops-engineer.md",
       "status": "skipped"
     },
     {
@@ -1689,175 +1439,79 @@
       "opencode_category": "web",
       "mode": "subagent",
       "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
         "write": "allow",
-        "edit": "ask",
+        "edit": "allow",
         "bash": {
           "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
+          "git *": "allow",
+          "npm *": "allow",
+          "npx *": "allow",
+          "yarn *": "allow",
+          "pnpm *": "allow",
+          "node *": "allow",
+          "bun *": "allow",
+          "deno *": "allow",
+          "tsc *": "allow",
+          "pytest*": "allow",
+          "python -m pytest*": "allow",
+          "python *": "allow",
+          "python3 *": "allow",
+          "pip *": "allow",
+          "pip3 *": "allow",
+          "uv *": "allow",
+          "ruff *": "allow",
+          "mypy *": "allow",
+          "go test*": "allow",
+          "go build*": "allow",
+          "go run*": "allow",
+          "go mod*": "allow",
+          "go vet*": "allow",
+          "golangci-lint*": "allow",
+          "cargo test*": "allow",
+          "cargo build*": "allow",
+          "cargo run*": "allow",
+          "cargo clippy*": "allow",
+          "cargo fmt*": "allow",
+          "mvn *": "allow",
+          "gradle *": "allow",
+          "gradlew *": "allow",
+          "dotnet *": "allow",
+          "make*": "allow",
+          "cmake*": "allow",
+          "gcc *": "allow",
+          "g++ *": "allow",
+          "clang*": "allow",
+          "just *": "allow",
+          "task *": "allow",
+          "ls*": "allow",
+          "cat *": "allow",
+          "head *": "allow",
+          "tail *": "allow",
+          "wc *": "allow",
+          "which *": "allow",
+          "echo *": "allow",
+          "mkdir *": "allow",
+          "pwd": "allow",
+          "env": "allow",
+          "printenv*": "allow"
         },
-        "task": {
-          "*": "allow"
-        }
+        "webfetch": "allow",
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/development-team/mobile-developer.md",
       "status": "skipped"
-    },
-    {
-      "name": "model-evaluator",
-      "path": "ai/model-evaluator",
-      "category": "ai-specialists",
-      "opencode_category": "ai",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "deny",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "webfetch": "allow",
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/ai-specialists/model-evaluator.md",
-      "status": "skipped"
-    },
-    {
-      "name": "monitoring-specialist",
-      "path": "devops/monitoring-specialist",
-      "category": "devops-infrastructure",
-      "opencode_category": "devops",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/devops-infrastructure/monitoring-specialist.md",
-      "status": "skipped"
-    },
-    {
-      "name": "network-engineer",
-      "path": "devops/network-engineer",
-      "category": "devops-infrastructure",
-      "opencode_category": "devops",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/devops-infrastructure/network-engineer.md",
-      "status": "synced"
-    },
-    {
-      "name": "nextjs-architecture-expert",
-      "path": "web/nextjs-architecture-expert",
-      "category": "web-tools",
-      "opencode_category": "web",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/web-tools/nextjs-architecture-expert.md",
-      "status": "synced"
-    },
-    {
-      "name": "nextjs-developer",
-      "path": "languages/nextjs-developer",
-      "category": "programming-languages",
-      "opencode_category": "languages",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/programming-languages/nextjs-developer.md",
-      "status": "synced"
-    },
-    {
-      "name": "nlp-engineer",
-      "path": "ai/nlp-engineer",
-      "category": "data-ai",
-      "opencode_category": "ai",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/data-ai/nlp-engineer.md",
-      "status": "synced"
-    },
-    {
-      "name": "nosql-specialist",
-      "path": "data-api/nosql-specialist",
-      "category": "database",
-      "opencode_category": "data-api",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/database/nosql-specialist.md",
-      "status": "synced"
     },
     {
       "name": "penetration-tester",
@@ -1866,17 +1520,44 @@
       "opencode_category": "security",
       "mode": "subagent",
       "permission": {
-        "write": "deny",
-        "edit": "deny",
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
+        "write": "allow",
+        "edit": "allow",
         "bash": {
           "*": "ask",
-          "git status": "allow",
+          "nmap *": "ask",
+          "nikto *": "ask",
+          "dig *": "allow",
+          "whois *": "allow",
+          "nslookup *": "allow",
+          "ping *": "allow",
+          "traceroute *": "allow",
+          "curl *": "ask",
+          "git log*": "allow",
+          "git status*": "allow",
           "git diff*": "allow",
-          "git log*": "allow"
+          "git show*": "allow",
+          "ls*": "allow",
+          "cat *": "allow",
+          "head *": "allow",
+          "tail *": "allow",
+          "which *": "allow",
+          "echo *": "allow",
+          "pwd": "allow"
         },
-        "task": {
-          "*": "allow"
-        }
+        "webfetch": "allow",
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "ask"
       },
       "source": "cli-tool/components/agents/security/penetration-tester.md",
       "status": "skipped"
@@ -1888,42 +1569,26 @@
       "opencode_category": "devtools",
       "mode": "subagent",
       "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
+        "write": "deny",
+        "edit": "deny",
+        "bash": "deny",
+        "webfetch": "ask",
+        "task": "allow",
+        "mcp": "deny",
+        "todoread": "allow",
+        "todowrite": "deny",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/development-tools/performance-engineer.md",
       "status": "skipped"
-    },
-    {
-      "name": "performance-profiler",
-      "path": "devtools/performance-profiler",
-      "category": "development-tools",
-      "opencode_category": "devtools",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/development-tools/performance-profiler.md",
-      "status": "synced"
     },
     {
       "name": "php-pro",
@@ -1932,41 +1597,78 @@
       "opencode_category": "languages",
       "mode": "subagent",
       "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
         "write": "allow",
-        "edit": "ask",
+        "edit": "allow",
         "bash": {
           "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
+          "git *": "allow",
+          "npm *": "allow",
+          "npx *": "allow",
+          "yarn *": "allow",
+          "pnpm *": "allow",
+          "node *": "allow",
+          "bun *": "allow",
+          "deno *": "allow",
+          "tsc *": "allow",
+          "pytest*": "allow",
+          "python -m pytest*": "allow",
+          "python *": "allow",
+          "python3 *": "allow",
+          "pip *": "allow",
+          "pip3 *": "allow",
+          "uv *": "allow",
+          "ruff *": "allow",
+          "mypy *": "allow",
+          "go test*": "allow",
+          "go build*": "allow",
+          "go run*": "allow",
+          "go mod*": "allow",
+          "go vet*": "allow",
+          "golangci-lint*": "allow",
+          "cargo test*": "allow",
+          "cargo build*": "allow",
+          "cargo run*": "allow",
+          "cargo clippy*": "allow",
+          "cargo fmt*": "allow",
+          "mvn *": "allow",
+          "gradle *": "allow",
+          "gradlew *": "allow",
+          "dotnet *": "allow",
+          "make*": "allow",
+          "cmake*": "allow",
+          "gcc *": "allow",
+          "g++ *": "allow",
+          "clang*": "allow",
+          "just *": "allow",
+          "task *": "allow",
+          "ls*": "allow",
+          "cat *": "allow",
+          "head *": "allow",
+          "tail *": "allow",
+          "wc *": "allow",
+          "which *": "allow",
+          "echo *": "allow",
+          "mkdir *": "allow",
+          "pwd": "allow",
+          "env": "allow",
+          "printenv*": "allow"
         },
-        "task": {
-          "*": "allow"
-        }
+        "webfetch": "allow",
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/programming-languages/php-pro.md",
-      "status": "skipped"
-    },
-    {
-      "name": "platform-engineer",
-      "path": "devops/platform-engineer",
-      "category": "devops-infrastructure",
-      "opencode_category": "devops",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/devops-infrastructure/platform-engineer.md",
       "status": "skipped"
     },
     {
@@ -1976,42 +1678,48 @@
       "opencode_category": "data-api",
       "mode": "subagent",
       "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
         "write": "allow",
-        "edit": "ask",
+        "edit": "allow",
         "bash": {
           "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
+          "psql *": "allow",
+          "pg_dump*": "ask",
+          "pg_restore*": "ask",
+          "redis-cli *": "allow",
+          "mysql *": "allow",
+          "mongosh *": "allow",
+          "sqlite3 *": "allow",
+          "curl *": "ask",
+          "httpie *": "ask",
+          "grpcurl *": "allow",
+          "git *": "allow",
+          "ls*": "allow",
+          "cat *": "allow",
+          "head *": "allow",
+          "tail *": "allow",
+          "jq *": "allow",
+          "wc *": "allow",
+          "echo *": "allow",
+          "mkdir *": "allow",
+          "pwd": "allow"
         },
-        "task": {
-          "*": "allow"
-        }
+        "webfetch": "allow",
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/database/postgres-pro.md",
       "status": "skipped"
-    },
-    {
-      "name": "powershell-7-expert",
-      "path": "languages/powershell-7-expert",
-      "category": "programming-languages",
-      "opencode_category": "languages",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/programming-languages/powershell-7-expert.md",
-      "status": "synced"
     },
     {
       "name": "product-manager",
@@ -2020,13 +1728,23 @@
       "opencode_category": "business",
       "mode": "subagent",
       "permission": {
-        "write": "allow",
-        "edit": "ask",
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
+        "write": "deny",
+        "edit": "deny",
         "bash": "deny",
-        "webfetch": "allow",
-        "task": {
-          "*": "allow"
-        }
+        "webfetch": "ask",
+        "task": "allow",
+        "mcp": "deny",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/business-marketing/product-manager.md",
       "status": "skipped"
@@ -2038,13 +1756,23 @@
       "opencode_category": "business",
       "mode": "subagent",
       "permission": {
-        "write": "allow",
-        "edit": "ask",
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
+        "write": "deny",
+        "edit": "deny",
         "bash": "deny",
-        "webfetch": "allow",
-        "task": {
-          "*": "allow"
-        }
+        "webfetch": "ask",
+        "task": "allow",
+        "mcp": "deny",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/business-marketing/project-manager.md",
       "status": "skipped"
@@ -2056,17 +1784,51 @@
       "opencode_category": "ai",
       "mode": "subagent",
       "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
         "write": "allow",
         "edit": "ask",
         "bash": {
           "*": "ask",
-          "git status": "allow",
+          "python *": "allow",
+          "python3 *": "allow",
+          "pip *": "allow",
+          "pip3 *": "allow",
+          "uv *": "allow",
+          "jupyter *": "allow",
+          "ipython*": "allow",
+          "Rscript *": "allow",
+          "sqlite3 *": "allow",
+          "jq *": "allow",
+          "csvkit*": "allow",
+          "csvtool*": "allow",
+          "cat *": "allow",
+          "head *": "allow",
+          "tail *": "allow",
+          "wc *": "allow",
+          "sort *": "allow",
+          "uniq *": "allow",
+          "cut *": "allow",
+          "ls*": "allow",
+          "pwd": "allow",
+          "echo *": "allow",
+          "git log*": "allow",
+          "git status*": "allow",
           "git diff*": "allow",
-          "git log*": "allow"
+          "git show*": "allow"
         },
-        "task": {
-          "*": "allow"
-        }
+        "webfetch": "allow",
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/data-ai/prompt-engineer.md",
       "status": "skipped"
@@ -2078,42 +1840,79 @@
       "opencode_category": "languages",
       "mode": "subagent",
       "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
         "write": "allow",
-        "edit": "ask",
+        "edit": "allow",
         "bash": {
           "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
+          "git *": "allow",
+          "npm *": "allow",
+          "npx *": "allow",
+          "yarn *": "allow",
+          "pnpm *": "allow",
+          "node *": "allow",
+          "bun *": "allow",
+          "deno *": "allow",
+          "tsc *": "allow",
+          "pytest*": "allow",
+          "python -m pytest*": "allow",
+          "python *": "allow",
+          "python3 *": "allow",
+          "pip *": "allow",
+          "pip3 *": "allow",
+          "uv *": "allow",
+          "ruff *": "allow",
+          "mypy *": "allow",
+          "go test*": "allow",
+          "go build*": "allow",
+          "go run*": "allow",
+          "go mod*": "allow",
+          "go vet*": "allow",
+          "golangci-lint*": "allow",
+          "cargo test*": "allow",
+          "cargo build*": "allow",
+          "cargo run*": "allow",
+          "cargo clippy*": "allow",
+          "cargo fmt*": "allow",
+          "mvn *": "allow",
+          "gradle *": "allow",
+          "gradlew *": "allow",
+          "dotnet *": "allow",
+          "make*": "allow",
+          "cmake*": "allow",
+          "gcc *": "allow",
+          "g++ *": "allow",
+          "clang*": "allow",
+          "just *": "allow",
+          "task *": "allow",
+          "ls*": "allow",
+          "cat *": "allow",
+          "head *": "allow",
+          "tail *": "allow",
+          "wc *": "allow",
+          "which *": "allow",
+          "echo *": "allow",
+          "mkdir *": "allow",
+          "pwd": "allow",
+          "env": "allow",
+          "printenv*": "allow"
         },
-        "task": {
-          "*": "allow"
-        }
+        "webfetch": "allow",
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/programming-languages/python-pro.md",
       "status": "skipped"
-    },
-    {
-      "name": "qa-expert",
-      "path": "devtools/qa-expert",
-      "category": "development-tools",
-      "opencode_category": "devtools",
-      "mode": "subagent",
-      "permission": {
-        "write": "deny",
-        "edit": "deny",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/development-tools/qa-expert.md",
-      "status": "synced"
     },
     {
       "name": "rails-expert",
@@ -2122,64 +1921,79 @@
       "opencode_category": "languages",
       "mode": "subagent",
       "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
         "write": "allow",
-        "edit": "ask",
+        "edit": "allow",
         "bash": {
           "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
+          "git *": "allow",
+          "npm *": "allow",
+          "npx *": "allow",
+          "yarn *": "allow",
+          "pnpm *": "allow",
+          "node *": "allow",
+          "bun *": "allow",
+          "deno *": "allow",
+          "tsc *": "allow",
+          "pytest*": "allow",
+          "python -m pytest*": "allow",
+          "python *": "allow",
+          "python3 *": "allow",
+          "pip *": "allow",
+          "pip3 *": "allow",
+          "uv *": "allow",
+          "ruff *": "allow",
+          "mypy *": "allow",
+          "go test*": "allow",
+          "go build*": "allow",
+          "go run*": "allow",
+          "go mod*": "allow",
+          "go vet*": "allow",
+          "golangci-lint*": "allow",
+          "cargo test*": "allow",
+          "cargo build*": "allow",
+          "cargo run*": "allow",
+          "cargo clippy*": "allow",
+          "cargo fmt*": "allow",
+          "mvn *": "allow",
+          "gradle *": "allow",
+          "gradlew *": "allow",
+          "dotnet *": "allow",
+          "make*": "allow",
+          "cmake*": "allow",
+          "gcc *": "allow",
+          "g++ *": "allow",
+          "clang*": "allow",
+          "just *": "allow",
+          "task *": "allow",
+          "ls*": "allow",
+          "cat *": "allow",
+          "head *": "allow",
+          "tail *": "allow",
+          "wc *": "allow",
+          "which *": "allow",
+          "echo *": "allow",
+          "mkdir *": "allow",
+          "pwd": "allow",
+          "env": "allow",
+          "printenv*": "allow"
         },
-        "task": {
-          "*": "allow"
-        }
+        "webfetch": "allow",
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/programming-languages/rails-expert.md",
       "status": "skipped"
-    },
-    {
-      "name": "react-performance-optimizer",
-      "path": "web/react-performance-optimizer",
-      "category": "web-tools",
-      "opencode_category": "web",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/web-tools/react-performance-optimizer.md",
-      "status": "synced"
-    },
-    {
-      "name": "react-specialist",
-      "path": "languages/react-specialist",
-      "category": "programming-languages",
-      "opencode_category": "languages",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/programming-languages/react-specialist.md",
-      "status": "synced"
     },
     {
       "name": "refactoring-specialist",
@@ -2188,64 +2002,79 @@
       "opencode_category": "devtools",
       "mode": "subagent",
       "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
         "write": "allow",
-        "edit": "ask",
+        "edit": "allow",
         "bash": {
           "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
+          "git *": "allow",
+          "npm *": "allow",
+          "npx *": "allow",
+          "yarn *": "allow",
+          "pnpm *": "allow",
+          "node *": "allow",
+          "bun *": "allow",
+          "deno *": "allow",
+          "tsc *": "allow",
+          "pytest*": "allow",
+          "python -m pytest*": "allow",
+          "python *": "allow",
+          "python3 *": "allow",
+          "pip *": "allow",
+          "pip3 *": "allow",
+          "uv *": "allow",
+          "ruff *": "allow",
+          "mypy *": "allow",
+          "go test*": "allow",
+          "go build*": "allow",
+          "go run*": "allow",
+          "go mod*": "allow",
+          "go vet*": "allow",
+          "golangci-lint*": "allow",
+          "cargo test*": "allow",
+          "cargo build*": "allow",
+          "cargo run*": "allow",
+          "cargo clippy*": "allow",
+          "cargo fmt*": "allow",
+          "mvn *": "allow",
+          "gradle *": "allow",
+          "gradlew *": "allow",
+          "dotnet *": "allow",
+          "make*": "allow",
+          "cmake*": "allow",
+          "gcc *": "allow",
+          "g++ *": "allow",
+          "clang*": "allow",
+          "just *": "allow",
+          "task *": "allow",
+          "ls*": "allow",
+          "cat *": "allow",
+          "head *": "allow",
+          "tail *": "allow",
+          "wc *": "allow",
+          "which *": "allow",
+          "echo *": "allow",
+          "mkdir *": "allow",
+          "pwd": "allow",
+          "env": "allow",
+          "printenv*": "allow"
         },
-        "task": {
-          "*": "allow"
-        }
+        "webfetch": "allow",
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/development-tools/refactoring-specialist.md",
       "status": "skipped"
-    },
-    {
-      "name": "ruby-mcp-expert",
-      "path": "languages/ruby-mcp-expert",
-      "category": "programming-languages",
-      "opencode_category": "languages",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/programming-languages/ruby-mcp-expert.md",
-      "status": "synced"
-    },
-    {
-      "name": "rust-engineer",
-      "path": "languages/rust-engineer",
-      "category": "programming-languages",
-      "opencode_category": "languages",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/programming-languages/rust-engineer.md",
-      "status": "synced"
     },
     {
       "name": "rust-pro",
@@ -2254,38 +2083,79 @@
       "opencode_category": "languages",
       "mode": "subagent",
       "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
         "write": "allow",
-        "edit": "ask",
+        "edit": "allow",
         "bash": {
           "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
+          "git *": "allow",
+          "npm *": "allow",
+          "npx *": "allow",
+          "yarn *": "allow",
+          "pnpm *": "allow",
+          "node *": "allow",
+          "bun *": "allow",
+          "deno *": "allow",
+          "tsc *": "allow",
+          "pytest*": "allow",
+          "python -m pytest*": "allow",
+          "python *": "allow",
+          "python3 *": "allow",
+          "pip *": "allow",
+          "pip3 *": "allow",
+          "uv *": "allow",
+          "ruff *": "allow",
+          "mypy *": "allow",
+          "go test*": "allow",
+          "go build*": "allow",
+          "go run*": "allow",
+          "go mod*": "allow",
+          "go vet*": "allow",
+          "golangci-lint*": "allow",
+          "cargo test*": "allow",
+          "cargo build*": "allow",
+          "cargo run*": "allow",
+          "cargo clippy*": "allow",
+          "cargo fmt*": "allow",
+          "mvn *": "allow",
+          "gradle *": "allow",
+          "gradlew *": "allow",
+          "dotnet *": "allow",
+          "make*": "allow",
+          "cmake*": "allow",
+          "gcc *": "allow",
+          "g++ *": "allow",
+          "clang*": "allow",
+          "just *": "allow",
+          "task *": "allow",
+          "ls*": "allow",
+          "cat *": "allow",
+          "head *": "allow",
+          "tail *": "allow",
+          "wc *": "allow",
+          "which *": "allow",
+          "echo *": "allow",
+          "mkdir *": "allow",
+          "pwd": "allow",
+          "env": "allow",
+          "printenv*": "allow"
         },
-        "task": {
-          "*": "allow"
-        }
+        "webfetch": "allow",
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/programming-languages/rust-pro.md",
       "status": "skipped"
-    },
-    {
-      "name": "sales-engineer",
-      "path": "business/sales-engineer",
-      "category": "business-marketing",
-      "opencode_category": "business",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": "deny",
-        "webfetch": "allow",
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/business-marketing/sales-engineer.md",
-      "status": "synced"
     },
     {
       "name": "scrum-master",
@@ -2294,33 +2164,26 @@
       "opencode_category": "business",
       "mode": "subagent",
       "permission": {
-        "write": "allow",
-        "edit": "ask",
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
+        "write": "deny",
+        "edit": "deny",
         "bash": "deny",
-        "webfetch": "allow",
-        "task": {
-          "*": "allow"
-        }
+        "webfetch": "ask",
+        "task": "allow",
+        "mcp": "deny",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/business-marketing/scrum-master.md",
       "status": "skipped"
-    },
-    {
-      "name": "se-security-reviewer",
-      "path": "security/se-security-reviewer",
-      "category": "security",
-      "opencode_category": "security",
-      "mode": "subagent",
-      "permission": {
-        "write": "deny",
-        "edit": "ask",
-        "bash": "deny",
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/security/se-security-reviewer.md",
-      "status": "synced"
     },
     {
       "name": "search-specialist",
@@ -2329,12 +2192,51 @@
       "opencode_category": "ai",
       "mode": "subagent",
       "permission": {
-        "write": "deny",
-        "edit": "deny",
-        "bash": "deny",
-        "task": {
-          "*": "allow"
-        }
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
+        "write": "allow",
+        "edit": "ask",
+        "bash": {
+          "*": "ask",
+          "python *": "allow",
+          "python3 *": "allow",
+          "pip *": "allow",
+          "pip3 *": "allow",
+          "uv *": "allow",
+          "jupyter *": "allow",
+          "ipython*": "allow",
+          "Rscript *": "allow",
+          "sqlite3 *": "allow",
+          "jq *": "allow",
+          "csvkit*": "allow",
+          "csvtool*": "allow",
+          "cat *": "allow",
+          "head *": "allow",
+          "tail *": "allow",
+          "wc *": "allow",
+          "sort *": "allow",
+          "uniq *": "allow",
+          "cut *": "allow",
+          "ls*": "allow",
+          "pwd": "allow",
+          "echo *": "allow",
+          "git log*": "allow",
+          "git status*": "allow",
+          "git diff*": "allow",
+          "git show*": "allow"
+        },
+        "webfetch": "allow",
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/ai-specialists/search-specialist.md",
       "status": "skipped"
@@ -2346,77 +2248,26 @@
       "opencode_category": "security",
       "mode": "subagent",
       "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
         "write": "deny",
         "edit": "deny",
         "bash": "deny",
-        "task": {
-          "*": "allow"
-        }
+        "webfetch": "ask",
+        "task": "allow",
+        "mcp": "deny",
+        "todoread": "allow",
+        "todowrite": "deny",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/security/security-auditor.md",
       "status": "skipped"
-    },
-    {
-      "name": "security-engineer",
-      "path": "security/security-engineer",
-      "category": "security",
-      "opencode_category": "security",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/security/security-engineer.md",
-      "status": "synced"
-    },
-    {
-      "name": "seo-analyzer",
-      "path": "web/seo-analyzer",
-      "category": "web-tools",
-      "opencode_category": "web",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "deny",
-        "bash": "deny",
-        "webfetch": "allow",
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/web-tools/seo-analyzer.md",
-      "status": "synced"
-    },
-    {
-      "name": "shell-scripting-pro",
-      "path": "languages/shell-scripting-pro",
-      "category": "programming-languages",
-      "opencode_category": "languages",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/programming-languages/shell-scripting-pro.md",
-      "status": "synced"
     },
     {
       "name": "smart-contract-auditor",
@@ -2425,143 +2276,26 @@
       "opencode_category": "security",
       "mode": "subagent",
       "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
         "write": "deny",
         "edit": "deny",
         "bash": "deny",
-        "task": {
-          "*": "allow"
-        }
+        "webfetch": "ask",
+        "task": "allow",
+        "mcp": "deny",
+        "todoread": "allow",
+        "todowrite": "deny",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/blockchain-web3/smart-contract-auditor.md",
       "status": "skipped"
-    },
-    {
-      "name": "spring-boot-engineer",
-      "path": "languages/spring-boot-engineer",
-      "category": "programming-languages",
-      "opencode_category": "languages",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/programming-languages/spring-boot-engineer.md",
-      "status": "synced"
-    },
-    {
-      "name": "sre-engineer",
-      "path": "devops/sre-engineer",
-      "category": "devops-infrastructure",
-      "opencode_category": "devops",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/devops-infrastructure/sre-engineer.md",
-      "status": "synced"
-    },
-    {
-      "name": "supabase-schema-architect",
-      "path": "data-api/supabase-schema-architect",
-      "category": "database",
-      "opencode_category": "data-api",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/database/supabase-schema-architect.md",
-      "status": "synced"
-    },
-    {
-      "name": "swift-expert",
-      "path": "languages/swift-expert",
-      "category": "programming-languages",
-      "opencode_category": "languages",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/programming-languages/swift-expert.md",
-      "status": "synced"
-    },
-    {
-      "name": "task-decomposition-expert",
-      "path": "ai/task-decomposition-expert",
-      "category": "ai-specialists",
-      "opencode_category": "ai",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "deny",
-        "bash": "deny",
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/ai-specialists/task-decomposition-expert.md",
-      "status": "synced"
-    },
-    {
-      "name": "technical-debt-manager",
-      "path": "devtools/technical-debt-manager",
-      "category": "development-tools",
-      "opencode_category": "devtools",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "deny",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "webfetch": "allow",
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/development-tools/technical-debt-manager.md",
-      "status": "synced"
     },
     {
       "name": "technical-writer",
@@ -2570,38 +2304,28 @@
       "opencode_category": "docs",
       "mode": "subagent",
       "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
         "write": "allow",
-        "edit": "ask",
-        "bash": "deny",
+        "edit": "allow",
+        "bash": {
+          "*": "deny"
+        },
         "webfetch": "allow",
-        "task": {
-          "*": "allow"
-        }
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/documentation/technical-writer.md",
       "status": "skipped"
-    },
-    {
-      "name": "terraform-engineer",
-      "path": "devops/terraform-engineer",
-      "category": "devops-infrastructure",
-      "opencode_category": "devops",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/devops-infrastructure/terraform-engineer.md",
-      "status": "synced"
     },
     {
       "name": "terraform-specialist",
@@ -2610,17 +2334,76 @@
       "opencode_category": "devops",
       "mode": "subagent",
       "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
         "write": "allow",
-        "edit": "ask",
+        "edit": "allow",
         "bash": {
           "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
+          "git *": "allow",
+          "npm *": "allow",
+          "npx *": "allow",
+          "yarn *": "allow",
+          "pnpm *": "allow",
+          "node *": "allow",
+          "bun *": "allow",
+          "deno *": "allow",
+          "tsc *": "allow",
+          "pytest*": "allow",
+          "python -m pytest*": "allow",
+          "python *": "allow",
+          "python3 *": "allow",
+          "pip *": "allow",
+          "pip3 *": "allow",
+          "uv *": "allow",
+          "ruff *": "allow",
+          "mypy *": "allow",
+          "go test*": "allow",
+          "go build*": "allow",
+          "go run*": "allow",
+          "go mod*": "allow",
+          "go vet*": "allow",
+          "golangci-lint*": "allow",
+          "cargo test*": "allow",
+          "cargo build*": "allow",
+          "cargo run*": "allow",
+          "cargo clippy*": "allow",
+          "cargo fmt*": "allow",
+          "mvn *": "allow",
+          "gradle *": "allow",
+          "gradlew *": "allow",
+          "dotnet *": "allow",
+          "make*": "allow",
+          "cmake*": "allow",
+          "gcc *": "allow",
+          "g++ *": "allow",
+          "clang*": "allow",
+          "just *": "allow",
+          "task *": "allow",
+          "ls*": "allow",
+          "cat *": "allow",
+          "head *": "allow",
+          "tail *": "allow",
+          "wc *": "allow",
+          "which *": "allow",
+          "echo *": "allow",
+          "mkdir *": "allow",
+          "pwd": "allow",
+          "env": "allow",
+          "printenv*": "allow"
         },
-        "task": {
-          "*": "allow"
-        }
+        "webfetch": "allow",
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/devops-infrastructure/terraform-specialist.md",
       "status": "skipped"
@@ -2632,42 +2415,79 @@
       "opencode_category": "devtools",
       "mode": "subagent",
       "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
         "write": "allow",
-        "edit": "ask",
+        "edit": "allow",
         "bash": {
           "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
+          "git *": "allow",
+          "npm *": "allow",
+          "npx *": "allow",
+          "yarn *": "allow",
+          "pnpm *": "allow",
+          "node *": "allow",
+          "bun *": "allow",
+          "deno *": "allow",
+          "tsc *": "allow",
+          "pytest*": "allow",
+          "python -m pytest*": "allow",
+          "python *": "allow",
+          "python3 *": "allow",
+          "pip *": "allow",
+          "pip3 *": "allow",
+          "uv *": "allow",
+          "ruff *": "allow",
+          "mypy *": "allow",
+          "go test*": "allow",
+          "go build*": "allow",
+          "go run*": "allow",
+          "go mod*": "allow",
+          "go vet*": "allow",
+          "golangci-lint*": "allow",
+          "cargo test*": "allow",
+          "cargo build*": "allow",
+          "cargo run*": "allow",
+          "cargo clippy*": "allow",
+          "cargo fmt*": "allow",
+          "mvn *": "allow",
+          "gradle *": "allow",
+          "gradlew *": "allow",
+          "dotnet *": "allow",
+          "make*": "allow",
+          "cmake*": "allow",
+          "gcc *": "allow",
+          "g++ *": "allow",
+          "clang*": "allow",
+          "just *": "allow",
+          "task *": "allow",
+          "ls*": "allow",
+          "cat *": "allow",
+          "head *": "allow",
+          "tail *": "allow",
+          "wc *": "allow",
+          "which *": "allow",
+          "echo *": "allow",
+          "mkdir *": "allow",
+          "pwd": "allow",
+          "env": "allow",
+          "printenv*": "allow"
         },
-        "task": {
-          "*": "allow"
-        }
+        "webfetch": "allow",
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/development-tools/test-automator.md",
       "status": "skipped"
-    },
-    {
-      "name": "test-engineer",
-      "path": "devtools/test-engineer",
-      "category": "development-tools",
-      "opencode_category": "devtools",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/development-tools/test-engineer.md",
-      "status": "synced"
     },
     {
       "name": "typescript-pro",
@@ -2676,17 +2496,76 @@
       "opencode_category": "languages",
       "mode": "subagent",
       "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
         "write": "allow",
-        "edit": "ask",
+        "edit": "allow",
         "bash": {
           "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
+          "git *": "allow",
+          "npm *": "allow",
+          "npx *": "allow",
+          "yarn *": "allow",
+          "pnpm *": "allow",
+          "node *": "allow",
+          "bun *": "allow",
+          "deno *": "allow",
+          "tsc *": "allow",
+          "pytest*": "allow",
+          "python -m pytest*": "allow",
+          "python *": "allow",
+          "python3 *": "allow",
+          "pip *": "allow",
+          "pip3 *": "allow",
+          "uv *": "allow",
+          "ruff *": "allow",
+          "mypy *": "allow",
+          "go test*": "allow",
+          "go build*": "allow",
+          "go run*": "allow",
+          "go mod*": "allow",
+          "go vet*": "allow",
+          "golangci-lint*": "allow",
+          "cargo test*": "allow",
+          "cargo build*": "allow",
+          "cargo run*": "allow",
+          "cargo clippy*": "allow",
+          "cargo fmt*": "allow",
+          "mvn *": "allow",
+          "gradle *": "allow",
+          "gradlew *": "allow",
+          "dotnet *": "allow",
+          "make*": "allow",
+          "cmake*": "allow",
+          "gcc *": "allow",
+          "g++ *": "allow",
+          "clang*": "allow",
+          "just *": "allow",
+          "task *": "allow",
+          "ls*": "allow",
+          "cat *": "allow",
+          "head *": "allow",
+          "tail *": "allow",
+          "wc *": "allow",
+          "which *": "allow",
+          "echo *": "allow",
+          "mkdir *": "allow",
+          "pwd": "allow",
+          "env": "allow",
+          "printenv*": "allow"
         },
-        "task": {
-          "*": "allow"
-        }
+        "webfetch": "allow",
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "deny"
       },
       "source": "cli-tool/components/agents/programming-languages/typescript-pro.md",
       "status": "skipped"
@@ -2698,143 +2577,28 @@
       "opencode_category": "web",
       "mode": "subagent",
       "permission": {
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "distill": "allow",
+        "prune": "allow",
+        "sequentialthinking": "allow",
+        "skill": "allow",
         "write": "allow",
-        "edit": "ask",
+        "edit": "allow",
         "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
+          "*": "deny"
         },
-        "task": {
-          "*": "allow"
-        }
+        "webfetch": "allow",
+        "task": "allow",
+        "mcp": "ask",
+        "todoread": "allow",
+        "todowrite": "allow",
+        "memory": "allow",
+        "browsermcp": "ask"
       },
       "source": "cli-tool/components/agents/development-team/ui-designer.md",
       "status": "skipped"
-    },
-    {
-      "name": "unity-game-developer",
-      "path": "specialist/unity-game-developer",
-      "category": "game-development",
-      "opencode_category": "specialist",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/game-development/unity-game-developer.md",
-      "status": "synced"
-    },
-    {
-      "name": "ux-researcher",
-      "path": "business/ux-researcher",
-      "category": "business-marketing",
-      "opencode_category": "business",
-      "mode": "subagent",
-      "permission": {
-        "write": "deny",
-        "edit": "deny",
-        "bash": "deny",
-        "webfetch": "allow",
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/business-marketing/ux-researcher.md",
-      "status": "synced"
-    },
-    {
-      "name": "vercel-deployment-specialist",
-      "path": "devops/vercel-deployment-specialist",
-      "category": "devops-infrastructure",
-      "opencode_category": "devops",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/devops-infrastructure/vercel-deployment-specialist.md",
-      "status": "synced"
-    },
-    {
-      "name": "vue-expert",
-      "path": "languages/vue-expert",
-      "category": "programming-languages",
-      "opencode_category": "languages",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/programming-languages/vue-expert.md",
-      "status": "synced"
-    },
-    {
-      "name": "web-accessibility-checker",
-      "path": "web/web-accessibility-checker",
-      "category": "web-tools",
-      "opencode_category": "web",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "deny",
-        "bash": "deny",
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/web-tools/web-accessibility-checker.md",
-      "status": "synced"
-    },
-    {
-      "name": "websocket-engineer",
-      "path": "web/websocket-engineer",
-      "category": "realtime",
-      "opencode_category": "web",
-      "mode": "subagent",
-      "permission": {
-        "write": "allow",
-        "edit": "ask",
-        "bash": {
-          "*": "ask",
-          "git status": "allow",
-          "git diff*": "allow",
-          "git log*": "allow"
-        },
-        "task": {
-          "*": "allow"
-        }
-      },
-      "source": "cli-tool/components/agents/realtime/websocket-engineer.md",
-      "status": "synced"
     }
   ]
 }
