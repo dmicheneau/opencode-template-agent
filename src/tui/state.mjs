@@ -118,7 +118,7 @@ export function createInitialState(manifest, terminal) {
     terminal,
     manifest,
     allAgents,
-    // TODO: populated by detectAgentStates() in orchestrator
+    // Populated by detectAgentStates() in orchestrator (index.mjs)
     agentStates: new Map(),
   };
 }
@@ -219,6 +219,25 @@ function updateBrowse(state, { action }) {
         ...state,
         mode: 'uninstall_confirm',
         uninstallTarget: { agent: item, name: item.name },
+      };
+    }
+    case Action.INSTALL_ALL: {
+      // Skip on packs tab — items are packs, not agents
+      const isPacksTab = state.tabs.ids[state.tabs.activeIndex] === 'packs';
+      if (isPacksTab) return state;
+      // Filter to uninstalled agents in the current view
+      const uninstalled = state.list.items.filter(a => a.name && !state.installed?.has(a.name));
+      if (uninstalled.length === 0) {
+        return { ...state, flash: { message: 'All agents in this view are already installed', ts: Date.now() } };
+      }
+      const sel = new Set(uninstalled.map(a => a.name));
+      const agents = state.allAgents.filter(a => sel.has(a.name));
+      return {
+        ...state,
+        mode: 'confirm',
+        selection: sel,
+        install: { agents, progress: 0, current: 0, results: [], error: null, doneCursor: 0, doneScrollOffset: 0, forceSelection: new Set() },
+        confirmContext: { type: 'agents', count: agents.length },
       };
     }
     case Action.QUIT:
@@ -356,6 +375,7 @@ function updatePackDetail(state, { action }) {
     }
     case Action.ESCAPE:
       return { ...state, mode: 'browse', packDetail: null, flash: null, confirmContext: null };
+    case Action.INSTALL_ALL: return state; // [i] disabled in pack detail view
     default: return state;
   }
 }

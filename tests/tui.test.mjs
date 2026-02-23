@@ -2931,3 +2931,179 @@ describe('render — bash-input sub-mode', () => {
     assert.ok(plain.includes('Cancel'), 'should contain Cancel');
   });
 });
+
+// ─── parseKey — INSTALL_ALL action ───────────────────────────────────────────
+
+describe('parseKey — INSTALL_ALL action', () => {
+  it('i in browse mode → INSTALL_ALL', () => {
+    assert.deepStrictEqual(parseKey(buf('i'), 'browse'), { action: 'INSTALL_ALL' });
+  });
+
+  it('I in browse mode → INSTALL_ALL', () => {
+    assert.deepStrictEqual(parseKey(buf('I'), 'browse'), { action: 'INSTALL_ALL' });
+  });
+
+  it('i in search mode → CHAR with char "i" (not INSTALL_ALL)', () => {
+    const result = parseKey(buf('i'), 'search');
+    assert.equal(result.action, 'CHAR');
+    assert.equal(result.char, 'i');
+  });
+
+  it('i in confirm mode → NONE', () => {
+    assert.deepStrictEqual(parseKey(buf('i'), 'confirm'), { action: 'NONE' });
+  });
+
+  it('i in done mode → NONE', () => {
+    assert.deepStrictEqual(parseKey(buf('i'), 'done'), { action: 'NONE' });
+  });
+});
+
+// ─── state.mjs — INSTALL_ALL ─────────────────────────────────────────────────
+
+describe('update — INSTALL_ALL action', () => {
+  it('selects all uninstalled agents and transitions to confirm', () => {
+    let state = makeState();
+    state = { ...state, installed: new Set(['ai-engineer']) };
+    const s1 = update(state, { action: Action.INSTALL_ALL });
+    assert.equal(s1.mode, 'confirm');
+    // Should select the 2 uninstalled agents (ml-engineer, postgres-pro)
+    assert.equal(s1.selection.size, 2);
+    assert.ok(s1.selection.has('ml-engineer'));
+    assert.ok(s1.selection.has('postgres-pro'));
+    assert.ok(!s1.selection.has('ai-engineer'), 'should not select already-installed agent');
+    assert.ok(s1.install);
+    assert.equal(s1.install.agents.length, 2);
+  });
+
+  it('all agents installed → stays in browse with flash message', () => {
+    let state = makeState();
+    state = { ...state, installed: new Set(['ai-engineer', 'ml-engineer', 'postgres-pro']) };
+    const s1 = update(state, { action: Action.INSTALL_ALL });
+    assert.equal(s1.mode, 'browse');
+    assert.ok(s1.flash);
+    assert.ok(s1.flash.message.includes('already installed'));
+  });
+
+  it('no agents installed → selects all', () => {
+    let state = makeState();
+    state = { ...state, installed: new Set() };
+    const s1 = update(state, { action: Action.INSTALL_ALL });
+    assert.equal(s1.mode, 'confirm');
+    assert.equal(s1.selection.size, 3);
+  });
+
+  it('skips on packs tab — no-op (identity return)', () => {
+    let state = makeState();
+    // Switch to packs tab (index 1)
+    state = { ...state, tabs: { ...state.tabs, activeIndex: 1 }, installed: new Set() };
+    const s1 = update(state, { action: Action.INSTALL_ALL });
+    assert.equal(s1, state, 'should return the exact same state reference');
+  });
+
+  it('respects filtered view (category tab)', () => {
+    let state = makeState();
+    state = { ...state, installed: new Set() };
+    // Switch to ai category tab (index 2: 'all', 'packs', 'ai', 'database')
+    state = update(state, { action: Action.TAB }); // → packs
+    state = update(state, { action: Action.TAB }); // → ai
+    assert.equal(state.tabs.ids[state.tabs.activeIndex], 'ai');
+    const s1 = update(state, { action: Action.INSTALL_ALL });
+    assert.equal(s1.mode, 'confirm');
+    // Only AI agents: ai-engineer, ml-engineer
+    assert.equal(s1.selection.size, 2);
+    assert.ok(s1.selection.has('ai-engineer'));
+    assert.ok(s1.selection.has('ml-engineer'));
+  });
+
+  it('creates confirmContext with correct count', () => {
+    let state = makeState();
+    state = { ...state, installed: new Set() };
+    const s1 = update(state, { action: Action.INSTALL_ALL });
+    assert.ok(s1.confirmContext);
+    assert.equal(s1.confirmContext.type, 'agents');
+    assert.equal(s1.confirmContext.count, 3);
+  });
+
+  it('respects active search filter — only selects matched agents', () => {
+    let state = makeState();
+    state = { ...state, installed: new Set() };
+    // Enter search, type "post", confirm search to apply filter
+    state = update(state, { action: Action.SEARCH });
+    state = update(state, { action: Action.CHAR, char: 'post' });
+    state = update(state, { action: Action.CONFIRM });
+    assert.equal(state.mode, 'browse');
+    assert.equal(state.search.query, 'post');
+    // Only postgres-pro should be in the filtered list
+    assert.equal(state.list.items.length, 1);
+    assert.equal(state.list.items[0].name, 'postgres-pro');
+    // INSTALL_ALL should only select the filtered agent
+    const s1 = update(state, { action: Action.INSTALL_ALL });
+    assert.equal(s1.mode, 'confirm');
+    assert.equal(s1.selection.size, 1);
+    assert.ok(s1.selection.has('postgres-pro'));
+    assert.ok(!s1.selection.has('ai-engineer'), 'should not select agents outside search filter');
+  });
+
+  it('INSTALL_ALL → confirm → cancel returns to browse cleanly', () => {
+    let state = makeState();
+    state = { ...state, installed: new Set() };
+    // Fire INSTALL_ALL → confirm mode
+    state = update(state, { action: Action.INSTALL_ALL });
+    assert.equal(state.mode, 'confirm');
+    assert.equal(state.selection.size, 3);
+    // Cancel with NO
+    const s1 = update(state, { action: Action.NO });
+    assert.equal(s1.mode, 'browse');
+    assert.equal(s1.selection.size, 0);
+    // install stays as-is (confirm cancel doesn't call resetToBrowse)
+    assert.ok(s1.install, 'install object is preserved — confirm cancel does not clear it');
+  });
+});
+
+// ─── render — installed counter in top border ────────────────────────────────
+
+describe('render — installed counter', () => {
+  it('shows ✔ N/M counter in top border', () => {
+    let state = makeState();
+    state = { ...state, installed: new Set(['ai-engineer']) };
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('✔ 1/3'), 'should show installed count ✔ 1/3');
+  });
+
+  it('shows 0/N when nothing installed', () => {
+    let state = makeState();
+    state = { ...state, installed: new Set() };
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('✔ 0/3'), 'should show ✔ 0/3');
+  });
+
+  it('shows N/N when all installed', () => {
+    let state = makeState();
+    state = { ...state, installed: new Set(['ai-engineer', 'ml-engineer', 'postgres-pro']) };
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('✔ 3/3'), 'should show ✔ 3/3');
+  });
+});
+
+// ─── render — [i] Install All hint ──────────────────────────────────────────
+
+describe('render — Install All hint', () => {
+  it('shows [i] Install All hint on agent tabs', () => {
+    const state = makeState({}, { cols: 120, rows: 24 });
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('Install All'), 'should show Install All hint on ALL tab');
+  });
+
+  it('hides [i] Install All hint on packs tab', () => {
+    let state = makeState({}, { cols: 120, rows: 24 });
+    state = update(state, { action: Action.TAB }); // → packs
+    assert.equal(state.tabs.ids[state.tabs.activeIndex], 'packs');
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(!plain.includes('Install All'), 'should NOT show Install All on packs tab');
+  });
+});

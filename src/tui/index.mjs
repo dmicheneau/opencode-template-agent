@@ -8,6 +8,7 @@ import { parseKey } from './input.mjs';
 import { createInitialState, update, getViewportHeight, detectInstalled, enterPresetSelect } from './state.mjs';
 import { render } from './renderer.mjs';
 import { SPINNER_INTERVAL_MS } from './ansi.mjs';
+import { detectAgentStates } from '../lock.mjs';
 
 /**
  * Launch the interactive TUI.
@@ -29,6 +30,7 @@ export async function launchTUI(options = {}) {
 
   // ─── Initialize ───────────────────────────────────────────────────────
   let state = createInitialState(manifest, getSize());
+  state = { ...state, agentStates: detectAgentStates(manifest) };
   enter();
 
   // ─── C3: Console hijacking state at launchTUI scope ───────────────────
@@ -102,9 +104,10 @@ export async function launchTUI(options = {}) {
 
       // Refresh installed set after installation
       const installed = detectInstalled(state.manifest);
+      const agentStates = detectAgentStates(state.manifest);
 
       // Done
-      state = { ...state, mode: 'done', installed, install: { ...state.install, done: true } };
+      state = { ...state, mode: 'done', installed, agentStates, install: { ...state.install, done: true } };
       redraw();
     } catch (err) {
       state = {
@@ -174,6 +177,7 @@ export async function launchTUI(options = {}) {
 
               // Refresh installed set
               const installed = detectInstalled(state.manifest);
+              const agentStates = detectAgentStates(state.manifest);
 
               const flashMsg = result === 'removed'
                 ? `✓ Agent "${target.name}" removed`
@@ -185,6 +189,7 @@ export async function launchTUI(options = {}) {
                 ...state,
                 mode: 'browse',
                 installed,
+                agentStates,
                 uninstallTarget: null,
                 flash: { message: flashMsg, ts: Date.now() },
               };

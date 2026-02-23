@@ -38,6 +38,9 @@ export const Action = Object.freeze({
   // Done mode
   FORCE:       'FORCE',
 
+  // Batch install
+  INSTALL_ALL: 'INSTALL_ALL',
+
   // Uninstall
   UNINSTALL:   'UNINSTALL',
 
@@ -95,6 +98,7 @@ const R_YES        = Object.freeze({ action: Action.YES });
 const R_NO         = Object.freeze({ action: Action.NO });
 const R_FORCE      = Object.freeze({ action: Action.FORCE });
 const R_UNINSTALL  = Object.freeze({ action: Action.UNINSTALL });
+const R_INSTALL_ALL = Object.freeze({ action: Action.INSTALL_ALL });
 const R_PERM_APPLY = Object.freeze({ action: Action.PERM_APPLY_ALL });
 const R_BASH_ADD   = Object.freeze({ action: Action.BASH_ADD });
 const R_BASH_DEL   = Object.freeze({ action: Action.BASH_DELETE });
@@ -229,6 +233,7 @@ export function parseKey(data, mode) {
   if (raw === '/')   return R_SEARCH;
   if (raw === 'q' || raw === 'Q') return R_QUIT;
   if (raw === 'a' || raw === 'A') return R_SELECT_ALL;
+  if (raw === 'i' || raw === 'I') return R_INSTALL_ALL;
   if (raw === 'x' || raw === 'X') return R_UNINSTALL;
 
   return R_NONE;

@@ -45,12 +45,16 @@ function bdr(content, W, bg) {
 
 function topBorder(W, state) {
   const title = ' OPENCODE AGENTS ';
+  const instCount = state.installed?.size || 0;
+  const totalCount = state.allAgents?.length || 0;
+  const counterTxt = `✔ ${instCount}/${totalCount} `;
   const sel = state.selection.size;
   const selTxt = sel > 0 ? `─ ${sel} selected ` : '';
   const prefix = cyan(BOX.topLeft + BOX.horizontal) + bold(brightCyan(title)) + cyan(BOX.horizontal);
+  const counter = stateInstalled(counterTxt);
   const suffix = selTxt ? bold(brightGreen(selTxt)) : '';
-  const fill = cyan(BOX.horizontal.repeat(Math.max(0, W - visibleLength(prefix) - visibleLength(suffix) - 1)));
-  return CLEAR_LINE + prefix + fill + suffix + cyan(BOX.topRight);
+  const fill = cyan(BOX.horizontal.repeat(Math.max(0, W - visibleLength(prefix) - visibleLength(counter) - visibleLength(suffix) - 1)));
+  return CLEAR_LINE + prefix + counter + fill + suffix + cyan(BOX.topRight);
 }
 
 function botBorder(W) {
@@ -222,11 +226,13 @@ function renderInfo(state, out, W, total, vh, off) {
 // ─── Status Bar ─────────────────────────────────────────────────────────────
 
 function renderStatus(state, out, W) {
+  const isPacksTab = state.tabs.ids[state.tabs.activeIndex] === 'packs';
+  const installAllHint = !isPacksTab ? `  ${cyan('[i]')} ${white('Install All')}` : '';
   const bar = state.search?.active
     ? `  ${cyan('[Enter]')} ${white('Apply')}  ${cyan('[Esc]')} ${white('Cancel')}`
     : state.search?.query
-      ? `  ${white('Filter:')} ${cyan('"' + state.search.query + '"')}  ${cyan('[/]')} ${white('Search')}  ${cyan('[Space]')} ${white('Select')}  ${cyan('[Enter]')} ${white('Install')}  ${cyan('[x]')} ${white('Uninstall')}  ${cyan('[Tab]')} ${white('Next')}  ${cyan('[q]')} ${white('Quit')}`
-      : `  ${cyan('[/]')} ${white('Search')}  ${cyan('[Space]')} ${white('Select')}  ${cyan('[Enter]')} ${white('Install')}  ${cyan('[x]')} ${white('Uninstall')}  ${cyan('[Tab]')} ${white('Next tab')}  ${cyan('[q]')} ${white('Quit')}`;
+      ? `  ${white('Filter:')} ${cyan('"' + state.search.query + '"')}  ${cyan('[/]')} ${white('Search')}  ${cyan('[Space]')} ${white('Select')}  ${cyan('[Enter]')} ${white('Install')}${installAllHint}  ${cyan('[x]')} ${white('Uninstall')}  ${cyan('[Tab]')} ${white('Next')}  ${cyan('[q]')} ${white('Quit')}`
+      : `  ${cyan('[/]')} ${white('Search')}  ${cyan('[Space]')} ${white('Select')}  ${cyan('[Enter]')} ${white('Install')}${installAllHint}  ${cyan('[x]')} ${white('Uninstall')}  ${cyan('[Tab]')} ${white('Next tab')}  ${cyan('[q]')} ${white('Quit')}`;
   out.push(bdr(bar, W));
 }
 

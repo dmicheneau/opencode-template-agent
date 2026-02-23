@@ -4,7 +4,7 @@
 
 [![CI](https://github.com/dmicheneau/opencode-template-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/dmicheneau/opencode-template-agent/actions/workflows/ci.yml)
 ![Agents](https://img.shields.io/badge/agents-70-blue)
-![Tests](https://img.shields.io/badge/tests-427%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-870%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Node](https://img.shields.io/badge/node-20%2B-green)
 ![npm](https://img.shields.io/npm/v/opencode-agents?label=npm&color=cb3837)
@@ -274,13 +274,50 @@ gh workflow run "Sync Agents" -f tier=all -f force=true        # Sync complète 
 
 ---
 
+## 🚀 Releases & Changelog
+
+Le changelog est généré automatiquement à partir de l'historique Git via [git-cliff](https://git-cliff.org), orienté utilisateur avec des catégories claires.
+
+### Fonctionnement
+
+1. **Tag push** — pousser un tag `v*` (ex: `git tag v8.0.0 && git push --tags`)
+2. **Génération du changelog** — git-cliff analyse les commits depuis le dernier tag et génère un changelog structuré
+3. **GitHub Release** — une release est créée automatiquement avec le changelog comme corps
+
+### Catégories du changelog
+
+| Préfixe commit | Catégorie changelog |
+|----------------|---------------------|
+| `feat` | ✨ Nouveautés |
+| `fix` | 🐛 Corrections |
+| `perf` | ⚡ Performance |
+| `docs` | 📝 Documentation |
+| `refactor` | ♻️ Refactoring |
+| `chore`, `ci`, `build`, `style`, `test` | 🔧 Maintenance |
+
+> Les commits avec `BREAKING CHANGE` sont préfixés **BREAKING:** dans leur catégorie respective.
+
+### Créer une release
+
+```bash
+# Bumper la version dans package.json, tagger et pousser
+npm version major  # ou minor, patch
+git push --follow-tags
+
+# Ou manuellement
+git tag v8.0.0
+git push --tags
+```
+
+---
+
 ## 🧪 Tests
 
-**427 tests** (250 JS + 177 Python).
+**870 tests** (559 JS + 311 Python).
 
 ```bash
 # Tous les tests JS (CLI + TUI)
-node --test tests/cli.test.mjs tests/tui.test.mjs
+node --test tests/cli.test.mjs tests/tui.test.mjs tests/lock.test.mjs
 
 # Tous les tests Python
 python3 tests/run_tests.py

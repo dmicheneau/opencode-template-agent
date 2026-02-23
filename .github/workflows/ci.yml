@@ -52,7 +52,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Run CLI tests
-        run: node --test tests/cli.test.mjs tests/tui.test.mjs
+        run: node --test tests/cli.test.mjs tests/tui.test.mjs tests/lock.test.mjs
 
   lint:
     runs-on: ubuntu-latest
