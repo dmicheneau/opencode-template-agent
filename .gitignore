@@ -30,3 +30,7 @@ Thumbs.db
 
 # Node (si présent)
 node_modules/
+
+# OpenCode working files
+.opencode/scratchpad.md
+.opencode/agents/.manifest-lock.json
