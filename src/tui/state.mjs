@@ -9,7 +9,7 @@ import { getWarningsForPreset, getWarningsForPermission } from '../permissions/w
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-const CHROME_ROWS = 8;
+const CHROME_ROWS = 10;
 const MIN_VIEWPORT = 5;
 
 // ─── Types (JSDoc) ───────────────────────────────────────────────────────────

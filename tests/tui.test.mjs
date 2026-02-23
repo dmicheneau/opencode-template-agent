@@ -1120,7 +1120,7 @@ describe('getViewportHeight', () => {
   it('returns rows minus chrome, at least MIN_VIEWPORT', () => {
     const state = makeState({}, { cols: 80, rows: 24 });
     const vh = getViewportHeight(state);
-    assert.equal(vh, 24 - 8); // rows - CHROME_ROWS
+    assert.equal(vh, 24 - 10); // rows - CHROME_ROWS
   });
 
   it('clamps to MIN_VIEWPORT for small terminals', () => {

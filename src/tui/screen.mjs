@@ -89,12 +89,13 @@ export function exit() {
  * @param {string} buffer - Complete frame content.
  */
 export function flush(buffer) {
-  const nextLines = buffer.split('\n');
+  const nextLines = buffer.split('\n').slice(0, process.stdout.rows);
+  const clipped = nextLines.join('\n');
   let out = SYNC_START;
 
   if (nextLines.length !== prevLines.length) {
     // Line count changed — full redraw
-    out += CURSOR_HOME + buffer + CLEAR_TO_END;
+    out += CURSOR_HOME + clipped + CLEAR_TO_END;
   } else {
     // Diff: only repaint changed lines
     for (let i = 0; i < nextLines.length; i++) {

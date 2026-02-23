@@ -727,6 +727,8 @@ export function render(state) {
 
   // Bottom border
   out.push(botBorder(cols));
+  // Clip to terminal height — safety net against chrome miscount
+  if (out.length > rows) out.length = rows;
 
   return out.join('\n');
 }
