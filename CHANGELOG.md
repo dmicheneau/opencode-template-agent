@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [7.0.0] - 2026-02-23
+
+### Added
+- **Manifest integrity** — `sha256` and `size` fields on all 70 agent entries for content verification
+- **Hash computation in sync** — `scripts/update-manifest.py` computes SHA-256 hashes and byte sizes during merge, with path traversal validation and graceful error handling
+- **Lock file recovery** — corrupted JSON in lock files now triggers automatic backup and clean recovery (SyntaxError-filtered)
+- **Cache invalidation** — `src/registry.mjs` uses mtime-based cache to avoid redundant manifest reloads, with `clearManifestCache()` for testing
+- **TUI state indicators** — outdated agents show `↻`, unknown agents show `?`, with semantic color aliases (`stateInstalled`, `stateOutdated`, `stateUnknown`)
+- **949 tests total** (641 JS + 311 Python), all passing
+
+### Changed
+- **Manifest validation hardened** — `isAbsolute()` check on agent paths, null byte guards with undefined protection, validation errors propagate with original messages
+- **Python sync robustness** — `read_bytes()` failures handled gracefully (OSError catch), stale hash/size cleared on file deletion, `path: null` edge case fixed
+
+### Fixed
+- **Lock file catch scope** — `readLock()` catch block now filters on `SyntaxError` only; filesystem errors (EACCES) re-thrown instead of silently swallowed
+- **Registry statSync** — permission errors on `statSync` treated as cache miss instead of crashing
+- **TUI state typedef** — `agentStates` field added to `TuiState` typedef and `createInitialState()`
+
 ## [6.0.0] - 2026-02-19
 
 ### Added

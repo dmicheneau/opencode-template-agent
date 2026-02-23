@@ -92,9 +92,20 @@ export function readLock(cwd = process.cwd(), basePath) {
       }
     }
     return clean;
-  } catch {
+  } catch (err) {
+    // Only recover from JSON parse errors — re-throw filesystem errors (EACCES, etc.)
+    if (!(err instanceof SyntaxError)) throw err;
+
+    // Back up corrupted file for debugging, then start fresh
+    const bakPath = p + '.bak';
+    let backedUp = false;
+    try {
+      renameSync(p, bakPath);
+      backedUp = true;
+    } catch { /* backup failed — proceed anyway */ }
+    const suffix = backedUp ? `, backed up to ${bakPath}` : ' (backup failed)';
     process.stderr.write(
-      "Warning: Lock file corrupted, starting fresh. Run 'rehash' to rebuild.\n",
+      `Warning: Lock file corrupted${suffix}. Run 'rehash' to rebuild.\n`,
     );
     return {};
   }

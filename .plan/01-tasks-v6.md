@@ -2,7 +2,7 @@
 
 **Plan:** [00-plan-v6.md](00-plan-v6.md)
 **Created:** 2026-02-18
-**Updated:** 2026-02-22 (S2 enrichment complete: all 70 agents enriched, scored, manifest updated — D2-D4 checked off)
+**Updated:** 2026-02-23 (Post-S2 code review: 96 issues fixed across 20 files, committed as 976168e)
 
 ---
 
@@ -40,25 +40,25 @@
 - [x] **S3.1** Create `src/lock.mjs` — computeHash(), computeFileHash(), readLockFile(), writeLockFile()
 - [x] **S3.2** Add upsertLockEntry(), removeLockEntry(), createEmptyLock() to lock.mjs
 - [x] **S3.3** Implement atomic write (tmp+rename) in writeLockFile()
-- [ ] **S3.4** Implement corrupted JSON recovery: display warning + backup to .bak + return empty lock (MF-4)
-- [ ] **S3.5** Add **optional** `sha256` and `size` fields to manifest.json agent entries (W-02: optional to not break makeManifest test fixtures)
-- [ ] **S3.6** Update `scripts/update-manifest.py` to compute SHA-256 hashes during sync
+- [x] **S3.4** Implement corrupted JSON recovery: display warning + backup to .bak + return empty lock (MF-4)
+- [x] **S3.5** Add **optional** `sha256` and `size` fields to manifest.json agent entries (W-02: optional to not break makeManifest test fixtures)
+- [x] **S3.6** Update `scripts/update-manifest.py` to compute SHA-256 hashes during sync
 - [x] **S3.7** Add `detectAgentStates()` returning Map<id, state> in `src/lock.mjs` (W-08)
 - [x] **S3.8** Wrap `detectInstalled()` as backward-compatible Set<id> using detectInstalledSet() (W-08)
-- [ ] **S3.9** Update `src/tui/renderer.mjs` to display state indicators (checkmark green, up-arrow yellow, ? gray)
-- [ ] **S3.10** Update `src/tui/ansi.mjs` with state indicator colors
+- [x] **S3.9** Update `src/tui/renderer.mjs` to display state indicators (checkmark green, up-arrow yellow, ? gray)
+- [x] **S3.10** Update `src/tui/ansi.mjs` with state indicator colors
 - [x] **S3.11** Modify `src/installer.mjs` installAgent() to compute hash + write lock entry on install
-- [ ] **S3.12** Invalidate registry.mjs singleton cache when manifest version changes (M-05)
+- [x] **S3.12** Invalidate registry.mjs singleton cache when manifest version changes (M-05)
 - [x] **S3.13** Add migration: detect installed agents without lock file, bootstrap "unknown" state entries (F-03)
 - [x] **S3.14** Write tests for lock.mjs (read/write/corrupt/missing/atomic)
 - [x] **S3.15** Write tests for 4-state detection logic + migration bootstrap
-- [ ] **S3.16** Write tests for manifest hash computation in Python sync
+- [x] **S3.16** Write tests for manifest hash computation in Python sync
 - [x] **S3.17** Run all 427 tests — verify no regressions
 
 ### V6.0 Release Tasks
 
-- [ ] **V6.0-R1** Version bump in package.json + install.sh (M-01)
-- [ ] **V6.0-R2** Update CHANGELOG.md
+- [x] **V6.0-R1** Version bump in package.json + install.sh (M-01)
+- [x] **V6.0-R2** Update CHANGELOG.md
 - [ ] **V6.0-R3** Final full test run (JS + Python)
 
 ---
@@ -126,15 +126,15 @@
 - [x] **CR-M2-tui** Dynamic import in try block (`src/tui/index.mjs`)
 - [x] **CR-M5-tui** Paste multi-chars in search mode (`src/tui/input.mjs`)
 
-**Backlog — remaining V6.0 S3 core tasks:**
+**Backlog — remaining V6.0 S3 core tasks: ✅ COMPLETE**
 
-- [ ] **S3.4** Implement corrupted JSON recovery: display warning + backup to .bak + return empty lock (MF-4)
-- [ ] **S3.5** Add optional `sha256` and `size` fields to manifest.json agent entries (W-02)
-- [ ] **S3.6** Update `scripts/update-manifest.py` to compute SHA-256 hashes during sync
-- [ ] **S3.9** Update `src/tui/renderer.mjs` to display state indicators (checkmark green, up-arrow yellow, ? gray)
-- [ ] **S3.10** Update `src/tui/ansi.mjs` with state indicator colors
-- [ ] **S3.12** Invalidate registry.mjs singleton cache when manifest version changes (M-05)
-- [ ] **S3.16** Write tests for manifest hash computation in Python sync
+- [x] **S3.4** Implement corrupted JSON recovery: display warning + backup to .bak + return empty lock (MF-4)
+- [x] **S3.5** Add optional `sha256` and `size` fields to manifest.json agent entries (W-02)
+- [x] **S3.6** Update `scripts/update-manifest.py` to compute SHA-256 hashes during sync
+- [x] **S3.9** Update `src/tui/renderer.mjs` to display state indicators (checkmark green, up-arrow yellow, ? gray)
+- [x] **S3.10** Update `src/tui/ansi.mjs` with state indicator colors
+- [x] **S3.12** Invalidate registry.mjs singleton cache when manifest version changes (M-05)
+- [x] **S3.16** Write tests for manifest hash computation in Python sync
 
 ### Code Review Minor/Low Fixes (commit e18d2d5)
 

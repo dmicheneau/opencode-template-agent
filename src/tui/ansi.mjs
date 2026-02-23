@@ -55,6 +55,17 @@ export const bgBrightBlack = wrap(100);    // dark gray bg
 export const boldCyan = wrap('1;36');
 export const boldBrightCyan = wrap('1;96');
 
+// ── Agent State Colors ───────────────────────────────────────────────────────
+// Note: ✔ (U+2714) and ↻ (U+21BB) have East Asian Width "Ambiguous" —
+// they may render as 1 or 2 columns depending on terminal CJK settings.
+// charWidth() treats ✔ as wide (U+2600-27BF range) and ↻ as narrow.
+/** @param {string} s */
+export const stateInstalled = brightGreen;   // re-export for semantic clarity
+/** @param {string} s */
+export const stateOutdated = yellow;
+/** @param {string} s */
+export const stateUnknown = dim;
+
 // ── Highlight Bar (selected row) ─────────────────────────────────────────────
 // 48;5;24 = 256-color bg (dark navy blue #005f87) — very visible cursor bar
 // on dark terminals. Matches the "FINDER" TUI screenshot style.

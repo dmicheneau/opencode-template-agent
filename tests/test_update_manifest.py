@@ -11,6 +11,7 @@ Covers:
 
 from __future__ import annotations
 
+import hashlib
 import importlib
 import json
 import os
@@ -977,6 +978,187 @@ class TestCLI(unittest.TestCase):
             with self.assertRaises(SystemExit) as ctx:
                 main()
             self.assertEqual(ctx.exception.code, 1)
+
+
+# =====================================================================
+# Test: Hash Computation (S3.6 / S3.16)
+# =====================================================================
+
+
+class TestHashComputation(unittest.TestCase):
+    """Tests for sha256 and size computation during merge."""
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp)
+
+    def _write_agent_file(self, base_dir, agent_path, content_text):
+        """Write a .md file for an agent and return (full_path, content_bytes)."""
+        full_path = Path(base_dir) / f"{agent_path}.md"
+        full_path.parent.mkdir(parents=True, exist_ok=True)
+        content_bytes = content_text.encode("utf-8")
+        full_path.write_bytes(content_bytes)
+        return full_path, content_bytes
+
+    def test_new_agent_gets_sha256_and_size(self):
+        """New agents get sha256 and size when .md file exists on disk."""
+        # Set up project structure: <tmp>/agents/<category>/<name>.md
+        agents_dir = os.path.join(self.tmp, "agents")
+        content_text = "# Test Agent\n\nThis is a test agent file.\n"
+        _, content_bytes = self._write_agent_file(
+            agents_dir, "ai/new-hash-agent", content_text
+        )
+        expected_hash = hashlib.sha256(content_bytes).hexdigest()
+        expected_size = len(content_bytes)
+
+        root = make_root_manifest(source_path="agents")
+        sync = make_sync_manifest(agents=[make_agent("new-hash-agent", category="ai")])
+
+        result, added, _ = merge_manifests(root, sync, project_root=self.tmp)
+
+        self.assertIn("new-hash-agent", added)
+        agent = result["agents"][0]
+        self.assertEqual(agent["sha256"], expected_hash)
+        self.assertEqual(agent["size"], expected_size)
+
+    def test_existing_agent_hash_refreshed(self):
+        """Existing agents get sha256 and size refreshed from disk."""
+        agents_dir = os.path.join(self.tmp, "agents")
+        content_text = "# Updated content\n\nRefreshed.\n"
+        _, content_bytes = self._write_agent_file(
+            agents_dir, "devtools/existing-agent", content_text
+        )
+        expected_hash = hashlib.sha256(content_bytes).hexdigest()
+        expected_size = len(content_bytes)
+
+        existing_agent = make_agent(
+            "existing-agent",
+            category="devtools",
+            sha256="old_stale_hash_value",
+            size=999,
+        )
+        root = make_root_manifest(agents=[existing_agent], source_path="agents")
+        sync = make_sync_manifest(
+            agents=[make_agent("existing-agent", category="devtools")]
+        )
+
+        result, added, _ = merge_manifests(root, sync, project_root=self.tmp)
+
+        self.assertEqual(len(added), 0)  # Not added, already existed
+        agent = result["agents"][0]
+        self.assertEqual(agent["sha256"], expected_hash)
+        self.assertEqual(agent["size"], expected_size)
+        # Verify stale values are gone
+        self.assertNotEqual(agent["sha256"], "old_stale_hash_value")
+        self.assertNotEqual(agent["size"], 999)
+
+    def test_missing_file_means_no_hash(self):
+        """Agent without .md file on disk gets no sha256 or size."""
+        # No agent file written — directory exists but is empty
+        os.makedirs(os.path.join(self.tmp, "agents", "ai"), exist_ok=True)
+
+        root = make_root_manifest(source_path="agents")
+        sync = make_sync_manifest(agents=[make_agent("ghost-agent", category="ai")])
+
+        result, added, _ = merge_manifests(root, sync, project_root=self.tmp)
+
+        self.assertIn("ghost-agent", added)
+        agent = result["agents"][0]
+        self.assertNotIn("sha256", agent)
+        self.assertNotIn("size", agent)
+
+    def test_size_is_byte_count_not_char_count(self):
+        """Size field reflects byte length, not character count (matters for UTF-8)."""
+        agents_dir = os.path.join(self.tmp, "agents")
+        # Multi-byte characters: é = 2 bytes, — = 3 bytes in UTF-8
+        content_text = "Développeur réseau — été"
+        _, content_bytes = self._write_agent_file(
+            agents_dir, "ai/utf8-agent", content_text
+        )
+        # Sanity: byte count differs from char count for this string
+        self.assertNotEqual(len(content_text), len(content_bytes))
+
+        root = make_root_manifest(source_path="agents")
+        sync = make_sync_manifest(agents=[make_agent("utf8-agent", category="ai")])
+
+        result, added, _ = merge_manifests(root, sync, project_root=self.tmp)
+        agent = result["agents"][0]
+        self.assertEqual(agent["size"], len(content_bytes))
+        self.assertEqual(agent["sha256"], hashlib.sha256(content_bytes).hexdigest())
+
+    def test_deleted_file_clears_hash_and_size(self):
+        """Existing agent with stale hash/size has them cleared when file is gone."""
+        # Don't create any file on disk — directory exists but is empty
+        os.makedirs(os.path.join(self.tmp, "agents", "devtools"), exist_ok=True)
+
+        existing_agent = make_agent(
+            "vanished-agent",
+            category="devtools",
+            sha256="stale_hash_that_should_be_removed",
+            size=12345,
+        )
+        root = make_root_manifest(agents=[existing_agent], source_path="agents")
+        sync = make_sync_manifest(
+            agents=[make_agent("vanished-agent", category="devtools")]
+        )
+
+        result, added, _ = merge_manifests(root, sync, project_root=self.tmp)
+
+        self.assertEqual(len(added), 0)
+        agent = result["agents"][0]
+        self.assertNotIn("sha256", agent)
+        self.assertNotIn("size", agent)
+
+    def test_empty_file_gets_hash(self):
+        """An empty agent file (0 bytes) still gets a valid sha256 and size=0."""
+        agents_dir = os.path.join(self.tmp, "agents")
+        self._write_agent_file(agents_dir, "ai/empty-agent", "")
+
+        root = make_root_manifest(source_path="agents")
+        sync = make_sync_manifest(agents=[make_agent("empty-agent", category="ai")])
+
+        result, added, _ = merge_manifests(root, sync, project_root=self.tmp)
+
+        self.assertIn("empty-agent", added)
+        agent = result["agents"][0]
+        self.assertEqual(
+            agent["sha256"],
+            "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        )
+        self.assertEqual(agent["size"], 0)
+
+    @unittest.skipIf(os.getuid() == 0, "root ignores permissions")
+    def test_permission_error_clears_hash(self):
+        """Unreadable agent file results in no sha256/size (graceful handling)."""
+        agents_dir = os.path.join(self.tmp, "agents")
+        full_path, _ = self._write_agent_file(
+            agents_dir, "devtools/locked-agent", "secret content"
+        )
+        # Make file unreadable
+        full_path.chmod(0o000)
+        try:
+            existing_agent = make_agent(
+                "locked-agent",
+                category="devtools",
+                sha256="old_hash",
+                size=99,
+            )
+            root = make_root_manifest(agents=[existing_agent], source_path="agents")
+            sync = make_sync_manifest(
+                agents=[make_agent("locked-agent", category="devtools")]
+            )
+
+            result, added, _ = merge_manifests(root, sync, project_root=self.tmp)
+
+            self.assertEqual(len(added), 0)
+            agent = result["agents"][0]
+            self.assertNotIn("sha256", agent)
+            self.assertNotIn("size", agent)
+        finally:
+            # Restore permissions so tmpdir cleanup works
+            full_path.chmod(0o644)
 
 
 if __name__ == "__main__":

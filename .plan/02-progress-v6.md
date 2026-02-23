@@ -2,7 +2,7 @@
 
 **Plan:** [00-plan-v6.md](00-plan-v6.md)
 **Tasks:** [01-tasks-v6.md](01-tasks-v6.md)
-**Updated:** 2026-02-22 (S2 complete — 70/70 agents enriched, avg 4.80)
+**Updated:** 2026-02-23 (S3 backlog complete: 7 tasks done, 189/191 total)
 
 ---
 
@@ -20,9 +20,9 @@
 |---------|------|-------|---|
 | S1: TUI Anti-Flicker | 10 | 11 | 91% |
 | S5: Pack Fix + Flash | 10 | 10 | 100% |
-| S3 core: Hash Detection | 10 | 17 | 59% |
+| S3 core: Hash Detection | 17 | 17 | 100% |
 | V6.0 Release Tasks | 0 | 3 | 0% |
-| **V6.0 Total** | **30** | **39** | **77%** |
+| **V6.0 Total** | **37** | **39** | **95%** |
 
 ### V6.1 — Lifecycle (S6 + S3 extras)
 
@@ -73,12 +73,12 @@
 
 | Release | Done | Total | % | Status |
 |---------|------|-------|---|--------|
-| V6.0 MVP | 30 | 39 | 77% | **In Progress** |
+| V6.0 MVP | 37 | 39 | 95% | **S3 Done — Release Pending** |
 | V6.1 Lifecycle | 46 | 46 | 100% | **Done** |
 | V7.0 Permissions | 54 | 54 | 100% | **Done** |
 | S2 Enrichment | 46 | 46 | 100% | **Done** |
 | S7 Agent Separation | 6 | 6 | 100% | **Done** |
-| **Total** | **182** | **191** | **95%** | |
+| **Total** | **189** | **191** | **99%** | |
 
 ## Review Integration
 
@@ -107,7 +107,11 @@
 - [x] S2 D2-D5 Agent Enrichment (70/70 agents): D2 Languages+DevTools (18 agents, avg 4.72), D3 AI+Security+DevOps (21 agents, avg 4.76), D4 Web+Business+Docs+MCP+Data-API+remaining DevOps+DevTools (31 agents, avg 4.91). All agents scored ≥3.5, no dimension below 2. Manifest updated with SHA256 hashes for all 70 agents, source=aitmpl removed from all entries.
 - [x] S7 Agent Separation plan (v2.1 — 2 review rounds): product agents in `.opencode/agents/` conflicted with OpenCode's active agent directory → silent write failures. Solution: move to `agents/` at root, split `manifest.json` `base_path` into `source_path` (GitHub repo) + `base_path` (local install destination). Key discovery: `base_path` was overloaded for both download and install. Deployment sequence: merge first, npm publish after (~5-10 min risk window). Full plan in `.plan/07-agent-separation.md`. **Plan ready, execution not started. Est. ~3h.**
 
+- [x] Post-S2 code review (commit 976168e): 20 files (6 scripts, 6 tests, 6 skills, 2 shell), 96 issues fixed (2 critical, 12 high, 28 medium, 33 low). Key fixes: run_tests.py auto-discovery, CATEGORY_MAP DRY, atomic writes, find-polluter.sh rewrite, install.sh security hardening. 3 dead stub scripts deleted. YAML parser consolidated (-127 lines). 304 tests passing.
+
 **Backlog (remaining V6.0 S3 core tasks):** S3.4 (corrupted JSON recovery), S3.5 (manifest sha256/size fields), S3.6 (Python sync hashes), S3.9-S3.10 (TUI state indicators), S3.12 (cache invalidation), S3.16 (Python sync tests)
+
+- [x] V6.0 S3 Backlog COMPLETE (2026-02-23): S3.4 corrupted JSON recovery (backup + warning + tests), S3.5 `size` field added to all 70 manifest entries, S3.6 Python sync sha256+size computation during merge, S3.9 TUI state indicators (↻ outdated, ? unknown), S3.10 semantic state color aliases in ansi.mjs, S3.12 mtime-based cache invalidation in registry.mjs + clearManifestCache(), S3.16 4 tests for hash computation in test_update_manifest.py. Review fixes: backup message truthful, semantic aliases used in renderer, color consistency. JS 628+ tests all pass, Python 308 tests (307 pass, 1 expected skip). **Only V6.0 release tasks (R1/R2/R3) remain.**
 
 ## Timeline Estimate
 
@@ -135,3 +139,5 @@
 | 2026-02-20 | Move product agents from `.opencode/agents/` to `agents/` | S7: conflicts with OpenCode's active agent dir, silent write failures |
 | 2026-02-20 | Split `base_path` into `source_path` + `base_path` | S7: single field was overloaded for GitHub download and local install |
 | 2026-02-20 | Merge-first deploy sequence for S7 | ~5-10 min risk window acceptable vs. coordinated atomic deploy complexity |
+| 2026-02-23 | Delete 3 empty code-reviewer stub scripts | Shipped as "tools" but performed zero analysis — false confidence worse than no tool |
+| 2026-02-23 | Full code review post-S2 enrichment | 96 issues across 20 files — critical: test runner missing 1082 lines of security tests, install.sh auto-approve without TTY |

@@ -1,6 +1,6 @@
 import { describe, it, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdirSync, mkdtempSync, rmSync, existsSync, readFileSync, writeFileSync, readdirSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, existsSync, readFileSync, writeFileSync, readdirSync, chmodSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
@@ -58,6 +58,18 @@ function writeAgentFile(cwd, agent, content = '# Agent') {
   mkdirSync(join(filePath, '..'), { recursive: true });
   writeFileSync(filePath, content, 'utf-8');
   return filePath;
+}
+
+/**
+ * Run `fn` while capturing everything written to stderr.
+ * Returns the concatenated output as a string.
+ */
+function captureStderr(fn) {
+  const chunks = [];
+  const orig = process.stderr.write;
+  process.stderr.write = (chunk) => { chunks.push(String(chunk)); return true; };
+  try { fn(); } finally { process.stderr.write = orig; }
+  return chunks.join('');
 }
 
 // ─── sha256 ──────────────────────────────────────────────────────────────────
@@ -201,19 +213,12 @@ describe('readLock', () => {
     mkdirSync(join(lockPath, '..'), { recursive: true });
     writeFileSync(lockPath, '<<< corrupted garbage >>>', 'utf-8');
 
-    // Capture stderr
-    const captured = [];
-    const originalWrite = process.stderr.write;
-    process.stderr.write = (chunk) => { captured.push(String(chunk)); return true; };
-    try {
-      const data = readLock(tmp);
-      assert.deepEqual(data, {}, 'corrupted lock should return {}');
-      assert.ok(captured.length > 0, 'should have written to stderr');
-      assert.ok(captured.some(s => s.includes('corrupted') || s.includes('Warning')),
-        `stderr should mention corruption, got: ${captured.join('')}`);
-    } finally {
-      process.stderr.write = originalWrite;
-    }
+    let data;
+    const output = captureStderr(() => { data = readLock(tmp); });
+    assert.deepEqual(data, {}, 'corrupted lock should return {}');
+    assert.ok(output.length > 0, 'should have written to stderr');
+    assert.ok(output.includes('corrupted') || output.includes('Warning'),
+      `stderr should mention corruption, got: ${output}`);
   });
 
   // ─── M-6: readLock filters out invalid entries ────────────────────────────
@@ -971,5 +976,116 @@ describe('rehashLock', () => {
     rehashLock(manifest, tmp);
     const lock = readLock(tmp);
     assert.ok(!lock['orphan-agent'], 'Orphan entry should be removed after rehash');
+  });
+});
+
+// ─── readLock — corrupted JSON recovery (S3.4) ──────────────────────────────
+
+describe('readLock — corrupted JSON recovery', () => {
+  /** @type {string} */
+  let tmp;
+
+  beforeEach(() => {
+    tmp = mkdtempSync(join(tmpdir(), 'lock-recovery-'));
+  });
+
+  afterEach(() => {
+    rmSync(tmp, { recursive: true, force: true });
+  });
+
+  it('should create .bak backup of corrupted lock file', () => {
+    const lockPath = getLockPath(tmp);
+    mkdirSync(join(lockPath, '..'), { recursive: true });
+    const corruptedContent = '<<< corrupted garbage >>>';
+    writeFileSync(lockPath, corruptedContent, 'utf-8');
+
+    captureStderr(() => { readLock(tmp); });
+
+    const bakPath = lockPath + '.bak';
+    assert.ok(existsSync(bakPath), '.bak file should exist after corrupted read');
+    assert.equal(readFileSync(bakPath, 'utf-8'), corruptedContent,
+      '.bak should contain the original corrupted content');
+    // Original lock file should have been renamed (moved), so it no longer exists
+    assert.ok(!existsSync(lockPath), 'original lock file should be gone after rename');
+  });
+
+  it('should return empty object for corrupted lock file', () => {
+    const lockPath = getLockPath(tmp);
+    mkdirSync(join(lockPath, '..'), { recursive: true });
+    writeFileSync(lockPath, '{{{invalid json', 'utf-8');
+
+    let data;
+    captureStderr(() => { data = readLock(tmp); });
+    assert.deepEqual(data, {}, 'corrupted lock should return empty object');
+  });
+
+  it('should write warning to stderr that includes .bak path', () => {
+    const lockPath = getLockPath(tmp);
+    mkdirSync(join(lockPath, '..'), { recursive: true });
+    writeFileSync(lockPath, 'not-json!!!', 'utf-8');
+
+    const output = captureStderr(() => { readLock(tmp); });
+
+    const bakPath = lockPath + '.bak';
+    assert.ok(output.includes('Warning'), 'stderr should contain "Warning"');
+    assert.ok(output.includes(bakPath), `stderr should contain the .bak path: ${bakPath}`);
+    assert.ok(output.includes('rehash'), 'stderr should mention rehash');
+  });
+
+  it('should recover from empty lock file', () => {
+    const lockPath = getLockPath(tmp);
+    const lockDir = join(lockPath, '..');
+    mkdirSync(lockDir, { recursive: true });
+    writeFileSync(lockPath, '');  // 0 bytes
+
+    captureStderr(() => {
+      const result = readLock(tmp);
+      assert.deepStrictEqual(result, {});
+    });
+
+    // Verify backup was created
+    const backups = readdirSync(lockDir).filter(f => f.endsWith('.bak'));
+    assert.strictEqual(backups.length, 1);
+  });
+
+  it('should handle backup rename failure gracefully', { skip: process.getuid?.() === 0 && 'root ignores chmod' }, () => {
+    const lockPath = getLockPath(tmp);
+    const lockDir = join(lockPath, '..');
+    mkdirSync(lockDir, { recursive: true });
+    writeFileSync(lockPath, '<<< broken >>>', 'utf-8');
+
+    // Make parent directory read-only so renameSync fails
+    chmodSync(lockDir, 0o555);
+
+    let data;
+    let output;
+    try {
+      output = captureStderr(() => { data = readLock(tmp); });
+    } finally {
+      // Restore write permission so afterEach cleanup can remove the dir
+      chmodSync(lockDir, 0o755);
+    }
+
+    assert.deepEqual(data, {}, 'should still return {} even when backup fails');
+    assert.ok(output.includes('backup failed'),
+      `stderr should mention "(backup failed)", got: ${output}`);
+  });
+
+  it('should overwrite previous .bak file', () => {
+    const lockPath = getLockPath(tmp);
+    mkdirSync(join(lockPath, '..'), { recursive: true });
+    const bakPath = lockPath + '.bak';
+
+    // Create an old .bak file
+    writeFileSync(bakPath, 'old backup content', 'utf-8');
+
+    // Write new corrupted lock
+    const newCorrupted = '### newer corruption ###';
+    writeFileSync(lockPath, newCorrupted, 'utf-8');
+
+    captureStderr(() => { readLock(tmp); });
+
+    assert.equal(readFileSync(bakPath, 'utf-8'), newCorrupted,
+      '.bak should contain the latest corrupted content, not the old backup');
   });
 });

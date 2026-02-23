@@ -32,6 +32,7 @@ Requires Python 3.8+ (stdlib only).
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import logging
 import os
@@ -41,7 +42,7 @@ import tempfile
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-from sync_common import CATEGORY_MAP
+from sync_common import CATEGORY_MAP, validate_output_path
 
 # ---------------------------------------------------------------------------
 # Logger
@@ -184,8 +185,9 @@ def merge_manifests(
     """Merge sync manifest entries into the root manifest.
 
     New agents (present in *sync* but not in *root*) are added with a
-    ``[NEEDS_REVIEW]`` prefix in their description. Existing agents are
-    left untouched to preserve curated metadata.
+    ``[NEEDS_REVIEW]`` prefix in their description. Existing agents have
+    their ``sha256`` and ``size`` refreshed from disk, but all other curated
+    metadata (description, tags, packs) is preserved.
 
     Agents in *root* with ``source="aitmpl"`` that are **not** present in
     *sync* are flagged as potentially stale (returned in *stale_names*).
@@ -233,6 +235,38 @@ def merge_manifests(
             sync_score = agent.get("quality_score")
             if sync_score is not None:
                 existing[name]["quality_score"] = sync_score
+            # Refresh sha256 and size from current file on disk
+            agent_path = (
+                existing[name].get("path")
+                or f"{existing[name].get('category', 'devtools')}/{name}"
+            )
+            full_path = project_root / base_path / f"{agent_path}.md"
+            try:
+                validate_output_path(full_path, project_root)
+            except ValueError:
+                logger.warning(
+                    "Path traversal blocked for existing agent %r: %s",
+                    name,
+                    full_path,
+                )
+                existing[name].pop("sha256", None)
+                existing[name].pop("size", None)
+                continue
+            if full_path.is_file():
+                try:
+                    content = full_path.read_bytes()
+                except OSError as e:
+                    logger.warning("Cannot read %s: %s", full_path, e)
+                    existing[name].pop("sha256", None)
+                    existing[name].pop("size", None)
+                    continue
+                # Note: hash computed on raw bytes; JS side reads UTF-8 string.
+                # Identical for well-formed UTF-8.
+                existing[name]["sha256"] = hashlib.sha256(content).hexdigest()
+                existing[name]["size"] = len(content)
+            else:
+                existing[name].pop("sha256", None)
+                existing[name].pop("size", None)
             continue
 
         # New agent — map category and build entry
@@ -240,10 +274,19 @@ def merge_manifests(
         our_category = map_category(sync_category)
 
         # Path is relative to base_path, without .md extension
-        agent_path = agent.get("path", f"{our_category}/{name}")
+        agent_path = agent.get("path") or f"{our_category}/{name}"
 
         # Verify the .md file exists on disk
         full_path = project_root / base_path / f"{agent_path}.md"
+        try:
+            validate_output_path(full_path, project_root)
+        except ValueError:
+            logger.warning(
+                "Path traversal blocked for new agent %r: %s",
+                name,
+                full_path,
+            )
+            continue
         if not full_path.is_file():
             logger.warning(
                 "Agent file not found at %s (may be staged but not on disk)",
@@ -261,6 +304,18 @@ def merge_manifests(
             "tags": [],
             "source": "aitmpl",
         }
+        # Compute sha256 and size from the agent file on disk
+        if full_path.is_file():
+            try:
+                content = full_path.read_bytes()
+            except OSError as e:
+                logger.warning("Cannot read %s: %s", full_path, e)
+                content = None
+            if content is not None:
+                # Note: hash computed on raw bytes; JS side reads UTF-8 string.
+                # Identical for well-formed UTF-8.
+                new_entry["sha256"] = hashlib.sha256(content).hexdigest()
+                new_entry["size"] = len(content)
         # Preserve quality_score if present in sync manifest
         sync_score = agent.get("quality_score")
         if sync_score is not None:

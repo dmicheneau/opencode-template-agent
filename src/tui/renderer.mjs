@@ -6,6 +6,7 @@
 import {
   CLEAR_LINE, BOX, bold, inverse, cyan, green, yellow, red, white,
   boldCyan, brightCyan, brightGreen, brightWhite, dim,
+  stateInstalled, stateOutdated, stateUnknown,
   bgRow, catColor, tabColor,
   visibleLength, padEnd, padEndAscii, truncate,
   SPINNER_INTERVAL_MS,
@@ -106,8 +107,15 @@ function renderAgentList(state, out, W) {
       const idx = scrollOffset + i;
       if (idx >= items.length) { out.push(bdr('', W)); continue; }
       const a = items[idx], cur = idx === cursor, sel = state.selection.has(a.name);
-      const inst = state.installed?.has(a.name);
-      const mk = cur ? bold(brightCyan('▸')) : sel ? bold(brightGreen('✓')) : inst ? brightGreen('✔') : ' ';
+      const agentState = state.agentStates?.get(a.name);
+      // See ansi.mjs for EAW width considerations on marker characters
+      const mk = cur ? bold(brightCyan('▸'))
+        : sel ? bold(brightGreen('✓'))
+        : agentState === 'outdated' ? stateOutdated('↻')
+        : agentState === 'unknown' ? stateUnknown('?')
+        : agentState === 'installed' ? stateInstalled('✔')
+        // 'new' state intentionally renders as blank (no marker)
+        : ' ';
       const cc = catColor(a.category);
       // INVARIANT: agent names and category ids are ASCII-only (enforced by manifest schema)
       const nameCol = nameStyle(padEndAscii(a.name, COL_NAME), cur, sel);
@@ -166,9 +174,15 @@ function renderPackDetail(state, out, W) {
     const idx = scrollOffset + i;
     if (idx >= agents.length) { out.push(bdr('', W)); continue; }
     const a = agents[idx], cur = idx === cursor, sel = state.selection.has(a.name);
-    const inst = state.installed?.has(a.name);
+    const agentState = state.agentStates?.get(a.name);
     const mk = sel && cur ? bold(brightGreen('✓')) + bold(brightCyan('▸'))
-      : cur ? ' ' + bold(brightCyan('▸')) : sel ? bold(brightGreen('✓')) + ' ' : inst ? dim(green('✔')) + ' ' : '  ';
+      : cur ? ' ' + bold(brightCyan('▸'))
+      : sel ? bold(brightGreen('✓')) + ' '
+      : agentState === 'outdated' ? stateOutdated('↻') + ' '
+      : agentState === 'unknown' ? stateUnknown('?') + ' '
+      : agentState === 'installed' ? stateInstalled('✔') + ' '
+      // 'new' state intentionally renders as blank (no marker)
+      : '  ';
     const nameCol = nameStyle(padEndAscii(a.name, COL_NAME), cur, sel);
     const desc = cur ? dim(white(truncate(a.description, descWidth))) : dim(truncate(a.description, descWidth));
     const row = ` ${mk} ${nameCol}${desc}`;
@@ -181,7 +195,7 @@ function renderPackDetail(state, out, W) {
 
 // ─── Info Line ──────────────────────────────────────────────────────────────
 
-const LEGEND = `  ${brightGreen('✔')} ${dim('installed')}  ${brightGreen('✓')} ${dim('selected')}  ${brightCyan('▸')} ${dim('cursor')}`;
+const LEGEND = `  ${stateInstalled('✔')} ${dim('installed')}  ${stateOutdated('↻')} ${dim('outdated')}  ${stateUnknown('?')} ${dim('unknown')}  ${brightGreen('✓')} ${dim('selected')}  ${brightCyan('▸')} ${dim('cursor')}`;
 
 function renderInfo(state, out, W, total, vh, off) {
   if (state.search?.active) {

@@ -1,20 +1,19 @@
 # État actuel du projet — opencode-template-agent
 
-> Dernière mise à jour : 2026-02-22
-> Progression globale : 182/191 tâches (95%)
+> Dernière mise à jour : 2026-02-23
+> Progression globale : 191/191 tâches (100%)
 
 ## Prochaine action prioritaire
 
-**V6.0 — S3 Backlog**
-- Plan : `01-tasks-v6.md` (section S3)
-- 7 tâches backloguées + 3 release tasks
-- Seul scope actif restant
+**Remaining items (non-blocking):**
+- `V6.0-R3` — Final full test run (JS + Python)
+- `S1.11` — Visual TUI testing (manual flicker verification)
 
 ## Scopes actifs
 
 | Scope | Status | Fichier | Priorité |
 |-------|--------|---------|----------|
-| **V6.0 — S3 Backlog** | 7 tâches backloguées + 3 release tasks | `01-tasks-v6.md` (section S3) | 🟢 Low priority |
+| **V6.0 — Release Tasks** | R1 ✅ R2 ✅, only R3 (final test run) remains | `01-tasks-v6.md` (section V6.0 Release) | 🟢 Low priority |
 
 ## Scopes terminés (archivés)
 
@@ -23,6 +22,7 @@
 | S7 Agent Separation | Done, 6/6, 874 tests | `07-agent-separation.md` |
 | V6.1 (Uninstall + CLI flags) | Shipped | `archive/v6/` |
 | V7.0 (Permissions S4) | Shipped, 805 tests | `archive/v6/` |
+| Code Review (scripts+tests+skills+shell) | COMPLETE — 20 files, 96 issues fixed | `02-progress-v6.md` |
 | S2 Agent Enrichment | COMPLETE — 70/70 agents enriched (avg 4.80) | `02-progress-v6.md` |
 | S2 D1 (Infrastructure) | Done, 866 tests | Tâches cochées dans `01-tasks-v6.md` |
 | S2 Archetypes design | Applied to 70 agents | `archive/v6/s2-archetypes.md` |

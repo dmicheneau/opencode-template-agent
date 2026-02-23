@@ -72,7 +72,8 @@
         "screen-reader",
         "inclusive-design"
       ],
-      "sha256": "f9c0d15e7123a73e3a3944c990fa9b4ea59e8bc7ea5b56b5b0a3e27cd6786d89"
+      "sha256": "f9c0d15e7123a73e3a3944c990fa9b4ea59e8bc7ea5b56b5b0a3e27cd6786d89",
+      "size": 7821
     },
     {
       "name": "ai-engineer",
@@ -87,7 +88,8 @@
         "deployment",
         "mlops"
       ],
-      "sha256": "6fcf7ab3ac5451b1a866a8dc027c9e19fb242caf9e8d89f9dd4598153720cb6a"
+      "sha256": "6fcf7ab3ac5451b1a866a8dc027c9e19fb242caf9e8d89f9dd4598153720cb6a",
+      "size": 9561
     },
     {
       "name": "angular-architect",
@@ -103,7 +105,8 @@
         "typescript",
         "frontend"
       ],
-      "sha256": "66f6e20443b8d0d48621e9e58587be7c199587677facd92701b7b2508365ca3a"
+      "sha256": "66f6e20443b8d0d48621e9e58587be7c199587677facd92701b7b2508365ca3a",
+      "size": 8362
     },
     {
       "name": "api-architect",
@@ -119,7 +122,8 @@
         "http",
         "openapi"
       ],
-      "sha256": "a9ceecda3af11546c7c389fb42c7b158a5bbc0d68d70bb6f161cd9b387642d0e"
+      "sha256": "a9ceecda3af11546c7c389fb42c7b158a5bbc0d68d70bb6f161cd9b387642d0e",
+      "size": 5809
     },
     {
       "name": "api-documenter",
@@ -134,7 +138,8 @@
         "documentation",
         "code-examples"
       ],
-      "sha256": "8ca5c3a78afa5679f42b20082d537128f2ea319106c6ded934de70b3bc70fa9e"
+      "sha256": "8ca5c3a78afa5679f42b20082d537128f2ea319106c6ded934de70b3bc70fa9e",
+      "size": 5067
     },
     {
       "name": "aws-specialist",
@@ -150,7 +155,8 @@
         "security",
         "well-architected"
       ],
-      "sha256": "828fea564fc715a558291563fb8483d21b2aa91eb142fa3cff81a87e90559c95"
+      "sha256": "828fea564fc715a558291563fb8483d21b2aa91eb142fa3cff81a87e90559c95",
+      "size": 5617
     },
     {
       "name": "business-analyst",
@@ -165,7 +171,8 @@
         "brd",
         "stakeholders"
       ],
-      "sha256": "38644751aa9d5ddbda43aa07dde3fc4aaa698d87715311a5b7990a98f0e6c1da"
+      "sha256": "38644751aa9d5ddbda43aa07dde3fc4aaa698d87715311a5b7990a98f0e6c1da",
+      "size": 6155
     },
     {
       "name": "ci-cd-engineer",
@@ -181,7 +188,8 @@
         "deployment",
         "automation"
       ],
-      "sha256": "d7c7ced7ef8d5bfb2fcbab8087048b8da3f66c814afc5fc1a12fd101a0d3667b"
+      "sha256": "d7c7ced7ef8d5bfb2fcbab8087048b8da3f66c814afc5fc1a12fd101a0d3667b",
+      "size": 6928
     },
     {
       "name": "cloud-architect",
@@ -197,7 +205,8 @@
         "migration",
         "infrastructure"
       ],
-      "sha256": "73254f37055a13492d0c504df26f035a9cd30e41d5b7d9ec5c5bf8f80458e73f"
+      "sha256": "73254f37055a13492d0c504df26f035a9cd30e41d5b7d9ec5c5bf8f80458e73f",
+      "size": 7924
     },
     {
       "name": "code-reviewer",
@@ -212,7 +221,8 @@
         "best-practices",
         "linting"
       ],
-      "sha256": "04ffee2bc345a8728cabfb89b31bb885504351c919a32d0e1ffd23faea305622"
+      "sha256": "04ffee2bc345a8728cabfb89b31bb885504351c919a32d0e1ffd23faea305622",
+      "size": 5652
     },
     {
       "name": "cpp-pro",
@@ -228,7 +238,8 @@
         "performance",
         "embedded"
       ],
-      "sha256": "aa69f9f8fd8cd33048c45dc05c1136eca991c16fb512e5521aaada9deb78d7e0"
+      "sha256": "aa69f9f8fd8cd33048c45dc05c1136eca991c16fb512e5521aaada9deb78d7e0",
+      "size": 9437
     },
     {
       "name": "csharp-developer",
@@ -243,7 +254,8 @@
         "entity-framework",
         "azure"
       ],
-      "sha256": "5ef803962871a6b5a1aef8b26061154a042613f888fe0c4e64591e7c2e4d6985"
+      "sha256": "5ef803962871a6b5a1aef8b26061154a042613f888fe0c4e64591e7c2e4d6985",
+      "size": 8694
     },
     {
       "name": "data-analyst",
@@ -259,7 +271,8 @@
         "reporting",
         "visualization"
       ],
-      "sha256": "4915b7f24f9228763f4e48336acd98435a64cfe93a67a0fd08dd3cbc805dfd6e"
+      "sha256": "4915b7f24f9228763f4e48336acd98435a64cfe93a67a0fd08dd3cbc805dfd6e",
+      "size": 8938
     },
     {
       "name": "data-engineer",
@@ -275,7 +288,8 @@
         "data-warehouse",
         "pipelines"
       ],
-      "sha256": "981e95acba1c9eae0cfbb22808960f9fd5feded32cbac9416b91314cbea71bcc"
+      "sha256": "981e95acba1c9eae0cfbb22808960f9fd5feded32cbac9416b91314cbea71bcc",
+      "size": 9892
     },
     {
       "name": "data-scientist",
@@ -290,7 +304,8 @@
         "analytics",
         "modeling"
       ],
-      "sha256": "41efbbce5bf2ce85233cd36a6b8b2e87203a82f8848b67c8529b47d18907c004"
+      "sha256": "41efbbce5bf2ce85233cd36a6b8b2e87203a82f8848b67c8529b47d18907c004",
+      "size": 9394
     },
     {
       "name": "database-architect",
@@ -305,7 +320,8 @@
         "schema",
         "architecture"
       ],
-      "sha256": "2063f013f162dc60acf04fbe2f02d594cc1158a2c674a8b8b0ddc3efebc941ce"
+      "sha256": "2063f013f162dc60acf04fbe2f02d594cc1158a2c674a8b8b0ddc3efebc941ce",
+      "size": 6628
     },
     {
       "name": "debugger",
@@ -320,7 +336,8 @@
         "errors",
         "stack-traces"
       ],
-      "sha256": "09d36632310abcfcc798d0fc2fed3d4511955520719d3d97c1f19b4f233c3e9c"
+      "sha256": "09d36632310abcfcc798d0fc2fed3d4511955520719d3d97c1f19b4f233c3e9c",
+      "size": 8734
     },
     {
       "name": "devops-engineer",
@@ -335,7 +352,8 @@
         "deployment",
         "infrastructure"
       ],
-      "sha256": "8d0718f4a420c635ad9288affec54608f88e7b1c7a61be501cceeec3376ff0d5"
+      "sha256": "8d0718f4a420c635ad9288affec54608f88e7b1c7a61be501cceeec3376ff0d5",
+      "size": 7777
     },
     {
       "name": "diagram-architect",
@@ -351,7 +369,8 @@
         "architecture",
         "visualization"
       ],
-      "sha256": "b76fe69172ff4e448db7074a3f0ce9d2da4121007fad2ee46e1cb5a0d9496887"
+      "sha256": "b76fe69172ff4e448db7074a3f0ce9d2da4121007fad2ee46e1cb5a0d9496887",
+      "size": 4561
     },
     {
       "name": "docker-specialist",
@@ -367,7 +386,8 @@
         "security",
         "optimization"
       ],
-      "sha256": "962d2ccf7e55b0694aa0719c68a0c74bb72a9e586d4186430fbe4a8e1e96cc14"
+      "sha256": "962d2ccf7e55b0694aa0719c68a0c74bb72a9e586d4186430fbe4a8e1e96cc14",
+      "size": 7216
     },
     {
       "name": "documentation-engineer",
@@ -382,7 +402,8 @@
         "guides",
         "developer-docs"
       ],
-      "sha256": "8bbde2e9dec9c6b20927f9d80934d8a51819230078811a274003e03457e933ed"
+      "sha256": "8bbde2e9dec9c6b20927f9d80934d8a51819230078811a274003e03457e933ed",
+      "size": 5185
     },
     {
       "name": "episode-orchestrator",
@@ -397,7 +418,8 @@
         "subagents",
         "automation"
       ],
-      "sha256": "f3f95055e5a3b9c54a8f748da947e127bd2b27fb4fadee6d13df7b7393c402da"
+      "sha256": "f3f95055e5a3b9c54a8f748da947e127bd2b27fb4fadee6d13df7b7393c402da",
+      "size": 6522
     },
     {
       "name": "expert-nextjs-developer",
@@ -413,7 +435,8 @@
         "turbopack",
         "ssr"
       ],
-      "sha256": "2d31d98d8e44b018bf295167a078a0096112c11abbfce81496138c9eb8dab11d"
+      "sha256": "2d31d98d8e44b018bf295167a078a0096112c11abbfce81496138c9eb8dab11d",
+      "size": 5326
     },
     {
       "name": "expert-react-frontend-engineer",
@@ -429,7 +452,8 @@
         "frontend",
         "performance"
       ],
-      "sha256": "d9d21647177a245a3ed387a8d968c45878521cb2b4c72d493afbfe6c05f46d32"
+      "sha256": "d9d21647177a245a3ed387a8d968c45878521cb2b4c72d493afbfe6c05f46d32",
+      "size": 5467
     },
     {
       "name": "fullstack-developer",
@@ -445,7 +469,8 @@
         "api",
         "database"
       ],
-      "sha256": "da209514074f13be2a821c9010525bd1a26da8f657e992ab1fe6eedd72c7ff94"
+      "sha256": "da209514074f13be2a821c9010525bd1a26da8f657e992ab1fe6eedd72c7ff94",
+      "size": 5487
     },
     {
       "name": "golang-pro",
@@ -460,7 +485,8 @@
         "microservices",
         "cloud-native"
       ],
-      "sha256": "754d9d5012f7d5375fb509f9c80ab845dc6c463cfb5eb5f104100de00d77442f"
+      "sha256": "754d9d5012f7d5375fb509f9c80ab845dc6c463cfb5eb5f104100de00d77442f",
+      "size": 8356
     },
     {
       "name": "graphql-architect",
@@ -475,7 +501,8 @@
         "api",
         "query-optimization"
       ],
-      "sha256": "81e35128789b43f768a5f95c951be059bcdc046d2dc9d3cf7017b0be52d80387"
+      "sha256": "81e35128789b43f768a5f95c951be059bcdc046d2dc9d3cf7017b0be52d80387",
+      "size": 6014
     },
     {
       "name": "java-architect",
@@ -490,7 +517,8 @@
         "enterprise",
         "jvm"
       ],
-      "sha256": "49e09f339891da7eee1556930bde8482ccdf3a194a6ce42b3b7b74806a637c9d"
+      "sha256": "49e09f339891da7eee1556930bde8482ccdf3a194a6ce42b3b7b74806a637c9d",
+      "size": 10309
     },
     {
       "name": "kotlin-specialist",
@@ -505,7 +533,8 @@
         "multiplatform",
         "jvm"
       ],
-      "sha256": "eebe55f7f7a9811b923c9bc456d68c53848c5719030b10646df4274e6d742c2a"
+      "sha256": "eebe55f7f7a9811b923c9bc456d68c53848c5719030b10646df4274e6d742c2a",
+      "size": 9379
     },
     {
       "name": "kubernetes-specialist",
@@ -521,7 +550,8 @@
         "helm",
         "production"
       ],
-      "sha256": "315a1359e03bd6ba666f4f08bd9a0c0967e8980a7d57f35facb0ae06ebd1b487"
+      "sha256": "315a1359e03bd6ba666f4f08bd9a0c0967e8980a7d57f35facb0ae06ebd1b487",
+      "size": 6651
     },
     {
       "name": "linux-admin",
@@ -537,7 +567,8 @@
         "shell",
         "security"
       ],
-      "sha256": "794d0a35ef71098acdc74bb11bd87b12f2751c1d2803cd9a947363b8ce20d9ab"
+      "sha256": "794d0a35ef71098acdc74bb11bd87b12f2751c1d2803cd9a947363b8ce20d9ab",
+      "size": 7504
     },
     {
       "name": "llm-architect",
@@ -553,7 +584,8 @@
         "nlp",
         "ai"
       ],
-      "sha256": "76c4537e936aeafef04678088544e09638d3ea29b6a54493fbcdd1d0a6b23d1b"
+      "sha256": "76c4537e936aeafef04678088544e09638d3ea29b6a54493fbcdd1d0a6b23d1b",
+      "size": 7796
     },
     {
       "name": "mcp-developer",
@@ -569,7 +601,8 @@
         "sdk",
         "development"
       ],
-      "sha256": "b7ae28a6476a0b2dce5a3d17f9846d7366d9c0bd00e62f3fabf8d90893a1e690"
+      "sha256": "b7ae28a6476a0b2dce5a3d17f9846d7366d9c0bd00e62f3fabf8d90893a1e690",
+      "size": 5544
     },
     {
       "name": "mcp-protocol-specialist",
@@ -584,7 +617,8 @@
         "transport",
         "standards"
       ],
-      "sha256": "fdcb268c944e6f89f05e579e10c48685fc692ce4901dc4222209ba1a65ee22fa"
+      "sha256": "fdcb268c944e6f89f05e579e10c48685fc692ce4901dc4222209ba1a65ee22fa",
+      "size": 4338
     },
     {
       "name": "mcp-security-auditor",
@@ -600,7 +634,8 @@
         "compliance",
         "audit"
       ],
-      "sha256": "435536b4a426c0652accff9736494f6ef43161abe344c5aabb06aba7ded720dc"
+      "sha256": "435536b4a426c0652accff9736494f6ef43161abe344c5aabb06aba7ded720dc",
+      "size": 5421
     },
     {
       "name": "mcp-server-architect",
@@ -616,7 +651,8 @@
         "python",
         "deployment"
       ],
-      "sha256": "6fa4f729eb72bb1c5ce6049f6a29f3fbc2d10b96215f689079187bde540fc3c2"
+      "sha256": "6fa4f729eb72bb1c5ce6049f6a29f3fbc2d10b96215f689079187bde540fc3c2",
+      "size": 5913
     },
     {
       "name": "microservices-architect",
@@ -631,7 +667,8 @@
         "service-mesh",
         "event-driven"
       ],
-      "sha256": "9294f94804f7bc57c3dcf1a3e44e47d78b6a9c47c88a6f88da9aea1d15167ca8"
+      "sha256": "9294f94804f7bc57c3dcf1a3e44e47d78b6a9c47c88a6f88da9aea1d15167ca8",
+      "size": 5790
     },
     {
       "name": "ml-engineer",
@@ -646,7 +683,8 @@
         "pipelines",
         "training"
       ],
-      "sha256": "e6c9aec7dd0438b4b7329a08a8bd4591db93380c1d3915a298c034794b055bb3"
+      "sha256": "e6c9aec7dd0438b4b7329a08a8bd4591db93380c1d3915a298c034794b055bb3",
+      "size": 6370
     },
     {
       "name": "mlops-engineer",
@@ -661,7 +699,8 @@
         "deployment",
         "ml-lifecycle"
       ],
-      "sha256": "50a83ddd058414e7d0c4cf5b4aaf3a2c204a2d85f87d2119f1d0c8109b041ac9"
+      "sha256": "50a83ddd058414e7d0c4cf5b4aaf3a2c204a2d85f87d2119f1d0c8109b041ac9",
+      "size": 7836
     },
     {
       "name": "mobile-developer",
@@ -677,7 +716,8 @@
         "android",
         "cross-platform"
       ],
-      "sha256": "0bd7534d4c173fd0509917f6cfc7e12eaa0ca526f348a8782c6e5aff668220fe"
+      "sha256": "0bd7534d4c173fd0509917f6cfc7e12eaa0ca526f348a8782c6e5aff668220fe",
+      "size": 5858
     },
     {
       "name": "penetration-tester",
@@ -692,7 +732,8 @@
         "vulnerabilities",
         "offensive"
       ],
-      "sha256": "b7fce0d7a5af0c3449ff9cb516f9a9a4c9279496f612ef8af4943b631d8e02d2"
+      "sha256": "b7fce0d7a5af0c3449ff9cb516f9a9a4c9279496f612ef8af4943b631d8e02d2",
+      "size": 6115
     },
     {
       "name": "performance-engineer",
@@ -707,7 +748,8 @@
         "bottlenecks",
         "benchmarking"
       ],
-      "sha256": "2431eefa3737c53b1acc7ea035f3204c215a6e8a4efb3d4ca2d2cbd2430893d7"
+      "sha256": "2431eefa3737c53b1acc7ea035f3204c215a6e8a4efb3d4ca2d2cbd2430893d7",
+      "size": 4987
     },
     {
       "name": "php-pro",
@@ -722,7 +764,8 @@
         "composer",
         "async"
       ],
-      "sha256": "e4ca4d5fe7cbba63a567cc1e714f54bc7a8e00e99b9dc5268036c2dea0a977a4"
+      "sha256": "e4ca4d5fe7cbba63a567cc1e714f54bc7a8e00e99b9dc5268036c2dea0a977a4",
+      "size": 8179
     },
     {
       "name": "platform-engineer",
@@ -738,7 +781,8 @@
         "observability",
         "developer-experience"
       ],
-      "sha256": "dab3dbe99d720d7055706dc8fd88667ecaa50aa000e9a7b7ef36415048c8e0f6"
+      "sha256": "dab3dbe99d720d7055706dc8fd88667ecaa50aa000e9a7b7ef36415048c8e0f6",
+      "size": 7466
     },
     {
       "name": "postgres-pro",
@@ -754,7 +798,8 @@
         "performance",
         "query-tuning"
       ],
-      "sha256": "ce685119f0cb3777e6b4ee80ef79f19df20cee7edf39d12bdd8341883f45e4b0"
+      "sha256": "ce685119f0cb3777e6b4ee80ef79f19df20cee7edf39d12bdd8341883f45e4b0",
+      "size": 6715
     },
     {
       "name": "prd",
@@ -770,7 +815,8 @@
         "documentation",
         "planning"
       ],
-      "sha256": "e6f070c0304eb6fe76138dd8f2ef421b4b541bff4ae021d0793141d994091237"
+      "sha256": "e6f070c0304eb6fe76138dd8f2ef421b4b541bff4ae021d0793141d994091237",
+      "size": 5989
     },
     {
       "name": "product-manager",
@@ -785,7 +831,8 @@
         "prioritization",
         "user-research"
       ],
-      "sha256": "59082914d8eb5eaddc9a4b6f41909219b4a1fdaace13e5e31d2fcfd197a98acb"
+      "sha256": "59082914d8eb5eaddc9a4b6f41909219b4a1fdaace13e5e31d2fcfd197a98acb",
+      "size": 5408
     },
     {
       "name": "project-manager",
@@ -800,7 +847,8 @@
         "stakeholders",
         "budget"
       ],
-      "sha256": "eb94eebf013c9c38d8fde8479732b64f25ad71f301cc73f909a9a5fcc110f631"
+      "sha256": "eb94eebf013c9c38d8fde8479732b64f25ad71f301cc73f909a9a5fcc110f631",
+      "size": 6223
     },
     {
       "name": "prompt-engineer",
@@ -815,7 +863,8 @@
         "ai",
         "prompt-engineering"
       ],
-      "sha256": "f35f8ba8156e52e6281b982e6fdf0b03259ee7ebee50043fa88dda8850794871"
+      "sha256": "f35f8ba8156e52e6281b982e6fdf0b03259ee7ebee50043fa88dda8850794871",
+      "size": 8865
     },
     {
       "name": "python-pro",
@@ -831,7 +880,8 @@
         "django",
         "flask"
       ],
-      "sha256": "2ce397ba699c54ff8ef2fcfbff09c73ae51a445ba5e49a6bf34affb17a707998"
+      "sha256": "2ce397ba699c54ff8ef2fcfbff09c73ae51a445ba5e49a6bf34affb17a707998",
+      "size": 7882
     },
     {
       "name": "qa-expert",
@@ -846,7 +896,8 @@
         "regression",
         "quality-gates"
       ],
-      "sha256": "89f0735f8afad43c44d02da21a6567322eca7ca33fa1225df528aaadf80f0bd0"
+      "sha256": "89f0735f8afad43c44d02da21a6567322eca7ca33fa1225df528aaadf80f0bd0",
+      "size": 4750
     },
     {
       "name": "rails-expert",
@@ -862,7 +913,8 @@
         "active-record",
         "full-stack"
       ],
-      "sha256": "bd1670ffed19e9d3d9916ec0d44ca1b95a066a821f4c58e9638d1f6a6b4df345"
+      "sha256": "bd1670ffed19e9d3d9916ec0d44ca1b95a066a821f4c58e9638d1f6a6b4df345",
+      "size": 9755
     },
     {
       "name": "redis-specialist",
@@ -878,7 +930,8 @@
         "streams",
         "performance"
       ],
-      "sha256": "6778db591940f4f3593a69cfe55b753a91dde59c1f407194b60df2025e2d01ee"
+      "sha256": "6778db591940f4f3593a69cfe55b753a91dde59c1f407194b60df2025e2d01ee",
+      "size": 6503
     },
     {
       "name": "refactoring-specialist",
@@ -893,7 +946,8 @@
         "patterns",
         "architecture"
       ],
-      "sha256": "a86a8217914da1604befd0e10c219988f16865596d9b5987fd8df7c463fb3cdc"
+      "sha256": "a86a8217914da1604befd0e10c219988f16865596d9b5987fd8df7c463fb3cdc",
+      "size": 5595
     },
     {
       "name": "rust-pro",
@@ -909,7 +963,8 @@
         "concurrency",
         "systems"
       ],
-      "sha256": "670dfb26cb013393a6bd984e426ba7ad54e39620e83059f63cd9c808b0536016"
+      "sha256": "670dfb26cb013393a6bd984e426ba7ad54e39620e83059f63cd9c808b0536016",
+      "size": 9138
     },
     {
       "name": "screenshot-ui-analyzer",
@@ -925,7 +980,8 @@
         "layout",
         "components"
       ],
-      "sha256": "36beec6df4c81f18918fb464f130d0f86946c12735f7256d9ff74c27da9c09bb"
+      "sha256": "36beec6df4c81f18918fb464f130d0f86946c12735f7256d9ff74c27da9c09bb",
+      "size": 4527
     },
     {
       "name": "scrum-master",
@@ -941,7 +997,8 @@
         "kanban",
         "facilitation"
       ],
-      "sha256": "67f04e3e43e938fb5075cf731bf168a94c6cfbdbf3dcf3288a1772d119ae527f"
+      "sha256": "67f04e3e43e938fb5075cf731bf168a94c6cfbdbf3dcf3288a1772d119ae527f",
+      "size": 6266
     },
     {
       "name": "search-specialist",
@@ -956,7 +1013,8 @@
         "information-retrieval",
         "synthesis"
       ],
-      "sha256": "ff8495ca57096afbafbc936dd8ecd5c6e8e6665afd9466ec96d68b05470e6ff6"
+      "sha256": "ff8495ca57096afbafbc936dd8ecd5c6e8e6665afd9466ec96d68b05470e6ff6",
+      "size": 8031
     },
     {
       "name": "security-auditor",
@@ -971,7 +1029,8 @@
         "vulnerabilities",
         "assessment"
       ],
-      "sha256": "74073e2ba3716e3b9d31980f3073d676870e4ac10c6c14f7bef972de88907a0c"
+      "sha256": "74073e2ba3716e3b9d31980f3073d676870e4ac10c6c14f7bef972de88907a0c",
+      "size": 5954
     },
     {
       "name": "security-engineer",
@@ -986,7 +1045,8 @@
         "vulnerability-management",
         "devsecops"
       ],
-      "sha256": "0c225459a47689f589687910fe7c60f0f3ca74a9ac09fbc2e6aa7b4715a3b0e7"
+      "sha256": "0c225459a47689f589687910fe7c60f0f3ca74a9ac09fbc2e6aa7b4715a3b0e7",
+      "size": 6812
     },
     {
       "name": "smart-contract-auditor",
@@ -1002,7 +1062,8 @@
         "web3",
         "audit"
       ],
-      "sha256": "62680ce17c3cb3fe5be91cf5c717025b90ae3cf209ca2f1b469f55e13a5fd4a9"
+      "sha256": "62680ce17c3cb3fe5be91cf5c717025b90ae3cf209ca2f1b469f55e13a5fd4a9",
+      "size": 6777
     },
     {
       "name": "sre-engineer",
@@ -1018,7 +1079,8 @@
         "incident-management",
         "observability"
       ],
-      "sha256": "ffefa0d36fb2c6fcdadfb963f91675e71db329abaa2ccf506d20747711d66ce6"
+      "sha256": "ffefa0d36fb2c6fcdadfb963f91675e71db329abaa2ccf506d20747711d66ce6",
+      "size": 6922
     },
     {
       "name": "swift-expert",
@@ -1034,7 +1096,8 @@
         "apple",
         "xcode"
       ],
-      "sha256": "b71fcd87756d4035fa924ab6cb6432988da70211547c210d0f34e140260350d2"
+      "sha256": "b71fcd87756d4035fa924ab6cb6432988da70211547c210d0f34e140260350d2",
+      "size": 10063
     },
     {
       "name": "technical-writer",
@@ -1049,7 +1112,8 @@
         "user-guides",
         "sdk"
       ],
-      "sha256": "fb8850e0676a29a02cc7e1ff489cf8ed822d66fc7049c449982784f0b7798c1d"
+      "sha256": "fb8850e0676a29a02cc7e1ff489cf8ed822d66fc7049c449982784f0b7798c1d",
+      "size": 5420
     },
     {
       "name": "terraform-specialist",
@@ -1065,7 +1129,8 @@
         "hcl",
         "providers"
       ],
-      "sha256": "c3425c693ea206a1817e3d8cbcbb86532d398ea7e1fdbc8c086299cbbddacc0e"
+      "sha256": "c3425c693ea206a1817e3d8cbcbb86532d398ea7e1fdbc8c086299cbbddacc0e",
+      "size": 7283
     },
     {
       "name": "test-automator",
@@ -1081,7 +1146,8 @@
         "coverage",
         "e2e"
       ],
-      "sha256": "8fd793782d84a6380f513a001d4ac0beb67fe1c0770b2668a7914b5b42e46e24"
+      "sha256": "8fd793782d84a6380f513a001d4ac0beb67fe1c0770b2668a7914b5b42e46e24",
+      "size": 5632
     },
     {
       "name": "typescript-pro",
@@ -1097,7 +1163,8 @@
         "node",
         "react"
       ],
-      "sha256": "b88c9cdfc76ca31c4cedbfcb0a8b7dd8084e55275c36e0be8f7cfb49c83858f1"
+      "sha256": "b88c9cdfc76ca31c4cedbfcb0a8b7dd8084e55275c36e0be8f7cfb49c83858f1",
+      "size": 7166
     },
     {
       "name": "ui-designer",
@@ -1113,7 +1180,8 @@
         "accessibility",
         "ux"
       ],
-      "sha256": "7b404651ef1f1cbc7ed8ae1fe4ae1bd4cb1be2b2cd33c3696b3aea8974d95ee8"
+      "sha256": "7b404651ef1f1cbc7ed8ae1fe4ae1bd4cb1be2b2cd33c3696b3aea8974d95ee8",
+      "size": 8727
     },
     {
       "name": "ux-researcher",
@@ -1128,7 +1196,8 @@
         "user-testing",
         "journey-mapping"
       ],
-      "sha256": "d2811100984c9f21723199210a2acd4dee1bb9a794c85ffd841aa46994796c7b"
+      "sha256": "d2811100984c9f21723199210a2acd4dee1bb9a794c85ffd841aa46994796c7b",
+      "size": 6840
     },
     {
       "name": "vue-expert",
@@ -1144,7 +1213,8 @@
         "composition-api",
         "frontend"
       ],
-      "sha256": "ca16c24d0a930cd95a9ae2ea49bbdc3980605b46e36f9c2b52713dfb2aba0263"
+      "sha256": "ca16c24d0a930cd95a9ae2ea49bbdc3980605b46e36f9c2b52713dfb2aba0263",
+      "size": 8751
     }
   ],
   "packs": {

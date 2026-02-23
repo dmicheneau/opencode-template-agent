@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, isAbsolute } from 'node:path';
 
@@ -54,6 +54,9 @@ const MANIFEST_PATH = join(__dirname, '..', 'manifest.json');
 /** @type {Manifest | null} */
 let _cached = null;
 
+/** @type {number} */
+let _cachedMtime = 0;
+
 export const SAFE_NAME_RE = /^[a-z0-9][a-z0-9._-]*$/i;
 
 /**
@@ -88,10 +91,13 @@ export function validateManifest(manifest) {
     if (agent.category && !SAFE_NAME_RE.test(agent.category)) {
       throw new Error(`Invalid category for "${agent.name}": "${agent.category}"`);
     }
+    if (agent.path != null && isAbsolute(agent.path)) {
+      throw new Error(`Agent "${agent.name}": path must be relative, got "${agent.path}"`);
+    }
     if (agent.path && agent.path.includes('..')) {
       throw new Error(`Agent path contains "..": "${agent.path}"`);
     }
-    if (agent.path.includes('\0')) {
+    if (agent.path != null && agent.path.includes('\0')) {
       throw new Error(`Invalid null byte in agent path: "${agent.name}"`);
     }
   }
@@ -99,22 +105,46 @@ export function validateManifest(manifest) {
 
 /**
  * Load and cache the manifest.
+ * Uses mtime-based invalidation: if the file changed on disk, reload.
  * @returns {Manifest}
  */
 export function loadManifest() {
-  if (_cached) return _cached;
+  let stat;
+  try {
+    stat = statSync(MANIFEST_PATH, { throwIfNoEntry: false });
+  } catch {
+    stat = null; // treat permission/access errors as cache miss
+  }
+  if (!stat) {
+    throw new Error(`Manifest not found at ${MANIFEST_PATH}`);
+  }
 
+  const mtime = stat.mtimeMs;
+  if (_cached && mtime === _cachedMtime) return _cached;
+
+  /** @type {Manifest} */
+  let manifest;
   try {
     const raw = readFileSync(MANIFEST_PATH, 'utf-8');
-    const manifest = /** @type {Manifest} */ (JSON.parse(raw));
-    validateManifest(manifest);
-    _cached = manifest;
-    return _cached;
+    manifest = /** @type {Manifest} */ (JSON.parse(raw));
   } catch (err) {
     throw new Error(
       `Failed to load manifest at ${MANIFEST_PATH}: ${/** @type {Error} */ (err).message}`
     );
   }
+
+  validateManifest(manifest); // validation errors propagate directly
+  _cached = manifest;
+  _cachedMtime = mtime;
+  return _cached;
+}
+
+/**
+ * Clear the manifest cache. Useful for tests and after sync operations.
+ */
+export function clearManifestCache() {
+  _cached = null;
+  _cachedMtime = 0;
 }
 
 // ─── Query helpers ──────────────────────────────────────────────────────────────

@@ -43,6 +43,7 @@ const MIN_VIEWPORT = 5;
  * @property {{ type: string, label?: string, count: number }|null} confirmContext
  * @property {{ agent: AgentEntry, name: string }|null} uninstallTarget
  * @property {PermState|null} perm
+ * @property {Map<string, string>} [agentStates] — Set by orchestrator after state detection
  */
 
 /**
@@ -117,6 +118,8 @@ export function createInitialState(manifest, terminal) {
     terminal,
     manifest,
     allAgents,
+    // TODO: populated by detectAgentStates() in orchestrator
+    agentStates: new Map(),
   };
 }
 
