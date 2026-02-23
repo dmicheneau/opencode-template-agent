@@ -2,96 +2,60 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
-
-## [7.0.0] - 2026-02-23
-
-### Added
-- **Manifest integrity** — `sha256` and `size` fields on all 70 agent entries for content verification
-- **Hash computation in sync** — `scripts/update-manifest.py` computes SHA-256 hashes and byte sizes during merge, with path traversal validation and graceful error handling
-- **Lock file recovery** — corrupted JSON in lock files now triggers automatic backup and clean recovery (SyntaxError-filtered)
-- **Cache invalidation** — `src/registry.mjs` uses mtime-based cache to avoid redundant manifest reloads, with `clearManifestCache()` for testing
-- **TUI state indicators** — outdated agents show `↻`, unknown agents show `?`, with semantic color aliases (`stateInstalled`, `stateOutdated`, `stateUnknown`)
-- **949 tests total** (641 JS + 311 Python), all passing
-
-### Changed
-- **Manifest validation hardened** — `isAbsolute()` check on agent paths, null byte guards with undefined protection, validation errors propagate with original messages
-- **Python sync robustness** — `read_bytes()` failures handled gracefully (OSError catch), stale hash/size cleared on file deletion, `path: null` edge case fixed
-
-### Fixed
-- **Lock file catch scope** — `readLock()` catch block now filters on `SyntaxError` only; filesystem errors (EACCES) re-thrown instead of silently swallowed
-- **Registry statSync** — permission errors on `statSync` treated as cache miss instead of crashing
-- **TUI state typedef** — `agentStates` field added to `TuiState` typedef and `createInitialState()`
-
+## [8.0.0] - 2026-02-23
+### ✨ Nouveautés
+- (s2) D1 foundation — agent template, archetypes, quality scoring, sync pipeline enrichment([c1ebae1](https://github.com/dmicheneau/opencode-template-agent/commit/c1ebae1ba483735f57630d7754c5a99a13da9c9e))- (permissions) apply 5-archetype permission system to 70 agents + global config([d85b6a8](https://github.com/dmicheneau/opencode-template-agent/commit/d85b6a84f93e61af7ab76f06bc6514c52fbe538a))- (s7) separate product agents from dev agents — move to agents/([0456191](https://github.com/dmicheneau/opencode-template-agent/commit/04561917cc5c08cd96a5513c9b6ae46bd5134629))- (s2) complete agent enrichment (70/70) + full code review fixes([976168e](https://github.com/dmicheneau/opencode-template-agent/commit/976168e514256eb36fe1b47f2086c2e39674d261))- add release workflow with git-cliff changelog + fix TUI improvements([5155d70](https://github.com/dmicheneau/opencode-template-agent/commit/5155d7068ce12fd529e4771600be3383f60a5a5c))- (ci) auto-update CHANGELOG.md on release via git-cliff([cd4e5db](https://github.com/dmicheneau/opencode-template-agent/commit/cd4e5db49b7f5de1051a79899fee8be58a7e39b6))
+### 🐛 Corrections
+- resolve 16 code review issues (1 critical, 3 high, 6 medium, 6 low)([71ea12b](https://github.com/dmicheneau/opencode-template-agent/commit/71ea12b2a243c09359adfcfd2aa26d2ce773462b))- resolve 29 S2 D1 review issues (12 code + 17 design docs)([657cae4](https://github.com/dmicheneau/opencode-template-agent/commit/657cae430691336b6e9d0d2df28a3285d46e15d1))- (s3) implement all review fixes + release close-out (v7.0.0)([1b07bec](https://github.com/dmicheneau/opencode-template-agent/commit/1b07bec9232606a77b56c0db209f5fc2af6f752f))- resolve TUI duplicate lines on navigation + detect local agents([fbcad84](https://github.com/dmicheneau/opencode-template-agent/commit/fbcad84d3824a25e506d11be254841f0b365e280))- (tui) restore CLEAR_LINE in flush + truncate overflow in bdr + responsive legend([d554312](https://github.com/dmicheneau/opencode-template-agent/commit/d554312cfd6df5f9b8548afa581650ce5b3ce420))- (tui) correct CHROME_ROWS (8→10) and clip frame to terminal height([c0c9aba](https://github.com/dmicheneau/opencode-template-agent/commit/c0c9aba7d2ed4231dc1da073aefae691fa8d9f46))- (ci) correct SHA pins for git-cliff-action and action-gh-release([5b7e1da](https://github.com/dmicheneau/opencode-template-agent/commit/5b7e1da8a6a88c3d2da3d2bc490e20641a01bf43))- (ci) replace self::remote_url() with hardcoded URL in cliff.toml([154703f](https://github.com/dmicheneau/opencode-template-agent/commit/154703f369d567eee1a2bd5d2d76150311f1ecb1))
+### 📝 Documentation
+- update .plan for S2 D1 completion (9/45, 76% overall)([aeb3260](https://github.com/dmicheneau/opencode-template-agent/commit/aeb32608853371043fcec3368af896aad41742b4))- (plan) S7 agent separation plan v2.1 + reorganize .plan/([4470675](https://github.com/dmicheneau/opencode-template-agent/commit/447067592ec562b248684c918338c52dd0b99c2f))- (plan) update CURRENT.md and tasks-v6.md to reflect S7 completion([9b51b5e](https://github.com/dmicheneau/opencode-template-agent/commit/9b51b5e79167402e38a6830da5f42e45c7f677f7))
+### 🔧 Maintenance
+- update plan progress, agent tests, enrichment script and dev tooling([4fa0706](https://github.com/dmicheneau/opencode-template-agent/commit/4fa0706e975cf1362ec38a9e80f2ca6af8364f4d))- gitignore scratchpad and manifest-lock (local working files)([9782eab](https://github.com/dmicheneau/opencode-template-agent/commit/9782eabee01f6bd69d1d15b25d5cc7e799b96a2c))
+## [7.0.0] - 2026-02-19
+### ♻️ Refactoring
+- clean up 5 LOW code review issues — dead imports, JSDoc, CLI polish([e18d2d5](https://github.com/dmicheneau/opencode-template-agent/commit/e18d2d57eff41f2b3bf88aaed113515ebf077ee3))
+### ✨ Nouveautés
+- (v7) C1 foundation — presets, writer, warnings + 91 tests([d81a8ac](https://github.com/dmicheneau/opencode-template-agent/commit/d81a8aca43bd6a741a508b7c62baabc2090a49b1))- (v7) C2 CLI & resolution — flag parsing, layered precedence, persistence + 33 tests([5780cc7](https://github.com/dmicheneau/opencode-template-agent/commit/5780cc79007c4a20288dc8401f93a4b6dfa8bc71))- (v7) C3 TUI permission editor — preset selector, per-agent editor, bash patterns + ~90 tests([e8324e1](https://github.com/dmicheneau/opencode-template-agent/commit/e8324e1c7f3d9c4f9de7fa6c9c3a6315f32603ba))- (v7) C4 integration — wire permissions into install flow, YOLO gate, summary([40495fc](https://github.com/dmicheneau/opencode-template-agent/commit/40495fcaaaa12169970bddbbce00c11aff99c1bb))
+### 🐛 Corrections
+- address code review findings — atomic writes, download guard, TOCTOU, flag hijacking([127e098](https://github.com/dmicheneau/opencode-template-agent/commit/127e09839e05aa7321c9de0f27ebb376e7a1d052))- resolve 8 Major code review issues — lock robustness, uninstall resilience, TUI polish([8470601](https://github.com/dmicheneau/opencode-template-agent/commit/8470601bb18d7515445faf2da968c6f0d9978da4))
+### 📝 Documentation
+- (plan) update .plan/ files with code review fixes status and test counts([64a0579](https://github.com/dmicheneau/opencode-template-agent/commit/64a05793c2e5888e9cf29ec414fbede4bc05aabc))- (plan) track 8 Major code review fixes, test count 562([688b4cf](https://github.com/dmicheneau/opencode-template-agent/commit/688b4cf77cb59e2f7555ea40e9c7d11066cb4665))- (plan) track all 21 code review issues resolved, test count 571([5d04a29](https://github.com/dmicheneau/opencode-template-agent/commit/5d04a29da54341540c3d6f928a2f446b16c4615d))
+### 🔧 Maintenance
+- (release) v7.0.0 — permission presets, YOLO mode, TUI permission editor([21970ac](https://github.com/dmicheneau/opencode-template-agent/commit/21970acb65c5d1ae64a89c591bf99fbda0a33be0))
 ## [6.0.0] - 2026-02-19
-
-### Added
-- **Agent Uninstall** — Full uninstall support in TUI (`[x]` key) and CLI (`uninstall`/`remove`/`rm` commands)
-  - Symlink protection (SEC-04): lstat check prevents malicious symlink traversal
-  - Batch uninstall with `--all`, `--pack`, `--category`, `--dry-run` flags
-  - TUI confirmation dialog with danger chrome, flash message feedback
-  - Browse footer updated with `[x] Uninstall` hint
-- **Lock Integrity Tools** — Three new CLI commands for lock file management:
-  - `update` / `--update`: Detect and reinstall outdated agents (hash mismatch)
-  - `verify` / `--verify`: Validate installed files against lock hashes (exit 1 on mismatch)
-  - `rehash` / `--rehash`: Rebuild lock file from disk state
-- 64 new tests (40 uninstall + 24 lock integrity)
-- 537 tests total (360 JS + 177 Python), all passing
-
+### ✨ Nouveautés
+- (s6) implement agent uninstall — TUI, CLI, symlink protection, 40 new tests([7aad6c6](https://github.com/dmicheneau/opencode-template-agent/commit/7aad6c6494c912e81105da13703fdccf4e2476d1))- (s3) add --update, --verify, --rehash CLI commands — lock integrity tools([45adaa8](https://github.com/dmicheneau/opencode-template-agent/commit/45adaa88427e66f74ef400e3e98d1f13e4987d23))
+### 🔧 Maintenance
+- (release) v6.0.0 — V6.1 release with agent uninstall + lock integrity tools([503b4e4](https://github.com/dmicheneau/opencode-template-agent/commit/503b4e4da5f4cb37b62f3e17528d2584d1e4fc42))
 ## [5.0.0] - 2026-02-19
+### ♻️ Refactoring
+- extract sync_common.py from sync-agents.py (P1+P2)([f7d2c56](https://github.com/dmicheneau/opencode-template-agent/commit/f7d2c563baa10c08ddc94da94119e56d3a04d4f1))- address remaining code review issues (6 fixes)([df09819](https://github.com/dmicheneau/opencode-template-agent/commit/df0981977c66ca29265124a44d0431d2d6df97f0))- reorganize categories from 12 to 10 for clearer TUI navigation([a53883b](https://github.com/dmicheneau/opencode-template-agent/commit/a53883b529c23fbdab0dd4a606eca801a61878ab))
+### ✨ Nouveautés
+- manually convert 3 upstream skills for T4.0 prototype (P4)([ecaff28](https://github.com/dmicheneau/opencode-template-agent/commit/ecaff28d5b8b9eb3d0c64d39cdd5566777129cd7))- implement sync-skills.py with full test suite (T4)([16657b6](https://github.com/dmicheneau/opencode-template-agent/commit/16657b64ab910defbf91282df56cb3d13bbc5ccc))- sync 12 skills from upstream (T4.5 + Phase 4b)([2085e5a](https://github.com/dmicheneau/opencode-template-agent/commit/2085e5af5a8f0ed92e16c0c0dd67940d938c5c7e))- add screenshot-ui-analyzer agent (50 agents)([34aa791](https://github.com/dmicheneau/opencode-template-agent/commit/34aa7917771aff9498e273756139605fd86f9c16))- add mcp category with 3 agents + pack (53 agents)([17f0029](https://github.com/dmicheneau/opencode-template-agent/commit/17f00294c42a158bac66c68f04327bd1e084999d))- add TUI interactive commander with force reinstall, vibrant colors, and Packs tab reorder([37e0ae8](https://github.com/dmicheneau/opencode-template-agent/commit/37e0ae89f55b839ecf567cb549803ceaece6f43e))- add mcp-developer and platform-engineer agents (55 agents)([2526b3a](https://github.com/dmicheneau/opencode-template-agent/commit/2526b3abe0e95016b915aa7cb2e001190e170a09))- add prd agent for Product Requirements Documents (56 agents)([c87ebca](https://github.com/dmicheneau/opencode-template-agent/commit/c87ebca5c6fbd866b3290effb3a04e22e2c4ccd1))- extract update-manifest.py + harden sync workflow([a565607](https://github.com/dmicheneau/opencode-template-agent/commit/a565607f073ee80aec3efe6343f01c97be2a2cd4))- curate 70 agents from extended sync (14 accepted, 72 rejected, 6 new packs)([6ccd0ba](https://github.com/dmicheneau/opencode-template-agent/commit/6ccd0bad81f004eb9a530ad624327ae21f09b2d4))- activate sync pipeline — reviewer assignment, cron verified, docs updated([4b02a3e](https://github.com/dmicheneau/opencode-template-agent/commit/4b02a3e0a956cfda76366173c7007bc58787d24c))- redesign TUI with colored tabs, category colors, and full-width highlight bar([76461d1](https://github.com/dmicheneau/opencode-template-agent/commit/76461d1740ddd9307730ac8995294257eb2f3b0b))- complete V4 plan — S3 curation process, docs fixes, CI lint, CHANGELOG([bbc67d8](https://github.com/dmicheneau/opencode-template-agent/commit/bbc67d8dcc4ed1bf0e9dcc93af9cef94755819da))- (v6.0) implement S1 anti-flicker + S5 pack fix + S3 hash-based lock — 473 tests pass([da3b1b7](https://github.com/dmicheneau/opencode-template-agent/commit/da3b1b761bbe9e0f5f674c5479cbceb18bde139d))
+### 🐛 Corrections
+- correct _extract_category_from_path() to return category not skill name (CR-T4)([973e310](https://github.com/dmicheneau/opencode-template-agent/commit/973e31010430a5a0273dd90ad48a60570f872c97))- improve TUI renderTooSmall with centered layout, vibrant colors and dimensions display([8b15eb0](https://github.com/dmicheneau/opencode-template-agent/commit/8b15eb0df175d80b53a369260fa6ccd8a6d59d02))- address code review findings (1 critical, 4 major, 2 minor)([c9d78c0](https://github.com/dmicheneau/opencode-template-agent/commit/c9d78c023f16007fb7bb8575b78d38a19fba2225))- address code review findings (3 major, 7 minor, 3 style) + add renderer tests([f587566](https://github.com/dmicheneau/opencode-template-agent/commit/f5875663b2a9ad2f2ef94555b5352f16a49c7b8d))- add missing frontmatter to prd.md agent([fcd9442](https://github.com/dmicheneau/opencode-template-agent/commit/fcd944288e209901f93a8f560500d04a1e2ebd35))- correct prd.md mode from 'all' to 'byline'([973d91b](https://github.com/dmicheneau/opencode-template-agent/commit/973d91b8d473465a2a5cd9844296724785ce2a9a))- address code review findings (2 critical, 8 major, 4 minor)([5104ec2](https://github.com/dmicheneau/opencode-template-agent/commit/5104ec232697c2829d454322c12c935305c374a4))- robust line counting in sync workflow step 5([70ea4ce](https://github.com/dmicheneau/opencode-template-agent/commit/70ea4ce6a6089fe8c5fe12429aa665930af410df))- address code review findings (M1-M3, C1-C3, F-02, minors)([bc4b856](https://github.com/dmicheneau/opencode-template-agent/commit/bc4b856ef1607a233c52d4fee03ccd18dca990b6))- correct README inaccuracies (Node version, categories, sync status)([4bf90c9](https://github.com/dmicheneau/opencode-template-agent/commit/4bf90c946c0cef4e3dd800d82b65d487e61f13b8))- polish TUI — display glitches, highlight, packs navigation, installed indicator([7874b23](https://github.com/dmicheneau/opencode-template-agent/commit/7874b23413ba7d6162eb84189b3bd50e0f832d93))- decouple PR creation from reviewer assignment for fallback resilience([a896997](https://github.com/dmicheneau/opencode-template-agent/commit/a896997b9d0a6f7be12ff0399e88387a43642d20))- sync prd agent mode to 'all' in manifest, add architecture diagrams([7534c81](https://github.com/dmicheneau/opencode-template-agent/commit/7534c812b5483cc29e246eae49bcc25c5efee939))- improve installed indicator visibility and add legend in info bar([c6586b0](https://github.com/dmicheneau/opencode-template-agent/commit/c6586b02c30830e23ab4f15c861c93fa57886ed8))
+### 📝 Documentation
+- add session 9 to progression journal([20e0eec](https://github.com/dmicheneau/opencode-template-agent/commit/20e0eec4b3df90cc7d804120acae7ebe453441ef))- update task plan — mark P1-P3, T4.x, Phase 4b as completed([a2c3479](https://github.com/dmicheneau/opencode-template-agent/commit/a2c3479e0b4fbfbbc0ebcc852d8ebc9431733534))- update PROGRESS.md with v3 review session notes([d4e1245](https://github.com/dmicheneau/opencode-template-agent/commit/d4e1245aa166875e92e3feb4ed00becca57cc4c4))- add TUI architecture spec for v3 raw-mode commander([4de54ca](https://github.com/dmicheneau/opencode-template-agent/commit/4de54ca7edfd23c0208acc87de0f840212cf867f))- update README and plan for 56 agents, 12 categories, TUI documentation([0f88530](https://github.com/dmicheneau/opencode-template-agent/commit/0f885307687f49c8b191872f7dc8ec3053c16d75))- update .plan files for category reorganization (12→10, D15)([256517b](https://github.com/dmicheneau/opencode-template-agent/commit/256517bbf10317d65b48b4e9c2cc9a7ef49bbd00))- update PROGRESS.md for v4, create 01-tasks-v4.md, archive v3 plans, cleanup v2 duplicates([2556232](https://github.com/dmicheneau/opencode-template-agent/commit/2556232ff128c103572114e67c8a3e9d58622137))- mark S1 stabilisation complete in plan files([4c0bf45](https://github.com/dmicheneau/opencode-template-agent/commit/4c0bf45402bc6942b254c336c92bb20168b46950))- add sync pipeline documentation to READMEs([8c0f77a](https://github.com/dmicheneau/opencode-template-agent/commit/8c0f77a029edb7d21a2c3f11556f05d95d306618))- complete S2 pipeline sync — all decisions resolved, tracking updated([b73edfb](https://github.com/dmicheneau/opencode-template-agent/commit/b73edfb4bc218d64dbea2b47fca7ed4a07d408ad))- update plan with S6 TUI redesign completion (427 tests)([f37eade](https://github.com/dmicheneau/opencode-template-agent/commit/f37eadea59ab93c9c261c29d4b3c300caf934fdb))- rewrite README with TUI-first installation, architecture diagrams([b564fbf](https://github.com/dmicheneau/opencode-template-agent/commit/b564fbf7dcbbdf499216e76f6fc7410302ee12a9))
+### 🔧 Maintenance
+- harden workflow — fix all review findings (C1-C2, M1-M5, m1-m2-m6)([e28d58c](https://github.com/dmicheneau/opencode-template-agent/commit/e28d58c145902b6cf09f5846e1a5e5d0db0656d3))- fix minor code quality issues (CR follow-up)([2609ad1](https://github.com/dmicheneau/opencode-template-agent/commit/2609ad1c9ac572c4430a52adea754a6641687397))- add 163 TUI unit tests for input, state, and ansi modules([acbc93f](https://github.com/dmicheneau/opencode-template-agent/commit/acbc93f139ab552c2b2fa2b451a1741156d209a5))- bump actions/checkout from 4.3.1 to 6.0.2([58506d2](https://github.com/dmicheneau/opencode-template-agent/commit/58506d235222ba89d6544af493971f9077557432))- bump actions/setup-python from 5.6.0 to 6.2.0([2395243](https://github.com/dmicheneau/opencode-template-agent/commit/2395243a5ff3b2207389b8980c4e73cc9b86e405))- bump actions/setup-node from 4.4.0 to 6.2.0([06a7b5f](https://github.com/dmicheneau/opencode-template-agent/commit/06a7b5f33a64d458b86acab78a015733f0035aab))- complete V4 housekeeping, archive V4, create V5 plan([1102c60](https://github.com/dmicheneau/opencode-template-agent/commit/1102c60b6755ac04de271935277f592992ebc214))- create V6 plan — 6 improvement axes with multi-agent analysis([4c6f8ce](https://github.com/dmicheneau/opencode-template-agent/commit/4c6f8ce3b9ca313969a0534040693d2772a4e144))- revise V6 plan — split into V6.0/V6.1/V7.0 releases with 148 tasks from 4 review findings([eb98062](https://github.com/dmicheneau/opencode-template-agent/commit/eb980620801d7424977f4c121a3b327e7c61bf19))- (release) v5.0.0 — V6.0 release with anti-flicker, pack fix, hash-based lock([e03bca7](https://github.com/dmicheneau/opencode-template-agent/commit/e03bca711d57ae0e16f2327ccef7003cd05af349))
+## [1.1.0] - 2026-02-13
+### ✨ Nouveautés
+- multi-pack and multi-category install with comma support([62a3e9c](https://github.com/dmicheneau/opencode-template-agent/commit/62a3e9c065d3da58c40a3085fabafa0acfaf13ee))
+### 📝 Documentation
+- rewrite README — concise, user-focused (536 → 174 lines)([7f90695](https://github.com/dmicheneau/opencode-template-agent/commit/7f906957774d39bbc418bb2265a32135d7f8224d))
+### 🔧 Maintenance
+- add CLI tests job (Node 18/20/22) to GitHub Actions([e4578d5](https://github.com/dmicheneau/opencode-template-agent/commit/e4578d5892314dfd3887d21ed6150bbadcef3d04))
+## [1.0.0] - 2026-02-13
+### ✨ Nouveautés
+- initial commit — 43 curated OpenCode agents + sync script + plan([8e939ba](https://github.com/dmicheneau/opencode-template-agent/commit/8e939baa78e0a2cd3788eef031f420a6ce531a0f))- sprint 2 — tests, install script, contributing guide & English docs([1ef9fdb](https://github.com/dmicheneau/opencode-template-agent/commit/1ef9fdb0b014b00f1bb5cd3409d0a472654bcbc1))- phase 1.5a — tier 2 extension with 90 additional curated agents([a1c3be7](https://github.com/dmicheneau/opencode-template-agent/commit/a1c3be7aa8b3bb242658d80ebd809e3ae524b495))- phase 1.5b + phase 2 — unknown profile, incremental sync, CI/CD, orchestrator([a0685fd](https://github.com/dmicheneau/opencode-template-agent/commit/a0685fd5764d0100ef931ff9d155657da5a2f81d))- phase 2 — add 5 custom agents (docker, ci-cd, linux, redis, aws)([60536a0](https://github.com/dmicheneau/opencode-template-agent/commit/60536a011056b1ed66880f31ee1ef96d46c4301e))- phase 3 — npx opencode-agents CLI (zero dependencies)([6245015](https://github.com/dmicheneau/opencode-template-agent/commit/624501528005b7d705f8dd95ff300de885e86e44))
+### 🐛 Corrections
+- sprint 0 — security + quality fixes from agent reviews([26c7cb2](https://github.com/dmicheneau/opencode-template-agent/commit/26c7cb2090352369df1d479b3c6c278307030916))- sprint 1 — stabilisation code + documentation([55f3a7c](https://github.com/dmicheneau/opencode-template-agent/commit/55f3a7c39df8fdaeb66316c469487afc835dd605))- sprint corrections — address review findings from session 5([e9cabff](https://github.com/dmicheneau/opencode-template-agent/commit/e9cabff02cf01c4922080536a348795e71aa7c78))- security hardening — path traversal guard, redirect limit, response cap([1052113](https://github.com/dmicheneau/opencode-template-agent/commit/105211323a3450efe45e7dca3c02ec6f3b2c8631))
+### 📝 Documentation
+- phase 3 — CODE_OF_CONDUCT, README polish, progression update([8047b41](https://github.com/dmicheneau/opencode-template-agent/commit/8047b41b8233aa7b7e1b6ce5e7f3d81a4e571eea))- close phase 2 — update roadmap and progression journal([3632c83](https://github.com/dmicheneau/opencode-template-agent/commit/3632c83fa9465d1b5ac37c028fc27c4d6e6af711))- update progression journal (sessions 7-8) and roadmap phase 3([8d444f0](https://github.com/dmicheneau/opencode-template-agent/commit/8d444f0bce73d64e56b95e11e34d3b5616a4b298))- add CLI npm section to README (FR + EN)([a45888a](https://github.com/dmicheneau/opencode-template-agent/commit/a45888a3e29331618ba56a84627459ebb9a3e794))
+**Full Changelog**: [v7.0.0...v8.0.0](https://github.com/dmicheneau/opencode-template-agent/compare/v7.0.0...v8.0.0)
+**Full Changelog**: [v6.0.0...v7.0.0](https://github.com/dmicheneau/opencode-template-agent/compare/v6.0.0...v7.0.0)
+**Full Changelog**: [v5.0.0...v6.0.0](https://github.com/dmicheneau/opencode-template-agent/compare/v5.0.0...v6.0.0)
+**Full Changelog**: [v1.1.0...v5.0.0](https://github.com/dmicheneau/opencode-template-agent/compare/v1.1.0...v5.0.0)
+**Full Changelog**: [v1.0.0...v1.1.0](https://github.com/dmicheneau/opencode-template-agent/compare/v1.0.0...v1.1.0)
+**Full Changelog**: [...v1.0.0](https://github.com/dmicheneau/opencode-template-agent/compare/...v1.0.0)
 
-### Added
-- **S1 Anti-Flicker**: DEC 2026 synchronized output, line-diffing flush (only repaints changed lines), microtask-coalesced redraw, shared `SPINNER_INTERVAL_MS` constant
-- **S5 Pack Fix**: auto-select uninstalled agents when pressing Enter in pack detail with no selection
-- **S5 Flash Messages**: yellow ⚠ flash messages with 3-second auto-dismiss, pack context in confirm dialog
-- **S3 Hash-Based Lock**: `lock.mjs` module with SHA-256 tracking, `.manifest-lock.json` lock file, 4 agent states (`installed`/`outdated`/`new`/`unknown`), `bootstrapLock()` migration for existing installations
-- 473 tests (296 JS + 177 Python), all passing
-
-### Changed
-- `screen.mjs` flush() now uses line diffing + SYNC_START/SYNC_END markers instead of full repaints
-- Spinner interval 80ms → 120ms via shared constant
-- `detectInstalled()` now delegates to lock-based `detectInstalledSet()`
-- `installer.mjs` records SHA-256 in lock file on every install
-
-## [4.0.0] - 2026-02-18
-
-### Added
-- TUI visual redesign with colored tabs, category colors, and full-width highlight bar
-- Automated sync pipeline (weekly cron, `sync-agents.yml` workflow)
-- `update-manifest.py` script for manifest generation
-- Expansion to 70 agents across 10 categories with 15 packs
-- Curation process with 6 criteria (C1–C6) and permission mapping
-- 427 tests (250 JS + 177 Python), all passing
-
-### Fixed
-- TUI bugs (`--help`, display glitches, packs Space key, highlight gaps)
-- Color collision between packs and mobile tabs
-
-### Changed
-- Replaced `highlight` with `bgRow` for cursor styling
-- Extracted `nameStyle` helper to reduce duplication
-
-### Removed
-- Dead `highlight` export from `ansi.mjs`
-
-## [3.0.0] - 2026-02-15
-
-### Added
-- Extended from 43 to 56+ agents
-- Pack system (curated agent groups)
-- `sync-agents.py` and `sync_common.py` for upstream sync
-
-## [2.0.0] - 2026-02-13
-
-### Added
-- Interactive TUI with raw-mode terminal (zero dependencies)
-- Tab navigation, search mode, multi-select, confirmation flow
-- Pack browsing and installation
-- Installed agent detection, `--help` and `--list` flags
-
-## [1.0.0] - 2026-02-12
-
-### Added
-- Agent manifest with categorized agents
-- OpenCode-compatible agent format (YAML front matter + markdown)
-- CLI entry point (`bin/cli.mjs`), zero npm dependencies
