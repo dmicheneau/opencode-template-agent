@@ -1377,7 +1377,8 @@ describe('render — browse mode', () => {
   });
 
   it('shows status bar with key hints', () => {
-    const state = makeState();
+    // Use wider terminal so status bar isn't truncated by bdr()
+    const state = makeState({}, { cols: 120, rows: 24 });
     const output = render(state);
     const plain = stripAnsi(output);
     assert.ok(plain.includes('Search') || plain.includes('[/]'), 'missing search hint');

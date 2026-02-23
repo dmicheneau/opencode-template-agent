@@ -35,8 +35,10 @@ const nameStyle = (text, cur, sel) =>
 /** Wrap content inside │ ... │ padded to full width, prefixed with CLEAR_LINE. */
 function bdr(content, W, bg) {
   const innerWidth = W - 4;
-  const gap = Math.max(0, innerWidth - visibleLength(content));
-  const padded = `${content}${' '.repeat(gap)}`;
+  const vLen = visibleLength(content);
+  const fitted = vLen > innerWidth ? truncate(content, innerWidth) : content;
+  const gap = Math.max(0, innerWidth - visibleLength(fitted));
+  const padded = `${fitted}${' '.repeat(gap)}`;
   const inner = bg ? bg(` ${padded} `) : ` ${padded} `;
   return `${CLEAR_LINE}${cyan(BOX.vertical)}${inner}${cyan(BOX.vertical)}`;
 }
@@ -195,17 +197,25 @@ function renderPackDetail(state, out, W) {
 
 // ─── Info Line ──────────────────────────────────────────────────────────────
 
-const LEGEND = `  ${stateInstalled('✔')} ${dim('installed')}  ${stateOutdated('↻')} ${dim('outdated')}  ${stateUnknown('?')} ${dim('unknown')}  ${brightGreen('✓')} ${dim('selected')}  ${brightCyan('▸')} ${dim('cursor')}`;
+const LEGEND_FULL = `  ${stateInstalled('✔')} ${dim('installed')}  ${stateOutdated('↻')} ${dim('outdated')}  ${stateUnknown('?')} ${dim('unknown')}  ${brightGreen('✓')} ${dim('selected')}  ${brightCyan('▸')} ${dim('cursor')}`;
+const LEGEND_SHORT = `  ${stateInstalled('✔')}${dim('inst')} ${stateOutdated('↻')}${dim('outd')} ${stateUnknown('?')}${dim('unk')} ${brightGreen('✓')}${dim('sel')} ${brightCyan('▸')}${dim('cur')}`;
+const LEGEND_MINI = `  ${stateInstalled('✔')} ${stateOutdated('↻')} ${stateUnknown('?')} ${brightGreen('✓')} ${brightCyan('▸')}`;
 
 function renderInfo(state, out, W, total, vh, off) {
+  const innerWidth = W - 4;
   if (state.search?.active) {
     out.push(bdr(`  ${bold(brightCyan('Search:'))} ${white(state.search.query)}${cyan('█')}`, W));
   } else if (state.flash) {
     out.push(bdr(`  ${yellow('⚠')} ${yellow(state.flash.message)}`, W));
-  } else if (total > vh) {
-    out.push(bdr(cyan(`  ↑↓ ${off + 1}-${Math.min(off + vh, total)} of ${total}`) + LEGEND, W));
   } else {
-    out.push(bdr(LEGEND, W));
+    const prefix = total > vh ? cyan(`  ↑↓ ${off + 1}-${Math.min(off + vh, total)} of ${total}`) : '';
+    const prefixLen = visibleLength(prefix);
+    // Pick legend variant that fits
+    let legend = LEGEND_FULL;
+    if (prefixLen + visibleLength(legend) > innerWidth) legend = LEGEND_SHORT;
+    if (prefixLen + visibleLength(legend) > innerWidth) legend = LEGEND_MINI;
+    if (prefixLen + visibleLength(legend) > innerWidth) legend = '';
+    out.push(bdr(prefix + legend, W));
   }
 }
 

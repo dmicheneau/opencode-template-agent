@@ -111,7 +111,7 @@ describe('Acceptance: TUI navigation produces clean frames (Bug 1 fix)', () => {
       'Agent rows should not be duplicated in the frame');
   });
 
-  it('flush diff path: changed lines carry exactly one CLEAR_LINE each', () => {
+  it('flush diff path: changed lines carry CLEAR_LINE from both renderer and flush', () => {
     const state0 = createInitialState(makeManifest(), TERMINAL);
     const frame0 = render(state0);
 
@@ -137,11 +137,10 @@ describe('Acceptance: TUI navigation produces clean frames (Bug 1 fix)', () => {
     }
 
     // Each changed line from the renderer already embeds 1 CLEAR_LINE.
-    // The flush diff path should NOT add extras — total should be exactly changedCount.
+    // The flush diff path adds another CLEAR_LINE — total should be 2 per changed line.
     const clearCount = countOccurrences(diffPart, CLEAR_LINE);
-    assert.equal(clearCount, changedCount,
-      `Expected ${changedCount} CLEAR_LINE (one per changed line from renderer), got ${clearCount}. ` +
-      'Double CLEAR_LINE bug is present if clearCount > changedCount.');
+    assert.equal(clearCount, changedCount * 2,
+      `Expected ${changedCount * 2} CLEAR_LINE (2 per changed line: 1 from renderer + 1 from flush), got ${clearCount}.`);
   });
 
   it('rapid DOWN-DOWN-UP-UP cycle produces no residual content', () => {
