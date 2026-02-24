@@ -1,6 +1,6 @@
 {
   "name": "opencode-agents",
-  "version": "7.0.0",
+  "version": "8.0.0",
   "description": "Curated AI agent registry for OpenCode — install expert agents in seconds",
   "license": "MIT",
   "author": "dmicheneau",

@@ -4,7 +4,7 @@
   "branch": "main",
   "source_path": "agents",
   "base_path": ".opencode/agents",
-  "agent_count": 70,
+  "agent_count": 67,
   "categories": {
     "languages": {
       "label": "Languages",
@@ -192,23 +192,6 @@
       "size": 6928
     },
     {
-      "name": "cloud-architect",
-      "category": "devops",
-      "path": "cloud-architect",
-      "mode": "primary",
-      "description": "Multi-cloud infrastructure design, migration, and cost optimization",
-      "tags": [
-        "cloud",
-        "architecture",
-        "aws",
-        "multi-cloud",
-        "migration",
-        "infrastructure"
-      ],
-      "sha256": "73254f37055a13492d0c504df26f035a9cd30e41d5b7d9ec5c5bf8f80458e73f",
-      "size": 7924
-    },
-    {
       "name": "code-reviewer",
       "category": "devtools",
       "path": "devtools/code-reviewer",
@@ -340,22 +323,6 @@
       "size": 8734
     },
     {
-      "name": "devops-engineer",
-      "category": "devops",
-      "path": "devops-engineer",
-      "mode": "primary",
-      "description": "Infrastructure automation, CI/CD pipelines, and deployment workflows",
-      "tags": [
-        "devops",
-        "ci-cd",
-        "automation",
-        "deployment",
-        "infrastructure"
-      ],
-      "sha256": "8d0718f4a420c635ad9288affec54608f88e7b1c7a61be501cceeec3376ff0d5",
-      "size": 7777
-    },
-    {
       "name": "diagram-architect",
       "category": "docs",
       "path": "docs/diagram-architect",
@@ -406,22 +373,6 @@
       "size": 5185
     },
     {
-      "name": "episode-orchestrator",
-      "category": "devtools",
-      "path": "episode-orchestrator",
-      "mode": "primary",
-      "description": "Workflow orchestrator coordinating specialized subagents in sequence",
-      "tags": [
-        "orchestration",
-        "workflow",
-        "coordination",
-        "subagents",
-        "automation"
-      ],
-      "sha256": "f3f95055e5a3b9c54a8f748da947e127bd2b27fb4fadee6d13df7b7393c402da",
-      "size": 6522
-    },
-    {
       "name": "expert-nextjs-developer",
       "category": "web",
       "path": "web/expert-nextjs-developer",
@@ -458,7 +409,7 @@
     {
       "name": "fullstack-developer",
       "category": "web",
-      "path": "fullstack-developer",
+      "path": "autres/fullstack-developer",
       "mode": "primary",
       "description": "End-to-end full-stack development spanning database, API, and frontend",
       "tags": [
@@ -1248,8 +1199,6 @@
       "label": "DevOps Toolkit",
       "description": "Complete DevOps and infrastructure agents",
       "agents": [
-        "devops-engineer",
-        "cloud-architect",
         "docker-specialist",
         "kubernetes-specialist",
         "terraform-specialist",
