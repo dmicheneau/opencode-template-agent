@@ -109,6 +109,8 @@ source ~/.zshrc
 
 ### Global architecture
 
+The diagram below shows the overall system architecture: the CLI entry point, TUI modules, agent registry, and upstream monitoring scripts.
+
 ```mermaid
 flowchart TB
     User["User"]
@@ -132,12 +134,12 @@ flowchart TB
         Installer["installer.mjs<br/>GitHub raw download<br/>→ .opencode/agents/"]
     end
 
-    subgraph Sync["Sync Pipeline"]
+    subgraph Sync["Upstream monitoring (manual dispatch)"]
         Upstream["davila7/claude-code-templates<br/>(upstream repo)"]
         SyncScript["sync-agents.py<br/>(1200 lines, fetch,<br/>tools→permission conversion,<br/>CURATED + EXTENDED agents)"]
         SyncCommon["sync_common.py<br/>(HTTP, ETag cache,<br/>frontmatter, validation)"]
         UpdateManifest["update-manifest.py<br/>(manifest merge,<br/>NEEDS_REVIEW prefix)"]
-        GHA["GitHub Actions<br/>(weekly cron Mon 6AM UTC,<br/>CI: test + lint + validate)"]
+        GHA["GitHub Actions<br/>(workflow_dispatch only,<br/>CI: test + lint + validate)"]
     end
 
     LocalDir[".opencode/agents/<br/>Installed agents"]
@@ -184,7 +186,7 @@ flowchart TB
 Two additional diagrams are available in [`docs/architecture.md`](docs/architecture.md):
 
 - **TUI user flow** — state machine and transitions (browse → search → confirm → installing → done)
-- **Agent update pipeline** — detailed 10-step GitHub Actions sync pipeline with security checks
+- **Agent update pipeline** — upstream monitoring scripts and discovery/evaluation workflow (manual dispatch only)
 
 ## 📋 Available agents
 
@@ -254,18 +256,20 @@ Upstream agents (~133 available) follow a generic format (capability lists, fict
 
 ### Adding a new agent
 
-1. **Discovery** — list available upstream agents:
+1. **Discovery** — list available upstream agents using the local script:
    ```bash
    python3 scripts/sync-agents.py --list --tier=extended
    ```
 2. **Evaluation** — verify the agent fills a gap not covered by the existing 67 agents
-3. **Skeleton import** — use the sync in dry-run mode to get frontmatter and permissions:
+3. **Upstream dry-run** — trigger the workflow in discovery mode to fetch frontmatter and permissions without modifying the repo:
    ```bash
    gh workflow run "Sync Agents" -f tier=core -f dry_run=true
    ```
 4. **Rewriting** — rewrite the body using the project's template (Workflow → Decisions → Quality Gate → Anti-patterns → Collaboration)
 
 ### Available scripts
+
+> These scripts are for **manual use only** — there is no automated sync.
 
 | Script | Description |
 |--------|-------------|

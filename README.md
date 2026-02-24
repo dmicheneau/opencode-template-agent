@@ -114,7 +114,7 @@ Les agents sont installés dans `.opencode/agents/`. Node.js 20+ requis pour les
 
 > Documentation détaillée : [`docs/architecture.md`](docs/architecture.md)
 
-Le diagramme ci-dessous présente l'architecture globale du système : le point d'entrée CLI, les modules TUI, le registre d'agents et le pipeline de synchronisation depuis le dépôt upstream.
+Le diagramme ci-dessous présente l'architecture globale du système : le point d'entrée CLI, les modules TUI, le registre d'agents et les scripts de veille upstream.
 
 ```mermaid
 flowchart TB
@@ -139,12 +139,12 @@ flowchart TB
         Installer["installer.mjs<br/>Telechargement GitHub raw<br/>→ .opencode/agents/"]
     end
 
-    subgraph Sync["Pipeline de synchronisation"]
+    subgraph Sync["Veille upstream (manual dispatch)"]
         Upstream["davila7/claude-code-templates<br/>(depot upstream)"]
         SyncScript["sync-agents.py<br/>(1200 lignes, fetch,<br/>conversion tools→permission,<br/>CURATED + EXTENDED agents)"]
         SyncCommon["sync_common.py<br/>(HTTP, cache ETag,<br/>frontmatter, validation)"]
         UpdateManifest["update-manifest.py<br/>(fusion manifest,<br/>prefix NEEDS_REVIEW)"]
-        GHA["GitHub Actions<br/>(cron lundi 6h UTC,<br/>CI: test + lint + validate)"]
+        GHA["GitHub Actions<br/>(workflow_dispatch uniquement,<br/>CI: test + lint + validate)"]
     end
 
     LocalDir[".opencode/agents/<br/>Agents installes"]
@@ -191,7 +191,7 @@ flowchart TB
 Deux diagrammes supplémentaires sont disponibles dans [`docs/architecture.md`](docs/architecture.md) :
 
 - **Flux utilisateur TUI** — machine à états complète (browse, search, confirm, installing, done)
-- **Pipeline de mise à jour des agents** — les 10 étapes du workflow de synchronisation GitHub Actions
+- **Pipeline de mise à jour des agents** — scripts de veille upstream et workflow de découverte/évaluation (manual dispatch uniquement)
 
 ---
 
@@ -269,18 +269,20 @@ Les agents upstream (~133 disponibles) suivent un format générique (listes de 
 
 ### Ajouter un nouvel agent
 
-1. **Découverte** — lister les agents upstream disponibles :
+1. **Découverte** — lister les agents upstream disponibles via le script local :
    ```bash
    python3 scripts/sync-agents.py --list --tier=extended
    ```
 2. **Évaluation** — vérifier que l'agent apporte une compétence non couverte par les 67 agents existants
-3. **Import du squelette** — utiliser le sync en dry-run pour récupérer le frontmatter et les permissions :
+3. **Dry-run upstream** — lancer le workflow en mode discovery pour récupérer le frontmatter et les permissions sans modifier le repo :
    ```bash
    gh workflow run "Sync Agents" -f tier=core -f dry_run=true
    ```
 4. **Réécriture** — réécrire le body avec le template du projet (Workflow → Décisions → Quality Gate → Anti-patterns → Collaboration)
 
 ### Scripts disponibles
+
+> Ces scripts sont destinés à un usage **manuel** uniquement — il n'y a pas de synchronisation automatique.
 
 | Script | Description |
 |--------|-------------|

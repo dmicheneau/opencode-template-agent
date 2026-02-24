@@ -1,95 +1,44 @@
 # Contribuer à OpenCode Agent Template
 
-Bienvenue et merci de vouloir contribuer ! Ce projet est un registre curé de **67 agents IA** pour [OpenCode](https://opencode.ai), synchronisés depuis [aitmpl.com](https://www.aitmpl.com/agents). Toute contribution — correction de bug, nouvel agent ou amélioration — est la bienvenue.
+Ce projet est un registre curé de **67 agents IA** pour [OpenCode](https://opencode.ai). Tous les agents sont manuellement évalués et maintenus — il n'y a pas de synchronisation automatique. Les scripts de sync existent encore comme outils de découverte, rien de plus.
 
 ## Comment contribuer
 
-Il y a trois façons principales de contribuer :
+### Signaler un bug
 
-### 1. Signaler un bug
+[Ouvrez une issue](../../issues/new?template=bug_report.md) avec le template **Bug Report**. Décrivez le problème, les étapes pour le reproduire et le comportement attendu.
 
-Vous avez trouvé un problème ? [Ouvrez une issue](../../issues/new?template=bug_report.md) en utilisant le template **Bug Report**. Décrivez le problème, les étapes pour le reproduire et le comportement attendu.
+### Améliorer un agent existant
 
-### 2. Proposer un nouvel agent
+Modifiez le prompt, ajustez les permissions, ou corrigez un problème. Consultez le [README](README.md) pour l'architecture du projet.
 
-Vous souhaitez ajouter un agent au registre ? [Créez une demande](../../issues/new?template=agent_request.md) avec le template **Demande d'agent**, ou suivez directement le guide ci-dessous pour ouvrir une PR.
+### Proposer un nouvel agent
 
-### 3. Améliorer un agent existant
-
-Vous pouvez modifier le prompt d'un agent, ajuster ses permissions, ou améliorer le script de synchronisation `scripts/sync-agents.py`. Consultez le [README](README.md) pour comprendre l'architecture du projet.
+[Créez une demande](../../issues/new?template=agent_request.md) avec le template **Demande d'agent**, ou ouvrez directement une PR en suivant le guide ci-dessous.
 
 ---
 
-## Ajouter un agent synchronisé
+## Ajouter un agent
 
-Pour ajouter un agent provenant de la source [aitmpl.com](https://www.aitmpl.com/agents), suivez ces étapes :
+### 1 — Découverte
 
-### Étape 1 — Vérifier la source
+Deux sources d'inspiration :
 
-Confirmez que l'agent existe dans le registre source sur [aitmpl.com/agents](https://www.aitmpl.com/agents). Notez son nom exact et sa catégorie.
+- **Upstream** : `python3 scripts/sync-agents.py --list --tier=extended` pour voir ce qui existe sur [aitmpl.com](https://www.aitmpl.com/agents)
+- **Observation** : vous identifiez un gap dans les 67 agents existants
 
-### Étape 2 — Ajouter au dictionnaire `CURATED_AGENTS`
+### 2 — Évaluation
 
-Ouvrez `scripts/sync-agents.py` et ajoutez une entrée dans le dictionnaire `CURATED_AGENTS` :
+L'agent doit satisfaire les critères de curation (voir [Processus de curation](#processus-de-curation) plus bas). La question clé : est-ce qu'il comble un manque réel que les agents existants ne couvrent pas ?
 
-```python
-CURATED_AGENTS: Dict[str, str] = {
-    # ...agents existants...
-    "nom-de-lagent": "catégorie-source/nom-de-lagent",
-}
-```
-
-### Étape 3 — Vérifier le mapping de catégorie
-
-Assurez-vous que la catégorie source est présente dans `CATEGORY_MAPPING`. Si la catégorie n'existe pas encore, ajoutez le mapping vers le sous-répertoire OpenCode approprié :
-
-```python
-CATEGORY_MAPPING: Dict[str, str] = {
-    # ...mappings existants...
-    "nouvelle-catégorie": "sous-répertoire",
-}
-```
-
-### Étape 4 — Lancer la synchronisation
-
-```bash
-python3 scripts/sync-agents.py --force
-```
-
-### Étape 5 — Vérifier le résultat
-
-Inspectez le fichier généré dans `.opencode/agents/<catégorie>/` :
-
-- Le frontmatter YAML est valide (description, mode, permission)
-- Le header `<!-- Synced from aitmpl.com -->` est présent
-- Le contenu du prompt est correctement converti
-
-### Étape 6 — Lancer les tests
-
-```bash
-python3 tests/run_tests.py
-```
-
-### Étape 7 — Ouvrir une PR
-
-Créez une branche, commitez vos changements et ouvrez une Pull Request en suivant le [template de PR](.github/PULL_REQUEST_TEMPLATE.md).
-
----
-
-## Créer un agent custom (non synchronisé)
-
-Vous pouvez créer un agent personnalisé qui ne sera pas écrasé par la synchronisation.
-
-### Étape 1 — Créer le fichier
+### 3 — Rédaction
 
 Créez un fichier `.md` dans le sous-répertoire approprié de `.opencode/agents/` :
 
 ```bash
-# Exemple : agent custom dans la catégorie languages
+# Exemple
 touch .opencode/agents/languages/zig-pro.md
 ```
-
-### Étape 2 — Respecter le format frontmatter
 
 Le fichier doit commencer par un frontmatter YAML valide :
 
@@ -105,29 +54,62 @@ permission:
   task:
     "*": allow
 ---
-
-Tu es un expert en Zig...
 ```
 
-### Étape 3 — Ne PAS ajouter le header de synchronisation
+Structurez le prompt selon le template du projet :
 
-Les agents custom ne doivent **pas** contenir le commentaire `<!-- Synced from aitmpl.com -->`. Ce header est réservé aux agents synchronisés et sert au script `--clean` pour identifier les fichiers à supprimer lors d'un nettoyage.
+1. **Workflow** — les étapes que l'agent suit quand il est invoqué
+2. **Décisions** — les critères de jugement et les arbitrages
+3. **Quality Gate** — les vérifications avant de considérer le travail terminé
+4. **Anti-patterns** — ce que l'agent ne doit jamais faire
+5. **Collaboration** — comment l'agent interagit avec les autres agents/outils
 
-### Étape 4 — Lancer les tests
+> **Optionnel** : si l'agent existe sur upstream, vous pouvez générer un squelette avec `gh workflow run "Sync Agents" -f dry_run=true`, puis le réécrire manuellement. Le squelette upstream est rarement utilisable tel quel (qualité 3-4/10 vs 8-9/10 attendu).
+
+### 4 — Tests
 
 ```bash
 python3 tests/run_tests.py
 ```
 
+### 5 — PR
+
+Créez une branche, commitez et ouvrez une Pull Request en suivant le [template de PR](.github/PULL_REQUEST_TEMPLATE.md).
+
+---
+
+## Processus de curation
+
+Chaque agent est évalué selon six critères avant intégration.
+
+### Critères C1–C6
+
+- **C1 — Non-redondant (obligatoire)** : ne duplique pas un agent existant
+- **C2 — Permissions claires (obligatoire)** : toutes les `permission:` sont explicites et justifiées
+- **C3 — Prompt substantiel (recommandé)** : le prompt système fait ≥50 lignes
+- **C4 — Catégorie existante (recommandé)** : correspond à une des 10 catégories (`languages`, `devtools`, `web`, `data-api`, `ai`, `security`, `devops`, `mcp`, `docs`, `business`)
+- **C5 — Valeur utilisateur (recommandé)** : apporte une valeur tangible et différenciée
+- **C6 — Source stable (recommandé)** : le prompt est bien conçu et maintenable dans la durée
+
+**Scoring** : C1+C2 (obligatoires) + ≥2 recommandés (≥4/6 total).
+
+### Exclusion (veto)
+
+Un agent est refusé s'il :
+
+- Utilise des tools indisponibles dans OpenCode
+- Dépend d'un service propriétaire de niche
+- Contient des exemples non transposables depuis Claude Code
+
 ---
 
 ## Conventions
 
-### Nommage des fichiers
+### Nommage
 
-- Utiliser le format **`kebab-case`** pour tous les fichiers d'agents (ex. `typescript-pro.md`, `code-reviewer.md`)
+Format **`kebab-case`** pour tous les fichiers d'agents (ex. `typescript-pro.md`, `code-reviewer.md`).
 
-### Mode des agents
+### Mode
 
 - **`primary`** pour les agents à la racine de `.opencode/agents/` (navigables avec `Tab`)
 - **`subagent`** pour les agents dans les sous-répertoires (invocables via `@catégorie/nom`)
@@ -136,46 +118,7 @@ python3 tests/run_tests.py
 
 - Utiliser **`permission:`** uniquement dans le frontmatter
 - Ne **jamais** utiliser le champ `tools:` (déprécié par OpenCode)
-- Se référer au [mapping des permissions par catégorie](#mapping-des-permissions-par-catégorie) ci-dessous
-
-### Langue
-
-- Documentation et commentaires en **français**
-- Les prompts d'agents restent en anglais (conformément à la source)
-
-### Script de synchronisation
-
-- **Python stdlib uniquement** — aucune dépendance externe (pas de pip)
-- Compatible Python 3.10+
-
----
-
-## Processus de curation
-
-Chaque agent proposé est évalué selon six critères avant d'être intégré au registre.
-
-### Critères C1–C6
-
-- **C1 — Non-redondant (obligatoire)** : l'agent ne duplique pas un agent existant
-- **C2 — Permissions claires (obligatoire)** : toutes les `permission:` sont explicites et justifiées
-- **C3 — Prompt substantiel (recommandé)** : le prompt système fait ≥50 lignes
-- **C4 — Catégorie existante (recommandé)** : correspond à une des 10 catégories (`languages`, `devtools`, `web`, `data-api`, `ai`, `security`, `devops`, `mcp`, `docs`, `business`)
-- **C5 — Valeur utilisateur (recommandé)** : apporte une valeur tangible et différenciée
-- **C6 — Source stable (recommandé)** : la source upstream est maintenue activement
-
-### Scoring
-
-Un agent doit satisfaire **C1+C2** (obligatoires) **ET** ≥2 recommandés (≥4/6 total).
-
-### Exclusion (veto)
-
-Un agent est automatiquement refusé s'il :
-
-- Utilise des tools indisponibles dans OpenCode
-- Dépend d'un service propriétaire de niche
-- Exemples non transposables depuis Claude Code
-
-### Mapping des permissions par catégorie
+- Suivre le mapping ci-dessous
 
 | Catégorie | `read` | `write` | `edit` | `bash` | `task` | `mcp` |
 |-----------|--------|---------|--------|--------|--------|-------|
@@ -192,30 +135,32 @@ Un agent est automatiquement refusé s'il :
 
 > ⚠️ = autorisé avec restrictions de chemin/commande explicites.
 
+### Langue
+
+- Documentation et commentaires en **français**
+- Prompts d'agents en **anglais**
+
+### Script de synchronisation
+
+- **Python stdlib uniquement** — aucune dépendance externe
+- Compatible Python 3.10+
+
 ---
 
-## Checklist avant de soumettre une PR
+## Checklist PR
 
-Avant d'ouvrir votre Pull Request, vérifiez les points suivants :
-
-- [ ] Le fichier d'agent est au format **`kebab-case.md`**
-- [ ] Le frontmatter YAML est valide (description, mode, permission)
-- [ ] Le champ `permission:` est utilisé (pas `tools:`)
-- [ ] Le mode est correct (`primary` à la racine, `subagent` dans un sous-répertoire)
-- [ ] Les tests passent : `python3 tests/run_tests.py`
-- [ ] La synchronisation fonctionne : `python3 scripts/sync-agents.py --force` (si agent synchronisé)
-- [ ] Le `manifest.json` est à jour (généré automatiquement par le script)
-- [ ] Pas de secrets ou tokens dans les fichiers commités
-- [ ] L'agent satisfait C1+C2 (obligatoires) + ≥2 recommandés
-- [ ] Les permissions suivent le mapping de la catégorie
-- [ ] Aucun critère d'exclusion (veto) n'est déclenché
+- [ ] Fichier au format **`kebab-case.md`**
+- [ ] Frontmatter YAML valide (description, mode, permission)
+- [ ] `permission:` utilisé (pas `tools:`)
+- [ ] Mode correct (`primary` racine, `subagent` sous-répertoire)
+- [ ] Tests passent : `python3 tests/run_tests.py`
+- [ ] Pas de secrets ou tokens commités
+- [ ] Critères C1+C2 satisfaits + ≥2 recommandés
+- [ ] Permissions conformes au mapping de la catégorie
+- [ ] Aucun critère d'exclusion déclenché
 
 ---
 
 ## Code de conduite
 
 Ce projet adhère au [Contributor Covenant](CODE_OF_CONDUCT.md). En participant, vous vous engagez à respecter ses termes. Tout comportement inacceptable peut être signalé via les [issues du projet](https://github.com/dmicheneau/opencode-template-agent/issues).
-
----
-
-Merci pour votre contribution !

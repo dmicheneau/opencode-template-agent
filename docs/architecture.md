@@ -34,12 +34,12 @@ flowchart TB
         Installer["installer.mjs<br/>Telechargement GitHub raw<br/>→ .opencode/agents/"]
     end
 
-    subgraph Sync["Pipeline de synchronisation"]
+    subgraph Sync["Outils de decouverte upstream (manuel)"]
         Upstream["davila7/claude-code-templates<br/>(depot upstream)"]
         SyncScript["sync-agents.py<br/>(1200 lignes, fetch,<br/>conversion tools→permission,<br/>CURATED + EXTENDED agents)"]
         SyncCommon["sync_common.py<br/>(HTTP, cache ETag,<br/>frontmatter, validation)"]
         UpdateManifest["update-manifest.py<br/>(fusion manifest,<br/>prefix NEEDS_REVIEW)"]
-        GHA["GitHub Actions<br/>(cron lundi 6h UTC,<br/>CI: test + lint + validate)"]
+        GHA["GitHub Actions<br/>(workflow_dispatch uniquement,<br/>CI: test + lint + validate)"]
     end
 
     LocalDir[".opencode/agents/<br/>Agents installes"]
@@ -94,9 +94,11 @@ flowchart TB
   et expose des helpers de requete.
 - **Installeur** : `installer.mjs` telecharge les fichiers depuis GitHub raw et les ecrit dans
   `.opencode/agents/`.
-- **Synchronisation** : Un pipeline de scripts Python (`sync-agents.py`, `sync_common.py`,
-  `update-manifest.py`) orchestre par GitHub Actions maintient le catalogue a jour depuis le depot
-  upstream `davila7/claude-code-templates`.
+- **Decouverte upstream** : Des scripts Python (`sync-agents.py`, `sync_common.py`,
+  `update-manifest.py`) permettent d'explorer manuellement le depot upstream
+  `davila7/claude-code-templates` via GitHub Actions (workflow_dispatch, mode dry_run).
+  La synchronisation automatique (cron) a ete desactivee ; ces outils servent a evaluer
+  les nouveaux agents avant un import manuel.
 
 ---
 
@@ -196,15 +198,15 @@ flowchart LR
 
 ---
 
-## 3. Pipeline de mise a jour des agents
+## 3. Pipeline de decouverte des agents upstream
 
-Ce diagramme detaille le pipeline de synchronisation orchestre par GitHub Actions
-qui maintient le catalogue a jour depuis le depot upstream.
+Ce diagramme detaille le pipeline de synchronisation disponible via GitHub Actions.
+La synchronisation automatique (cron) a ete desactivee — le workflow est conserve
+comme outil de decouverte et d'evaluation, declenchable manuellement en mode dry_run.
 
 ```mermaid
 flowchart TB
     subgraph Trigger["Declenchement"]
-        Cron["Cron hebdomadaire<br/>Lundi 6h UTC"]
         Manual["Dispatch manuel<br/>tier: core/extended/all<br/>force: true/false<br/>dry_run: true/false"]
     end
 
@@ -246,7 +248,6 @@ flowchart TB
 
     PR["Pull Request<br/>sync/agents-latest → main"]
 
-    Cron --> Step1
     Manual --> Step1
     Step1 --> Step2
     Step2 --> Step3
@@ -279,7 +280,7 @@ flowchart TB
     classDef security fill:#e74c3c,stroke:#a93226,color:#fff
     classDef output fill:#9b59b6,stroke:#6c3483,color:#fff
 
-    class Cron,Manual trigger
+    class Manual trigger
     class Step1,Step2,Step3,Step4,Step5,Step6,Step7,Step8,Step9,Step10 step
     class Fetch,Convert,Curated,Extended,WriteFiles,Merge,Review,Stale detail
     class Unknown,PathCheck,SHA,Cache security
@@ -288,20 +289,23 @@ flowchart TB
 
 **Explication :**
 
-- **Declenchement** : Le pipeline s'execute automatiquement chaque lundi a 6h UTC via un cron,
-  ou manuellement via `workflow_dispatch` avec des parametres (`tier`, `force`, `dry_run`).
-- **Synchronisation** : `sync-agents.py` (environ 1200 lignes) telecharge les agents depuis
-  `davila7/claude-code-templates`, convertit les champs `tools:` deprecies en `permission:`,
-  et ecrit les fichiers dans `agents/`. Il distingue les agents curates (verifies
+- **Declenchement** : Le cron hebdomadaire a ete desactive. Le pipeline se declenche
+  uniquement via `workflow_dispatch` avec des parametres (`tier`, `force`, `dry_run`).
+  L'usage prevu est le mode dry_run pour evaluer les nouveaux agents upstream sans import
+  automatique.
+- **Synchronisation** : `sync-agents.py` (environ 1200 lignes) telechargerait les agents depuis
+  `davila7/claude-code-templates`, convertirait les champs `tools:` deprecies en `permission:`,
+  et ecrirait les fichiers dans `agents/`. Il distingue les agents curates (verifies
   manuellement, dictionnaire `CURATED_AGENTS`) des agents etendus (`EXTENDED_AGENTS`).
-- **Mise a jour du manifest** : `update-manifest.py` fusionne le manifest de synchronisation dans
-  le `manifest.json` racine. Les nouveaux agents recoivent le prefix `[NEEDS_REVIEW]` pour
-  signaler qu'ils necessitent une verification manuelle. Les agents supprimes upstream sont detectes
-  comme obsoletes.
-- **Validation** : Avant le commit, le pipeline verifie les tests (Python + Node), la validite du
-  frontmatter, la coherence du manifest, et l'absence de champs `tools:` deprecies.
+- **Mise a jour du manifest** : `update-manifest.py` fusionnerait le manifest de synchronisation
+  dans le `manifest.json` racine. Les nouveaux agents recevraient le prefix `[NEEDS_REVIEW]`
+  pour signaler qu'ils necessitent une verification manuelle. Les agents supprimes upstream
+  seraient detectes comme obsoletes.
+- **Validation** : Avant tout commit, le pipeline verifierait les tests (Python + Node), la validite
+  du frontmatter, la coherence du manifest, et l'absence de champs `tools:` deprecies.
 - **Securite** : Les agents non curates recoivent `UNKNOWN_PERMISSIONS`, les chemins sont valides
   contre la traversee de repertoire, les actions GitHub sont epinglees par SHA (pas de tags mutables),
   et le cache HTTP (ETag, If-Modified-Since) via `sync_common.py` reduit les appels reseau.
-- **Livraison** : Le pipeline commit sur la branche `sync/agents-latest`, force-push vers origin,
-  et cree ou met a jour une Pull Request avec une description detaillee des changements.
+- **Livraison** : Si execute hors dry_run, le pipeline commettrait sur la branche
+  `sync/agents-latest`, force-push vers origin, et creerait ou mettrait a jour une Pull Request
+  avec une description detaillee des changements.
