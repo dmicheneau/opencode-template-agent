@@ -227,6 +227,23 @@ Two additional diagrams are available in [`docs/architecture.md`](docs/architect
 | `product-discovery` | product-manager, ux-researcher, business-analyst, prd, ui-designer | Product discovery |
 | `architecture-docs` | microservices-architect, api-architect, database-architect, diagram-architect, documentation-engineer | Architecture & docs |
 
+## ⚙️ CI / CD
+
+### Continuous integration (`ci.yml`)
+
+Every push or pull request to `main` triggers 4 parallel jobs:
+
+| Job | Description |
+|-----|-------------|
+| **test** | Python tests across 3 versions (3.10, 3.12, 3.13) |
+| **test-cli** | Node.js tests across 3 versions (20, 22, 23) — CLI, TUI, lock |
+| **lint** | Python/Node syntax, shellcheck, agent YAML frontmatter validation, manifest JSON validation |
+| **validate-agents** | Verifies manifest consistency with actual files, detects deprecated fields |
+
+### Dependency updates (`dependabot.yml`)
+
+Dependabot monitors the SHA pins of GitHub Actions used in workflows and automatically opens a PR each week when an update is available. All actions are pinned by SHA for security.
+
 ## 🔄 Automatic sync
 
 Agents are automatically synced from [aitmpl.com](https://www.aitmpl.com/agents) via a weekly GitHub Actions workflow.

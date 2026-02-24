@@ -240,6 +240,25 @@ Deux diagrammes supplémentaires sont disponibles dans [`docs/architecture.md`](
 
 ---
 
+## ⚙️ CI / CD
+
+### Intégration continue (`ci.yml`)
+
+Chaque push ou pull request sur `main` déclenche 4 jobs en parallèle :
+
+| Job | Description |
+|-----|-------------|
+| **test** | Tests Python sur 3 versions (3.10, 3.12, 3.13) |
+| **test-cli** | Tests Node.js sur 3 versions (20, 22, 23) — CLI, TUI, lock |
+| **lint** | Syntaxe Python/Node, shellcheck, validation du frontmatter YAML des agents, validation du manifest JSON |
+| **validate-agents** | Vérifie la cohérence du manifest avec les fichiers réels, détecte les champs dépréciés |
+
+### Mises à jour des dépendances (`dependabot.yml`)
+
+Dependabot surveille les SHA des GitHub Actions utilisées dans les workflows et ouvre automatiquement une PR chaque semaine si une mise à jour est disponible. Toutes les actions sont pinnées par SHA pour des raisons de sécurité.
+
+---
+
 ## 🔄 Synchronisation automatique
 
 Les agents sont synchronisés automatiquement depuis [aitmpl.com](https://www.aitmpl.com/agents) via un workflow GitHub Actions hebdomadaire.
