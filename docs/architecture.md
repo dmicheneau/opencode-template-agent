@@ -30,7 +30,7 @@ flowchart TB
 
     subgraph Data["Couche de donnees"]
         Registry["registry.mjs<br/>Chargeur de manifest<br/>(validation, getAgent,<br/>getCategory, searchAgents,<br/>resolvePackAgents)"]
-        Manifest["manifest.json<br/>70 agents | 10 categories<br/>15 packs"]
+        Manifest["manifest.json<br/>67 agents | 10 categories<br/>15 packs"]
         Installer["installer.mjs<br/>Telechargement GitHub raw<br/>→ .opencode/agents/"]
     end
 
@@ -90,7 +90,7 @@ flowchart TB
 - **TUI** : Interface interactive construite sur une boucle `input → state → render → screen`.
   L'orchestrateur (`index.mjs`) gere le cycle de vie, les signaux (SIGINT, SIGWINCH) et la boucle
   d'installation. Chaque module a une responsabilite unique.
-- **Registre** : `registry.mjs` charge et valide `manifest.json` (70 agents, 10 categories, 15 packs)
+- **Registre** : `registry.mjs` charge et valide `manifest.json` (67 agents, 10 categories, 15 packs)
   et expose des helpers de requete.
 - **Installeur** : `installer.mjs` telecharge les fichiers depuis GitHub raw et les ecrit dans
   `.opencode/agents/`.

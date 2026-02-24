@@ -3,13 +3,13 @@
 > 🇫🇷 [Version française](README.md)
 
 [![CI](https://github.com/dmicheneau/opencode-template-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/dmicheneau/opencode-template-agent/actions/workflows/ci.yml)
-![Agents](https://img.shields.io/badge/agents-70-blue)
+![Agents](https://img.shields.io/badge/agents-67-blue)
 ![Tests](https://img.shields.io/badge/tests-870%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Node](https://img.shields.io/badge/node-20%2B-green)
 ![npm](https://img.shields.io/npm/v/opencode-agents?label=npm&color=cb3837)
 
-Curated registry of **70 AI agents** for [OpenCode](https://opencode.ai), distributed via a zero-dependency CLI and interactive TUI. Agents are `.md` files containing system prompts that configure specialized AI assistants.
+Curated registry of **67 AI agents** for [OpenCode](https://opencode.ai), distributed via a zero-dependency CLI and interactive TUI. Agents are `.md` files containing system prompts that configure specialized AI assistants.
 
 Source: [aitmpl.com](https://www.aitmpl.com/agents) (413+ agents available). The 4 primary agents are custom.
 
@@ -128,7 +128,7 @@ flowchart TB
 
     subgraph Data["Data Layer"]
         Registry["registry.mjs<br/>Manifest loader<br/>(validation, getAgent,<br/>getCategory, searchAgents,<br/>resolvePackAgents)"]
-        Manifest["manifest.json<br/>70 agents | 10 categories<br/>15 packs"]
+        Manifest["manifest.json<br/>67 agents | 10 categories<br/>15 packs"]
         Installer["installer.mjs<br/>GitHub raw download<br/>→ .opencode/agents/"]
     end
 
@@ -188,7 +188,7 @@ Two additional diagrams are available in [`docs/architecture.md`](docs/architect
 
 ## 📋 Available agents
 
-70 agents — 4 primary (`Tab` in OpenCode) + 66 subagents (`@category/name`).
+67 agents — 4 primary (`Tab` in OpenCode) + 63 subagents (`@category/name`).
 
 | Category | Agents | Description |
 |----------|--------|-------------|
@@ -258,7 +258,7 @@ Upstream agents (~133 available) follow a generic format (capability lists, fict
    ```bash
    python3 scripts/sync-agents.py --list --tier=extended
    ```
-2. **Evaluation** — verify the agent fills a gap not covered by the existing 70 agents
+2. **Evaluation** — verify the agent fills a gap not covered by the existing 67 agents
 3. **Skeleton import** — use the sync in dry-run mode to get frontmatter and permissions:
    ```bash
    gh workflow run "Sync Agents" -f tier=core -f dry_run=true

@@ -3,13 +3,13 @@
 > 🇬🇧 [English version](README.en.md)
 
 [![CI](https://github.com/dmicheneau/opencode-template-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/dmicheneau/opencode-template-agent/actions/workflows/ci.yml)
-![Agents](https://img.shields.io/badge/agents-70-blue)
+![Agents](https://img.shields.io/badge/agents-67-blue)
 ![Tests](https://img.shields.io/badge/tests-870%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Node](https://img.shields.io/badge/node-20%2B-green)
 ![npm](https://img.shields.io/npm/v/opencode-agents?label=npm&color=cb3837)
 
-Registre curé de **70 agents IA** pour [OpenCode](https://opencode.ai), distribué via un CLI zero-dependency et un TUI interactif. Les agents sont des fichiers `.md` contenant des system prompts pour configurer des assistants IA spécialisés.
+Registre curé de **67 agents IA** pour [OpenCode](https://opencode.ai), distribué via un CLI zero-dependency et un TUI interactif. Les agents sont des fichiers `.md` contenant des system prompts pour configurer des assistants IA spécialisés.
 
 Source : [aitmpl.com](https://www.aitmpl.com/agents) (413+ agents disponibles). Les 4 agents primary sont custom.
 
@@ -135,7 +135,7 @@ flowchart TB
 
     subgraph Data["Couche de donnees"]
         Registry["registry.mjs<br/>Chargeur de manifest<br/>(validation, getAgent,<br/>getCategory, searchAgents,<br/>resolvePackAgents)"]
-        Manifest["manifest.json<br/>70 agents | 10 categories<br/>15 packs"]
+        Manifest["manifest.json<br/>67 agents | 10 categories<br/>15 packs"]
         Installer["installer.mjs<br/>Telechargement GitHub raw<br/>→ .opencode/agents/"]
     end
 
@@ -197,7 +197,7 @@ Deux diagrammes supplémentaires sont disponibles dans [`docs/architecture.md`](
 
 ## 📋 Agents disponibles
 
-70 agents — 4 primary (`Tab` dans OpenCode) + 66 subagents (`@catégorie/nom`).
+67 agents — 4 primary (`Tab` dans OpenCode) + 63 subagents (`@catégorie/nom`).
 
 | Catégorie | Agents | Description |
 |-----------|--------|-------------|
@@ -273,7 +273,7 @@ Les agents upstream (~133 disponibles) suivent un format générique (listes de 
    ```bash
    python3 scripts/sync-agents.py --list --tier=extended
    ```
-2. **Évaluation** — vérifier que l'agent apporte une compétence non couverte par les 70 agents existants
+2. **Évaluation** — vérifier que l'agent apporte une compétence non couverte par les 67 agents existants
 3. **Import du squelette** — utiliser le sync en dry-run pour récupérer le frontmatter et les permissions :
    ```bash
    gh workflow run "Sync Agents" -f tier=core -f dry_run=true

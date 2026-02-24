@@ -1,6 +1,6 @@
 # Contribuer à OpenCode Agent Template
 
-Bienvenue et merci de vouloir contribuer ! Ce projet est un registre curé de **70 agents IA** pour [OpenCode](https://opencode.ai), synchronisés depuis [aitmpl.com](https://www.aitmpl.com/agents). Toute contribution — correction de bug, nouvel agent ou amélioration — est la bienvenue.
+Bienvenue et merci de vouloir contribuer ! Ce projet est un registre curé de **67 agents IA** pour [OpenCode](https://opencode.ai), synchronisés depuis [aitmpl.com](https://www.aitmpl.com/agents). Toute contribution — correction de bug, nouvel agent ou amélioration — est la bienvenue.
 
 ## Comment contribuer
 
