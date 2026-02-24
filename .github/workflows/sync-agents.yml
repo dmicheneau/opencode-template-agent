@@ -10,12 +10,11 @@
 # =============================================================================
 
 name: Sync Agents
+# Cron désactivé — la synchronisation automatique produit des agents de qualité
+# insuffisante (3-4/10) comparée aux agents curés manuellement (8-9/10).
+# Utiliser en mode manuel uniquement pour la découverte de nouveaux agents upstream.
 
 on:
-  # Weekly on Monday at 06:00 UTC — gives a full business week for review
-  schedule:
-    - cron: "0 6 * * 1"
-
   # Manual trigger with configurable options
   workflow_dispatch:
     inputs:

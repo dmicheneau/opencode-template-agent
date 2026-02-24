@@ -259,36 +259,33 @@ Dependabot surveille les SHA des GitHub Actions utilisées dans les workflows et
 
 ---
 
-## 🔄 Synchronisation automatique
+## 🔄 Synchronisation des agents
 
-Les agents sont synchronisés automatiquement depuis [aitmpl.com](https://www.aitmpl.com/agents) via un workflow GitHub Actions hebdomadaire.
+Les agents sont sourcés depuis [aitmpl.com](https://www.aitmpl.com/agents) mais **curés manuellement** pour garantir un haut niveau de qualité. La synchronisation automatique hebdomadaire a été désactivée — chaque agent passe par un processus de réécriture experte avant intégration.
 
-### Fonctionnement
+### Pourquoi pas de sync automatique ?
 
-1. **Cron hebdomadaire** — chaque lundi à 06:00 UTC, le workflow `sync-agents.yml` vérifie les mises à jour
-2. **Détection des changements** — les agents nouveaux, modifiés ou supprimés sont identifiés
-3. **Mise à jour du manifest** — `scripts/update-manifest.py` fusionne les agents synchronisés avec le manifest principal en préservant les métadonnées curées (tags, descriptions, packs)
-4. **Validation** — tests automatiques, vérification du frontmatter et de la cohérence du manifest
-5. **Pull Request** — une PR est créée automatiquement avec un rapport détaillé pour revue humaine
+Les agents upstream (~133 disponibles) suivent un format générique (listes de compétences, métriques fictives). Les agents du projet suivent un format expert (workflow opérationnel, arbres de décision, quality gates, anti-patterns). La différence de qualité (3-4/10 vs 8-9/10) rend l'import automatique contre-productif.
 
-Les nouveaux agents sont marqués `[NEEDS_REVIEW]` dans le manifest et nécessitent une revue manuelle avant merge.
+### Ajouter un nouvel agent
 
-### Lancement manuel
+1. **Découverte** — lister les agents upstream disponibles :
+   ```bash
+   python3 scripts/sync-agents.py --list --tier=extended
+   ```
+2. **Évaluation** — vérifier que l'agent apporte une compétence non couverte par les 70 agents existants
+3. **Import du squelette** — utiliser le sync en dry-run pour récupérer le frontmatter et les permissions :
+   ```bash
+   gh workflow run "Sync Agents" -f tier=core -f dry_run=true
+   ```
+4. **Réécriture** — réécrire le body avec le template du projet (Workflow → Décisions → Quality Gate → Anti-patterns → Collaboration)
 
-```bash
-# Via GitHub CLI
-gh workflow run "Sync Agents" -f tier=core -f dry_run=true    # Dry-run (pas de commit)
-gh workflow run "Sync Agents" -f tier=core                     # Sync réelle (core uniquement)
-gh workflow run "Sync Agents" -f tier=extended                  # Sync étendue
-gh workflow run "Sync Agents" -f tier=all -f force=true        # Sync complète forcée
-```
-
-### Scripts de synchronisation
+### Scripts disponibles
 
 | Script | Description |
 |--------|-------------|
-| `scripts/sync-agents.py` | Télécharge les agents depuis le dépôt upstream, convertit les champs `tools:` en `permission:` |
-| `scripts/update-manifest.py` | Fusionne le manifest de sync dans le manifest principal, préfixe `[NEEDS_REVIEW]` |
+| `scripts/sync-agents.py` | Télécharge et convertit les agents depuis le dépôt upstream |
+| `scripts/update-manifest.py` | Fusionne le manifest de sync dans le manifest principal |
 | `scripts/sync_common.py` | Utilitaires HTTP partagés, cache ETag, validation de frontmatter |
 
 ---

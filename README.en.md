@@ -244,37 +244,34 @@ Every push or pull request to `main` triggers 4 parallel jobs:
 
 Dependabot monitors the SHA pins of GitHub Actions used in workflows and automatically opens a PR each week when an update is available. All actions are pinned by SHA for security.
 
-## 🔄 Automatic sync
+## 🔄 Agent synchronization
 
-Agents are automatically synced from [aitmpl.com](https://www.aitmpl.com/agents) via a weekly GitHub Actions workflow.
+Agents are sourced from [aitmpl.com](https://www.aitmpl.com/agents) but **manually curated** to ensure high quality. The automated weekly sync has been disabled — each agent goes through an expert rewriting process before integration.
 
-### How it works
+### Why no automatic sync?
 
-1. **Weekly cron** — every Monday at 06:00 UTC, the `sync-agents.yml` workflow checks for updates
-2. **Change detection** — new, modified, or deleted agents are identified
-3. **Manifest update** — `scripts/update-manifest.py` merges synced agents with the main manifest while preserving curated metadata (tags, descriptions, packs)
-4. **Validation** — automated tests, frontmatter verification, and manifest consistency checks
-5. **Pull Request** — a PR is automatically created with a detailed report for human review
+Upstream agents (~133 available) follow a generic format (capability lists, fictional metrics). Project agents follow an expert format (operational workflow, decision trees, quality gates, anti-patterns). The quality gap (3-4/10 vs 8-9/10) makes automated import counterproductive.
 
-New agents are marked `[NEEDS_REVIEW]` in the manifest and require manual review before merging.
+### Adding a new agent
 
-### Manual trigger
+1. **Discovery** — list available upstream agents:
+   ```bash
+   python3 scripts/sync-agents.py --list --tier=extended
+   ```
+2. **Evaluation** — verify the agent fills a gap not covered by the existing 70 agents
+3. **Skeleton import** — use the sync in dry-run mode to get frontmatter and permissions:
+   ```bash
+   gh workflow run "Sync Agents" -f tier=core -f dry_run=true
+   ```
+4. **Rewriting** — rewrite the body using the project's template (Workflow → Decisions → Quality Gate → Anti-patterns → Collaboration)
 
-```bash
-# Via GitHub CLI
-gh workflow run "Sync Agents" -f tier=core -f dry_run=true    # Dry-run (no commit)
-gh workflow run "Sync Agents" -f tier=core                     # Actual sync (core only)
-gh workflow run "Sync Agents" -f tier=extended                  # Extended sync
-gh workflow run "Sync Agents" -f tier=all -f force=true        # Full forced sync
-```
-
-### Sync scripts
+### Available scripts
 
 | Script | Description |
 |--------|-------------|
-| `scripts/sync-agents.py` | Downloads agents from the upstream repo |
+| `scripts/sync-agents.py` | Downloads and converts agents from the upstream repo |
 | `scripts/update-manifest.py` | Merges sync manifest with the main manifest |
-| `scripts/sync_common.py` | Shared HTTP utilities and helpers |
+| `scripts/sync_common.py` | Shared HTTP utilities, ETag cache, frontmatter validation |
 
 ## 🚀 Releases & Changelog
 
