@@ -212,9 +212,9 @@ describe('CLI install', () => {
   });
 
   it('should dry-run primary agent placement at root agents dir', () => {
-    const output = run(['install', 'cloud-architect', '--dry-run'], { cwd: TEMP_DIR });
+    const output = run(['install', 'fullstack-developer', '--dry-run'], { cwd: TEMP_DIR });
     assert.ok(output.includes('would install'));
-    assert.ok(output.includes('cloud-architect'));
+    assert.ok(output.includes('fullstack-developer'));
     // Primary agents should NOT be in a subdirectory
     assert.ok(output.includes('.opencode'));
   });

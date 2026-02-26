@@ -61,29 +61,7 @@ def _make_agent(
 _GOOD_BODY = """\
 You are the test agent. You specialize in verifying things work correctly.
 Call this agent when you need automated validation of code changes.
-Your bias: fail fast, report clearly.
-
-## Workflow
-
-1. **Read the input** — Parse the request and identify test targets.
-   Check: targets are concrete file paths or function names.
-   Output: list of test targets.
-
-2. **Run tests** — Execute `pytest` with coverage.
-   Check: exit code is 0.
-   Output: test report.
-
-3. **Analyze coverage** — Identify uncovered branches.
-   Check: coverage >= 80%.
-   Output: coverage delta.
-
-4. **Generate report** — Summarize results for the caller.
-   Check: report includes pass/fail count and coverage.
-   Output: markdown summary.
-
-5. **Validate regressions** — Compare against baseline if available.
-   Check: no new failures.
-   Output: regression diff.
+Your bias: fail fast, report clearly. Targets Python 3.12+ and Node 20.x (2024).
 
 ## Decisions
 
@@ -101,18 +79,25 @@ Your bias: fail fast, report clearly.
 - ELIF coverage < 80% → warn
 - ELSE → pass
 
-## Tools
+## Examples
 
-**Prefer:** Use `pytest` for Python, `vitest` for TypeScript. Prefer `Read` over `bash cat` for file inspection.
+```bash
+pytest --cov=src --cov-report=term-missing tests/
+```
 
-**Restrict:** Do not use `Edit` — this agent is read-only. Never run `rm` or destructive bash commands.
+```python
+import subprocess
+result = subprocess.run(["pytest", "tests/test_core.py", "-v"], capture_output=True)
+assert result.returncode == 0
+```
 
 ## Quality Gate
 
-Before responding, verify:
-1. All test commands completed — fails if any command timed out
-2. Coverage numbers are from the current run — fails if stale
-3. No test was silently skipped — fails if skip count > 0 unexpectedly
+- All test commands completed — fails if any command timed out
+- Coverage numbers are from the current run — fails if stale
+- No test was silently skipped — fails if skip count > 0 unexpectedly
+- Report includes pass/fail count and coverage percentage
+- No new regressions compared to baseline
 """
 
 
@@ -465,32 +450,28 @@ class TestCheckTemplateConformance(unittest.TestCase):
         warnings = check_template_conformance(content)
         self.assertEqual(warnings, [], f"Unexpected warnings: {warnings}")
 
-    def test_missing_workflow(self):
-        body = "Some identity text here about this agent.\n\n## Decisions\n\nStuff\n\n## Tools\n\nStuff\n\n## Quality Gate\n\nStuff"
-        content = _make_agent(body=body)
-        warnings = check_template_conformance(content)
-        self.assertTrue(any("Workflow" in w for w in warnings))
-
     def test_missing_decisions(self):
-        body = "Some identity text here about this agent.\n\n## Workflow\n\nStuff\n\n## Tools\n\nStuff\n\n## Quality Gate\n\nStuff"
+        body = "Some identity text here about this agent.\n\n## Examples\n\nStuff\n\n## Quality Gate\n\nStuff"
         content = _make_agent(body=body)
         warnings = check_template_conformance(content)
         self.assertTrue(any("Decisions" in w for w in warnings))
 
-    def test_missing_tools(self):
-        body = "Some identity text here about this agent.\n\n## Workflow\n\nStuff\n\n## Decisions\n\nStuff\n\n## Quality Gate\n\nStuff"
+    def test_missing_examples(self):
+        body = "Some identity text here about this agent.\n\n## Decisions\n\nStuff\n\n## Quality Gate\n\nStuff"
         content = _make_agent(body=body)
         warnings = check_template_conformance(content)
-        self.assertTrue(any("Tools" in w for w in warnings))
+        self.assertTrue(any("Examples" in w for w in warnings))
 
     def test_missing_quality_gate(self):
-        body = "Some identity text here about this agent.\n\n## Workflow\n\nStuff\n\n## Decisions\n\nStuff\n\n## Tools\n\nStuff"
+        body = "Some identity text here about this agent.\n\n## Decisions\n\nStuff\n\n## Examples\n\nStuff"
         content = _make_agent(body=body)
         warnings = check_template_conformance(content)
         self.assertTrue(any("Quality Gate" in w for w in warnings))
 
     def test_missing_identity_prose(self):
-        body = "## Workflow\n\nStuff\n\n## Decisions\n\nStuff\n\n## Tools\n\nStuff\n\n## Quality Gate\n\nStuff"
+        body = (
+            "## Decisions\n\nStuff\n\n## Examples\n\nStuff\n\n## Quality Gate\n\nStuff"
+        )
         content = _make_agent(body=body)
         warnings = check_template_conformance(content)
         self.assertTrue(any("identity" in w.lower() for w in warnings))
@@ -521,29 +502,29 @@ class TestScoreAgent(unittest.TestCase):
         self.assertIn("overall", result)
         self.assertIn("passed", result)
         self.assertIn("label", result)
-        # The good body has decisions, workflow, tools, quality gate
-        self.assertGreaterEqual(result["dimensions"]["decision_density"], 3)
-        self.assertGreaterEqual(result["dimensions"]["workflow_clarity"], 3)
+        # The good body has decisions with IF/THEN and examples with code blocks
+        self.assertGreaterEqual(result["dimensions"]["decisions"], 3)
+        self.assertGreaterEqual(result["dimensions"]["examples"], 3)
 
     def test_empty_agent_scores_poorly(self):
         content = _make_agent(body="Be thorough. Follow best practices.")
         result = score_agent(content)
         self.assertFalse(result["passed"])
-        self.assertEqual(result["dimensions"]["workflow_clarity"], 1)
-        self.assertEqual(result["dimensions"]["decision_density"], 1)
+        self.assertEqual(result["dimensions"]["decisions"], 1)
+        self.assertEqual(result["dimensions"]["examples"], 1)
 
     def test_score_dimensions_complete(self):
         content = _make_agent(body=_GOOD_BODY)
         result = score_agent(content)
         expected_dims = {
-            "specificity",
-            "decision_density",
-            "workflow_clarity",
-            "permission_alignment",
-            "density",
-            "tool_awareness",
-            "antipattern_coverage",
-            "collaboration_clarity",
+            "frontmatter",
+            "identity",
+            "decisions",
+            "examples",
+            "quality_gate",
+            "conciseness",
+            "no_banned_sections",
+            "version_pinning",
         }
         self.assertEqual(set(result["dimensions"].keys()), expected_dims)
 
@@ -579,8 +560,8 @@ class TestScoreAgent(unittest.TestCase):
         content = "Just raw markdown without frontmatter"
         result = score_agent(content)
         self.assertIn("overall", result)
-        # No permissions → permission_alignment should be 1
-        self.assertEqual(result["dimensions"]["permission_alignment"], 1)
+        # No frontmatter → frontmatter dimension should be 1
+        self.assertEqual(result["dimensions"]["frontmatter"], 1)
 
 
 # ===================================================================

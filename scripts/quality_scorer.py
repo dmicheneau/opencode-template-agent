@@ -2,9 +2,11 @@
 """
 quality_scorer.py — 8-dimension quality scorer for AI agent markdown files.
 
-Scores agent files across: Specificity, Decision Density, Workflow Clarity,
-Permission Alignment, Density, Tool Awareness, Anti-pattern Coverage,
-Collaboration Clarity.
+Validates the NEW optimized agent format with sections:
+Identity (unheaded paragraph), ## Decisions, ## Examples, ## Quality Gate.
+
+Scoring dimensions: Frontmatter, Identity, Decisions, Examples,
+Quality Gate, Conciseness, No Banned Sections, Version Pinning.
 
 Pass criteria: overall mean >= 3.5 AND no dimension < 2.
 
@@ -16,13 +18,11 @@ Requires: Python 3.10+ (stdlib only, no pip dependencies)
 
 from __future__ import annotations
 
-import json
 import re
 import sys
 from statistics import mean
 from typing import Any, Dict
 
-# Import the nested frontmatter parser from sync_common (same package dir)
 from sync_common import parse_nested_frontmatter
 
 
@@ -30,60 +30,89 @@ from sync_common import parse_nested_frontmatter
 # Regex patterns
 # ---------------------------------------------------------------------------
 
-_RE_DECISION = re.compile(r"(?i)\b(if|when|unless|otherwise|else|in case|fallback)\b")
-_RE_NUMBERED_STEP = re.compile(r"^\s*\d+\.\s+")
-_RE_VERB_FIRST = re.compile(
-    r"^\s*\d+\.\s+\**(?:Run|Check|Validate|Create|Review|Parse|Extract|Send|"
-    r"Update|Delete|Read|Write|Execute|Deploy|Test|Build|Scan|Notify|Open|"
-    r"Close|Merge|Reject|Approve|Generate|Analyze|Compare|Resolve|Identify|"
-    r"Configure|Set|Install|Verify|Inspect|Apply|Document|Map|Assess|Audit|"
-    r"Measure|Monitor|Profile|Refactor|Migrate|Draft|Prioritize|Evaluate|"
-    r"Define|Gather|Estimate|Plan|Investigate|Diagnose|Fix|Implement|Search|"
-    r"Fetch|Navigate|Capture|Annotate|Propose|Recommend|Score|Rate)\b",
-    re.IGNORECASE,
+# IF/THEN/ELIF/ELSE decision tree keywords (case-insensitive, whole words)
+_RE_DECISION_TREE = re.compile(r"(?i)^\s*[-*]?\s*\b(IF|THEN|ELIF|ELSE)\b")
+
+# Fenced code block opener (``` with optional language tag)
+_RE_CODE_FENCE = re.compile(r"^```")
+
+# Bullet point (- or * at start of line, possibly indented)
+_RE_BULLET = re.compile(r"^\s*[-*]\s+\S")
+
+# Version numbers: 5.x, 3.11+, v2, >=4.0, ~=1.2, etc.
+_RE_VERSION = re.compile(r"\b(?:v?\d+\.\d+[\w.*+-]*|\bv\d+\b|\b\d+\.x\b)")
+
+# Year references: 2020-2029
+_RE_YEAR = re.compile(r"\b20[2-3]\d\b")
+
+# Banned section headings from the old format (any heading level)
+_RE_BANNED_SECTION = re.compile(
+    r"^#{1,3}\s+(Workflow|Tools|Anti-patterns|Collaboration)\s*$",
+    re.MULTILINE | re.IGNORECASE,
 )
+
+# Section heading detector
+_RE_SECTION_HEADING = re.compile(r"^##\s+(.+)", re.MULTILINE)
+
+# Generic filler phrases (kept from old scorer for density check)
 _RE_FILLER = re.compile(
     r"(?i)(it is important|note that|please ensure|keep in mind|"
     r"remember to|as mentioned|in order to)"
 )
-_RE_GENERIC = re.compile(
-    r"(?i)(be thorough|follow best practices|ensure quality|be careful|"
-    r"do a good job|pay attention|strive for|aim for excellence)"
-)
-_RE_TOOL_REF = re.compile(r"`([a-zA-Z_][\w-]*)`")
-_RE_CONDITIONAL_TOOL = re.compile(
-    r"(?:use|prefer|run)\s+`\w+`\s+(?:when|if|for)", re.IGNORECASE
-)
 
-# Known tools that agents can reference — only these are counted for scoring
-KNOWN_TOOLS: frozenset[str] = frozenset(
-    {
-        "Read",
-        "Edit",
-        "Write",
-        "Bash",
-        "Glob",
-        "Grep",
-        "Task",
-        "Fetch",
-        "WebFetch",
-        "Search",
-        "Diff",
-        "Notebook",
-        "MCP",
-        "Browser",
-        "Think",
-        "TodoWrite",
-        "Architect",
-    }
-)
-_RE_ANTIPATTERN = re.compile(
-    r"(?i)\b(do not|don't|never|avoid|anti-pattern|mistake|pitfall|trap)\b"
-)
-_RE_HANDOFF = re.compile(
-    r"(?i)(?:delegate|hand off|handoff|escalate|forward|consult|notify|"
-    r"defer to|invoke|call)\s+(?:to\s+)?`?\w+[\w-]*`?"
-)
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+
+def _extract_identity_paragraph(body: str) -> str:
+    """Extract text between the end of frontmatter and the first ## heading.
+
+    Returns the identity paragraph text (may be empty).
+    """
+    match = re.search(r"^##\s", body, re.MULTILINE)
+    if match:
+        return body[: match.start()].strip()
+    # No ## heading found — entire body is "identity" (unlikely but handle it)
+    return body.strip()
+
+
+def _extract_section(body: str, heading: str) -> str:
+    """Extract content under a specific ## heading until the next ## or end.
+
+    Args:
+        body: The markdown body (after frontmatter).
+        heading: The heading text to find (e.g., "Decisions").
+
+    Returns:
+        Section content (empty string if heading not found).
+    """
+    pattern = re.compile(
+        r"^##\s+" + re.escape(heading) + r"\s*$",
+        re.MULTILINE,
+    )
+    match = pattern.search(body)
+    if not match:
+        return ""
+
+    start = match.end()
+    # Find the next ## heading
+    next_heading = re.search(r"^##\s+", body[start:], re.MULTILINE)
+    if next_heading:
+        return body[start : start + next_heading.start()].strip()
+    return body[start:].strip()
+
+
+def _count_code_fences(text: str) -> int:
+    """Count the number of fenced code blocks (``` pairs) in text."""
+    fences = [ln for ln in text.split("\n") if _RE_CODE_FENCE.match(ln.strip())]
+    return len(fences) // 2  # opening + closing = 1 block
+
+
+def _count_bullets(text: str) -> int:
+    """Count bullet-point lines in text."""
+    return sum(1 for ln in text.split("\n") if _RE_BULLET.match(ln))
 
 
 # ---------------------------------------------------------------------------
@@ -94,6 +123,16 @@ _RE_HANDOFF = re.compile(
 def score_agent(content: str) -> Dict[str, Any]:
     """Score an agent markdown file across 8 quality dimensions.
 
+    Dimensions:
+        frontmatter — description, mode, permission block present
+        identity — unheaded paragraph between frontmatter and first ##
+        decisions — ## Decisions with IF/THEN/ELIF patterns
+        examples — ## Examples with 2+ fenced code blocks
+        quality_gate — ## Quality Gate with 3+ bullet points
+        conciseness — line count in the 50-150 range
+        no_banned_sections — no Workflow/Tools/Anti-patterns/Collaboration
+        version_pinning — identity contains version numbers or year refs
+
     Args:
         content: Raw markdown string of the agent file.
 
@@ -101,126 +140,150 @@ def score_agent(content: str) -> Dict[str, Any]:
         Dict with ``dimensions`` (name→int), ``overall`` (float),
         ``min_dimension`` (int), ``passed`` (bool), ``label`` (str).
     """
-    lines = content.strip().split("\n")
-    total_lines = len(lines)
-
     meta, body = parse_nested_frontmatter(content)
 
-    # Extract permission keys from nested frontmatter
-    perm_block = meta.get("permission", {})
-    permission_keys: set = set()
-    if isinstance(perm_block, dict):
-        permission_keys = set(perm_block.keys())
+    # Count body lines only (excludes frontmatter YAML) for conciseness scoring
+    body_lines = body.strip().split("\n")
+    body_line_count = len(body_lines)
 
     scores: Dict[str, int] = {}
 
-    # 1. Specificity
-    generic_count = sum(1 for ln in lines if _RE_GENERIC.search(ln))
-    specificity_ratio = 1 - (generic_count / max(total_lines, 1))
-    if specificity_ratio >= 0.95:
-        scores["specificity"] = 5
-    elif specificity_ratio >= 0.80:
-        scores["specificity"] = 3
-    else:
-        scores["specificity"] = 1
+    # ---------------------------------------------------------------
+    # 1. Frontmatter — description, mode, permission block
+    # ---------------------------------------------------------------
+    fm_checks = 0
+    if meta.get("description") and str(meta["description"]).strip():
+        fm_checks += 1
+    if meta.get("mode") and str(meta["mode"]).strip():
+        fm_checks += 1
+    perm = meta.get("permission")
+    if isinstance(perm, dict) and len(perm) > 0:
+        fm_checks += 1
 
-    # 2. Decision Density
-    decision_count = sum(1 for ln in lines if _RE_DECISION.search(ln))
-    if decision_count >= 7:
-        scores["decision_density"] = 5
-    elif decision_count >= 3:
-        scores["decision_density"] = 3
+    if fm_checks == 3:
+        scores["frontmatter"] = 5
+    elif fm_checks >= 2:
+        scores["frontmatter"] = 3
     else:
-        scores["decision_density"] = 1
+        scores["frontmatter"] = 1
 
-    # 3. Workflow Clarity
-    numbered_steps = [ln for ln in lines if _RE_NUMBERED_STEP.match(ln)]
-    verb_first = [ln for ln in numbered_steps if _RE_VERB_FIRST.match(ln)]
-    step_count = len(numbered_steps)
-    vf_ratio = len(verb_first) / max(step_count, 1)
-    if 4 <= step_count <= 10 and vf_ratio >= 0.8:
-        scores["workflow_clarity"] = 5
-    elif step_count >= 3:
-        scores["workflow_clarity"] = 3
+    # ---------------------------------------------------------------
+    # 2. Identity — paragraph before first ##, 50-300 words
+    # ---------------------------------------------------------------
+    identity_text = _extract_identity_paragraph(body)
+    # Strip any `# Identity` heading if present (old format compat)
+    identity_text = re.sub(r"^#\s+Identity\s*\n+", "", identity_text).strip()
+    identity_words = len(identity_text.split()) if identity_text else 0
+
+    if 50 <= identity_words <= 300:
+        scores["identity"] = 5
+    elif 30 <= identity_words <= 400:
+        scores["identity"] = 3
+    elif identity_words > 0:
+        scores["identity"] = 2
     else:
-        scores["workflow_clarity"] = 1
+        scores["identity"] = 1
 
-    # 4. Permission Alignment
-    # Check if the body mentions the tools enabled by the permissions.
-    # Map permission keys to the tool names that an agent would reference.
-    _PERM_TO_TOOLS: Dict[str, set[str]] = {
-        "read": {"Read"},
-        "write": {"Write"},
-        "edit": {"Edit"},
-        "bash": {"Bash"},
-        "glob": {"Glob"},
-        "grep": {"Grep"},
-        "task": {"Task"},
-        "webfetch": {"WebFetch", "Fetch"},
-        "browsermcp": {"Browser"},
-        "mcp": {"MCP"},
-        "todowrite": {"TodoWrite"},
-        "todoread": {"TodoWrite"},  # often mentioned together
-    }
-    expected_tools: set[str] = set()
-    for pkey in permission_keys:
-        expected_tools |= _PERM_TO_TOOLS.get(pkey, set())
-    # Find which known tools are actually mentioned in the body
-    all_refs = set(_RE_TOOL_REF.findall(body))
-    mentioned_tools = all_refs & (expected_tools | KNOWN_TOOLS)
-    if len(permission_keys) > 0 and len(expected_tools) > 0:
-        coverage = len(mentioned_tools & expected_tools) / len(expected_tools)
-        if coverage >= 0.6:
-            scores["permission_alignment"] = 5
-        elif coverage >= 0.3:
-            scores["permission_alignment"] = 3
+    # ---------------------------------------------------------------
+    # 3. Decisions — ## Decisions with IF/THEN/ELIF/ELSE patterns
+    # ---------------------------------------------------------------
+    decisions_section = _extract_section(body, "Decisions")
+    if decisions_section:
+        decision_keywords = sum(
+            1 for ln in decisions_section.split("\n") if _RE_DECISION_TREE.search(ln)
+        )
+        # Also count inline IF...THEN patterns (e.g., "IF x → THEN y")
+        inline_patterns = len(re.findall(r"(?i)\bIF\b.*?\bTHEN\b", decisions_section))
+        total_decision_signals = max(decision_keywords, inline_patterns)
+
+        if total_decision_signals >= 5:
+            scores["decisions"] = 5
+        elif total_decision_signals >= 2:
+            scores["decisions"] = 3
         else:
-            scores["permission_alignment"] = 2
-    elif len(permission_keys) > 0:
-        scores["permission_alignment"] = 2
+            scores["decisions"] = 2
     else:
-        scores["permission_alignment"] = 1
+        scores["decisions"] = 1
 
-    # 5. Density
-    filler_count = sum(1 for ln in lines if _RE_FILLER.search(ln))
-    filler_ratio = filler_count / max(total_lines, 1)
-    if filler_ratio <= 0.05 and 30 <= total_lines <= 120:
-        scores["density"] = 5
-    elif filler_ratio <= 0.15 and total_lines <= 140:
-        scores["density"] = 3
+    # ---------------------------------------------------------------
+    # 4. Examples — ## Examples with 2+ fenced code blocks
+    # ---------------------------------------------------------------
+    examples_section = _extract_section(body, "Examples")
+    if examples_section:
+        code_blocks = _count_code_fences(examples_section)
+        if code_blocks >= 3:
+            scores["examples"] = 5
+        elif code_blocks >= 2:
+            scores["examples"] = 4
+        elif code_blocks >= 1:
+            scores["examples"] = 3
+        else:
+            scores["examples"] = 2
     else:
-        scores["density"] = 1
+        scores["examples"] = 1
 
-    # 6. Tool Awareness
-    all_tool_refs = set(_RE_TOOL_REF.findall(body))
-    unique_tools = all_tool_refs & KNOWN_TOOLS
-    conditional_refs = len(_RE_CONDITIONAL_TOOL.findall(body))
-    if len(unique_tools) >= 4 and conditional_refs >= 2:
-        scores["tool_awareness"] = 5
-    elif len(unique_tools) >= 2:
-        scores["tool_awareness"] = 3
+    # ---------------------------------------------------------------
+    # 5. Quality Gate — ## Quality Gate with 3+ bullet points
+    # ---------------------------------------------------------------
+    qg_section = _extract_section(body, "Quality Gate")
+    if qg_section:
+        bullet_count = _count_bullets(qg_section)
+        if bullet_count >= 5:
+            scores["quality_gate"] = 5
+        elif bullet_count >= 3:
+            scores["quality_gate"] = 4
+        elif bullet_count >= 1:
+            scores["quality_gate"] = 3
+        else:
+            scores["quality_gate"] = 2
     else:
-        scores["tool_awareness"] = 1
+        scores["quality_gate"] = 1
 
-    # 7. Anti-pattern Coverage
-    ap_count = sum(1 for ln in lines if _RE_ANTIPATTERN.search(ln))
-    if ap_count >= 5:
-        scores["antipattern_coverage"] = 5
-    elif ap_count >= 2:
-        scores["antipattern_coverage"] = 3
+    # ---------------------------------------------------------------
+    # 6. Conciseness — body line count sweet spot 70-120, acceptable 50-150
+    # ---------------------------------------------------------------
+    filler_count = sum(1 for ln in body_lines if _RE_FILLER.search(ln))
+    filler_ratio = filler_count / max(body_line_count, 1)
+
+    if 70 <= body_line_count <= 120 and filler_ratio <= 0.03:
+        scores["conciseness"] = 5
+    elif 50 <= body_line_count <= 150 and filler_ratio <= 0.08:
+        scores["conciseness"] = 4
+    elif 40 <= body_line_count <= 200 and filler_ratio <= 0.15:
+        scores["conciseness"] = 3
+    elif body_line_count < 30:
+        scores["conciseness"] = 1
     else:
-        scores["antipattern_coverage"] = 1
+        scores["conciseness"] = 2
 
-    # 8. Collaboration Clarity
-    handoff_count = len(_RE_HANDOFF.findall(body))
-    if handoff_count >= 3:
-        scores["collaboration_clarity"] = 5
-    elif handoff_count >= 1:
-        scores["collaboration_clarity"] = 3
+    # ---------------------------------------------------------------
+    # 7. No Banned Sections — old format headings must be absent
+    # ---------------------------------------------------------------
+    banned_matches = _RE_BANNED_SECTION.findall(body)
+    if len(banned_matches) == 0:
+        scores["no_banned_sections"] = 5
+    elif len(banned_matches) == 1:
+        scores["no_banned_sections"] = 3
     else:
-        scores["collaboration_clarity"] = 1
+        scores["no_banned_sections"] = 1
 
+    # ---------------------------------------------------------------
+    # 8. Version Pinning — identity mentions versions or years
+    # ---------------------------------------------------------------
+    has_version = bool(_RE_VERSION.search(identity_text))
+    has_year = bool(_RE_YEAR.search(identity_text))
+    if has_version and has_year:
+        scores["version_pinning"] = 5
+    elif has_version or has_year:
+        scores["version_pinning"] = 4
+    else:
+        # Not all agents need version pinning (e.g., prd, scrum-master)
+        # so absence is a 2, not a 1
+        scores["version_pinning"] = 2
+
+    # ---------------------------------------------------------------
     # Overall
+    # ---------------------------------------------------------------
     all_scores = list(scores.values())
     overall = round(mean(all_scores), 2)
     min_score = min(all_scores)

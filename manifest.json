@@ -4,7 +4,7 @@
   "branch": "main",
   "source_path": "agents",
   "base_path": ".opencode/agents",
-  "agent_count": 67,
+  "agent_count": 69,
   "categories": {
     "languages": {
       "label": "Languages",
@@ -72,8 +72,8 @@
         "screen-reader",
         "inclusive-design"
       ],
-      "sha256": "f9c0d15e7123a73e3a3944c990fa9b4ea59e8bc7ea5b56b5b0a3e27cd6786d89",
-      "size": 7821
+      "sha256": "675042dc074a562bca1b036f118571865e1901d34d76a07d50a8dc85f1dea03e",
+      "size": 5092
     },
     {
       "name": "ai-engineer",
@@ -88,8 +88,8 @@
         "deployment",
         "mlops"
       ],
-      "sha256": "6fcf7ab3ac5451b1a866a8dc027c9e19fb242caf9e8d89f9dd4598153720cb6a",
-      "size": 9561
+      "sha256": "c432cebece3b7891aee68b1c3161d5eba4836adad6319d6f7445e8016de9ce55",
+      "size": 4658
     },
     {
       "name": "angular-architect",
@@ -105,8 +105,8 @@
         "typescript",
         "frontend"
       ],
-      "sha256": "66f6e20443b8d0d48621e9e58587be7c199587677facd92701b7b2508365ca3a",
-      "size": 8362
+      "sha256": "1dccde892d7ee7e7fa6ac63e36292c50bdb968b71cfbaf41b2faa8a418eb94b9",
+      "size": 5135
     },
     {
       "name": "api-architect",
@@ -122,8 +122,8 @@
         "http",
         "openapi"
       ],
-      "sha256": "a9ceecda3af11546c7c389fb42c7b158a5bbc0d68d70bb6f161cd9b387642d0e",
-      "size": 5809
+      "sha256": "999ff88934cdd18b8e57490d4e800f52768ab01294d0feb0f7073f774a4b85dd",
+      "size": 5438
     },
     {
       "name": "api-documenter",
@@ -138,8 +138,8 @@
         "documentation",
         "code-examples"
       ],
-      "sha256": "8ca5c3a78afa5679f42b20082d537128f2ea319106c6ded934de70b3bc70fa9e",
-      "size": 5067
+      "sha256": "a3de3bc6f19f1ccab840f99e5486386aed2654fe2fe2104e66903236bbc31096",
+      "size": 4824
     },
     {
       "name": "aws-specialist",
@@ -155,8 +155,8 @@
         "security",
         "well-architected"
       ],
-      "sha256": "828fea564fc715a558291563fb8483d21b2aa91eb142fa3cff81a87e90559c95",
-      "size": 5617
+      "sha256": "0b335f7653215b84d32f788c42e461454900ac3da2214e6c30c113e7bdcb2bc9",
+      "size": 4348
     },
     {
       "name": "business-analyst",
@@ -171,8 +171,8 @@
         "brd",
         "stakeholders"
       ],
-      "sha256": "38644751aa9d5ddbda43aa07dde3fc4aaa698d87715311a5b7990a98f0e6c1da",
-      "size": 6155
+      "sha256": "4048dd3d40c1e80b0254ea939a31a702074798a358f924491727d1e60a02a72d",
+      "size": 5119
     },
     {
       "name": "ci-cd-engineer",
@@ -188,8 +188,8 @@
         "deployment",
         "automation"
       ],
-      "sha256": "d7c7ced7ef8d5bfb2fcbab8087048b8da3f66c814afc5fc1a12fd101a0d3667b",
-      "size": 6928
+      "sha256": "02d6f377500e02acd8f438f25ed82cb82c1c96d5f0e9cac4410e815520e8261a",
+      "size": 4414
     },
     {
       "name": "code-reviewer",
@@ -204,8 +204,26 @@
         "best-practices",
         "linting"
       ],
-      "sha256": "04ffee2bc345a8728cabfb89b31bb885504351c919a32d0e1ffd23faea305622",
-      "size": 5652
+      "sha256": "ae15ac6b1ee1a5c2c5ba393f70eed9b9aae90ca0f5a06e709731d94f587fd877",
+      "size": 4856
+    },
+    {
+      "name": "compliance-auditor",
+      "category": "security",
+      "path": "security/compliance-auditor",
+      "mode": "subagent",
+      "description": "Compliance framework specialist for SOC2, GDPR, HIPAA, PCI-DSS, and ISO 27001",
+      "tags": [
+        "compliance",
+        "soc2",
+        "gdpr",
+        "hipaa",
+        "pci-dss",
+        "iso-27001",
+        "audit"
+      ],
+      "sha256": "456cfa790a600008be8627b8358e53f893119c2867ee4e8410bc106328c7976b",
+      "size": 7223
     },
     {
       "name": "cpp-pro",
@@ -221,8 +239,8 @@
         "performance",
         "embedded"
       ],
-      "sha256": "aa69f9f8fd8cd33048c45dc05c1136eca991c16fb512e5521aaada9deb78d7e0",
-      "size": 9437
+      "sha256": "0e09fd44fa6a2a96795c131672f628dac3e26072be1c57d60375b9b72b3d9c15",
+      "size": 4385
     },
     {
       "name": "csharp-developer",
@@ -237,8 +255,8 @@
         "entity-framework",
         "azure"
       ],
-      "sha256": "5ef803962871a6b5a1aef8b26061154a042613f888fe0c4e64591e7c2e4d6985",
-      "size": 8694
+      "sha256": "eb69ae2414c60e0a68210e65fd823deeed6d44c4281e6b382a232ea1c247222b",
+      "size": 4286
     },
     {
       "name": "data-analyst",
@@ -254,8 +272,8 @@
         "reporting",
         "visualization"
       ],
-      "sha256": "4915b7f24f9228763f4e48336acd98435a64cfe93a67a0fd08dd3cbc805dfd6e",
-      "size": 8938
+      "sha256": "afdb460174b82a2658bac80c892356241a5b9d0a97e893b321b6da5c1f1da72a",
+      "size": 4354
     },
     {
       "name": "data-engineer",
@@ -271,8 +289,8 @@
         "data-warehouse",
         "pipelines"
       ],
-      "sha256": "981e95acba1c9eae0cfbb22808960f9fd5feded32cbac9416b91314cbea71bcc",
-      "size": 9892
+      "sha256": "eb135a8a8de98248d389a598c02167668f715272223fddeece20634806f15544",
+      "size": 4742
     },
     {
       "name": "data-scientist",
@@ -287,8 +305,8 @@
         "analytics",
         "modeling"
       ],
-      "sha256": "41efbbce5bf2ce85233cd36a6b8b2e87203a82f8848b67c8529b47d18907c004",
-      "size": 9394
+      "sha256": "dc9803083c524f8355cb35cbb12b821e6985de4565af671e0a186be21a591981",
+      "size": 4892
     },
     {
       "name": "database-architect",
@@ -303,8 +321,8 @@
         "schema",
         "architecture"
       ],
-      "sha256": "2063f013f162dc60acf04fbe2f02d594cc1158a2c674a8b8b0ddc3efebc941ce",
-      "size": 6628
+      "sha256": "cfbeb135a0e5fa5dad854464b41be6186701b99f54d78f85e866270effa1eac0",
+      "size": 5092
     },
     {
       "name": "debugger",
@@ -319,8 +337,8 @@
         "errors",
         "stack-traces"
       ],
-      "sha256": "09d36632310abcfcc798d0fc2fed3d4511955520719d3d97c1f19b4f233c3e9c",
-      "size": 8734
+      "sha256": "15c757de33cd8d9411229001aef4b45cb262099a1a4c587b5e6dc46bc56f5bdc",
+      "size": 5476
     },
     {
       "name": "diagram-architect",
@@ -336,8 +354,8 @@
         "architecture",
         "visualization"
       ],
-      "sha256": "b76fe69172ff4e448db7074a3f0ce9d2da4121007fad2ee46e1cb5a0d9496887",
-      "size": 4561
+      "sha256": "55285c62d1c6b3d9998f2365c6a197ebd00dcf3ae2cf22125366859a45d3c27a",
+      "size": 4693
     },
     {
       "name": "docker-specialist",
@@ -353,8 +371,8 @@
         "security",
         "optimization"
       ],
-      "sha256": "962d2ccf7e55b0694aa0719c68a0c74bb72a9e586d4186430fbe4a8e1e96cc14",
-      "size": 7216
+      "sha256": "7d49e6af3f081afb08a1393eb5018700f4f6f314038d1e46e976217fe855ff47",
+      "size": 4357
     },
     {
       "name": "documentation-engineer",
@@ -369,42 +387,8 @@
         "guides",
         "developer-docs"
       ],
-      "sha256": "8bbde2e9dec9c6b20927f9d80934d8a51819230078811a274003e03457e933ed",
-      "size": 5185
-    },
-    {
-      "name": "expert-nextjs-developer",
-      "category": "web",
-      "path": "web/expert-nextjs-developer",
-      "mode": "subagent",
-      "description": "Next.js App Router, Server Components, Turbopack, and modern React",
-      "tags": [
-        "nextjs",
-        "react",
-        "server-components",
-        "app-router",
-        "turbopack",
-        "ssr"
-      ],
-      "sha256": "2d31d98d8e44b018bf295167a078a0096112c11abbfce81496138c9eb8dab11d",
-      "size": 5326
-    },
-    {
-      "name": "expert-react-frontend-engineer",
-      "category": "web",
-      "path": "web/expert-react-frontend-engineer",
-      "mode": "subagent",
-      "description": "React 19 hooks, Server Components, Actions, and performance optimization",
-      "tags": [
-        "react",
-        "hooks",
-        "server-components",
-        "typescript",
-        "frontend",
-        "performance"
-      ],
-      "sha256": "d9d21647177a245a3ed387a8d968c45878521cb2b4c72d493afbfe6c05f46d32",
-      "size": 5467
+      "sha256": "d81123ed0cfdad30b4f3c2d4ac2df90a3c78dc8dfd28993a883d7fbc7ad97b7d",
+      "size": 4243
     },
     {
       "name": "fullstack-developer",
@@ -420,8 +404,8 @@
         "api",
         "database"
       ],
-      "sha256": "da209514074f13be2a821c9010525bd1a26da8f657e992ab1fe6eedd72c7ff94",
-      "size": 5487
+      "sha256": "b6249fe9cb55e9a5b437f01b51cb52e1557e474abe552b65f3d689fc908b53c3",
+      "size": 4136
     },
     {
       "name": "golang-pro",
@@ -436,8 +420,8 @@
         "microservices",
         "cloud-native"
       ],
-      "sha256": "754d9d5012f7d5375fb509f9c80ab845dc6c463cfb5eb5f104100de00d77442f",
-      "size": 8356
+      "sha256": "8e490d731610b29455b733fb1b1a3a17bbb5659324fb9c64cb09cd706afe6ad6",
+      "size": 4132
     },
     {
       "name": "graphql-architect",
@@ -452,8 +436,25 @@
         "api",
         "query-optimization"
       ],
-      "sha256": "81e35128789b43f768a5f95c951be059bcdc046d2dc9d3cf7017b0be52d80387",
-      "size": 6014
+      "sha256": "104b342476061cef14628733ed579b08c754de5e49a62671f88c4ce0c22f9f1d",
+      "size": 5028
+    },
+    {
+      "name": "incident-responder",
+      "category": "devops",
+      "path": "devops/incident-responder",
+      "mode": "subagent",
+      "description": "Incident response specialist for triage, mitigation, communication, and postmortem",
+      "tags": [
+        "incident-response",
+        "triage",
+        "mitigation",
+        "postmortem",
+        "production",
+        "on-call"
+      ],
+      "sha256": "761997e42829a9ad1f4137ce88ca8cfd486b9570b3facf0dc560c80bea3bca73",
+      "size": 8118
     },
     {
       "name": "java-architect",
@@ -468,8 +469,8 @@
         "enterprise",
         "jvm"
       ],
-      "sha256": "49e09f339891da7eee1556930bde8482ccdf3a194a6ce42b3b7b74806a637c9d",
-      "size": 10309
+      "sha256": "34e68f25c39d7af7bc39178137fe819d90fdf277d626e579b9f7ea55124d9ea5",
+      "size": 5128
     },
     {
       "name": "kotlin-specialist",
@@ -484,8 +485,8 @@
         "multiplatform",
         "jvm"
       ],
-      "sha256": "eebe55f7f7a9811b923c9bc456d68c53848c5719030b10646df4274e6d742c2a",
-      "size": 9379
+      "sha256": "63000a5b6b5aa6825d9ce5798824d3fdd4d1ed06120e92f6b677a7d74ff102de",
+      "size": 4404
     },
     {
       "name": "kubernetes-specialist",
@@ -501,8 +502,24 @@
         "helm",
         "production"
       ],
-      "sha256": "315a1359e03bd6ba666f4f08bd9a0c0967e8980a7d57f35facb0ae06ebd1b487",
-      "size": 6651
+      "sha256": "83c8d5730a6928573409f10a8624e4a600638ada7cc9d85b9fbcb39694c11e7b",
+      "size": 4444
+    },
+    {
+      "name": "legacy-modernizer",
+      "category": "devtools",
+      "path": "devtools/legacy-modernizer",
+      "mode": "subagent",
+      "description": "Legacy codebase modernization using strangler fig, branch by abstraction, and parallel run patterns",
+      "tags": [
+        "legacy",
+        "modernization",
+        "migration",
+        "strangler-fig",
+        "refactoring"
+      ],
+      "sha256": "267d8e25850013520a972f3810a2d9ca9a21919e0c150bd724e06983ae001f6c",
+      "size": 10646
     },
     {
       "name": "linux-admin",
@@ -518,8 +535,8 @@
         "shell",
         "security"
       ],
-      "sha256": "794d0a35ef71098acdc74bb11bd87b12f2751c1d2803cd9a947363b8ce20d9ab",
-      "size": 7504
+      "sha256": "fcc401393827c1a02d6500b8d66d9c54fadf32bc391792a178710d7c018b042a",
+      "size": 4176
     },
     {
       "name": "llm-architect",
@@ -535,8 +552,8 @@
         "nlp",
         "ai"
       ],
-      "sha256": "76c4537e936aeafef04678088544e09638d3ea29b6a54493fbcdd1d0a6b23d1b",
-      "size": 7796
+      "sha256": "67dd47f2a5e247821999f29eba445cc5bf4e8d1fbc15d3d6182d062adb38b565",
+      "size": 5412
     },
     {
       "name": "mcp-developer",
@@ -552,24 +569,8 @@
         "sdk",
         "development"
       ],
-      "sha256": "b7ae28a6476a0b2dce5a3d17f9846d7366d9c0bd00e62f3fabf8d90893a1e690",
-      "size": 5544
-    },
-    {
-      "name": "mcp-protocol-specialist",
-      "category": "mcp",
-      "path": "mcp/mcp-protocol-specialist",
-      "mode": "subagent",
-      "description": "MCP protocol specification, standards compliance, and transport implementation",
-      "tags": [
-        "mcp",
-        "protocol",
-        "json-rpc",
-        "transport",
-        "standards"
-      ],
-      "sha256": "fdcb268c944e6f89f05e579e10c48685fc692ce4901dc4222209ba1a65ee22fa",
-      "size": 4338
+      "sha256": "6bb8bf0085f3a3fba0f9961ae22ef8dfae05f96f43ffc9ff33bd109065756acb",
+      "size": 5538
     },
     {
       "name": "mcp-security-auditor",
@@ -585,25 +586,8 @@
         "compliance",
         "audit"
       ],
-      "sha256": "435536b4a426c0652accff9736494f6ef43161abe344c5aabb06aba7ded720dc",
-      "size": 5421
-    },
-    {
-      "name": "mcp-server-architect",
-      "category": "mcp",
-      "path": "mcp/mcp-server-architect",
-      "mode": "subagent",
-      "description": "MCP server architecture, implementation, and production deployment",
-      "tags": [
-        "mcp",
-        "server",
-        "architecture",
-        "typescript",
-        "python",
-        "deployment"
-      ],
-      "sha256": "6fa4f729eb72bb1c5ce6049f6a29f3fbc2d10b96215f689079187bde540fc3c2",
-      "size": 5913
+      "sha256": "bf6819c08ca4fb40fcd084d1ba4c96f2793b745627c322c7ed0ef96a09ad8a8f",
+      "size": 5156
     },
     {
       "name": "microservices-architect",
@@ -618,8 +602,8 @@
         "service-mesh",
         "event-driven"
       ],
-      "sha256": "9294f94804f7bc57c3dcf1a3e44e47d78b6a9c47c88a6f88da9aea1d15167ca8",
-      "size": 5790
+      "sha256": "c7814949ccbd73238018489d6a835af75e2e616a77f00e068b786dbb9181894a",
+      "size": 4923
     },
     {
       "name": "ml-engineer",
@@ -634,8 +618,8 @@
         "pipelines",
         "training"
       ],
-      "sha256": "e6c9aec7dd0438b4b7329a08a8bd4591db93380c1d3915a298c034794b055bb3",
-      "size": 6370
+      "sha256": "40cabbc306ad1bce0bb6f6fc3dbb0e18826d93afd74c3d1e97ad262f2581e809",
+      "size": 4680
     },
     {
       "name": "mlops-engineer",
@@ -650,8 +634,8 @@
         "deployment",
         "ml-lifecycle"
       ],
-      "sha256": "50a83ddd058414e7d0c4cf5b4aaf3a2c204a2d85f87d2119f1d0c8109b041ac9",
-      "size": 7836
+      "sha256": "a059d01fa50cf4887cf989bf0e1219aa1d367493b369f5b13d4b8b143e3c226f",
+      "size": 4823
     },
     {
       "name": "mobile-developer",
@@ -667,8 +651,25 @@
         "android",
         "cross-platform"
       ],
-      "sha256": "0bd7534d4c173fd0509917f6cfc7e12eaa0ca526f348a8782c6e5aff668220fe",
-      "size": 5858
+      "sha256": "235d7a79333b4af0997dcdb9071140f009e2e8906504c902ec0371b9bfb9fad8",
+      "size": 4899
+    },
+    {
+      "name": "nextjs-developer",
+      "category": "web",
+      "path": "web/nextjs-developer",
+      "mode": "subagent",
+      "description": "Next.js 15+ App Router, Server Components, Partial Pre-Rendering, and modern React with TypeScript",
+      "tags": [
+        "nextjs",
+        "react",
+        "server-components",
+        "app-router",
+        "typescript",
+        "ssr"
+      ],
+      "sha256": "0ee56ff5b6e25ddc89022b0c61ddd035d29f15d98109d937e4657b04dcded072",
+      "size": 4811
     },
     {
       "name": "penetration-tester",
@@ -683,8 +684,8 @@
         "vulnerabilities",
         "offensive"
       ],
-      "sha256": "b7fce0d7a5af0c3449ff9cb516f9a9a4c9279496f612ef8af4943b631d8e02d2",
-      "size": 6115
+      "sha256": "b0cc9f3cd0e5abf1ffc981d43d1e9e6f271104d9251e854acdec374bc02d7e80",
+      "size": 4300
     },
     {
       "name": "performance-engineer",
@@ -699,8 +700,8 @@
         "bottlenecks",
         "benchmarking"
       ],
-      "sha256": "2431eefa3737c53b1acc7ea035f3204c215a6e8a4efb3d4ca2d2cbd2430893d7",
-      "size": 4987
+      "sha256": "b359255c0bd406a8112e1f543ad456b734fc4277a9b6e8ccc8e569a7688dfa26",
+      "size": 4907
     },
     {
       "name": "php-pro",
@@ -715,8 +716,8 @@
         "composer",
         "async"
       ],
-      "sha256": "e4ca4d5fe7cbba63a567cc1e714f54bc7a8e00e99b9dc5268036c2dea0a977a4",
-      "size": 8179
+      "sha256": "bbce49775aae998aa3905c83bd4792595d53686fb54a9111e8e03c4664546762",
+      "size": 4410
     },
     {
       "name": "platform-engineer",
@@ -732,8 +733,8 @@
         "observability",
         "developer-experience"
       ],
-      "sha256": "dab3dbe99d720d7055706dc8fd88667ecaa50aa000e9a7b7ef36415048c8e0f6",
-      "size": 7466
+      "sha256": "023c6d20f56aa7dc24654ed9c96415ddcb4e8b0e6229ae306392fe8adb4e8939",
+      "size": 4076
     },
     {
       "name": "postgres-pro",
@@ -749,8 +750,8 @@
         "performance",
         "query-tuning"
       ],
-      "sha256": "ce685119f0cb3777e6b4ee80ef79f19df20cee7edf39d12bdd8341883f45e4b0",
-      "size": 6715
+      "sha256": "dd4d759cb0b7cdfb0c851b657fe0ce9ed9a8c48aa509428c46f75478bc34d28e",
+      "size": 4865
     },
     {
       "name": "prd",
@@ -766,8 +767,8 @@
         "documentation",
         "planning"
       ],
-      "sha256": "e6f070c0304eb6fe76138dd8f2ef421b4b541bff4ae021d0793141d994091237",
-      "size": 5989
+      "sha256": "ae52bde81243f13be305a82cba6bf9fbce13051741179c3028aaf4654ab9a4b6",
+      "size": 5707
     },
     {
       "name": "product-manager",
@@ -782,8 +783,8 @@
         "prioritization",
         "user-research"
       ],
-      "sha256": "59082914d8eb5eaddc9a4b6f41909219b4a1fdaace13e5e31d2fcfd197a98acb",
-      "size": 5408
+      "sha256": "c9600821a4cd5221d83ea3ec5780a1376517ba07d32e0abd25bfae2235f3da88",
+      "size": 4220
     },
     {
       "name": "project-manager",
@@ -798,8 +799,8 @@
         "stakeholders",
         "budget"
       ],
-      "sha256": "eb94eebf013c9c38d8fde8479732b64f25ad71f301cc73f909a9a5fcc110f631",
-      "size": 6223
+      "sha256": "76889a1fb21233994e1ff5f18a2fa603ddfc9f9e54ccd80ff817dd016ba2f27e",
+      "size": 4745
     },
     {
       "name": "prompt-engineer",
@@ -814,8 +815,8 @@
         "ai",
         "prompt-engineering"
       ],
-      "sha256": "f35f8ba8156e52e6281b982e6fdf0b03259ee7ebee50043fa88dda8850794871",
-      "size": 8865
+      "sha256": "b87fd98d160ee3dfa7f6e50ace613e3db0a788b975d49ee9bb5d37a05e8d675a",
+      "size": 5545
     },
     {
       "name": "python-pro",
@@ -831,8 +832,8 @@
         "django",
         "flask"
       ],
-      "sha256": "2ce397ba699c54ff8ef2fcfbff09c73ae51a445ba5e49a6bf34affb17a707998",
-      "size": 7882
+      "sha256": "8f44ba7d7b1f5e147e0c24ddabd34f95faa69c112242d20df4aa3a48f17b2ca0",
+      "size": 4196
     },
     {
       "name": "qa-expert",
@@ -847,8 +848,8 @@
         "regression",
         "quality-gates"
       ],
-      "sha256": "89f0735f8afad43c44d02da21a6567322eca7ca33fa1225df528aaadf80f0bd0",
-      "size": 4750
+      "sha256": "6a3711e1a3ac3d4afebfa9f1b989141039df3a4eecc7a122f423f45e52ce8f6a",
+      "size": 5070
     },
     {
       "name": "rails-expert",
@@ -864,8 +865,25 @@
         "active-record",
         "full-stack"
       ],
-      "sha256": "bd1670ffed19e9d3d9916ec0d44ca1b95a066a821f4c58e9638d1f6a6b4df345",
-      "size": 9755
+      "sha256": "32426547ba7f437328cfe3174bff0f4a2bb30a2b60659898965efe75ee73f55d",
+      "size": 4565
+    },
+    {
+      "name": "react-specialist",
+      "category": "web",
+      "path": "web/react-specialist",
+      "mode": "subagent",
+      "description": "React 19+ modern hooks, Server Components, Actions, TypeScript, and performance optimization",
+      "tags": [
+        "react",
+        "hooks",
+        "server-components",
+        "typescript",
+        "frontend",
+        "performance"
+      ],
+      "sha256": "b8bc61f218409eb5c86bd110b96ea8519f7585544afa75a3bc3d4486f764a53a",
+      "size": 3987
     },
     {
       "name": "redis-specialist",
@@ -881,8 +899,8 @@
         "streams",
         "performance"
       ],
-      "sha256": "6778db591940f4f3593a69cfe55b753a91dde59c1f407194b60df2025e2d01ee",
-      "size": 6503
+      "sha256": "0ddb4a497b0713bb75a5404ba488271ea29e213973038093aa054c47c0999cfa",
+      "size": 4974
     },
     {
       "name": "refactoring-specialist",
@@ -897,8 +915,8 @@
         "patterns",
         "architecture"
       ],
-      "sha256": "a86a8217914da1604befd0e10c219988f16865596d9b5987fd8df7c463fb3cdc",
-      "size": 5595
+      "sha256": "baf12ef51f2bd8277ef4a9f4fb72dfd862ad72f6dcd94d9cf0282e144ff938eb",
+      "size": 7014
     },
     {
       "name": "rust-pro",
@@ -914,8 +932,8 @@
         "concurrency",
         "systems"
       ],
-      "sha256": "670dfb26cb013393a6bd984e426ba7ad54e39620e83059f63cd9c808b0536016",
-      "size": 9138
+      "sha256": "3b62f8cd9742c4c6319f67fa3151f2375574523ad2fcfa25c866e353dfd362b8",
+      "size": 4462
     },
     {
       "name": "screenshot-ui-analyzer",
@@ -931,8 +949,8 @@
         "layout",
         "components"
       ],
-      "sha256": "36beec6df4c81f18918fb464f130d0f86946c12735f7256d9ff74c27da9c09bb",
-      "size": 4527
+      "sha256": "2033af1765dd2f3d538c7f0a8c2a2c6b494d1073fd4201a2f637413c7bb5c96e",
+      "size": 5520
     },
     {
       "name": "scrum-master",
@@ -948,8 +966,8 @@
         "kanban",
         "facilitation"
       ],
-      "sha256": "67f04e3e43e938fb5075cf731bf168a94c6cfbdbf3dcf3288a1772d119ae527f",
-      "size": 6266
+      "sha256": "a1d67a42361c6a4935015b6d652d97872e77d212cbbb323c39a0e8758b916a77",
+      "size": 5060
     },
     {
       "name": "search-specialist",
@@ -964,8 +982,8 @@
         "information-retrieval",
         "synthesis"
       ],
-      "sha256": "ff8495ca57096afbafbc936dd8ecd5c6e8e6665afd9466ec96d68b05470e6ff6",
-      "size": 8031
+      "sha256": "630759377353f3e42d203570cb6125b3353446bfc169dc8324d409d23b2c0fe5",
+      "size": 5266
     },
     {
       "name": "security-auditor",
@@ -980,8 +998,8 @@
         "vulnerabilities",
         "assessment"
       ],
-      "sha256": "74073e2ba3716e3b9d31980f3073d676870e4ac10c6c14f7bef972de88907a0c",
-      "size": 5954
+      "sha256": "b5875df42b2b6a909b8d482279b5bf3246a4eaa72d5d8f2ecec7d8278c8ff042",
+      "size": 6532
     },
     {
       "name": "security-engineer",
@@ -996,8 +1014,8 @@
         "vulnerability-management",
         "devsecops"
       ],
-      "sha256": "0c225459a47689f589687910fe7c60f0f3ca74a9ac09fbc2e6aa7b4715a3b0e7",
-      "size": 6812
+      "sha256": "bb2fe125d50fa2051f5a3abb5ffe54c62a0d8df02bb2eac735ea3d47fd4b536b",
+      "size": 4447
     },
     {
       "name": "smart-contract-auditor",
@@ -1013,8 +1031,25 @@
         "web3",
         "audit"
       ],
-      "sha256": "62680ce17c3cb3fe5be91cf5c717025b90ae3cf209ca2f1b469f55e13a5fd4a9",
-      "size": 6777
+      "sha256": "956f64d34fa37b4845c5380c7d506cd0228c6503419514dc62116d9cccacbf18",
+      "size": 5047
+    },
+    {
+      "name": "sql-pro",
+      "category": "data-api",
+      "path": "data-api/sql-pro",
+      "mode": "subagent",
+      "description": "Vendor-agnostic SQL specialist for query optimization, schema design, migrations, and performance tuning",
+      "tags": [
+        "sql",
+        "postgresql",
+        "mysql",
+        "sqlite",
+        "query-optimization",
+        "schema-design"
+      ],
+      "sha256": "9b82680fd2ff705375313d4d63d1e0b78f855b63f046442de98bae22787ae49a",
+      "size": 7951
     },
     {
       "name": "sre-engineer",
@@ -1030,8 +1065,8 @@
         "incident-management",
         "observability"
       ],
-      "sha256": "ffefa0d36fb2c6fcdadfb963f91675e71db329abaa2ccf506d20747711d66ce6",
-      "size": 6922
+      "sha256": "009047fab4897f8638d190b5e4e4cd76f0e425105f6d4beb7bfec48edae4f54b",
+      "size": 4629
     },
     {
       "name": "swift-expert",
@@ -1047,8 +1082,8 @@
         "apple",
         "xcode"
       ],
-      "sha256": "b71fcd87756d4035fa924ab6cb6432988da70211547c210d0f34e140260350d2",
-      "size": 10063
+      "sha256": "89beeec1cdde1a906ffb3a53cb2e55e737205cfa405e13f942c42348a3224dae",
+      "size": 4444
     },
     {
       "name": "technical-writer",
@@ -1063,8 +1098,8 @@
         "user-guides",
         "sdk"
       ],
-      "sha256": "fb8850e0676a29a02cc7e1ff489cf8ed822d66fc7049c449982784f0b7798c1d",
-      "size": 5420
+      "sha256": "0dbc82a4567ad4cd6748a7f99e9427a4923a72a51fedfce62a2b126732af7f57",
+      "size": 4433
     },
     {
       "name": "terraform-specialist",
@@ -1080,8 +1115,8 @@
         "hcl",
         "providers"
       ],
-      "sha256": "c3425c693ea206a1817e3d8cbcbb86532d398ea7e1fdbc8c086299cbbddacc0e",
-      "size": 7283
+      "sha256": "1e020c162e33e97b9a2e14df47e06265610043c805b67ae41a11f0ab550fad03",
+      "size": 4970
     },
     {
       "name": "test-automator",
@@ -1097,8 +1132,8 @@
         "coverage",
         "e2e"
       ],
-      "sha256": "8fd793782d84a6380f513a001d4ac0beb67fe1c0770b2668a7914b5b42e46e24",
-      "size": 5632
+      "sha256": "c48c84c1e121bde10739047df929c02f7a5a3fda07dd19f2893cdf44f1d2c5d1",
+      "size": 6185
     },
     {
       "name": "typescript-pro",
@@ -1114,8 +1149,8 @@
         "node",
         "react"
       ],
-      "sha256": "b88c9cdfc76ca31c4cedbfcb0a8b7dd8084e55275c36e0be8f7cfb49c83858f1",
-      "size": 7166
+      "sha256": "91a7228f884f61f576559d4596984a0fafc5a29b631e1f469d7915f5bc322a5b",
+      "size": 4593
     },
     {
       "name": "ui-designer",
@@ -1131,8 +1166,8 @@
         "accessibility",
         "ux"
       ],
-      "sha256": "7b404651ef1f1cbc7ed8ae1fe4ae1bd4cb1be2b2cd33c3696b3aea8974d95ee8",
-      "size": 8727
+      "sha256": "1f355c5766576f297a75a2457d30fb7259d51d9a8a683af893e395d5476d146f",
+      "size": 4535
     },
     {
       "name": "ux-researcher",
@@ -1147,8 +1182,8 @@
         "user-testing",
         "journey-mapping"
       ],
-      "sha256": "d2811100984c9f21723199210a2acd4dee1bb9a794c85ffd841aa46994796c7b",
-      "size": 6840
+      "sha256": "49a3dda7b148c9d1b26deb5c80e2c0f059ff53c5cdf65cd117913c69b7a5325e",
+      "size": 5149
     },
     {
       "name": "vue-expert",
@@ -1164,8 +1199,8 @@
         "composition-api",
         "frontend"
       ],
-      "sha256": "ca16c24d0a930cd95a9ae2ea49bbdc3980605b46e36f9c2b52713dfb2aba0263",
-      "size": 8751
+      "sha256": "806bdbd59c6250d22eac4f99bdd1c20fa52dc65e4025c48f78f049a7cb50f4ea",
+      "size": 4386
     }
   ],
   "packs": {
@@ -1187,8 +1222,8 @@
       "label": "Frontend Stack",
       "description": "Everything you need for modern frontend development",
       "agents": [
-        "expert-react-frontend-engineer",
-        "expert-nextjs-developer",
+        "react-specialist",
+        "nextjs-developer",
         "typescript-pro",
         "ui-designer",
         "performance-engineer",
@@ -1205,7 +1240,8 @@
         "aws-specialist",
         "ci-cd-engineer",
         "linux-admin",
-        "platform-engineer"
+        "platform-engineer",
+        "incident-responder"
       ]
     },
     "fullstack": {
@@ -1214,8 +1250,8 @@
       "agents": [
         "fullstack-developer",
         "typescript-pro",
-        "expert-react-frontend-engineer",
-        "expert-nextjs-developer",
+        "react-specialist",
+        "nextjs-developer",
         "postgres-pro",
         "api-architect",
         "debugger",
@@ -1241,15 +1277,14 @@
       "agents": [
         "security-auditor",
         "penetration-tester",
-        "smart-contract-auditor"
+        "smart-contract-auditor",
+        "compliance-auditor"
       ]
     },
     "mcp": {
       "label": "MCP Development",
       "description": "Complete MCP server development toolkit",
       "agents": [
-        "mcp-protocol-specialist",
-        "mcp-server-architect",
         "mcp-security-auditor",
         "mcp-developer"
       ]
@@ -1262,7 +1297,8 @@
         "test-automator",
         "debugger",
         "performance-engineer",
-        "refactoring-specialist"
+        "refactoring-specialist",
+        "legacy-modernizer"
       ]
     },
     "startup": {
@@ -1271,7 +1307,7 @@
       "agents": [
         "fullstack-developer",
         "typescript-pro",
-        "expert-nextjs-developer",
+        "nextjs-developer",
         "postgres-pro",
         "docker-specialist",
         "product-manager",
@@ -1287,7 +1323,8 @@
         "data-analyst",
         "data-scientist",
         "database-architect",
-        "postgres-pro"
+        "postgres-pro",
+        "sql-pro"
       ]
     },
     "ml-to-production": {
@@ -1306,8 +1343,8 @@
       "label": "Frontend Complete",
       "description": "Every framework and practice for modern frontend development",
       "agents": [
-        "expert-react-frontend-engineer",
-        "expert-nextjs-developer",
+        "react-specialist",
+        "nextjs-developer",
         "vue-expert",
         "angular-architect",
         "accessibility",

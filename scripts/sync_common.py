@@ -905,9 +905,8 @@ def validate_agent_schema(content: str) -> List[str]:
 # ---------------------------------------------------------------------------
 
 _REQUIRED_SECTIONS = [
-    "## Workflow",
     "## Decisions",
-    "## Tools",
+    "## Examples",
     "## Quality Gate",
 ]
 
@@ -917,9 +916,8 @@ def check_template_conformance(content: str) -> List[str]:
 
     Required sections:
     - Identity prose (first prose block after frontmatter, no heading required)
-    - ``## Workflow``
     - ``## Decisions``
-    - ``## Tools``
+    - ``## Examples``
     - ``## Quality Gate``
 
     Returns a list of warning strings (empty = conformant).
