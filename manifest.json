@@ -1048,8 +1048,8 @@
         "query-optimization",
         "schema-design"
       ],
-      "sha256": "9b82680fd2ff705375313d4d63d1e0b78f855b63f046442de98bae22787ae49a",
-      "size": 7951
+      "sha256": "875f3935143200096add9408b935cc6ebd0a102cf68d3c8e44b94b129eff7113",
+      "size": 8546
     },
     {
       "name": "sre-engineer",
@@ -1182,8 +1182,8 @@
         "user-testing",
         "journey-mapping"
       ],
-      "sha256": "49a3dda7b148c9d1b26deb5c80e2c0f059ff53c5cdf65cd117913c69b7a5325e",
-      "size": 5149
+      "sha256": "089d0b5d4756bcab7b4ff32dccf04382a07f38653cbb4dbba3ff5818ab8a86e1",
+      "size": 5786
     },
     {
       "name": "vue-expert",
