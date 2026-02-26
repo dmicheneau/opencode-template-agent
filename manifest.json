@@ -453,8 +453,8 @@
         "production",
         "on-call"
       ],
-      "sha256": "761997e42829a9ad1f4137ce88ca8cfd486b9570b3facf0dc560c80bea3bca73",
-      "size": 8118
+      "sha256": "1a20976f1566657a6f142c060b8f91f05f0a2b93ef48539db0e55f22cd80c120",
+      "size": 8450
     },
     {
       "name": "java-architect",
@@ -684,8 +684,8 @@
         "vulnerabilities",
         "offensive"
       ],
-      "sha256": "b0cc9f3cd0e5abf1ffc981d43d1e9e6f271104d9251e854acdec374bc02d7e80",
-      "size": 4300
+      "sha256": "c9bfbd426274dffff5730119750dc4803dbfadba16388bf9acb23e9d4e018ecc",
+      "size": 7312
     },
     {
       "name": "performance-engineer",
@@ -1031,8 +1031,8 @@
         "web3",
         "audit"
       ],
-      "sha256": "956f64d34fa37b4845c5380c7d506cd0228c6503419514dc62116d9cccacbf18",
-      "size": 5047
+      "sha256": "e330f8b1ab984495900052dd58da75838f29eff1a037dd630e737477e84d5428",
+      "size": 9077
     },
     {
       "name": "sql-pro",
