@@ -3,15 +3,15 @@
 > 🇬🇧 [English version](README.en.md)
 
 [![CI](https://github.com/dmicheneau/opencode-template-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/dmicheneau/opencode-template-agent/actions/workflows/ci.yml)
-![Agents](https://img.shields.io/badge/agents-67-blue)
-![Tests](https://img.shields.io/badge/tests-870%20passing-brightgreen)
+![Agents](https://img.shields.io/badge/agents-69-blue)
+![Tests](https://img.shields.io/badge/tests-593%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Node](https://img.shields.io/badge/node-20%2B-green)
 ![npm](https://img.shields.io/npm/v/opencode-agents?label=npm&color=cb3837)
 
-Registre curé de **67 agents IA** pour [OpenCode](https://opencode.ai), distribué via un CLI zero-dependency et un TUI interactif. Les agents sont des fichiers `.md` contenant des system prompts pour configurer des assistants IA spécialisés.
+Registre curé de **69 agents IA** pour [OpenCode](https://opencode.ai), distribué via un CLI zero-dependency et un TUI interactif. Les agents sont des fichiers `.md` contenant des system prompts pour configurer des assistants IA spécialisés.
 
-Source : [aitmpl.com](https://www.aitmpl.com/agents) (413+ agents disponibles). Les 4 agents primary sont custom.
+Chaque agent suit un format expert à 4 sections : identité, décisions, exemples, quality gate.
 
 ---
 
@@ -135,7 +135,7 @@ flowchart TB
 
     subgraph Data["Couche de donnees"]
         Registry["registry.mjs<br/>Chargeur de manifest<br/>(validation, getAgent,<br/>getCategory, searchAgents,<br/>resolvePackAgents)"]
-        Manifest["manifest.json<br/>67 agents | 10 categories<br/>15 packs"]
+        Manifest["manifest.json<br/>69 agents | 10 categories<br/>15 packs"]
         Installer["installer.mjs<br/>Telechargement GitHub raw<br/>→ .opencode/agents/"]
     end
 
@@ -197,22 +197,119 @@ Deux diagrammes supplémentaires sont disponibles dans [`docs/architecture.md`](
 
 ## 📋 Agents disponibles
 
-67 agents — 4 primary (`Tab` dans OpenCode) + 63 subagents (`@catégorie/nom`).
+69 agents répartis en 10 catégories, invocables via `@catégorie/nom`.
 
 | Catégorie | Agents | Description |
 |-----------|--------|-------------|
 | 💻 Languages | 11 | TypeScript, Python, Go, Rust, Java, C#, PHP, Kotlin, C++, Rails, Swift |
 | 🤖 AI | 9 | AI engineering, data science, ML, MLOps, LLM, prompts, recherche, data engineering, data analysis |
-| 🌐 Web | 9 | React, Next.js, Vue, Angular, fullstack, mobile, UI design, analyse UI, accessibilité |
-| 🗄️ Data & API | 5 | Architecture API, GraphQL, bases de données, PostgreSQL, Redis |
-| ⚙️ DevOps | 10 | Docker, Kubernetes, Terraform, AWS, CI/CD, Linux, plateforme, SRE |
-| 🛠️ DevTools | 8 | Code review, debugging, performance, refactoring, tests, orchestration, microservices, QA |
-| 🔒 Security | 4 | Audit sécurité, tests de pénétration, smart contracts, security engineering |
-| 🔌 MCP | 4 | Protocole MCP, serveurs, développement, audit sécurité |
+| 🌐 Web | 9 | React, Next.js, Vue, Angular, mobile, UI design, analyse UI, accessibilité, fullstack |
+| 🗄️ Data & API | 6 | Architecture API, GraphQL, bases de données, PostgreSQL, Redis, SQL |
+| ⚙️ DevOps | 9 | Docker, Kubernetes, Terraform, AWS, CI/CD, Linux, plateforme, SRE, incident response |
+| 🛠️ DevTools | 8 | Code review, debugging, performance, refactoring, tests, orchestration, microservices, QA, legacy modernization |
+| 🔒 Security | 5 | Audit sécurité, tests de pénétration, smart contracts, security engineering, conformité |
+| 🔌 MCP | 2 | Développement MCP, audit sécurité MCP |
 | 📊 Business | 6 | Product management, project management, PRD, Scrum, UX research, business analysis |
 | 📝 Docs | 4 | Documentation technique, API, rédaction, diagrammes |
 
-> ⭐ **4 agents primary** (`Tab` dans OpenCode) : `cloud-architect`, `devops-engineer`, `fullstack-developer`, `episode-orchestrator`
+---
+
+## 📊 Qualité des agents
+
+Chaque agent est évalué automatiquement par `scripts/quality_scorer.py` sur **8 dimensions** (score 1-5 chacune) :
+
+| Dimension | Ce qui est mesuré | 5/5 |
+|-----------|-------------------|-----|
+| `frontmatter` | Présence de `description`, `mode`, `permission` | 3 champs présents |
+| `identity` | Paragraphe d'identité entre le frontmatter et le premier `##` | 50-300 mots |
+| `decisions` | Section `## Decisions` avec arbres IF/THEN | ≥ 5 règles |
+| `examples` | Section `## Examples` avec blocs de code | ≥ 3 exemples |
+| `quality_gate` | Section `## Quality Gate` avec critères de validation | ≥ 5 critères |
+| `conciseness` | Nombre de lignes (70-120 idéal) et ratio de filler phrases | 70-120 lignes, ≤ 3% filler |
+| `no_banned_sections` | Absence des anciennes sections (Workflow, Tools, Anti-patterns, Collaboration) | 0 section interdite |
+| `version_pinning` | Références à des versions et années dans l'identité | Version + année présents |
+
+**Seuil de passage** : moyenne ≥ 3.5 ET aucune dimension < 2
+
+**Labels** : Excellent (≥ 4.5) · Good (≥ 3.5) · Needs improvement (≥ 2.5) · Poor (< 2.5)
+
+### Catalogue des agents
+
+**69 agents** · Score moyen : **4.59/5** · 100% pass rate · 49 Excellent, 20 Good
+
+> Coût token estimé : `taille en bytes / 4` (approximation pour contenu anglais + code).
+
+| Catégorie | Agent | Score | Label | ~Tokens | Lignes |
+|-----------|-------|-------|-------|---------|--------|
+| ai | ai-engineer | 4.75 | Excellent | 1 165 | 113 |
+| ai | data-analyst | 4.75 | Excellent | 1 089 | 102 |
+| ai | data-engineer | 4.75 | Excellent | 1 181 | 106 |
+| ai | data-scientist | 4.75 | Excellent | 1 218 | 108 |
+| ai | llm-architect | 4.88 | Excellent | 1 353 | 125 |
+| ai | ml-engineer | 4.75 | Excellent | 1 170 | 108 |
+| ai | mlops-engineer | 4.75 | Excellent | 1 206 | 125 |
+| ai | prompt-engineer | 4.75 | Excellent | 1 386 | 121 |
+| ai | search-specialist | 4.62 | Excellent | 1 317 | 114 |
+| business | business-analyst | 4.62 | Excellent | 1 260 | 104 |
+| business | prd | 4.25 | Good | 1 407 | 74 |
+| business | product-manager | 4.25 | Good | 1 043 | 85 |
+| business | project-manager | 4.38 | Good | 1 174 | 89 |
+| business | scrum-master | 4.25 | Good | 1 265 | 98 |
+| business | ux-researcher | 4.25 | Good | 1 447 | 116 |
+| data-api | api-architect | 4.75 | Excellent | 1 352 | 128 |
+| data-api | database-architect | 4.50 | Excellent | 1 265 | 113 |
+| data-api | graphql-architect | 4.88 | Excellent | 1 249 | 128 |
+| data-api | postgres-pro | 4.50 | Excellent | 1 209 | 119 |
+| data-api | redis-specialist | 4.88 | Excellent | 1 244 | 122 |
+| data-api | sql-pro | 4.50 | Excellent | 2 137 | 165 |
+| devops | aws-specialist | 4.88 | Excellent | 1 087 | 123 |
+| devops | ci-cd-engineer | 4.62 | Excellent | 1 104 | 118 |
+| devops | docker-specialist | 4.62 | Excellent | 1 089 | 130 |
+| devops | incident-responder | 4.25 | Good | 2 113 | 182 |
+| devops | kubernetes-specialist | 4.88 | Excellent | 1 111 | 136 |
+| devops | linux-admin | 4.62 | Excellent | 1 044 | 127 |
+| devops | platform-engineer | 4.88 | Excellent | 1 019 | 118 |
+| devops | sre-engineer | 4.38 | Good | 1 157 | 122 |
+| devops | terraform-specialist | 4.88 | Excellent | 1 243 | 139 |
+| devtools | code-reviewer | 4.25 | Good | 1 214 | 110 |
+| devtools | debugger | 4.25 | Good | 1 369 | 122 |
+| devtools | legacy-modernizer | 4.25 | Good | 2 662 | 220 |
+| devtools | microservices-architect | 4.50 | Excellent | 1 231 | 150 |
+| devtools | performance-engineer | 4.25 | Good | 1 227 | 119 |
+| devtools | qa-expert | 4.25 | Good | 1 268 | 123 |
+| devtools | refactoring-specialist | 4.50 | Excellent | 1 754 | 186 |
+| devtools | test-automator | 4.50 | Excellent | 1 546 | 161 |
+| docs | api-documenter | 4.62 | Excellent | 1 196 | 118 |
+| docs | diagram-architect | 4.62 | Excellent | 1 173 | 111 |
+| docs | documentation-engineer | 4.38 | Good | 1 050 | 105 |
+| docs | technical-writer | 4.25 | Good | 1 098 | 120 |
+| languages | cpp-pro | 4.62 | Excellent | 1 096 | 120 |
+| languages | csharp-developer | 4.62 | Excellent | 1 072 | 114 |
+| languages | golang-pro | 4.88 | Excellent | 1 033 | 114 |
+| languages | java-architect | 4.88 | Excellent | 1 282 | 117 |
+| languages | kotlin-specialist | 4.88 | Excellent | 1 101 | 102 |
+| languages | php-pro | 4.88 | Excellent | 1 103 | 119 |
+| languages | python-pro | 4.88 | Excellent | 1 049 | 120 |
+| languages | rails-expert | 4.88 | Excellent | 1 141 | 120 |
+| languages | rust-pro | 4.88 | Excellent | 1 116 | 119 |
+| languages | swift-expert | 4.88 | Excellent | 1 111 | 119 |
+| languages | typescript-pro | 4.88 | Excellent | 1 148 | 107 |
+| mcp | mcp-developer | 4.88 | Excellent | 1 385 | 125 |
+| mcp | mcp-security-auditor | 4.12 | Good | 1 289 | 87 |
+| security | compliance-auditor | 4.75 | Excellent | 1 806 | 107 |
+| security | penetration-tester | 4.62 | Excellent | 1 828 | 137 |
+| security | security-auditor | 4.25 | Good | 1 633 | 104 |
+| security | security-engineer | 4.25 | Good | 1 112 | 109 |
+| security | smart-contract-auditor | 4.75 | Excellent | 2 269 | 126 |
+| web | accessibility | 4.50 | Excellent | 1 273 | 107 |
+| web | angular-architect | 4.25 | Good | 1 282 | 125 |
+| web | fullstack-developer | 4.62 | Excellent | 1 034 | 103 |
+| web | mobile-developer | 4.50 | Excellent | 1 223 | 125 |
+| web | nextjs-developer | 4.25 | Good | 1 201 | 126 |
+| web | react-specialist | 4.88 | Excellent | 995 | 104 |
+| web | screenshot-ui-analyzer | 4.25 | Good | 1 380 | 99 |
+| web | ui-designer | 4.62 | Excellent | 1 132 | 103 |
+| web | vue-expert | 4.88 | Excellent | 1 095 | 104 |
 
 ---
 
@@ -223,17 +320,17 @@ Deux diagrammes supplémentaires sont disponibles dans [`docs/architecture.md`](
 | Pack | Agents | Description |
 |------|--------|-------------|
 | `backend` | postgres-pro, redis-specialist, database-architect, api-architect, python-pro, typescript-pro, debugger, test-automator | Stack backend |
-| `frontend` | expert-react-frontend-engineer, expert-nextjs-developer, typescript-pro, ui-designer, performance-engineer, test-automator | Stack frontend |
-| `devops` | devops-engineer, cloud-architect, docker-specialist, kubernetes-specialist, terraform-specialist, aws-specialist, ci-cd-engineer, linux-admin, platform-engineer | Infrastructure |
-| `fullstack` | fullstack-developer, typescript-pro, expert-react-frontend-engineer, expert-nextjs-developer, postgres-pro, api-architect, debugger, test-automator, code-reviewer | Full stack |
+| `frontend` | react-specialist, nextjs-developer, typescript-pro, ui-designer, performance-engineer, test-automator | Stack frontend |
+| `devops` | docker-specialist, kubernetes-specialist, terraform-specialist, aws-specialist, ci-cd-engineer, linux-admin, platform-engineer, incident-responder | Infrastructure |
+| `fullstack` | fullstack-developer, typescript-pro, react-specialist, nextjs-developer, postgres-pro, api-architect, debugger, test-automator, code-reviewer | Full stack |
 | `ai` | ai-engineer, data-scientist, ml-engineer, llm-architect, prompt-engineer, search-specialist | IA & ML |
-| `security` | security-auditor, penetration-tester, smart-contract-auditor | Sécurité |
-| `mcp` | mcp-protocol-specialist, mcp-server-architect, mcp-developer, mcp-security-auditor | MCP servers |
-| `quality` | code-reviewer, test-automator, debugger, performance-engineer, refactoring-specialist | Qualité code |
-| `startup` | fullstack-developer, typescript-pro, expert-nextjs-developer, postgres-pro, docker-specialist, product-manager, ui-designer, test-automator | Kit startup |
-| `data-stack` | data-engineer, data-analyst, data-scientist, database-architect, postgres-pro | Stack données |
+| `security` | security-auditor, penetration-tester, smart-contract-auditor, compliance-auditor | Sécurité |
+| `mcp` | mcp-developer, mcp-security-auditor | MCP servers |
+| `quality` | code-reviewer, test-automator, debugger, performance-engineer, refactoring-specialist, legacy-modernizer | Qualité code |
+| `startup` | fullstack-developer, typescript-pro, nextjs-developer, postgres-pro, docker-specialist, product-manager, ui-designer, test-automator | Kit startup |
+| `data-stack` | data-engineer, data-analyst, data-scientist, database-architect, postgres-pro, sql-pro | Stack données |
 | `ml-to-production` | data-scientist, ml-engineer, mlops-engineer, llm-architect, docker-specialist, kubernetes-specialist | ML en production |
-| `frontend-complete` | expert-react-frontend-engineer, expert-nextjs-developer, vue-expert, angular-architect, accessibility, ui-designer | Frontend complet |
+| `frontend-complete` | react-specialist, nextjs-developer, vue-expert, angular-architect, accessibility, ui-designer | Frontend complet |
 | `ship-it-safely` | ci-cd-engineer, docker-specialist, kubernetes-specialist, sre-engineer, security-engineer, qa-expert | Déploiement sûr |
 | `product-discovery` | product-manager, ux-researcher, business-analyst, prd, ui-designer | Découverte produit |
 | `architecture-docs` | microservices-architect, api-architect, database-architect, diagram-architect, documentation-engineer | Architecture & docs |
@@ -265,7 +362,7 @@ Les agents sont sourcés depuis [aitmpl.com](https://www.aitmpl.com/agents) mais
 
 ### Pourquoi pas de sync automatique ?
 
-Les agents upstream (~133 disponibles) suivent un format générique (listes de compétences, métriques fictives). Les agents du projet suivent un format expert (workflow opérationnel, arbres de décision, quality gates, anti-patterns). La différence de qualité (3-4/10 vs 8-9/10) rend l'import automatique contre-productif.
+Les agents upstream (~133 disponibles) suivent un format générique (listes de compétences, métriques fictives). Les agents du projet suivent un format expert à 4 sections (identité, décisions, exemples, quality gate). La différence de qualité (3-4/10 vs 8-9/10) rend l'import automatique contre-productif.
 
 ### Ajouter un nouvel agent
 
@@ -273,12 +370,12 @@ Les agents upstream (~133 disponibles) suivent un format générique (listes de 
    ```bash
    python3 scripts/sync-agents.py --list --tier=extended
    ```
-2. **Évaluation** — vérifier que l'agent apporte une compétence non couverte par les 67 agents existants
+2. **Évaluation** — vérifier que l'agent apporte une compétence non couverte par les 69 agents existants
 3. **Dry-run upstream** — lancer le workflow en mode discovery pour récupérer le frontmatter et les permissions sans modifier le repo :
    ```bash
    gh workflow run "Sync Agents" -f tier=core -f dry_run=true
    ```
-4. **Réécriture** — réécrire le body avec le template du projet (Workflow → Décisions → Quality Gate → Anti-patterns → Collaboration)
+4. **Réécriture** — réécrire le body avec le template du projet (Identité → Decisions → Examples → Quality Gate)
 
 ### Scripts disponibles
 
@@ -331,7 +428,7 @@ git push --tags
 
 ## 🧪 Tests
 
-**870 tests** (559 JS + 311 Python).
+**593 tests** (283 JS + 310 Python).
 
 ```bash
 # Tous les tests JS (CLI + TUI)
