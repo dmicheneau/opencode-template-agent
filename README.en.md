@@ -359,7 +359,7 @@ Dependabot monitors the SHA pins of GitHub Actions used in workflows and automat
 
 ## 🔄 Agent synchronization
 
-Agents are sourced from [aitmpl.com](https://www.aitmpl.com/agents) but **manually curated** to ensure high quality. The automated weekly sync has been disabled — each agent goes through an expert rewriting process before integration.
+Agents come from two sources: the majority originates from [aitmpl.com](https://www.aitmpl.com/agents) ([claude-code-templates](https://github.com/davila7/claude-code-templates)), and some are original creations of this project (aws-specialist, ci-cd-engineer, docker-specialist, linux-admin, redis-specialist, mcp-security-auditor, prd, screenshot-ui-analyzer). All agents are **manually curated** and go through an expert rewriting process before integration — the automated weekly sync has been disabled to ensure high quality.
 
 ### Why no automatic sync?
 
@@ -468,7 +468,7 @@ Contributions are welcome! See the open [issues](https://github.com/dmicheneau/o
 
 Each agent must meet the quality threshold: **average score ≥ 3.5** and **no dimension < 2**. See the [Agent quality](#-agent-quality) section for dimension details.
 
-Contributions sourced from [aitmpl.com](https://www.aitmpl.com/agents) ([claude-code-templates](https://github.com/davila7/claude-code-templates)).
+Agents primarily sourced from [aitmpl.com](https://www.aitmpl.com/agents) ([claude-code-templates](https://github.com/davila7/claude-code-templates)), with original project creations. All manually rewritten and curated.
 
 ---
 

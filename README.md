@@ -359,7 +359,7 @@ Dependabot surveille les SHA des GitHub Actions utilisées dans les workflows et
 
 ## 🔄 Synchronisation des agents
 
-Les agents sont sourcés depuis [aitmpl.com](https://www.aitmpl.com/agents) mais **curés manuellement** pour garantir un haut niveau de qualité. La synchronisation automatique hebdomadaire a été désactivée — chaque agent passe par un processus de réécriture experte avant intégration.
+Les agents proviennent de deux sources : la majorité est issue de [aitmpl.com](https://www.aitmpl.com/agents) ([claude-code-templates](https://github.com/davila7/claude-code-templates)), et certains sont des créations originales du projet (aws-specialist, ci-cd-engineer, docker-specialist, linux-admin, redis-specialist, mcp-security-auditor, prd, screenshot-ui-analyzer). Tous les agents sont **curés manuellement** et passent par un processus de réécriture experte avant intégration — la synchronisation automatique hebdomadaire a été désactivée pour garantir un haut niveau de qualité.
 
 ### Pourquoi pas de sync automatique ?
 
@@ -468,7 +468,7 @@ Les contributions sont les bienvenues ! Voir les [issues](https://github.com/dmi
 
 Chaque agent doit atteindre le seuil de qualité : **score moyen ≥ 3.5** et **aucune dimension < 2**. Consultez la section [Qualité des agents](#-qualité-des-agents) pour le détail des dimensions.
 
-Agents sourcés depuis [aitmpl.com](https://www.aitmpl.com/agents) ([claude-code-templates](https://github.com/davila7/claude-code-templates)).
+Agents majoritairement sourcés depuis [aitmpl.com](https://www.aitmpl.com/agents) ([claude-code-templates](https://github.com/davila7/claude-code-templates)), avec des créations originales du projet. Tous réécrits et curés manuellement.
 
 ---
 
