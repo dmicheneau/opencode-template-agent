@@ -30,7 +30,7 @@ readonly VERSION="7.0.0"
 readonly REPO_URL="https://github.com/dmicheneau/opencode-template-agent.git"
 
 if [[ -z "${HOME:-}" ]]; then
-    printf 'FATAL: $HOME is not set. Cannot determine installation paths.\n' >&2
+    printf "FATAL: \$HOME is not set. Cannot determine installation paths.\n" >&2
     exit 1
 fi
 
