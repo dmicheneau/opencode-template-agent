@@ -234,83 +234,84 @@ Each agent is automatically scored by `scripts/quality_scorer.py` across **8 dim
 **Labels**: Excellent (≥ 4.5) · Good (≥ 3.5) · Needs improvement (≥ 2.5) · Poor (< 2.5)
 
 ### Agent catalog
-
+<!-- SCORES:BEGIN -->
 **69 agents** · Average score: **4.59/5** · 100% pass rate · 49 Excellent, 20 Good
 
 > Estimated token cost: `size in bytes / 4` (approximation for English + code content).
 
 | Category | Agent | Score | Label | ~Tokens | Lines |
 |----------|-------|-------|-------|---------|-------|
-| ai | ai-engineer | 4.75 | Excellent | 1,165 | 113 |
-| ai | data-analyst | 4.75 | Excellent | 1,089 | 102 |
-| ai | data-engineer | 4.75 | Excellent | 1,181 | 106 |
+| ai | ai-engineer | 4.75 | Excellent | 1,164 | 113 |
+| ai | data-analyst | 4.75 | Excellent | 1,088 | 102 |
+| ai | data-engineer | 4.75 | Excellent | 1,180 | 106 |
 | ai | data-scientist | 4.75 | Excellent | 1,218 | 108 |
 | ai | llm-architect | 4.88 | Excellent | 1,353 | 125 |
 | ai | ml-engineer | 4.75 | Excellent | 1,170 | 108 |
-| ai | mlops-engineer | 4.75 | Excellent | 1,206 | 125 |
+| ai | mlops-engineer | 4.75 | Excellent | 1,205 | 125 |
 | ai | prompt-engineer | 4.75 | Excellent | 1,386 | 121 |
-| ai | search-specialist | 4.62 | Excellent | 1,317 | 114 |
+| ai | search-specialist | 4.62 | Excellent | 1,316 | 114 |
 | business | business-analyst | 4.62 | Excellent | 1,260 | 104 |
 | business | prd | 4.25 | Good | 1,407 | 74 |
 | business | product-manager | 4.25 | Good | 1,043 | 85 |
 | business | project-manager | 4.38 | Good | 1,174 | 89 |
 | business | scrum-master | 4.25 | Good | 1,265 | 98 |
-| business | ux-researcher | 4.25 | Good | 1,447 | 116 |
-| data-api | api-architect | 4.75 | Excellent | 1,352 | 128 |
+| business | ux-researcher | 4.25 | Good | 1,446 | 116 |
+| data-api | api-architect | 4.75 | Excellent | 1,351 | 128 |
 | data-api | database-architect | 4.50 | Excellent | 1,265 | 113 |
 | data-api | graphql-architect | 4.88 | Excellent | 1,249 | 128 |
-| data-api | postgres-pro | 4.50 | Excellent | 1,209 | 119 |
-| data-api | redis-specialist | 4.88 | Excellent | 1,244 | 122 |
-| data-api | sql-pro | 4.50 | Excellent | 2,137 | 165 |
+| data-api | postgres-pro | 4.50 | Excellent | 1,208 | 119 |
+| data-api | redis-specialist | 4.88 | Excellent | 1,243 | 122 |
+| data-api | sql-pro | 4.50 | Excellent | 2,136 | 165 |
 | devops | aws-specialist | 4.88 | Excellent | 1,087 | 123 |
-| devops | ci-cd-engineer | 4.62 | Excellent | 1,104 | 118 |
+| devops | ci-cd-engineer | 4.62 | Excellent | 1,103 | 118 |
 | devops | docker-specialist | 4.62 | Excellent | 1,089 | 130 |
-| devops | incident-responder | 4.25 | Good | 2,113 | 182 |
+| devops | incident-responder | 4.25 | Good | 2,112 | 182 |
 | devops | kubernetes-specialist | 4.88 | Excellent | 1,111 | 136 |
 | devops | linux-admin | 4.62 | Excellent | 1,044 | 127 |
 | devops | platform-engineer | 4.88 | Excellent | 1,019 | 118 |
 | devops | sre-engineer | 4.38 | Good | 1,157 | 122 |
-| devops | terraform-specialist | 4.88 | Excellent | 1,243 | 139 |
+| devops | terraform-specialist | 4.88 | Excellent | 1,242 | 139 |
 | devtools | code-reviewer | 4.25 | Good | 1,214 | 110 |
 | devtools | debugger | 4.25 | Good | 1,369 | 122 |
-| devtools | legacy-modernizer | 4.25 | Good | 2,662 | 220 |
-| devtools | microservices-architect | 4.50 | Excellent | 1,231 | 150 |
-| devtools | performance-engineer | 4.25 | Good | 1,227 | 119 |
-| devtools | qa-expert | 4.25 | Good | 1,268 | 123 |
-| devtools | refactoring-specialist | 4.50 | Excellent | 1,754 | 186 |
+| devtools | legacy-modernizer | 4.25 | Good | 2,661 | 220 |
+| devtools | microservices-architect | 4.50 | Excellent | 1,230 | 150 |
+| devtools | performance-engineer | 4.25 | Good | 1,226 | 119 |
+| devtools | qa-expert | 4.25 | Good | 1,267 | 123 |
+| devtools | refactoring-specialist | 4.50 | Excellent | 1,753 | 186 |
 | devtools | test-automator | 4.50 | Excellent | 1,546 | 161 |
-| docs | api-documenter | 4.62 | Excellent | 1,196 | 118 |
+| docs | api-documenter | 4.62 | Excellent | 1,195 | 118 |
 | docs | diagram-architect | 4.62 | Excellent | 1,173 | 111 |
 | docs | documentation-engineer | 4.38 | Good | 1,050 | 105 |
-| docs | technical-writer | 4.25 | Good | 1,098 | 120 |
+| docs | technical-writer | 4.25 | Good | 1,097 | 120 |
 | languages | cpp-pro | 4.62 | Excellent | 1,096 | 120 |
-| languages | csharp-developer | 4.62 | Excellent | 1,072 | 114 |
+| languages | csharp-developer | 4.62 | Excellent | 1,071 | 114 |
 | languages | golang-pro | 4.88 | Excellent | 1,033 | 114 |
 | languages | java-architect | 4.88 | Excellent | 1,282 | 117 |
 | languages | kotlin-specialist | 4.88 | Excellent | 1,101 | 102 |
-| languages | php-pro | 4.88 | Excellent | 1,103 | 119 |
+| languages | php-pro | 4.88 | Excellent | 1,102 | 119 |
 | languages | python-pro | 4.88 | Excellent | 1,049 | 120 |
 | languages | rails-expert | 4.88 | Excellent | 1,141 | 120 |
-| languages | rust-pro | 4.88 | Excellent | 1,116 | 119 |
+| languages | rust-pro | 4.88 | Excellent | 1,115 | 119 |
 | languages | swift-expert | 4.88 | Excellent | 1,111 | 119 |
 | languages | typescript-pro | 4.88 | Excellent | 1,148 | 107 |
-| mcp | mcp-developer | 4.88 | Excellent | 1,385 | 125 |
+| mcp | mcp-developer | 4.88 | Excellent | 1,384 | 125 |
 | mcp | mcp-security-auditor | 4.12 | Good | 1,289 | 87 |
-| security | compliance-auditor | 4.75 | Excellent | 1,806 | 107 |
+| security | compliance-auditor | 4.75 | Excellent | 1,805 | 107 |
 | security | penetration-tester | 4.62 | Excellent | 1,828 | 137 |
 | security | security-auditor | 4.25 | Good | 1,633 | 104 |
-| security | security-engineer | 4.25 | Good | 1,112 | 109 |
+| security | security-engineer | 4.25 | Good | 1,111 | 109 |
 | security | smart-contract-auditor | 4.75 | Excellent | 2,269 | 126 |
 | web | accessibility | 4.50 | Excellent | 1,273 | 107 |
 | web | angular-architect | 4.25 | Good | 1,282 | 125 |
 | web | fullstack-developer | 4.62 | Excellent | 1,034 | 103 |
 | web | mobile-developer | 4.50 | Excellent | 1,223 | 125 |
 | web | nextjs-developer | 4.25 | Good | 1,201 | 126 |
-| web | react-specialist | 4.88 | Excellent | 995 | 104 |
+| web | react-specialist | 4.88 | Excellent | 994 | 104 |
 | web | screenshot-ui-analyzer | 4.25 | Good | 1,380 | 99 |
-| web | ui-designer | 4.62 | Excellent | 1,132 | 103 |
-| web | vue-expert | 4.88 | Excellent | 1,095 | 104 |
+| web | ui-designer | 4.62 | Excellent | 1,131 | 103 |
+| web | vue-expert | 4.88 | Excellent | 1,094 | 104 |
 
+<!-- SCORES:END -->
 ---
 
 ## 🎒 Packs
@@ -386,6 +387,7 @@ Upstream agents (~133 available) follow a generic format (capability lists, fict
 | `scripts/sync-agents.py` | Downloads and converts agents from the upstream repo |
 | `scripts/update-manifest.py` | Merges sync manifest with the main manifest |
 | `scripts/sync_common.py` | Shared HTTP utilities, ETag cache, frontmatter validation |
+| `scripts/generate_readme_scores.py` | Regenerates quality score tables in both READMEs. `--check` mode for CI verification. |
 
 ---
 
@@ -449,7 +451,24 @@ python3 -m pytest tests/test_update_manifest.py -v
 
 Contributions are welcome! See the open [issues](https://github.com/dmicheneau/opencode-template-agent/issues).
 
-Agents sourced from [aitmpl.com](https://www.aitmpl.com/agents) ([claude-code-templates](https://github.com/davila7/claude-code-templates)).
+### Modify or add an agent
+
+1. Create or edit the file in `agents/<category>/<name>.md`
+2. Follow the 4-section template: Identity, Decisions, Examples, Quality Gate
+3. Regenerate the README scores:
+   ```bash
+   python3 scripts/generate_readme_scores.py
+   ```
+4. Commit the agent files **and** the updated READMEs together
+5. CI will automatically verify that scores are up to date
+
+> **Tip**: run `python3 scripts/quality_scorer.py agents/<category>/<name>.md` to see the detailed score before updating the READMEs.
+
+### Minimum quality
+
+Each agent must meet the quality threshold: **average score ≥ 3.5** and **no dimension < 2**. See the [Agent quality](#-agent-quality) section for dimension details.
+
+Contributions sourced from [aitmpl.com](https://www.aitmpl.com/agents) ([claude-code-templates](https://github.com/davila7/claude-code-templates)).
 
 ---
 

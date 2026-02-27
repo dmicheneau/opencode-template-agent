@@ -73,7 +73,7 @@ jobs:
 
       - name: Check Python syntax
         run: |
-          for f in scripts/sync-agents.py scripts/sync_common.py scripts/update-manifest.py scripts/sync-skills.py; do
+          for f in scripts/sync-agents.py scripts/sync_common.py scripts/update-manifest.py scripts/sync-skills.py scripts/generate_readme_scores.py; do
             python3 -c "import ast; ast.parse(open('$f').read())"
           done
 
@@ -138,6 +138,9 @@ jobs:
 
       - name: Validate manifest.json
         run: python3 -c "import json; json.load(open('manifest.json'))" && echo "manifest.json is valid JSON"
+
+      - name: Verify README scores are up to date
+        run: python3 scripts/generate_readme_scores.py --check
 
   validate-agents:
     runs-on: ubuntu-latest
