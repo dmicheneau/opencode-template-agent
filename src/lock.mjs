@@ -77,9 +77,10 @@ export function isValidLockEntry(entry) {
  * Invalid entries (missing `sha256`, etc.) are silently filtered out.
  * @param {string} [cwd]
  * @param {string} [basePath]  manifest base_path override
+ * @param {{ readonly?: boolean }} [options]  When readonly=true, skip backup of corrupted lock files
  * @returns {LockData}
  */
-export function readLock(cwd = process.cwd(), basePath) {
+export function readLock(cwd = process.cwd(), basePath, { readonly = false } = {}) {
   const p = getLockPath(cwd, basePath);
   if (!existsSync(p)) return {};
   try {
@@ -102,14 +103,17 @@ export function readLock(cwd = process.cwd(), basePath) {
     // Only recover from JSON parse errors — re-throw filesystem errors (EACCES, etc.)
     if (!(err instanceof SyntaxError)) throw err;
 
-    // Back up corrupted file for debugging, then start fresh
-    const bakPath = p + '.bak';
-    let backedUp = false;
-    try {
-      renameSync(p, bakPath);
-      backedUp = true;
-    } catch { /* backup failed — proceed anyway */ }
-    const suffix = backedUp ? `, backed up to ${bakPath}` : ' (backup failed)';
+    let suffix = '';
+    if (!readonly) {
+      // Back up corrupted file for debugging, then start fresh
+      const bakPath = p + '.bak';
+      let backedUp = false;
+      try {
+        renameSync(p, bakPath);
+        backedUp = true;
+      } catch { /* backup failed — proceed anyway */ }
+      suffix = backedUp ? `, backed up to ${bakPath}` : ' (backup failed)';
+    }
     process.stderr.write(
       `Warning: Lock file corrupted${suffix}. Run 'rehash' to rebuild.\n`,
     );

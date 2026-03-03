@@ -1,0 +1,22 @@
+# ─── Distribution: exclude from git archive / GitHub tarballs ────────────────
+
+.plan/             export-ignore
+.github/           export-ignore
+scripts/           export-ignore
+tests/             export-ignore
+docs/              export-ignore
+.opencode/         export-ignore
+agents/            export-ignore
+
+.gitignore         export-ignore
+.gitattributes     export-ignore
+.npmignore         export-ignore
+AGENTS.md          export-ignore
+CODE_OF_CONDUCT.md export-ignore
+CONTRIBUTING.md    export-ignore
+CHANGELOG.md       export-ignore
+README.en.md       export-ignore
+bun.lock           export-ignore
+cliff.toml         export-ignore
+install.sh         export-ignore
+*.test.*           export-ignore

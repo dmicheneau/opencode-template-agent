@@ -17,7 +17,7 @@ import {
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
-function sanitizeError(err: unknown): string {
+export function sanitizeError(err: unknown): string {
   const msg = err instanceof Error ? err.message : String(err);
   return msg
     .replace(/[A-Za-z]:\\(?:[^\\]+\\)+/g, "…\\")   // Windows (case-insensitive drive)

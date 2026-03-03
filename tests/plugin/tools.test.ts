@@ -10,6 +10,7 @@ import {
   list_agents,
   get_agent,
   check_health,
+  sanitizeError,
 } from "../../plugin/tools.ts";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
@@ -159,6 +160,23 @@ describe("list_agents", () => {
       `Expected available categories listed in:\n${result}`,
     );
   });
+
+  it("should error for unknown pack", async () => {
+    const result = await list_agents.execute(
+      { pack: "nonexistent" },
+      makeCtx(PROJECT_DIR),
+    );
+
+    assert.ok(
+      result.includes("not found"),
+      `Expected "not found" in:\n${result}`,
+    );
+    // Should list available packs
+    assert.ok(
+      result.includes("fullstack") && result.includes("frontend"),
+      `Expected available packs listed in:\n${result}`,
+    );
+  });
 });
 
 // ─── get_agent ──────────────────────────────────────────────────────────────
@@ -268,5 +286,74 @@ describe("check_health", () => {
     } finally {
       rmSync(tmpDir, { recursive: true, force: true });
     }
+  });
+});
+
+// ─── sanitizeError ──────────────────────────────────────────────────────────
+
+describe("sanitizeError", () => {
+  it("should strip Unix absolute paths", () => {
+    const result = sanitizeError(
+      new Error("Failed at /Users/david/Git/project/src/file.ts"),
+    );
+
+    assert.ok(
+      result.includes("…/"),
+      `Expected "…/" replacement in: ${result}`,
+    );
+    assert.ok(
+      !result.includes("/Users/"),
+      `Should not contain original path "/Users/" in: ${result}`,
+    );
+  });
+
+  it("should strip Windows absolute paths", () => {
+    const result = sanitizeError(
+      new Error("Failed at C:\\Users\\david\\project\\src\\file.ts"),
+    );
+
+    assert.ok(
+      result.includes("…\\"),
+      `Expected "…\\\\" replacement in: ${result}`,
+    );
+    assert.ok(
+      !result.includes("C:\\Users"),
+      `Should not contain original path "C:\\\\Users" in: ${result}`,
+    );
+  });
+
+  it("should strip UNC paths", () => {
+    const result = sanitizeError(
+      new Error("Failed at \\\\server\\share\\path\\file"),
+    );
+
+    assert.ok(
+      result.includes("…\\"),
+      `Expected "…\\\\" replacement in: ${result}`,
+    );
+    assert.ok(
+      !result.includes("\\\\server"),
+      `Should not contain original UNC path "\\\\\\\\server" in: ${result}`,
+    );
+  });
+
+  it("should pass through messages without paths unchanged", () => {
+    const msg = "Simple error without paths";
+    const result = sanitizeError(new Error(msg));
+
+    assert.strictEqual(result, msg, "Message without paths should be unchanged");
+  });
+
+  it("should handle non-Error input and still strip paths", () => {
+    const result = sanitizeError("string error /home/user/deep/path/file");
+
+    assert.ok(
+      result.includes("…/"),
+      `Expected "…/" replacement for string input: ${result}`,
+    );
+    assert.ok(
+      !result.includes("/home/user"),
+      `Should not contain original path "/home/user" in: ${result}`,
+    );
   });
 });

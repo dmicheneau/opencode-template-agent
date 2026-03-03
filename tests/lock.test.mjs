@@ -1090,6 +1090,41 @@ describe('readLock — corrupted JSON recovery', () => {
   });
 });
 
+// ─── readLock — readonly mode skips .bak backup ─────────────────────────────
+
+describe('readLock — readonly mode skips .bak backup', () => {
+  /** @type {string} */
+  let tmp;
+
+  beforeEach(() => {
+    tmp = mkdtempSync(join(tmpdir(), 'lock-readonly-'));
+  });
+
+  afterEach(() => {
+    rmSync(tmp, { recursive: true, force: true });
+  });
+
+  it('should not create .bak file when readonly=true and lock is corrupted', () => {
+    const lockPath = getLockPath(tmp);
+    mkdirSync(join(lockPath, '..'), { recursive: true });
+    const corruptedContent = '<<< corrupted garbage >>>';
+    writeFileSync(lockPath, corruptedContent, 'utf-8');
+
+    let data;
+    captureStderr(() => { data = readLock(tmp, undefined, { readonly: true }); });
+
+    // a) Returns empty object
+    assert.deepEqual(data, {}, 'corrupted lock should return {}');
+    // b) No .bak file created
+    const bakPath = lockPath + '.bak';
+    assert.ok(!existsSync(bakPath), '.bak file should NOT exist in readonly mode');
+    // c) Original corrupted file still exists (wasn't moved)
+    assert.ok(existsSync(lockPath), 'original lock file should still exist');
+    assert.equal(readFileSync(lockPath, 'utf-8'), corruptedContent,
+      'original file content should be unchanged');
+  });
+});
+
 // ─── detectAgentStates — mode: "all" handling ────────────────────────────────
 
 describe('detectAgentStates — mode "all"', () => {

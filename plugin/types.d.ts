@@ -1,6 +1,9 @@
 /**
  * Ambient type declarations for src/*.mjs modules.
  *
+ * All shared interfaces/types are prefixed with `Oc` (OpenCode) to avoid
+ * collisions in the global namespace — e.g. `OcAgentEntry`, `OcManifest`.
+ *
  * This file has NO top-level exports — keeping it as a global declaration file
  * so that `declare module` blocks are true ambient module declarations,
  * not module augmentations.
@@ -8,7 +11,7 @@
 
 // ─── Shared types ─────────────────────────────────────────────────────────
 
-interface AgentEntry {
+interface OcAgentEntry {
   name: string;
   category: string;
   path: string;
@@ -17,67 +20,67 @@ interface AgentEntry {
   tags: string[];
 }
 
-interface CategoryMeta {
+interface OcCategoryMeta {
   label: string;
   icon: string;
   description: string;
 }
 
-interface PackDef {
+interface OcPackDef {
   label: string;
   description: string;
   agents: string[];
 }
 
-interface Manifest {
+interface OcManifest {
   version: string;
   repo: string;
   branch: string;
   base_path: string;
   source_path?: string;
   agent_count: number;
-  categories: Record<string, CategoryMeta>;
-  agents: AgentEntry[];
-  packs: Record<string, PackDef>;
+  categories: Record<string, OcCategoryMeta>;
+  agents: OcAgentEntry[];
+  packs: Record<string, OcPackDef>;
 }
 
-type AgentState = "installed" | "outdated" | "new" | "unknown";
+type OcAgentState = "installed" | "outdated" | "new" | "unknown";
 
-interface LockEntry {
+interface OcLockEntry {
   sha256: string;
   installedAt: string;
   updatedAt: string;
   relativePath?: string;
 }
 
-type LockData = Record<string, LockEntry>;
+type OcLockData = Record<string, OcLockEntry>;
 
 // ─── src/registry.mjs ────────────────────────────────────────────────────
 
 declare module "../src/registry.mjs" {
   export const SAFE_NAME_RE: RegExp;
-  export function validateManifest(manifest: Manifest): void;
-  export function loadManifest(): Manifest;
+  export function validateManifest(manifest: OcManifest): void;
+  export function loadManifest(): OcManifest;
   export function clearManifestCache(): void;
-  export function getAgent(name: string): AgentEntry | undefined;
-  export function getCategory(category: string): AgentEntry[];
+  export function getAgent(name: string): OcAgentEntry | undefined;
+  export function getCategory(category: string): OcAgentEntry[];
   export function getCategoryIds(): string[];
-  export function getPack(name: string): PackDef | undefined;
-  export function resolvePackAgents(name: string): AgentEntry[];
-  export function searchAgents(query: string): AgentEntry[];
-  export function listAll(): AgentEntry[];
-  export function getManifest(): Manifest;
+  export function getPack(name: string): OcPackDef | undefined;
+  export function resolvePackAgents(name: string): OcAgentEntry[];
+  export function searchAgents(query: string): OcAgentEntry[];
+  export function listAll(): OcAgentEntry[];
+  export function getManifest(): OcManifest;
 }
 
 // ─── src/lock.mjs ─────────────────────────────────────────────────────────
 
 declare module "../src/lock.mjs" {
   export function sha256(content: string | Buffer): string;
-  export function detectAgentStates(manifest: Manifest, cwd?: string): Map<string, AgentState>;
-  export function detectInstalledSet(manifest: Manifest, cwd?: string): Set<string>;
-  export function findOutdatedAgents(manifest: Manifest, cwd?: string): AgentEntry[];
+  export function detectAgentStates(manifest: OcManifest, cwd?: string): Map<string, OcAgentState>;
+  export function detectInstalledSet(manifest: OcManifest, cwd?: string): Set<string>;
+  export function findOutdatedAgents(manifest: OcManifest, cwd?: string): OcAgentEntry[];
   export function verifyLockIntegrity(
-    manifest: Manifest,
+    manifest: OcManifest,
     cwd?: string
   ): { ok: string[]; mismatch: string[]; missing: string[] };
 }
