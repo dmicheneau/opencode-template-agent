@@ -110,6 +110,62 @@ Agents are installed into `.opencode/agents/`. Node.js 20+ required for modes 1 
 
 ---
 
+## 🔌 OpenCode Plugin
+
+The plugin exposes the 69-agent registry as **LLM-callable tools** inside [OpenCode](https://opencode.ai) sessions. Current version: **discovery-only (v1)** — 4 read-only tools, no write operations.
+
+### Installation
+
+**Global** (recommended — available in all OpenCode sessions):
+
+Add to `~/.config/opencode/opencode.json`:
+
+```json
+{
+  "plugin": ["github:dmicheneau/opencode-template-agent"]
+}
+```
+
+**Per-project** (available only in that project):
+
+Add to `.opencode/opencode.json` at the project root:
+
+```json
+{
+  "plugin": ["github:dmicheneau/opencode-template-agent"]
+}
+```
+
+### Available tools
+
+| Tool | Description |
+|------|-------------|
+| `search_agents` | Search by name, description, category, or tags |
+| `list_agents` | List all agents grouped by category, with optional category or pack filters |
+| `get_agent` | Full details for a specific agent (description, install mode, install state, typo suggestions) |
+| `check_health` | Registry health report (installed, outdated, missing, unknown agents, file integrity) |
+
+### Usage examples
+
+```
+> Search for a TypeScript agent
+> List agents in the security category
+> Check registry health
+```
+
+### File structure
+
+```
+plugin/
+  index.ts       # entry point (exported as OpenCode Plugin)
+  tools.ts       # 4 tool definitions
+  types.d.ts     # type declarations
+```
+
+> **Requirements**: [OpenCode](https://opencode.ai) + [Bun](https://bun.sh) (TypeScript is transpiled natively, no build step needed).
+
+---
+
 ## 🏗️ Architecture
 
 > Full documentation: [`docs/architecture.md`](docs/architecture.md)

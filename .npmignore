@@ -1,0 +1,21 @@
+# Internal development files
+.plan/
+.github/
+scripts/
+tests/
+docs/
+.opencode/
+agents/
+
+# Config and meta
+.gitignore
+.npmignore
+AGENTS.md
+CODE_OF_CONDUCT.md
+CONTRIBUTING.md
+CHANGELOG.md
+README.en.md
+*.test.*
+bun.lock
+cliff.toml
+install.sh

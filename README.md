@@ -110,6 +110,62 @@ Les agents sont installés dans `.opencode/agents/`. Node.js 20+ requis pour les
 
 ---
 
+## 🔌 Plugin OpenCode
+
+Le plugin expose le registre des 69 agents comme **outils LLM** directement dans les sessions [OpenCode](https://opencode.ai). Version actuelle : **discovery-only (v1)** — 4 tools en lecture seule, aucune modification du système de fichiers.
+
+### Installation
+
+**Globale** (recommandé — disponible dans toutes les sessions OpenCode) :
+
+Ajouter dans `~/.config/opencode/opencode.json` :
+
+```json
+{
+  "plugin": ["github:dmicheneau/opencode-template-agent"]
+}
+```
+
+**Par projet** (disponible uniquement dans le projet concerné) :
+
+Ajouter dans `.opencode/opencode.json` à la racine du projet :
+
+```json
+{
+  "plugin": ["github:dmicheneau/opencode-template-agent"]
+}
+```
+
+### Tools disponibles
+
+| Tool | Description |
+|------|-------------|
+| `search_agents` | Recherche par nom, description, catégorie ou tags |
+| `list_agents` | Liste tous les agents groupés par catégorie, avec filtres optionnels par catégorie ou pack |
+| `get_agent` | Détails complets d'un agent (description, mode d'installation, état d'installation, suggestions de correction si typo) |
+| `check_health` | Rapport de santé du registre (agents installés, obsolètes, manquants, intégrité) |
+
+### Exemples d'utilisation
+
+```
+> Cherche un agent pour TypeScript
+> Liste les agents de la catégorie security
+> Vérifie la santé du registre
+```
+
+### Structure des fichiers
+
+```
+plugin/
+  index.ts       # point d'entrée (exporté comme Plugin OpenCode)
+  tools.ts       # définitions des 4 tools
+  types.d.ts     # déclarations de types
+```
+
+> **Prérequis** : [OpenCode](https://opencode.ai) + [Bun](https://bun.sh) (le TypeScript est transpilé nativement, pas d'étape de build).
+
+---
+
 ## 🏗️ Architecture
 
 > Documentation détaillée : [`docs/architecture.md`](docs/architecture.md)

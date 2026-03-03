@@ -8,12 +8,14 @@
 **Remaining items (non-blocking):**
 - `V6.0-R3` — Final full test run (JS + Python)
 - `S1.11` — Visual TUI testing (manual flicker verification)
+- `S8` — OpenCode Plugin plan ready for approval → see `08-opencode-plugin.md`
 
 ## Scopes actifs
 
 | Scope | Status | Fichier | Priorité |
 |-------|--------|---------|----------|
 | **V6.0 — Release Tasks** | R1 ✅ R2 ✅, only R3 (final test run) remains | `01-tasks-v6.md` (section V6.0 Release) | 🟢 Low priority |
+| **S8 — OpenCode Plugin** | 🟡 Draft | `08-opencode-plugin.md` | High |
 
 ## Scopes terminés (archivés)
 
@@ -38,6 +40,7 @@
 | `02-progress-v6.md` | Tracker de progression + decision log |
 | `s2-template.md` | Template universel pour l'enrichissement des agents |
 | `s2-quality-rubric.md` | Grille de notation qualité (8 dimensions, seuil 3.5) |
+| `08-opencode-plugin.md` | Plan plugin OpenCode — discovery tools v1 |
 
 ## Comment utiliser ce répertoire
 

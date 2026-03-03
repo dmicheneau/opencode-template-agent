@@ -35,6 +35,7 @@
       "headers": {
         "MEMOAI_PROJECT": "opencode-template-agent"
       },
+      "enabled": true
     },
     "browsermcp": {
       "type": "local",

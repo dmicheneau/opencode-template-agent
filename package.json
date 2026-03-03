@@ -12,6 +12,10 @@
     "type": "git",
     "url": "https://github.com/dmicheneau/opencode-template-agent"
   },
+  "main": "./plugin/index.ts",
+  "exports": {
+    ".": "./plugin/index.ts"
+  },
   "bin": {
     "opencode-agents": "./bin/cli.mjs"
   },
@@ -19,7 +23,8 @@
   "files": [
     "bin/",
     "src/",
-    "manifest.json"
+    "manifest.json",
+    "plugin/"
   ],
   "engines": {
     "node": ">=20"
@@ -34,6 +39,14 @@
   "scripts": {
     "test": "node --test tests/cli.test.mjs tests/tui.test.mjs tests/lock.test.mjs",
     "lint": "node --check bin/cli.mjs src/*.mjs src/tui/*.mjs",
-    "prepublishOnly": "npm test"
+    "prepublishOnly": "npm test",
+    "test:plugin": "bun test tests/plugin/",
+    "test:all": "npm test && bun test tests/plugin/"
+  },
+  "devDependencies": {
+    "@opencode-ai/plugin": "1.2.5"
+  },
+  "peerDependencies": {
+    "@opencode-ai/plugin": ">=1.1.0"
   }
 }
