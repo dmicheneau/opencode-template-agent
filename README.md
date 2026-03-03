@@ -4,7 +4,7 @@
 
 [![CI](https://github.com/dmicheneau/opencode-template-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/dmicheneau/opencode-template-agent/actions/workflows/ci.yml)
 ![Agents](https://img.shields.io/badge/agents-69-blue)
-![Tests](https://img.shields.io/badge/tests-593%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-893%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Node](https://img.shields.io/badge/node-20%2B-green)
 ![npm](https://img.shields.io/npm/v/opencode-agents?label=npm&color=cb3837)
@@ -144,6 +144,8 @@ Ajouter dans `.opencode/opencode.json` à la racine du projet :
 | `list_agents` | Liste tous les agents groupés par catégorie, avec filtres optionnels par catégorie ou pack |
 | `get_agent` | Détails complets d'un agent (description, mode d'installation, état d'installation, suggestions de correction si typo) |
 | `check_health` | Rapport de santé du registre (agents installés, obsolètes, manquants, intégrité) |
+
+> **v1.1** — Types préfixés `Oc*` pour éviter les collisions de namespace, mode `readonly` pour les opérations lock, et sanitization des chemins absolus dans les messages d'erreur.
 
 ### Exemples d'utilisation
 
@@ -486,7 +488,7 @@ git push --tags
 
 ## 🧪 Tests
 
-**593 tests** (283 JS + 310 Python).
+**893 tests** (560 JS + 23 plugin TS + 310 Python).
 
 ```bash
 # Tous les tests JS (CLI + TUI)
