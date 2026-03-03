@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [8.2.0] - 2026-03-03
+### ✨ Nouveautés
+- add OpenCode plugin for global agent registry discovery([e364913](https://github.com/dmicheneau/opencode-template-agent/commit/e3649137a4315ed57542fcfba9770a03ac1afdc6))
+### 📝 Documentation
+- update CHANGELOG.md for v8.1.0([a3e815a](https://github.com/dmicheneau/opencode-template-agent/commit/a3e815a4f550e4eb30543b2441e6758d1bb485f7))- update READMEs for v8.2.0 — plugin v1.1 note, test counts (893)([63acff5](https://github.com/dmicheneau/opencode-template-agent/commit/63acff5797493c68471ade37374dc9e19381d838))
+### 🔧 Maintenance
+- complete S8 v1.1 backlog — tests, types, readonly, .gitattributes([fb368d8](https://github.com/dmicheneau/opencode-template-agent/commit/fb368d85ff1077dd769bf4c8aab2770268687dbb))
 ## [8.1.0] - 2026-02-27
 ### ♻️ Refactoring
 - rewrite all 69 agents to optimized 4-section format([940ff74](https://github.com/dmicheneau/opencode-template-agent/commit/940ff7422c58b2879d8700ca4f89c6a8c0d71a36))
@@ -63,6 +70,7 @@ All notable changes to this project will be documented in this file.
 - sprint 0 — security + quality fixes from agent reviews([26c7cb2](https://github.com/dmicheneau/opencode-template-agent/commit/26c7cb2090352369df1d479b3c6c278307030916))- sprint 1 — stabilisation code + documentation([55f3a7c](https://github.com/dmicheneau/opencode-template-agent/commit/55f3a7c39df8fdaeb66316c469487afc835dd605))- sprint corrections — address review findings from session 5([e9cabff](https://github.com/dmicheneau/opencode-template-agent/commit/e9cabff02cf01c4922080536a348795e71aa7c78))- security hardening — path traversal guard, redirect limit, response cap([1052113](https://github.com/dmicheneau/opencode-template-agent/commit/105211323a3450efe45e7dca3c02ec6f3b2c8631))
 ### 📝 Documentation
 - phase 3 — CODE_OF_CONDUCT, README polish, progression update([8047b41](https://github.com/dmicheneau/opencode-template-agent/commit/8047b41b8233aa7b7e1b6ce5e7f3d81a4e571eea))- close phase 2 — update roadmap and progression journal([3632c83](https://github.com/dmicheneau/opencode-template-agent/commit/3632c83fa9465d1b5ac37c028fc27c4d6e6af711))- update progression journal (sessions 7-8) and roadmap phase 3([8d444f0](https://github.com/dmicheneau/opencode-template-agent/commit/8d444f0bce73d64e56b95e11e34d3b5616a4b298))- add CLI npm section to README (FR + EN)([a45888a](https://github.com/dmicheneau/opencode-template-agent/commit/a45888a3e29331618ba56a84627459ebb9a3e794))
+**Full Changelog**: [v8.1.0...v8.2.0](https://github.com/dmicheneau/opencode-template-agent/compare/v8.1.0...v8.2.0)
 **Full Changelog**: [v8.0.0...v8.1.0](https://github.com/dmicheneau/opencode-template-agent/compare/v8.0.0...v8.1.0)
 **Full Changelog**: [v7.0.0...v8.0.0](https://github.com/dmicheneau/opencode-template-agent/compare/v7.0.0...v8.0.0)
 **Full Changelog**: [v6.0.0...v7.0.0](https://github.com/dmicheneau/opencode-template-agent/compare/v6.0.0...v7.0.0)
