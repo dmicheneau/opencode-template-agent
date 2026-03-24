@@ -374,11 +374,8 @@ async function cmdInstall(parsed) {
     // No arguments at all — run the smart suggestion flow
     const suggestedAgents = await runSuggestFlow(parsed, options, resolvedPerms);
     if (suggestedAgents === null) {
-      // Fall through to usage hint
-      errorMessage('Missing agent name. Usage: opencode-agents install <agent>');
-      console.error(`  Run ${cyan('opencode-agents list')} to see available agents.`);
-      console.error();
-      process.exit(1);
+      console.log(`ℹ No agent suggestions available. Try ${cyan('opencode-agents list')} to browse all agents.`);
+      return;
     }
     return;
   }
@@ -411,7 +408,7 @@ async function runSuggestFlow(parsed, options, resolvedPerms) {
   }
 
   // 2. Score agents
-  const installed = detectInstalledSet(manifest, process.cwd());
+  const installed = options.force ? new Set() : detectInstalledSet(manifest, process.cwd());
   const suggestions = scoreAgents({ profile, installed, manifest });
 
   // 3. No useful suggestions → fall through

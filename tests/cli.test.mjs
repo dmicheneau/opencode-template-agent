@@ -155,9 +155,10 @@ describe('CLI install', () => {
     rmSync(TEMP_DIR, { recursive: true, force: true });
   });
 
-  it('should error when no agent name provided', () => {
-    const output = run(['install'], { expectError: true, cwd: TEMP_DIR });
-    assert.ok(output.includes('Missing agent name'));
+  it('should show info message when no agent name provided and no suggestions', () => {
+    // Empty temp dir → no stack detected → runSuggestFlow returns null → friendly message
+    const output = run(['install'], { cwd: TEMP_DIR });
+    assert.ok(output.includes('No agent suggestions available'), `got: ${output}`);
   });
 
   it('should error for unknown agent', () => {
@@ -1091,12 +1092,12 @@ describe('CLI runSuggestFlow', () => {
     rmSync(tmpDir, { recursive: true, force: true });
   });
 
-  it('falls through to "Missing agent name" for empty project (no suggestions)', () => {
-    // Empty dir → no profile → no useful suggestions → fall-through
+  it('shows info message for empty project (no suggestions)', () => {
+    // Empty dir → no profile → no useful suggestions → friendly info, exit 0
     const { stdout, stderr, status } = runFull(['install'], { cwd: tmpDir });
     const combined = stdout + stderr;
-    assert.ok(status !== 0, 'should exit with non-zero for no agent');
-    assert.ok(combined.includes('Missing agent name'), 'should fall through to missing-agent error');
+    assert.strictEqual(status, 0, 'should exit 0 when no suggestions');
+    assert.ok(combined.includes('No agent suggestions available'), `got: ${combined}`);
   });
 
   it('shows "Suggested agents" for a React project (dry-run)', () => {
