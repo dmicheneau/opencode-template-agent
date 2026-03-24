@@ -1,6 +1,7 @@
 /// <reference path="./types.d.ts" />
 
 import { tool } from "@opencode-ai/plugin/tool";
+import { realpathSync, statSync } from "node:fs";
 import {
   searchAgents,
   getAgent,
@@ -13,7 +14,13 @@ import {
 import {
   detectAgentStates,
   verifyLockIntegrity,
+  detectInstalledSet,
 } from "../src/lock.mjs";
+import {
+  detectProjectProfile,
+  analyzeQuery,
+  scoreAgents,
+} from "../src/recommender.mjs";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -279,6 +286,85 @@ export const check_health = tool({
       );
 
       return lines.join("\n");
+    } catch (err) {
+      return `Error: ${sanitizeError(err)}`;
+    }
+  },
+});
+
+// ─── suggest_agents ─────────────────────────────────────────────────────────
+
+export const suggest_agents = tool({
+  description:
+    "Analyze the current project and optionally a task description to suggest the most relevant agents to install. Uses project stack detection (languages, frameworks, tools) and intent matching. Returns ranked suggestions with reasons.",
+  args: {
+    context: tool.schema
+      .string()
+      .optional()
+      .describe(
+        "What the user is trying to do — e.g. 'debug a React performance issue' or 'set up CI/CD for a Go API'"
+      ),
+    scope: tool.schema
+      .enum(["project", "prompt", "both"])
+      .optional()
+      .describe("Scoring scope: 'project' (stack only), 'prompt' (context only), 'both' (default)"),
+  },
+  async execute(args, ctx) {
+    try {
+      const manifest = getManifest();
+
+      // m2: validate scope at runtime
+      const VALID_SCOPES = new Set(["project", "prompt", "both"]);
+      const effectiveScope = VALID_SCOPES.has(args.scope ?? "") ? args.scope! : "both";
+
+      // M1: validate ctx.directory — resolve symlinks and ensure it's a real directory
+      let safeDirectory = ctx.directory;
+      try {
+        const resolved = realpathSync(ctx.directory);
+        const stat = statSync(resolved);
+        if (!stat.isDirectory()) throw new Error("not a directory");
+        safeDirectory = resolved;
+      } catch {
+        return "Error: provided directory is not accessible or not a valid directory.";
+      }
+
+      // 1. Stack detection
+      let profile: OcProjectProfile | null = null;
+      if (effectiveScope !== "prompt") {
+        profile = detectProjectProfile(safeDirectory);
+      }
+
+      // 2. Query analysis
+      let query: OcQuerySignals | null = null;
+      if (args.context && effectiveScope !== "project") {
+        query = analyzeQuery(args.context);
+      }
+
+      // 3. Installed agents
+      const installed = detectInstalledSet(manifest, safeDirectory);
+
+      // 4. Scoring
+      const suggestions = scoreAgents({ profile, query, installed, manifest });
+
+      if (suggestions.length === 0) {
+        if (installed.size >= manifest.agents.length * 0.8) {
+          return "You already have most agents installed! Use search_agents to find specific ones.";
+        }
+        return "No strong matches found. Try providing more context about what you're building, or use search_agents with a specific keyword.";
+      }
+
+      // 5. Format output
+      const lines = suggestions.map((s, i) => {
+        const score = Math.round(s.score * 100);
+        const reasons = s.reasons.join(" · ");
+        return `${i + 1}. ${s.agent.name} (${s.agent.category}) — ${score}% match\n   ${s.agent.description}\n   Why: ${reasons}`;
+      });
+
+      const header = profile
+        ? `Detected stack: ${[...profile.languages, ...profile.frameworks].join(", ") || "unknown"}`
+        : "Stack detection skipped (prompt-only mode)";
+
+      return `${header}\n\nSuggested agents:\n\n${lines.join("\n\n")}`;
     } catch (err) {
       return `Error: ${sanitizeError(err)}`;
     }

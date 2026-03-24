@@ -1,0 +1,4 @@
+[project]
+name = "ml-project"
+version = "0.1.0"
+dependencies = ["torch", "transformers", "fastapi", "pandas"]

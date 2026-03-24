@@ -12,6 +12,10 @@ import { dirname, join, isAbsolute } from 'node:path';
  *   mode: 'primary' | 'subagent';
  *   description: string;
  *   tags: string[];
+ *   triggers?: string[];
+ *   ecosystem?: string[];
+ *   intent?: string[];
+ *   related_agents?: string[];
  * }} AgentEntry
  */
 
@@ -99,6 +103,34 @@ export function validateManifest(manifest) {
     }
     if (agent.path != null && agent.path.includes('\0')) {
       throw new Error(`Invalid null byte in agent path: "${agent.name}"`);
+    }
+
+    // Optional enrichment fields (Phase 1) — validated loosely for backward compatibility
+    if (agent.triggers !== undefined) {
+      if (!Array.isArray(agent.triggers) || !agent.triggers.every((t) => typeof t === 'string')) {
+        throw new Error(`Agent "${agent.name}": triggers must be string[]`);
+      }
+    }
+    if (agent.ecosystem !== undefined) {
+      if (!Array.isArray(agent.ecosystem) || !agent.ecosystem.every((t) => typeof t === 'string')) {
+        throw new Error(`Agent "${agent.name}": ecosystem must be string[]`);
+      }
+    }
+    if (agent.intent !== undefined) {
+      if (!Array.isArray(agent.intent) || !agent.intent.every((t) => typeof t === 'string')) {
+        throw new Error(`Agent "${agent.name}": intent must be string[]`);
+      }
+    }
+    if (agent.related_agents !== undefined) {
+      if (
+        !Array.isArray(agent.related_agents) ||
+        !agent.related_agents.every((t) => typeof t === 'string' && SAFE_NAME_RE.test(t)) ||
+        agent.related_agents.length > 10
+      ) {
+        throw new Error(
+          `Agent "${agent.name}": related_agents must be string[] of safe names (max 10)`
+        );
+      }
     }
   }
 }

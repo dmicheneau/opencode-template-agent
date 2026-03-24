@@ -4,6 +4,7 @@ import {
   list_agents,
   get_agent,
   check_health,
+  suggest_agents,
 } from "./tools.ts"
 
 export const agentRegistry: Plugin = async (_input) => {
@@ -13,6 +14,7 @@ export const agentRegistry: Plugin = async (_input) => {
       list_agents,
       get_agent,
       check_health,
+      suggest_agents,
     },
   }
 }

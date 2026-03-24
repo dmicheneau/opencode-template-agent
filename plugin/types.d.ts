@@ -18,6 +18,11 @@ interface OcAgentEntry {
   mode: "primary" | "subagent";
   description: string;
   tags: string[];
+  // Phase 1 enrichment (optional — graceful degradation when absent)
+  triggers?: string[];
+  ecosystem?: string[];
+  intent?: string[];
+  related_agents?: string[];
 }
 
 interface OcCategoryMeta {
@@ -77,10 +82,47 @@ declare module "../src/registry.mjs" {
 declare module "../src/lock.mjs" {
   export function sha256(content: string | Buffer): string;
   export function detectAgentStates(manifest: OcManifest, cwd?: string): Map<string, OcAgentState>;
-  export function detectInstalledSet(manifest: OcManifest, cwd?: string): Set<string>;
+  export function detectInstalledSet(manifest: OcManifest, directory?: string): Set<string>;
   export function findOutdatedAgents(manifest: OcManifest, cwd?: string): OcAgentEntry[];
   export function verifyLockIntegrity(
     manifest: OcManifest,
     cwd?: string
   ): { ok: string[]; mismatch: string[]; missing: string[] };
+}
+
+// ─── src/recommender.mjs ──────────────────────────────────────────────────
+
+interface OcProjectProfile {
+  languages: string[];
+  frameworks: string[];
+  tools: string[];
+  hasTests: boolean;
+  hasCi: boolean;
+  hasDocker: boolean;
+  hasKubernetes: boolean;
+  hasTerraform: boolean;
+}
+
+interface OcQuerySignals {
+  keywords: string[];
+  detectedIntents: string[];
+  detectedTech: string[];
+}
+
+interface OcSuggestion {
+  agent: OcAgentEntry;
+  score: number;
+  reasons: string[];
+  sources: Array<"stack" | "intent" | "pack" | "related">;
+}
+
+declare module "../src/recommender.mjs" {
+  export function detectProjectProfile(directory: string): OcProjectProfile;
+  export function analyzeQuery(prompt: string): OcQuerySignals;
+  export function scoreAgents(input: {
+    profile: OcProjectProfile | null;
+    query?: OcQuerySignals | null;
+    installed: Set<string>;
+    manifest: OcManifest;
+  }): OcSuggestion[];
 }

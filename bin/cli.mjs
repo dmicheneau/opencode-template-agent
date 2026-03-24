@@ -40,7 +40,14 @@ import {
   verifyLockIntegrity,
   rehashLock,
   bootstrapLock,
+  detectInstalledSet,
 } from '../src/lock.mjs';
+
+import {
+  detectProjectProfile,
+  analyzeQuery,
+  scoreAgents,
+} from '../src/recommender.mjs';
 
 import { parsePermissionFlags } from '../src/permissions/cli.mjs';
 import { resolvePermissions } from '../src/permissions/resolve.mjs';
@@ -143,11 +150,15 @@ ${bold('Usage:')}
   opencode-agents verify                          Verify installed files match lock hashes
   opencode-agents rehash                          Rebuild lock file from installed files
   opencode-agents tui                             Interactive agent browser
+  opencode-agents suggest [context]               Suggest agents based on your project stack
+                                                  (optional: describe what you're building)
 
 ${bold('Options:')}
   --force      Overwrite existing agent files
   --dry-run    Preview without writing files
   --update     Reinstall only outdated agents (use with install)
+  --json       Output as JSON (use with suggest)
+  --limit <n>  Max number of suggestions, 1-50 (use with suggest, default: 10)
   --help       Show this help
   --version    Show version
 
@@ -619,17 +630,112 @@ function cmdRehash() {
   process.exit(0);
 }
 
+// ─── Command: suggest ───────────────────────────────────────────────────────────
+
+/**
+ * Strip system paths from error messages to avoid leaking directory structure.
+ * @param {unknown} err
+ * @returns {string}
+ */
+function sanitizeCLIError(err) {
+  const msg = err instanceof Error ? err.message : String(err);
+  return msg
+    .replace(/[A-Za-z]:\\(?:[^\\]+\\)+/g, '…\\')   // Windows absolute paths
+    .replace(/\\\\(?:[^\\]+\\)+/g, '…\\')            // UNC paths
+    .replace(/\/(?:[^/]+\/){2,}/g, '…/');             // Unix absolute paths (≥3 segments)
+}
+
+/**
+ * Handle the "suggest" command.
+ * Detects the project stack from cwd and returns ranked agent suggestions.
+ * Optional positional arg: context prompt for intent matching.
+ * @param {ParsedArgs} parsed
+ */
+function cmdSuggest(parsed) {
+  try {
+    const rawLimit = parseInt(/** @type {string} */ (parsed.flags.limit), 10);
+    const limit = (!isNaN(rawLimit) && rawLimit > 0) ? Math.min(rawLimit, 50) : 10;
+    const jsonOutput = Boolean(parsed.flags.json);
+    const manifest = getManifest();
+
+    // Optional context prompt (first positional arg)
+    const contextArg = parsed.args[0] ?? null;
+
+    // Stack detection from cwd
+    const profile = detectProjectProfile(process.cwd());
+    const installed = detectInstalledSet(manifest);
+
+    // Query analysis from context prompt
+    const query = contextArg ? analyzeQuery(contextArg) : null;
+
+    // Scoring
+    const suggestions = scoreAgents({
+      profile,
+      query,
+      installed,
+      manifest,
+    }).slice(0, limit);
+
+    if (jsonOutput) {
+      const output = suggestions.map(s => ({
+        name: s.agent.name,
+        category: s.agent.category,
+        score: Math.round(s.score * 100),
+        reasons: s.reasons,
+        sources: s.sources,
+      }));
+      console.log(JSON.stringify(output, null, 2));
+      return;
+    }
+
+    // Human-readable output
+    const stackInfo = [...profile.languages, ...profile.frameworks].join(', ') || 'unknown';
+    header(`Detected stack: ${stackInfo}`);
+
+    if (profile.hasDocker) console.log(`  ${dim('+')} Docker detected`);
+    if (profile.hasCi) console.log(`  ${dim('+')} CI/CD detected`);
+    if (profile.hasKubernetes) console.log(`  ${dim('+')} Kubernetes detected`);
+    if (profile.hasTerraform) console.log(`  ${dim('+')} Terraform detected`);
+    if (query && query.detectedIntents.length > 0) {
+      console.log(`  ${dim('+')} Intent: ${query.detectedIntents.join(', ')}`);
+    }
+    console.log();
+
+    if (suggestions.length === 0) {
+      console.log(`  ${dim("No suggestions — either all relevant agents are installed or the project stack wasn't recognized.")}`);
+      console.log(`  ${dim('Try: opencode-agents search <keyword>')}`);
+      return;
+    }
+
+    header(`Top ${suggestions.length} suggestion(s):`);
+    console.log();
+    for (const s of suggestions) {
+      const score = Math.round(s.score * 100);
+      console.log(`  ${bold(s.agent.name)} ${dim(`(${s.agent.category})`)} — ${cyan(`${score}%`)} match`);
+      console.log(`  ${dim(s.agent.description)}`);
+      console.log(`  ${dim('→')} ${s.reasons.join(' · ')}`);
+      console.log(`  ${dim('$')} ${green(`npx opencode-agents install ${s.agent.name}`)}`);
+      console.log();
+    }
+  } catch (err) {
+    console.error(`Error: ${sanitizeCLIError(err)}`);
+    process.exitCode = 1;
+  }
+}
+
 // ─── Main Router ────────────────────────────────────────────────────────────────
 
 async function main() {
   const parsed = parseArgs(process.argv);
 
   // Warn about unknown flags (don't error — just inform)
+  const SUGGEST_CMDS = new Set(['suggest', 'recommend']);
   const KNOWN_FLAGS = new Set([
     'help', 'version', 'dry-run', 'force',
     'category', 'pack', 'all', 'packs', 'update',
     'yolo', 'permissions', 'permission-override',
     'save-permissions', 'no-saved-permissions', 'no-interactive',
+    ...(SUGGEST_CMDS.has(parsed.command) ? ['json', 'limit'] : []),
   ]);
   const unknownFlags = Object.keys(parsed.flags).filter((f) => !KNOWN_FLAGS.has(f));
   if (unknownFlags.length > 0) {
@@ -685,6 +791,11 @@ async function main() {
 
     case 'tui':
       await (await import('../src/tui/index.mjs')).launchTUI({ force: Boolean(parsed.flags.force) });
+      break;
+
+    case 'suggest':
+    case 'recommend':
+      cmdSuggest(parsed);
       break;
 
     case '':

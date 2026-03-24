@@ -37,7 +37,8 @@
     "code-templates"
   ],
   "scripts": {
-    "test": "node --test tests/cli.test.mjs tests/tui.test.mjs tests/lock.test.mjs",
+    "test": "node --test tests/cli.test.mjs tests/tui.test.mjs tests/lock.test.mjs tests/recommender.test.mjs",
+    "test:recommender": "node --test tests/recommender.test.mjs",
     "lint": "node --check bin/cli.mjs src/*.mjs src/tui/*.mjs",
     "prepublishOnly": "npm test",
     "test:plugin": "bun test tests/plugin/",
@@ -48,5 +49,8 @@
   },
   "peerDependencies": {
     "@opencode-ai/plugin": ">=1.1.0"
+  },
+  "volta": {
+    "node": "24.14.0"
   }
 }
