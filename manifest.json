@@ -73,7 +73,19 @@
         "inclusive-design"
       ],
       "sha256": "675042dc074a562bca1b036f118571865e1901d34d76a07d50a8dc85f1dea03e",
-      "size": 5092
+      "size": 5092,
+      "ecosystem": [
+        "web"
+      ],
+      "intent": [
+        "audit"
+      ],
+      "related_agents": [
+        "ui-designer",
+        "react-specialist",
+        "nextjs-developer",
+        "screenshot-ui-analyzer"
+      ]
     },
     {
       "name": "ai-engineer",
@@ -89,7 +101,19 @@
         "mlops"
       ],
       "sha256": "c432cebece3b7891aee68b1c3161d5eba4836adad6319d6f7445e8016de9ce55",
-      "size": 4658
+      "size": 4658,
+      "ecosystem": [
+        "ai"
+      ],
+      "intent": [
+        "build"
+      ],
+      "related_agents": [
+        "ml-engineer",
+        "llm-architect",
+        "mlops-engineer",
+        "data-scientist"
+      ]
     },
     {
       "name": "angular-architect",
@@ -106,7 +130,19 @@
         "frontend"
       ],
       "sha256": "1dccde892d7ee7e7fa6ac63e36292c50bdb968b71cfbaf41b2faa8a418eb94b9",
-      "size": 5135
+      "size": 5135,
+      "ecosystem": [
+        "javascript"
+      ],
+      "intent": [
+        "build"
+      ],
+      "related_agents": [
+        "typescript-pro",
+        "react-specialist",
+        "vue-expert",
+        "nextjs-developer"
+      ]
     },
     {
       "name": "api-architect",
@@ -123,7 +159,19 @@
         "openapi"
       ],
       "sha256": "999ff88934cdd18b8e57490d4e800f52768ab01294d0feb0f7073f774a4b85dd",
-      "size": 5438
+      "size": 5438,
+      "ecosystem": [
+        "web"
+      ],
+      "intent": [
+        "design"
+      ],
+      "related_agents": [
+        "graphql-architect",
+        "database-architect",
+        "microservices-architect",
+        "documentation-engineer"
+      ]
     },
     {
       "name": "api-documenter",
@@ -139,7 +187,19 @@
         "code-examples"
       ],
       "sha256": "a3de3bc6f19f1ccab840f99e5486386aed2654fe2fe2104e66903236bbc31096",
-      "size": 4824
+      "size": 4824,
+      "ecosystem": [
+        "web"
+      ],
+      "intent": [
+        "document"
+      ],
+      "related_agents": [
+        "technical-writer",
+        "api-architect",
+        "documentation-engineer",
+        "diagram-architect"
+      ]
     },
     {
       "name": "aws-specialist",
@@ -156,7 +216,19 @@
         "well-architected"
       ],
       "sha256": "0b335f7653215b84d32f788c42e461454900ac3da2214e6c30c113e7bdcb2bc9",
-      "size": 4348
+      "size": 4348,
+      "ecosystem": [
+        "cloud"
+      ],
+      "intent": [
+        "deploy"
+      ],
+      "related_agents": [
+        "terraform-specialist",
+        "platform-engineer",
+        "kubernetes-specialist",
+        "ci-cd-engineer"
+      ]
     },
     {
       "name": "business-analyst",
@@ -172,7 +244,19 @@
         "stakeholders"
       ],
       "sha256": "4048dd3d40c1e80b0254ea939a31a702074798a358f924491727d1e60a02a72d",
-      "size": 5119
+      "size": 5119,
+      "ecosystem": [
+        "web"
+      ],
+      "intent": [
+        "plan"
+      ],
+      "related_agents": [
+        "product-manager",
+        "prd",
+        "project-manager",
+        "ux-researcher"
+      ]
     },
     {
       "name": "ci-cd-engineer",
@@ -189,7 +273,19 @@
         "automation"
       ],
       "sha256": "02d6f377500e02acd8f438f25ed82cb82c1c96d5f0e9cac4410e815520e8261a",
-      "size": 4414
+      "size": 4414,
+      "ecosystem": [
+        "devops"
+      ],
+      "intent": [
+        "deploy"
+      ],
+      "related_agents": [
+        "docker-specialist",
+        "kubernetes-specialist",
+        "platform-engineer",
+        "sre-engineer"
+      ]
     },
     {
       "name": "code-reviewer",
@@ -205,7 +301,19 @@
         "linting"
       ],
       "sha256": "ae15ac6b1ee1a5c2c5ba393f70eed9b9aae90ca0f5a06e709731d94f587fd877",
-      "size": 4856
+      "size": 4856,
+      "ecosystem": [
+        "web"
+      ],
+      "intent": [
+        "review"
+      ],
+      "related_agents": [
+        "refactoring-specialist",
+        "test-automator",
+        "debugger",
+        "typescript-pro"
+      ]
     },
     {
       "name": "compliance-auditor",
@@ -223,7 +331,19 @@
         "audit"
       ],
       "sha256": "456cfa790a600008be8627b8358e53f893119c2867ee4e8410bc106328c7976b",
-      "size": 7223
+      "size": 7223,
+      "ecosystem": [
+        "security"
+      ],
+      "intent": [
+        "audit"
+      ],
+      "related_agents": [
+        "security-auditor",
+        "security-engineer",
+        "penetration-tester",
+        "mcp-security-auditor"
+      ]
     },
     {
       "name": "cpp-pro",
@@ -240,7 +360,19 @@
         "embedded"
       ],
       "sha256": "0e09fd44fa6a2a96795c131672f628dac3e26072be1c57d60375b9b72b3d9c15",
-      "size": 4385
+      "size": 4385,
+      "ecosystem": [
+        "web"
+      ],
+      "intent": [
+        "build"
+      ],
+      "related_agents": [
+        "rust-pro",
+        "performance-engineer",
+        "debugger",
+        "refactoring-specialist"
+      ]
     },
     {
       "name": "csharp-developer",
@@ -256,7 +388,19 @@
         "azure"
       ],
       "sha256": "eb69ae2414c60e0a68210e65fd823deeed6d44c4281e6b382a232ea1c247222b",
-      "size": 4286
+      "size": 4286,
+      "ecosystem": [
+        "dotnet"
+      ],
+      "intent": [
+        "build"
+      ],
+      "related_agents": [
+        "java-architect",
+        "typescript-pro",
+        "database-architect",
+        "api-architect"
+      ]
     },
     {
       "name": "data-analyst",
@@ -273,7 +417,19 @@
         "visualization"
       ],
       "sha256": "afdb460174b82a2658bac80c892356241a5b9d0a97e893b321b6da5c1f1da72a",
-      "size": 4354
+      "size": 4354,
+      "ecosystem": [
+        "data"
+      ],
+      "intent": [
+        "research"
+      ],
+      "related_agents": [
+        "data-scientist",
+        "data-engineer",
+        "sql-pro",
+        "postgres-pro"
+      ]
     },
     {
       "name": "data-engineer",
@@ -290,7 +446,19 @@
         "pipelines"
       ],
       "sha256": "eb135a8a8de98248d389a598c02167668f715272223fddeece20634806f15544",
-      "size": 4742
+      "size": 4742,
+      "ecosystem": [
+        "data"
+      ],
+      "intent": [
+        "build"
+      ],
+      "related_agents": [
+        "data-scientist",
+        "ml-engineer",
+        "postgres-pro",
+        "database-architect"
+      ]
     },
     {
       "name": "data-scientist",
@@ -306,7 +474,19 @@
         "modeling"
       ],
       "sha256": "dc9803083c524f8355cb35cbb12b821e6985de4565af671e0a186be21a591981",
-      "size": 4892
+      "size": 4892,
+      "ecosystem": [
+        "data"
+      ],
+      "intent": [
+        "research"
+      ],
+      "related_agents": [
+        "ml-engineer",
+        "data-engineer",
+        "ai-engineer",
+        "data-analyst"
+      ]
     },
     {
       "name": "database-architect",
@@ -322,7 +502,19 @@
         "architecture"
       ],
       "sha256": "cfbeb135a0e5fa5dad854464b41be6186701b99f54d78f85e866270effa1eac0",
-      "size": 5092
+      "size": 5092,
+      "ecosystem": [
+        "data"
+      ],
+      "intent": [
+        "design"
+      ],
+      "related_agents": [
+        "postgres-pro",
+        "sql-pro",
+        "api-architect",
+        "data-engineer"
+      ]
     },
     {
       "name": "debugger",
@@ -338,7 +530,19 @@
         "stack-traces"
       ],
       "sha256": "15c757de33cd8d9411229001aef4b45cb262099a1a4c587b5e6dc46bc56f5bdc",
-      "size": 5476
+      "size": 5476,
+      "ecosystem": [
+        "web"
+      ],
+      "intent": [
+        "debug"
+      ],
+      "related_agents": [
+        "code-reviewer",
+        "performance-engineer",
+        "test-automator",
+        "refactoring-specialist"
+      ]
     },
     {
       "name": "diagram-architect",
@@ -355,7 +559,19 @@
         "visualization"
       ],
       "sha256": "55285c62d1c6b3d9998f2365c6a197ebd00dcf3ae2cf22125366859a45d3c27a",
-      "size": 4693
+      "size": 4693,
+      "ecosystem": [
+        "web"
+      ],
+      "intent": [
+        "document"
+      ],
+      "related_agents": [
+        "documentation-engineer",
+        "microservices-architect",
+        "api-architect",
+        "technical-writer"
+      ]
     },
     {
       "name": "docker-specialist",
@@ -372,7 +588,19 @@
         "optimization"
       ],
       "sha256": "7d49e6af3f081afb08a1393eb5018700f4f6f314038d1e46e976217fe855ff47",
-      "size": 4357
+      "size": 4357,
+      "ecosystem": [
+        "devops"
+      ],
+      "intent": [
+        "deploy"
+      ],
+      "related_agents": [
+        "kubernetes-specialist",
+        "ci-cd-engineer",
+        "platform-engineer",
+        "sre-engineer"
+      ]
     },
     {
       "name": "documentation-engineer",
@@ -388,7 +616,19 @@
         "developer-docs"
       ],
       "sha256": "d81123ed0cfdad30b4f3c2d4ac2df90a3c78dc8dfd28993a883d7fbc7ad97b7d",
-      "size": 4243
+      "size": 4243,
+      "ecosystem": [
+        "web"
+      ],
+      "intent": [
+        "document"
+      ],
+      "related_agents": [
+        "technical-writer",
+        "api-documenter",
+        "diagram-architect",
+        "api-architect"
+      ]
     },
     {
       "name": "fullstack-developer",
@@ -405,7 +645,19 @@
         "database"
       ],
       "sha256": "b6249fe9cb55e9a5b437f01b51cb52e1557e474abe552b65f3d689fc908b53c3",
-      "size": 4136
+      "size": 4136,
+      "ecosystem": [
+        "javascript"
+      ],
+      "intent": [
+        "build"
+      ],
+      "related_agents": [
+        "typescript-pro",
+        "react-specialist",
+        "nextjs-developer",
+        "postgres-pro"
+      ]
     },
     {
       "name": "golang-pro",
@@ -421,7 +673,19 @@
         "cloud-native"
       ],
       "sha256": "8e490d731610b29455b733fb1b1a3a17bbb5659324fb9c64cb09cd706afe6ad6",
-      "size": 4132
+      "size": 4132,
+      "ecosystem": [
+        "go"
+      ],
+      "intent": [
+        "build"
+      ],
+      "related_agents": [
+        "rust-pro",
+        "microservices-architect",
+        "kubernetes-specialist",
+        "docker-specialist"
+      ]
     },
     {
       "name": "graphql-architect",
@@ -437,7 +701,19 @@
         "query-optimization"
       ],
       "sha256": "104b342476061cef14628733ed579b08c754de5e49a62671f88c4ce0c22f9f1d",
-      "size": 5028
+      "size": 5028,
+      "ecosystem": [
+        "web"
+      ],
+      "intent": [
+        "design"
+      ],
+      "related_agents": [
+        "api-architect",
+        "database-architect",
+        "react-specialist",
+        "nextjs-developer"
+      ]
     },
     {
       "name": "incident-responder",
@@ -454,7 +730,19 @@
         "on-call"
       ],
       "sha256": "1a20976f1566657a6f142c060b8f91f05f0a2b93ef48539db0e55f22cd80c120",
-      "size": 8450
+      "size": 8450,
+      "ecosystem": [
+        "devops"
+      ],
+      "intent": [
+        "debug"
+      ],
+      "related_agents": [
+        "sre-engineer",
+        "kubernetes-specialist",
+        "platform-engineer",
+        "docker-specialist"
+      ]
     },
     {
       "name": "java-architect",
@@ -470,7 +758,19 @@
         "jvm"
       ],
       "sha256": "34e68f25c39d7af7bc39178137fe819d90fdf277d626e579b9f7ea55124d9ea5",
-      "size": 5128
+      "size": 5128,
+      "ecosystem": [
+        "jvm"
+      ],
+      "intent": [
+        "build"
+      ],
+      "related_agents": [
+        "kotlin-specialist",
+        "microservices-architect",
+        "database-architect",
+        "api-architect"
+      ]
     },
     {
       "name": "kotlin-specialist",
@@ -486,7 +786,19 @@
         "jvm"
       ],
       "sha256": "63000a5b6b5aa6825d9ce5798824d3fdd4d1ed06120e92f6b677a7d74ff102de",
-      "size": 4404
+      "size": 4404,
+      "ecosystem": [
+        "jvm"
+      ],
+      "intent": [
+        "build"
+      ],
+      "related_agents": [
+        "java-architect",
+        "mobile-developer",
+        "microservices-architect",
+        "api-architect"
+      ]
     },
     {
       "name": "kubernetes-specialist",
@@ -503,7 +815,19 @@
         "production"
       ],
       "sha256": "83c8d5730a6928573409f10a8624e4a600638ada7cc9d85b9fbcb39694c11e7b",
-      "size": 4444
+      "size": 4444,
+      "ecosystem": [
+        "devops"
+      ],
+      "intent": [
+        "deploy"
+      ],
+      "related_agents": [
+        "docker-specialist",
+        "platform-engineer",
+        "ci-cd-engineer",
+        "sre-engineer"
+      ]
     },
     {
       "name": "legacy-modernizer",
@@ -519,7 +843,19 @@
         "refactoring"
       ],
       "sha256": "267d8e25850013520a972f3810a2d9ca9a21919e0c150bd724e06983ae001f6c",
-      "size": 10646
+      "size": 10646,
+      "ecosystem": [
+        "web"
+      ],
+      "intent": [
+        "migrate"
+      ],
+      "related_agents": [
+        "refactoring-specialist",
+        "code-reviewer",
+        "typescript-pro",
+        "test-automator"
+      ]
     },
     {
       "name": "linux-admin",
@@ -536,7 +872,19 @@
         "security"
       ],
       "sha256": "fcc401393827c1a02d6500b8d66d9c54fadf32bc391792a178710d7c018b042a",
-      "size": 4176
+      "size": 4176,
+      "ecosystem": [
+        "devops"
+      ],
+      "intent": [
+        "deploy"
+      ],
+      "related_agents": [
+        "docker-specialist",
+        "sre-engineer",
+        "kubernetes-specialist",
+        "platform-engineer"
+      ]
     },
     {
       "name": "llm-architect",
@@ -553,7 +901,19 @@
         "ai"
       ],
       "sha256": "67dd47f2a5e247821999f29eba445cc5bf4e8d1fbc15d3d6182d062adb38b565",
-      "size": 5412
+      "size": 5412,
+      "ecosystem": [
+        "ai"
+      ],
+      "intent": [
+        "design"
+      ],
+      "related_agents": [
+        "ai-engineer",
+        "prompt-engineer",
+        "ml-engineer",
+        "search-specialist"
+      ]
     },
     {
       "name": "mcp-developer",
@@ -570,7 +930,18 @@
         "development"
       ],
       "sha256": "6bb8bf0085f3a3fba0f9961ae22ef8dfae05f96f43ffc9ff33bd109065756acb",
-      "size": 5538
+      "size": 5538,
+      "ecosystem": [
+        "mcp"
+      ],
+      "intent": [
+        "build"
+      ],
+      "related_agents": [
+        "mcp-security-auditor",
+        "typescript-pro",
+        "api-architect"
+      ]
     },
     {
       "name": "mcp-security-auditor",
@@ -587,7 +958,19 @@
         "audit"
       ],
       "sha256": "bf6819c08ca4fb40fcd084d1ba4c96f2793b745627c322c7ed0ef96a09ad8a8f",
-      "size": 5156
+      "size": 5156,
+      "ecosystem": [
+        "mcp"
+      ],
+      "intent": [
+        "audit"
+      ],
+      "related_agents": [
+        "mcp-developer",
+        "security-auditor",
+        "compliance-auditor",
+        "security-engineer"
+      ]
     },
     {
       "name": "microservices-architect",
@@ -603,7 +986,19 @@
         "event-driven"
       ],
       "sha256": "c7814949ccbd73238018489d6a835af75e2e616a77f00e068b786dbb9181894a",
-      "size": 4923
+      "size": 4923,
+      "ecosystem": [
+        "cloud"
+      ],
+      "intent": [
+        "design"
+      ],
+      "related_agents": [
+        "api-architect",
+        "docker-specialist",
+        "kubernetes-specialist",
+        "database-architect"
+      ]
     },
     {
       "name": "ml-engineer",
@@ -619,7 +1014,19 @@
         "training"
       ],
       "sha256": "40cabbc306ad1bce0bb6f6fc3dbb0e18826d93afd74c3d1e97ad262f2581e809",
-      "size": 4680
+      "size": 4680,
+      "ecosystem": [
+        "ai"
+      ],
+      "intent": [
+        "build"
+      ],
+      "related_agents": [
+        "data-scientist",
+        "mlops-engineer",
+        "ai-engineer",
+        "llm-architect"
+      ]
     },
     {
       "name": "mlops-engineer",
@@ -635,7 +1042,19 @@
         "ml-lifecycle"
       ],
       "sha256": "a059d01fa50cf4887cf989bf0e1219aa1d367493b369f5b13d4b8b143e3c226f",
-      "size": 4823
+      "size": 4823,
+      "ecosystem": [
+        "ai"
+      ],
+      "intent": [
+        "deploy"
+      ],
+      "related_agents": [
+        "ml-engineer",
+        "docker-specialist",
+        "kubernetes-specialist",
+        "ai-engineer"
+      ]
     },
     {
       "name": "mobile-developer",
@@ -652,7 +1071,19 @@
         "cross-platform"
       ],
       "sha256": "235d7a79333b4af0997dcdb9071140f009e2e8906504c902ec0371b9bfb9fad8",
-      "size": 4899
+      "size": 4899,
+      "ecosystem": [
+        "mobile"
+      ],
+      "intent": [
+        "build"
+      ],
+      "related_agents": [
+        "react-specialist",
+        "swift-expert",
+        "kotlin-specialist",
+        "ui-designer"
+      ]
     },
     {
       "name": "nextjs-developer",
@@ -669,7 +1100,19 @@
         "ssr"
       ],
       "sha256": "0ee56ff5b6e25ddc89022b0c61ddd035d29f15d98109d937e4657b04dcded072",
-      "size": 4811
+      "size": 4811,
+      "ecosystem": [
+        "javascript"
+      ],
+      "intent": [
+        "build"
+      ],
+      "related_agents": [
+        "react-specialist",
+        "typescript-pro",
+        "ui-designer",
+        "fullstack-developer"
+      ]
     },
     {
       "name": "penetration-tester",
@@ -685,7 +1128,19 @@
         "offensive"
       ],
       "sha256": "c9bfbd426274dffff5730119750dc4803dbfadba16388bf9acb23e9d4e018ecc",
-      "size": 7312
+      "size": 7312,
+      "ecosystem": [
+        "security"
+      ],
+      "intent": [
+        "audit"
+      ],
+      "related_agents": [
+        "security-auditor",
+        "compliance-auditor",
+        "security-engineer",
+        "mcp-security-auditor"
+      ]
     },
     {
       "name": "performance-engineer",
@@ -701,7 +1156,19 @@
         "benchmarking"
       ],
       "sha256": "b359255c0bd406a8112e1f543ad456b734fc4277a9b6e8ccc8e569a7688dfa26",
-      "size": 4907
+      "size": 4907,
+      "ecosystem": [
+        "web"
+      ],
+      "intent": [
+        "optimize"
+      ],
+      "related_agents": [
+        "debugger",
+        "code-reviewer",
+        "test-automator",
+        "refactoring-specialist"
+      ]
     },
     {
       "name": "php-pro",
@@ -717,7 +1184,19 @@
         "async"
       ],
       "sha256": "bbce49775aae998aa3905c83bd4792595d53686fb54a9111e8e03c4664546762",
-      "size": 4410
+      "size": 4410,
+      "ecosystem": [
+        "php"
+      ],
+      "intent": [
+        "build"
+      ],
+      "related_agents": [
+        "database-architect",
+        "api-architect",
+        "code-reviewer",
+        "refactoring-specialist"
+      ]
     },
     {
       "name": "platform-engineer",
@@ -734,7 +1213,19 @@
         "developer-experience"
       ],
       "sha256": "023c6d20f56aa7dc24654ed9c96415ddcb4e8b0e6229ae306392fe8adb4e8939",
-      "size": 4076
+      "size": 4076,
+      "ecosystem": [
+        "devops"
+      ],
+      "intent": [
+        "deploy"
+      ],
+      "related_agents": [
+        "kubernetes-specialist",
+        "docker-specialist",
+        "ci-cd-engineer",
+        "sre-engineer"
+      ]
     },
     {
       "name": "postgres-pro",
@@ -751,7 +1242,19 @@
         "query-tuning"
       ],
       "sha256": "dd4d759cb0b7cdfb0c851b657fe0ce9ed9a8c48aa509428c46f75478bc34d28e",
-      "size": 4865
+      "size": 4865,
+      "ecosystem": [
+        "data"
+      ],
+      "intent": [
+        "optimize"
+      ],
+      "related_agents": [
+        "database-architect",
+        "sql-pro",
+        "data-engineer",
+        "redis-specialist"
+      ]
     },
     {
       "name": "prd",
@@ -768,7 +1271,19 @@
         "planning"
       ],
       "sha256": "ae52bde81243f13be305a82cba6bf9fbce13051741179c3028aaf4654ab9a4b6",
-      "size": 5707
+      "size": 5707,
+      "ecosystem": [
+        "web"
+      ],
+      "intent": [
+        "plan"
+      ],
+      "related_agents": [
+        "product-manager",
+        "business-analyst",
+        "project-manager",
+        "ux-researcher"
+      ]
     },
     {
       "name": "product-manager",
@@ -784,7 +1299,19 @@
         "user-research"
       ],
       "sha256": "c9600821a4cd5221d83ea3ec5780a1376517ba07d32e0abd25bfae2235f3da88",
-      "size": 4220
+      "size": 4220,
+      "ecosystem": [
+        "web"
+      ],
+      "intent": [
+        "plan"
+      ],
+      "related_agents": [
+        "prd",
+        "business-analyst",
+        "ux-researcher",
+        "scrum-master"
+      ]
     },
     {
       "name": "project-manager",
@@ -800,7 +1327,19 @@
         "budget"
       ],
       "sha256": "76889a1fb21233994e1ff5f18a2fa603ddfc9f9e54ccd80ff817dd016ba2f27e",
-      "size": 4745
+      "size": 4745,
+      "ecosystem": [
+        "web"
+      ],
+      "intent": [
+        "plan"
+      ],
+      "related_agents": [
+        "product-manager",
+        "scrum-master",
+        "business-analyst",
+        "prd"
+      ]
     },
     {
       "name": "prompt-engineer",
@@ -816,7 +1355,18 @@
         "prompt-engineering"
       ],
       "sha256": "b87fd98d160ee3dfa7f6e50ace613e3db0a788b975d49ee9bb5d37a05e8d675a",
-      "size": 5545
+      "size": 5545,
+      "ecosystem": [
+        "ai"
+      ],
+      "intent": [
+        "optimize"
+      ],
+      "related_agents": [
+        "llm-architect",
+        "ai-engineer",
+        "search-specialist"
+      ]
     },
     {
       "name": "python-pro",
@@ -833,7 +1383,19 @@
         "flask"
       ],
       "sha256": "8f44ba7d7b1f5e147e0c24ddabd34f95faa69c112242d20df4aa3a48f17b2ca0",
-      "size": 4196
+      "size": 4196,
+      "ecosystem": [
+        "python"
+      ],
+      "intent": [
+        "build"
+      ],
+      "related_agents": [
+        "data-scientist",
+        "ai-engineer",
+        "data-engineer",
+        "api-architect"
+      ]
     },
     {
       "name": "qa-expert",
@@ -849,7 +1411,19 @@
         "quality-gates"
       ],
       "sha256": "6a3711e1a3ac3d4afebfa9f1b989141039df3a4eecc7a122f423f45e52ce8f6a",
-      "size": 5070
+      "size": 5070,
+      "ecosystem": [
+        "web"
+      ],
+      "intent": [
+        "test"
+      ],
+      "related_agents": [
+        "test-automator",
+        "code-reviewer",
+        "debugger",
+        "performance-engineer"
+      ]
     },
     {
       "name": "rails-expert",
@@ -866,7 +1440,19 @@
         "full-stack"
       ],
       "sha256": "32426547ba7f437328cfe3174bff0f4a2bb30a2b60659898965efe75ee73f55d",
-      "size": 4565
+      "size": 4565,
+      "ecosystem": [
+        "ruby"
+      ],
+      "intent": [
+        "build"
+      ],
+      "related_agents": [
+        "database-architect",
+        "api-architect",
+        "code-reviewer",
+        "refactoring-specialist"
+      ]
     },
     {
       "name": "react-specialist",
@@ -883,7 +1469,19 @@
         "performance"
       ],
       "sha256": "b8bc61f218409eb5c86bd110b96ea8519f7585544afa75a3bc3d4486f764a53a",
-      "size": 3987
+      "size": 3987,
+      "ecosystem": [
+        "javascript"
+      ],
+      "intent": [
+        "build"
+      ],
+      "related_agents": [
+        "nextjs-developer",
+        "typescript-pro",
+        "ui-designer",
+        "angular-architect"
+      ]
     },
     {
       "name": "redis-specialist",
@@ -900,7 +1498,19 @@
         "performance"
       ],
       "sha256": "0ddb4a497b0713bb75a5404ba488271ea29e213973038093aa054c47c0999cfa",
-      "size": 4974
+      "size": 4974,
+      "ecosystem": [
+        "data"
+      ],
+      "intent": [
+        "optimize"
+      ],
+      "related_agents": [
+        "postgres-pro",
+        "database-architect",
+        "performance-engineer",
+        "api-architect"
+      ]
     },
     {
       "name": "refactoring-specialist",
@@ -916,7 +1526,19 @@
         "architecture"
       ],
       "sha256": "baf12ef51f2bd8277ef4a9f4fb72dfd862ad72f6dcd94d9cf0282e144ff938eb",
-      "size": 7014
+      "size": 7014,
+      "ecosystem": [
+        "web"
+      ],
+      "intent": [
+        "migrate"
+      ],
+      "related_agents": [
+        "code-reviewer",
+        "legacy-modernizer",
+        "test-automator",
+        "debugger"
+      ]
     },
     {
       "name": "rust-pro",
@@ -933,7 +1555,19 @@
         "systems"
       ],
       "sha256": "3b62f8cd9742c4c6319f67fa3151f2375574523ad2fcfa25c866e353dfd362b8",
-      "size": 4462
+      "size": 4462,
+      "ecosystem": [
+        "rust"
+      ],
+      "intent": [
+        "build"
+      ],
+      "related_agents": [
+        "cpp-pro",
+        "golang-pro",
+        "performance-engineer",
+        "debugger"
+      ]
     },
     {
       "name": "screenshot-ui-analyzer",
@@ -950,7 +1584,19 @@
         "components"
       ],
       "sha256": "2033af1765dd2f3d538c7f0a8c2a2c6b494d1073fd4201a2f637413c7bb5c96e",
-      "size": 5520
+      "size": 5520,
+      "ecosystem": [
+        "web"
+      ],
+      "intent": [
+        "review"
+      ],
+      "related_agents": [
+        "ui-designer",
+        "accessibility",
+        "react-specialist",
+        "ux-researcher"
+      ]
     },
     {
       "name": "scrum-master",
@@ -967,7 +1613,19 @@
         "facilitation"
       ],
       "sha256": "a1d67a42361c6a4935015b6d652d97872e77d212cbbb323c39a0e8758b916a77",
-      "size": 5060
+      "size": 5060,
+      "ecosystem": [
+        "web"
+      ],
+      "intent": [
+        "plan"
+      ],
+      "related_agents": [
+        "product-manager",
+        "project-manager",
+        "business-analyst",
+        "prd"
+      ]
     },
     {
       "name": "search-specialist",
@@ -983,7 +1641,18 @@
         "synthesis"
       ],
       "sha256": "630759377353f3e42d203570cb6125b3353446bfc169dc8324d409d23b2c0fe5",
-      "size": 5266
+      "size": 5266,
+      "ecosystem": [
+        "ai"
+      ],
+      "intent": [
+        "research"
+      ],
+      "related_agents": [
+        "data-analyst",
+        "llm-architect",
+        "prompt-engineer"
+      ]
     },
     {
       "name": "security-auditor",
@@ -999,7 +1668,19 @@
         "assessment"
       ],
       "sha256": "b5875df42b2b6a909b8d482279b5bf3246a4eaa72d5d8f2ecec7d8278c8ff042",
-      "size": 6532
+      "size": 6532,
+      "ecosystem": [
+        "security"
+      ],
+      "intent": [
+        "audit"
+      ],
+      "related_agents": [
+        "penetration-tester",
+        "compliance-auditor",
+        "security-engineer",
+        "mcp-security-auditor"
+      ]
     },
     {
       "name": "security-engineer",
@@ -1015,7 +1696,19 @@
         "devsecops"
       ],
       "sha256": "bb2fe125d50fa2051f5a3abb5ffe54c62a0d8df02bb2eac735ea3d47fd4b536b",
-      "size": 4447
+      "size": 4447,
+      "ecosystem": [
+        "security"
+      ],
+      "intent": [
+        "audit"
+      ],
+      "related_agents": [
+        "security-auditor",
+        "compliance-auditor",
+        "penetration-tester",
+        "ci-cd-engineer"
+      ]
     },
     {
       "name": "smart-contract-auditor",
@@ -1032,7 +1725,18 @@
         "audit"
       ],
       "sha256": "e330f8b1ab984495900052dd58da75838f29eff1a037dd630e737477e84d5428",
-      "size": 9077
+      "size": 9077,
+      "ecosystem": [
+        "security"
+      ],
+      "intent": [
+        "audit"
+      ],
+      "related_agents": [
+        "security-auditor",
+        "compliance-auditor",
+        "penetration-tester"
+      ]
     },
     {
       "name": "sql-pro",
@@ -1049,7 +1753,19 @@
         "schema-design"
       ],
       "sha256": "875f3935143200096add9408b935cc6ebd0a102cf68d3c8e44b94b129eff7113",
-      "size": 8546
+      "size": 8546,
+      "ecosystem": [
+        "data"
+      ],
+      "intent": [
+        "optimize"
+      ],
+      "related_agents": [
+        "postgres-pro",
+        "database-architect",
+        "data-engineer",
+        "data-analyst"
+      ]
     },
     {
       "name": "sre-engineer",
@@ -1066,7 +1782,19 @@
         "observability"
       ],
       "sha256": "009047fab4897f8638d190b5e4e4cd76f0e425105f6d4beb7bfec48edae4f54b",
-      "size": 4629
+      "size": 4629,
+      "ecosystem": [
+        "devops"
+      ],
+      "intent": [
+        "deploy"
+      ],
+      "related_agents": [
+        "kubernetes-specialist",
+        "platform-engineer",
+        "incident-responder",
+        "docker-specialist"
+      ]
     },
     {
       "name": "swift-expert",
@@ -1083,7 +1811,18 @@
         "xcode"
       ],
       "sha256": "89beeec1cdde1a906ffb3a53cb2e55e737205cfa405e13f942c42348a3224dae",
-      "size": 4444
+      "size": 4444,
+      "ecosystem": [
+        "mobile"
+      ],
+      "intent": [
+        "build"
+      ],
+      "related_agents": [
+        "mobile-developer",
+        "kotlin-specialist",
+        "ui-designer"
+      ]
     },
     {
       "name": "technical-writer",
@@ -1099,7 +1838,18 @@
         "sdk"
       ],
       "sha256": "0dbc82a4567ad4cd6748a7f99e9427a4923a72a51fedfce62a2b126732af7f57",
-      "size": 4433
+      "size": 4433,
+      "ecosystem": [
+        "web"
+      ],
+      "intent": [
+        "document"
+      ],
+      "related_agents": [
+        "documentation-engineer",
+        "api-documenter",
+        "diagram-architect"
+      ]
     },
     {
       "name": "terraform-specialist",
@@ -1116,7 +1866,19 @@
         "providers"
       ],
       "sha256": "1e020c162e33e97b9a2e14df47e06265610043c805b67ae41a11f0ab550fad03",
-      "size": 4970
+      "size": 4970,
+      "ecosystem": [
+        "devops"
+      ],
+      "intent": [
+        "deploy"
+      ],
+      "related_agents": [
+        "aws-specialist",
+        "platform-engineer",
+        "kubernetes-specialist",
+        "ci-cd-engineer"
+      ]
     },
     {
       "name": "test-automator",
@@ -1133,7 +1895,19 @@
         "e2e"
       ],
       "sha256": "c48c84c1e121bde10739047df929c02f7a5a3fda07dd19f2893cdf44f1d2c5d1",
-      "size": 6185
+      "size": 6185,
+      "ecosystem": [
+        "web"
+      ],
+      "intent": [
+        "test"
+      ],
+      "related_agents": [
+        "qa-expert",
+        "code-reviewer",
+        "debugger",
+        "ci-cd-engineer"
+      ]
     },
     {
       "name": "typescript-pro",
@@ -1150,7 +1924,19 @@
         "react"
       ],
       "sha256": "91a7228f884f61f576559d4596984a0fafc5a29b631e1f469d7915f5bc322a5b",
-      "size": 4593
+      "size": 4593,
+      "ecosystem": [
+        "javascript"
+      ],
+      "intent": [
+        "build"
+      ],
+      "related_agents": [
+        "react-specialist",
+        "nextjs-developer",
+        "code-reviewer",
+        "refactoring-specialist"
+      ]
     },
     {
       "name": "ui-designer",
@@ -1167,7 +1953,19 @@
         "ux"
       ],
       "sha256": "1f355c5766576f297a75a2457d30fb7259d51d9a8a683af893e395d5476d146f",
-      "size": 4535
+      "size": 4535,
+      "ecosystem": [
+        "web"
+      ],
+      "intent": [
+        "design"
+      ],
+      "related_agents": [
+        "accessibility",
+        "react-specialist",
+        "nextjs-developer",
+        "screenshot-ui-analyzer"
+      ]
     },
     {
       "name": "ux-researcher",
@@ -1183,7 +1981,19 @@
         "journey-mapping"
       ],
       "sha256": "089d0b5d4756bcab7b4ff32dccf04382a07f38653cbb4dbba3ff5818ab8a86e1",
-      "size": 5786
+      "size": 5786,
+      "ecosystem": [
+        "web"
+      ],
+      "intent": [
+        "research"
+      ],
+      "related_agents": [
+        "product-manager",
+        "business-analyst",
+        "ui-designer",
+        "accessibility"
+      ]
     },
     {
       "name": "vue-expert",
@@ -1200,7 +2010,19 @@
         "frontend"
       ],
       "sha256": "806bdbd59c6250d22eac4f99bdd1c20fa52dc65e4025c48f78f049a7cb50f4ea",
-      "size": 4386
+      "size": 4386,
+      "ecosystem": [
+        "javascript"
+      ],
+      "intent": [
+        "build"
+      ],
+      "related_agents": [
+        "angular-architect",
+        "react-specialist",
+        "typescript-pro",
+        "nextjs-developer"
+      ]
     }
   ],
   "packs": {

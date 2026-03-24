@@ -262,37 +262,37 @@ function scanLocalAgents(cwd, basePath, known) {
  *
  * @param {import('./registry.mjs').Manifest} manifest
  * @param {string} [cwd]
- * @returns {Map<string, AgentState>}
+ * @returns {Record<string, AgentState>}
  */
 export function detectAgentStates(manifest, cwd = process.cwd()) {
   const basePath = manifest.base_path || '.opencode/agents';
   const lock = readLock(cwd, basePath);
-  const states = new Map();
+  const states = {};
 
   for (const agent of manifest.agents) {
     const filePath = resolveAgentPath(cwd, basePath, agent);
 
     if (!existsSync(filePath)) {
-      states.set(agent.name, 'new');
+      states[agent.name] = 'new';
       continue;
     }
 
     const entry = lock[agent.name];
     if (!entry) {
-      states.set(agent.name, 'unknown');
+      states[agent.name] = 'unknown';
       continue;
     }
 
     // Compare current file hash with lock hash
     const currentContent = readFileSync(filePath, 'utf-8');
     const currentHash = sha256(currentContent);
-    states.set(agent.name, currentHash === entry.sha256 ? 'installed' : 'outdated');
+    states[agent.name] = currentHash === entry.sha256 ? 'installed' : 'outdated';
   }
 
   // Filesystem scan: pick up local .md files not in the manifest
-  const known = new Set(states.keys());
+  const known = new Set(Object.keys(states));
   for (const { name } of scanLocalAgents(cwd, basePath, known)) {
-    states.set(name, 'unknown');
+    states[name] = 'unknown';
   }
 
   return states;
@@ -309,7 +309,7 @@ export function detectAgentStates(manifest, cwd = process.cwd()) {
 export function detectInstalledSet(manifest, cwd = process.cwd()) {
   const states = detectAgentStates(manifest, cwd);
   const set = new Set();
-  for (const [name, state] of states) {
+  for (const [name, state] of Object.entries(states)) {
     if (state !== 'new') set.add(name);
   }
   return set;
@@ -327,7 +327,7 @@ export function detectInstalledSet(manifest, cwd = process.cwd()) {
  */
 export function findOutdatedAgents(manifest, cwd = process.cwd()) {
   const states = detectAgentStates(manifest, cwd);
-  return manifest.agents.filter((a) => states.get(a.name) === 'outdated');
+  return manifest.agents.filter((a) => states[a.name] === 'outdated');
 }
 
 // ─── Integrity verification ──────────────────────────────────────────────────

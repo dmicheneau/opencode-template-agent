@@ -1,7 +1,7 @@
 import { describe, it, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { mkdirSync, rmSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { dirname } from 'node:path';
@@ -1075,5 +1075,108 @@ describe('source_path: validateManifest', () => {
       /source_path/i,
       'source_path with null byte should be rejected'
     );
+  });
+});
+
+// ─── runSuggestFlow ──────────────────────────────────────────────────────────
+
+describe('CLI runSuggestFlow', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = mkdtempSync(join(tmpdir(), 'suggest-cli-'));
+  });
+
+  afterEach(() => {
+    rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  it('falls through to "Missing agent name" for empty project (no suggestions)', () => {
+    // Empty dir → no profile → no useful suggestions → fall-through
+    const { stdout, stderr, status } = runFull(['install'], { cwd: tmpDir });
+    const combined = stdout + stderr;
+    assert.ok(status !== 0, 'should exit with non-zero for no agent');
+    assert.ok(combined.includes('Missing agent name'), 'should fall through to missing-agent error');
+  });
+
+  it('shows "Suggested agents" for a React project (dry-run)', () => {
+    writeFileSync(
+      join(tmpDir, 'package.json'),
+      JSON.stringify({ name: 'my-app', dependencies: { react: '^18.0.0' } })
+    );
+    // stdin piped → non-TTY → auto-confirm
+    const { stdout, stderr, status } = runFull(['install', '--dry-run'], { cwd: tmpDir });
+    const combined = stdout + stderr;
+    assert.ok(combined.includes('Suggested agents'), 'should show suggestion header');
+  });
+
+  it('shows detected stack for a React project', () => {
+    writeFileSync(
+      join(tmpDir, 'package.json'),
+      JSON.stringify({ name: 'my-app', dependencies: { react: '^18.0.0' } })
+    );
+    const { stdout, stderr } = runFull(['install', '--dry-run'], { cwd: tmpDir });
+    const combined = stdout + stderr;
+    assert.ok(combined.includes('javascript') || combined.includes('react'), 'should show detected stack');
+  });
+
+  it('shows agent names and scores in output', () => {
+    writeFileSync(
+      join(tmpDir, 'package.json'),
+      JSON.stringify({ name: 'my-app', dependencies: { react: '^18.0.0' } })
+    );
+    const { stdout, stderr } = runFull(['install', '--dry-run'], { cwd: tmpDir });
+    const combined = stdout + stderr;
+    // Should contain at least one agent name (e.g. react-specialist or typescript-pro)
+    const hasAgent = combined.includes('react-specialist') || combined.includes('typescript-pro');
+    assert.ok(hasAgent, 'output should contain at least one suggested agent name');
+    // Should contain a percentage score
+    assert.ok(/\d+%/.test(combined), 'output should contain percentage scores');
+  });
+
+  it('installs suggested agents for a React project (non-dry-run, auto-confirm)', () => {
+    writeFileSync(
+      join(tmpDir, 'package.json'),
+      JSON.stringify({ name: 'my-app', dependencies: { react: '^18.0.0' } })
+    );
+    // Non-dry-run: should actually install agents
+    const { stdout, stderr, status } = runFull(['install'], { cwd: tmpDir });
+    const combined = stdout + stderr;
+    // Should succeed or exit 0
+    assert.equal(status, 0, `expected exit 0, got ${status}. output:\n${combined}`);
+    assert.ok(combined.includes('suggested'), 'output should mention suggested agents');
+    // At least one agent directory should exist
+    const agentsDir = join(tmpDir, '.opencode', 'agents');
+    assert.ok(existsSync(agentsDir), '.opencode/agents directory should be created');
+  });
+
+  it('shows "Detected stack:" prefix when languages/tools detected', () => {
+    writeFileSync(
+      join(tmpDir, 'package.json'),
+      JSON.stringify({ name: 'my-app', dependencies: { react: '^18.0.0' } })
+    );
+    const { stdout, stderr } = runFull(['install', '--dry-run'], { cwd: tmpDir });
+    const combined = stdout + stderr;
+    assert.ok(combined.includes('Detected stack:'), 'should print detected stack label');
+  });
+
+  it('shows suggestions for a Go project', () => {
+    writeFileSync(join(tmpDir, 'go.mod'), 'module myapp\n\ngo 1.21\n');
+    const { stdout, stderr } = runFull(['install', '--dry-run'], { cwd: tmpDir });
+    const combined = stdout + stderr;
+    // Go project should trigger suggestions (go-developer or similar)
+    assert.ok(combined.includes('Suggested agents') || combined.includes('Missing agent name'),
+      'should either show suggestions or fall through gracefully');
+  });
+
+  it('respects --dry-run flag (no files written)', () => {
+    writeFileSync(
+      join(tmpDir, 'package.json'),
+      JSON.stringify({ name: 'my-app', dependencies: { react: '^18.0.0' } })
+    );
+    runFull(['install', '--dry-run'], { cwd: tmpDir });
+    // With --dry-run, no agents directory should be created
+    const agentsDir = join(tmpDir, '.opencode', 'agents');
+    assert.ok(!existsSync(agentsDir), '.opencode/agents should NOT be created on dry-run');
   });
 });

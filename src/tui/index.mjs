@@ -9,6 +9,7 @@ import { createInitialState, update, getViewportHeight, detectInstalled, enterPr
 import { render } from './renderer.mjs';
 import { SPINNER_INTERVAL_MS } from './ansi.mjs';
 import { detectAgentStates } from '../lock.mjs';
+import { detectProjectProfile, scoreAgents } from '../recommender.mjs';
 
 /**
  * Launch the interactive TUI.
@@ -31,6 +32,29 @@ export async function launchTUI(options = {}) {
   // ─── Initialize ───────────────────────────────────────────────────────
   let state = createInitialState(manifest, getSize());
   state = { ...state, agentStates: detectAgentStates(manifest) };
+
+  // ─── Suggest mode: detect project stack and score agents ──────────────
+  try {
+    const profile = detectProjectProfile(process.cwd());
+    if (profile.languages.length > 0 || profile.tools.length > 0) {
+      const rawSuggestions = scoreAgents({ profile, installed: state.installed, manifest });
+      const suggestions = rawSuggestions.filter(s => s.score >= 0.1);
+      if (suggestions.length > 0) {
+        const suggestSelected = new Set(suggestions.map(s => s.agent.name));
+        state = {
+          ...state,
+          mode: 'suggest',
+          suggestions,
+          suggestCursor: 0,
+          suggestSelected,
+          _suggestProfile: profile,
+        };
+      }
+    }
+  } catch {
+    // On any error, skip to browse (state already in browse mode)
+  }
+
   enter();
 
   // ─── C3: Console hijacking state at launchTUI scope ───────────────────

@@ -7,6 +7,8 @@
 
 import { VERSION } from '../src/meta.mjs';
 
+import { createInterface } from 'node:readline';
+
 import {
   getAgent,
   getCategory,
@@ -40,7 +42,10 @@ import {
   verifyLockIntegrity,
   rehashLock,
   bootstrapLock,
+  detectInstalledSet,
 } from '../src/lock.mjs';
+
+import { detectProjectProfile, scoreAgents } from '../src/recommender.mjs';
 
 import { parsePermissionFlags } from '../src/permissions/cli.mjs';
 import { resolvePermissions } from '../src/permissions/resolve.mjs';
@@ -366,15 +371,158 @@ async function cmdInstall(parsed) {
   // install <agent-name>
   const agentName = parsed.args[0];
   if (!agentName) {
-    errorMessage('Missing agent name. Usage: opencode-agents install <agent>');
-    console.error(`  Run ${cyan('opencode-agents list')} to see available agents.`);
-    console.error();
-    process.exit(1);
+    // No arguments at all — run the smart suggestion flow
+    const suggestedAgents = await runSuggestFlow(parsed, options, resolvedPerms);
+    if (suggestedAgents === null) {
+      // Fall through to usage hint
+      errorMessage('Missing agent name. Usage: opencode-agents install <agent>');
+      console.error(`  Run ${cyan('opencode-agents list')} to see available agents.`);
+      console.error();
+      process.exit(1);
+    }
+    return;
   }
 
   const agent = resolveAgentOrExit(agentName, 'install');
   const result = await installAgents([agent], { ...options, permissions: resolvedPerms });
   process.exit(result.failed > 0 ? 1 : 0);
+}
+
+// ─── Smart Suggestion Flow ──────────────────────────────────────────────────────
+
+/**
+ * Detect project profile, score agents, prompt user, and install suggestions.
+ * Returns the install result on success, or `null` to signal "fall through to help".
+ *
+ * @param {ParsedArgs} parsed
+ * @param {{ force: boolean, dryRun: boolean }} options
+ * @param {object|null} resolvedPerms
+ * @returns {Promise<null | object>}
+ */
+async function runSuggestFlow(parsed, options, resolvedPerms) {
+  const manifest = getManifest();
+
+  // 1. Detect project stack — bail gracefully on any error
+  let profile;
+  try {
+    profile = detectProjectProfile(process.cwd());
+  } catch {
+    return null;
+  }
+
+  // 2. Score agents
+  const installed = detectInstalledSet(manifest, process.cwd());
+  const suggestions = scoreAgents({ profile, installed, manifest });
+
+  // 3. No useful suggestions → fall through
+  const useful = suggestions.filter((s) => s.score >= 0.1);
+  if (useful.length === 0) return null;
+
+  const topN = useful.slice(0, 8);
+
+  // 4. Display detected stack
+  const stackItems = [
+    ...profile.languages,
+    ...profile.tools,
+    ...(profile.frameworks ?? []),
+  ].slice(0, 5);
+
+  console.log();
+  if (stackItems.length > 0) {
+    console.log(bold('Detected stack:') + '  ' + stackItems.map((s) => cyan(s)).join(dim(' · ')));
+    console.log();
+  }
+
+  // 5. Display suggestions
+  console.log(bold('Suggested agents for this project:'));
+  console.log();
+
+  const maxNameLen = topN.reduce((m, s) => Math.max(m, s.agent.name.length), 0);
+  const ANSI_OVERHEAD = cyan('').length;
+
+  topN.forEach((s, i) => {
+    const idx  = dim(String(i + 1).padStart(2) + '.');
+    const name = padRight(cyan(s.agent.name), maxNameLen + ANSI_OVERHEAD);
+    const pct  = bold(String(Math.round(s.score * 100)).padStart(3) + '%');
+    const desc = truncate(s.agent.description, 60);
+    const reasons = s.reasons.slice(0, 4).join(dim(' · '));
+
+    console.log(`  ${idx} ${name}  ${pct}  ${dim('—')} ${dim(desc)}`);
+    if (reasons) {
+      console.log(`      ${dim(reasons)}`);
+    }
+  });
+
+  console.log();
+
+  // 6. Prompt Y/n (auto-confirm when --force or non-TTY)
+  const autoConfirm = options.force || !process.stdin.isTTY;
+  let confirmed;
+
+  if (autoConfirm) {
+    confirmed = true;
+    if (options.dryRun) {
+      console.log(dim(`  (auto-confirmed — dry run)`));
+    } else if (!process.stdin.isTTY) {
+      console.log(dim(`  (auto-confirming in non-interactive mode)`));
+    }
+  } else {
+    process.stdout.write(`Install these ${topN.length} agents? [Y/n] `);
+    confirmed = await readYesNo();
+  }
+
+  if (!confirmed) {
+    console.log();
+    showHelp();
+    process.exit(0);
+  }
+
+  // 7. Install
+  console.log();
+  header(`Installing ${topN.length} suggested agent(s)...`);
+  const result = await installAgents(topN.map((s) => s.agent), { ...options, permissions: resolvedPerms });
+  process.exit(result.failed > 0 ? 1 : 0);
+  return result;
+}
+
+// ─── Suggestion flow helpers ────────────────────────────────────────────────────
+
+/**
+ * Read a single line from stdin, return true for Y/y/o/enter, false for N/n.
+ * @returns {Promise<boolean>}
+ */
+async function readYesNo() {
+  const rl = createInterface({ input: process.stdin, output: process.stdout });
+  return new Promise((resolve) => {
+    rl.question('', (answer) => {
+      rl.close();
+      const a = answer.trim().toLowerCase();
+      resolve(a === '' || a === 'y' || a === 'o');
+    });
+  });
+}
+
+/**
+ * Pad a string (which may contain ANSI codes) to `width` visible chars.
+ * @param {string} s
+ * @param {number} width
+ * @returns {string}
+ */
+function padRight(s, width) {
+  // Strip ANSI to measure visible length
+  const visible = s.replace(/\x1b\[[0-9;]*m/g, '').length;
+  return s + ' '.repeat(Math.max(0, width - visible));
+}
+
+/**
+ * Truncate a plain string to `max` chars, appending '…' if cut.
+ * @param {string} s
+ * @param {number} max
+ * @returns {string}
+ */
+function truncate(s, max) {
+  if (s.length <= max) return s;
+  return s.slice(0, max - 1) + '…';
 }
 
 // ─── Command: uninstall ─────────────────────────────────────────────────────────

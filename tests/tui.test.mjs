@@ -3107,3 +3107,280 @@ describe('render — Install All hint', () => {
     assert.ok(!plain.includes('Install All'), 'should NOT show Install All on packs tab');
   });
 });
+
+// ─── render — suggest mode ───────────────────────────────────────────────────
+
+/** Build a suggest-mode state for renderer tests. */
+function makeSuggestState(overrides = {}) {
+  const base = makeState({}, { cols: 100, rows: 28 });
+  return {
+    ...base,
+    mode: 'suggest',
+    suggestions: [
+      {
+        agent: {
+          name: 'typescript-pro',
+          category: 'languages',
+          description: 'TypeScript expert for large codebases',
+          mode: 'subagent',
+          tags: ['typescript'],
+          path: 'languages/typescript-pro',
+        },
+        score: 0.85,
+        reasons: ['Stack match: javascript', 'Framework: react'],
+        sources: ['stack'],
+      },
+      {
+        agent: {
+          name: 'react-specialist',
+          category: 'web',
+          description: 'React component architecture',
+          mode: 'subagent',
+          tags: ['react'],
+          path: 'web/react-specialist',
+        },
+        score: 0.72,
+        reasons: ['Framework: react'],
+        sources: ['stack'],
+      },
+    ],
+    suggestCursor: 0,
+    suggestSelected: new Set(),
+    _suggestProfile: { languages: ['javascript'], tools: ['npm'], frameworks: ['react'] },
+    ...overrides,
+  };
+}
+
+describe('render — suggest mode', () => {
+  it('shows SUGGESTIONS in the header title', () => {
+    const state = makeSuggestState();
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('SUGGESTIONS'), 'header should contain SUGGESTIONS');
+  });
+
+  it('shows detected stack languages and tools', () => {
+    const state = makeSuggestState();
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('javascript'), 'should show language');
+    assert.ok(plain.includes('npm'), 'should show tool');
+  });
+
+  it('shows "Detected stack:" prefix', () => {
+    const state = makeSuggestState();
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('Detected stack:'), 'should have stack prefix');
+  });
+
+  it('falls back to "Stack detected" when profile has no languages or tools', () => {
+    const state = makeSuggestState({
+      _suggestProfile: { languages: [], tools: [], frameworks: [] },
+    });
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('Stack detected'), 'should show fallback text when stack empty');
+  });
+
+  it('renders agent names', () => {
+    const state = makeSuggestState();
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('typescript-pro'), 'cursor agent name should appear');
+    assert.ok(plain.includes('react-specialist'), 'second agent name should appear');
+  });
+
+  it('renders percentage scores', () => {
+    const state = makeSuggestState();
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('85%'), 'score 0.85 should render as 85%');
+    assert.ok(plain.includes('72%'), 'score 0.72 should render as 72%');
+  });
+
+  it('cursor row shows first reason and description', () => {
+    const state = makeSuggestState({ suggestCursor: 0 });
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('Stack match: javascript'), 'cursor row should show first reason');
+    assert.ok(plain.includes('TypeScript expert'), 'cursor row should show description');
+  });
+
+  it('non-cursor row does not expand reason line', () => {
+    // Only the cursor row gets the extra reason/desc line
+    const state = makeSuggestState({ suggestCursor: 1 });
+    const output = render(state);
+    const plain = stripAnsi(output);
+    // For cursor=1, typescript-pro row should NOT have its reason expanded
+    // (Stack match line only appears under the cursor)
+    const lines = plain.split('\n');
+    const tsLine = lines.findIndex((l) => l.includes('typescript-pro'));
+    assert.ok(tsLine >= 0, 'typescript-pro line should exist');
+    // The very next line should NOT be the reason for typescript-pro
+    const nextLine = lines[tsLine + 1] || '';
+    assert.ok(
+      !nextLine.includes('Stack match: javascript') || nextLine.includes('react-specialist'),
+      'reason should only expand under cursor'
+    );
+  });
+
+  it('selected agent shows checkmark ✓', () => {
+    const state = makeSuggestState({
+      suggestSelected: new Set(['react-specialist']),
+    });
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('✓'), 'selected agent should show checkmark');
+  });
+
+  it('footer shows "Browse all agents" when nothing selected', () => {
+    const state = makeSuggestState({ suggestSelected: new Set() });
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('Browse all agents'), 'footer should say Browse all agents');
+  });
+
+  it('footer shows "Install selected" when items are selected', () => {
+    const state = makeSuggestState({
+      suggestSelected: new Set(['typescript-pro']),
+    });
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('Install selected'), 'footer should say Install selected');
+  });
+
+  it('shows key hints [Space], [A], [B], [Q] in footer', () => {
+    const state = makeSuggestState();
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('[Space]'), 'footer should have [Space]');
+    assert.ok(plain.includes('[A]'), 'footer should have [A]');
+    assert.ok(plain.includes('[B]'), 'footer should have [B]');
+    assert.ok(plain.includes('[Q]'), 'footer should have [Q]');
+  });
+
+  it('shows empty state message when no suggestions', () => {
+    const state = makeSuggestState({ suggestions: [] });
+    const output = render(state);
+    const plain = stripAnsi(output);
+    assert.ok(
+      plain.includes('No suggestions for this project'),
+      'should show empty state message'
+    );
+  });
+
+  it('renders within terminal bounds (no overflow)', () => {
+    const state = makeSuggestState();
+    const output = render(state);
+    const lines = output.split('\n');
+    assert.ok(lines.length <= 28, `output must not exceed terminal rows (got ${lines.length})`);
+  });
+
+  it('renders correctly at narrow terminal width (60 cols)', () => {
+    const state = {
+      ...makeSuggestState(),
+      terminal: { cols: 60, rows: 24 },
+    };
+    const output = render(state);
+    assert.ok(output.length > 0, 'should render at 60 cols');
+    const plain = stripAnsi(output);
+    assert.ok(plain.includes('typescript-pro'), 'agent name should appear at 60 cols');
+  });
+});
+
+// ─── updateSuggest reducer ────────────────────────────────────────────────────
+
+describe('update — suggest mode (updateSuggest reducer)', () => {
+  /** Build a minimal suggest-mode state with 3 suggestions. */
+  function makeSuggestReducerState(overrides = {}) {
+    const manifest = makeManifest();
+    const base = createInitialState(manifest, { cols: 120, rows: 24 });
+    return {
+      ...base,
+      mode: 'suggest',
+      suggestions: [
+        { agent: { name: 'ai-engineer' }, score: 0.9, reasons: [] },
+        { agent: { name: 'ml-engineer' }, score: 0.7, reasons: [] },
+        { agent: { name: 'postgres-pro' }, score: 0.5, reasons: [] },
+      ],
+      suggestCursor: 1,
+      suggestSelected: new Set(),
+      agentStates: {},
+      ...overrides,
+    };
+  }
+
+  it('UP moves suggestCursor up by 1', () => {
+    const state = makeSuggestReducerState({ suggestCursor: 1 });
+    const next = update(state, { action: Action.UP });
+    assert.equal(next.suggestCursor, 0);
+  });
+
+  it('UP clamps at 0 (does not wrap)', () => {
+    const state = makeSuggestReducerState({ suggestCursor: 0 });
+    const next = update(state, { action: Action.UP });
+    assert.equal(next.suggestCursor, 0);
+  });
+
+  it('DOWN moves suggestCursor down by 1', () => {
+    const state = makeSuggestReducerState({ suggestCursor: 1 });
+    const next = update(state, { action: Action.DOWN });
+    assert.equal(next.suggestCursor, 2);
+  });
+
+  it('DOWN clamps at max index (does not wrap)', () => {
+    const state = makeSuggestReducerState({ suggestCursor: 2 });
+    const next = update(state, { action: Action.DOWN });
+    assert.equal(next.suggestCursor, 2);
+  });
+
+  it('CONFIRM with selections transitions to browse mode', () => {
+    const state = makeSuggestReducerState({
+      suggestSelected: new Set(['ai-engineer']),
+    });
+    const next = update(state, { action: Action.CONFIRM });
+    assert.equal(next.mode, 'browse');
+  });
+
+  it('CONFIRM merges suggestSelected into agentStates (plain object, not replace)', () => {
+    const state = makeSuggestReducerState({
+      suggestSelected: new Set(['ai-engineer']),
+      agentStates: { 'postgres-pro': 'installed' },
+    });
+    const next = update(state, { action: Action.CONFIRM });
+    // New selection merged in
+    assert.equal(next.agentStates['ai-engineer'], 'selected');
+    // Pre-existing entry preserved
+    assert.equal(next.agentStates['postgres-pro'], 'installed');
+  });
+
+  it('CONFIRM clears suggestions, cursor and selection', () => {
+    const state = makeSuggestReducerState({
+      suggestSelected: new Set(['ai-engineer']),
+    });
+    const next = update(state, { action: Action.CONFIRM });
+    assert.deepEqual(next.suggestions, []);
+    assert.equal(next.suggestCursor, 0);
+    assert.equal(next.suggestSelected.size, 0);
+  });
+
+  it('CONFIRM with no selection skips to browse without touching agentStates', () => {
+    const state = makeSuggestReducerState({
+      suggestSelected: new Set(),
+      agentStates: { 'postgres-pro': 'installed' },
+    });
+    const next = update(state, { action: Action.CONFIRM });
+    assert.equal(next.mode, 'browse');
+    assert.equal(next.agentStates['postgres-pro'], 'installed');
+  });
+
+  it('BROWSE transitions to browse mode without changing agentStates', () => {
+    const state = makeSuggestReducerState({
+      agentStates: { 'ml-engineer': 'selected' },
+    });
+    const next = update(state, { action: Action.BROWSE });
+    assert.equal(next.mode, 'browse');
+    assert.equal(next.agentStates['ml-engineer'], 'selected');
+  });
+});
