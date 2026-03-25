@@ -33,5 +33,4 @@ node_modules/
 bun.lock
 
 # OpenCode working files
-.opencode/scratchpad.md
-.opencode/agents/.manifest-lock.json
+.opencode/*

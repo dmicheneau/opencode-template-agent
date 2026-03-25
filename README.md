@@ -4,7 +4,7 @@
 
 [![CI](https://github.com/dmicheneau/opencode-template-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/dmicheneau/opencode-template-agent/actions/workflows/ci.yml)
 ![Agents](https://img.shields.io/badge/agents-69-blue)
-![Tests](https://img.shields.io/badge/tests-893%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-814%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Node](https://img.shields.io/badge/node-20%2B-green)
 ![npm](https://img.shields.io/npm/v/opencode-agents?label=npm&color=cb3837)
@@ -18,8 +18,11 @@ Chaque agent suit un format expert à 4 sections : identité, décisions, exempl
 ## 🚀 Quickstart
 
 ```bash
-# TUI interactif (auto-détecte TTY)
+# TUI interactif avec suggestions intelligentes (auto-détecte TTY)
 npx github:dmicheneau/opencode-template-agent
+
+# Détecte la stack et suggère les agents adaptés
+npx github:dmicheneau/opencode-template-agent install
 
 # CLI rapide — installer un pack en une commande
 npx github:dmicheneau/opencode-template-agent install --pack backend
@@ -42,6 +45,7 @@ npx github:dmicheneau/opencode-template-agent tui
 **Ce que ça fait :**
 
 - Auto-détecte le TTY et lance l'interface interactive
+- **Écran de suggestions au démarrage** : si une stack est détectée dans le projet courant, les agents les plus pertinents apparaissent pré-sélectionnés — appuyez sur `Space` pour désélectionner, `Enter` pour installer, `B` pour parcourir tout le catalogue
 - Parcourir les catégories par onglets (`←` `→` / `Tab`)
 - Naviguer dans les listes avec `↑` `↓`
 - Sélectionner des agents avec `Space`, installer avec `Enter`
@@ -54,6 +58,9 @@ Pour l'automatisation ou une installation rapide sans interface graphique.
 **Commandes :**
 
 ```bash
+# Détecter la stack et suggérer les agents adaptés
+npx github:dmicheneau/opencode-template-agent install
+
 # Installer un agent spécifique
 npx github:dmicheneau/opencode-template-agent install typescript-pro
 
@@ -83,8 +90,8 @@ npx github:dmicheneau/opencode-template-agent search "machine learning"
 
 | Option | Description |
 |--------|-------------|
-| `--force` | Écraser les fichiers existants |
-| `--dry-run` | Aperçu sans écriture sur le disque |
+| `--force` | Écraser les fichiers existants ; avec `install` sans argument, re-propose les agents déjà installés |
+| `--dry-run` | Aperçu sans écriture sur le disque (fonctionne aussi avec la suggestion automatique) |
 
 > **Note :** `--pack` et `--category` sont mutuellement exclusifs.
 
@@ -488,7 +495,7 @@ git push --tags
 
 ## 🧪 Tests
 
-**893 tests** (560 JS + 23 plugin TS + 310 Python).
+**814 tests** (504 JS + 310 Python).
 
 ```bash
 # Tous les tests JS (CLI + TUI)

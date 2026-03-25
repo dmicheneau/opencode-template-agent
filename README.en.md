@@ -4,7 +4,7 @@
 
 [![CI](https://github.com/dmicheneau/opencode-template-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/dmicheneau/opencode-template-agent/actions/workflows/ci.yml)
 ![Agents](https://img.shields.io/badge/agents-69-blue)
-![Tests](https://img.shields.io/badge/tests-893%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-814%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Node](https://img.shields.io/badge/node-20%2B-green)
 ![npm](https://img.shields.io/npm/v/opencode-agents?label=npm&color=cb3837)
@@ -18,8 +18,11 @@ Each agent follows an expert 4-section format: identity, decisions, examples, qu
 ## 🚀 Quickstart
 
 ```bash
-# Interactive TUI (auto-detects TTY)
+# Interactive TUI with intelligent suggestions (auto-detects TTY)
 npx github:dmicheneau/opencode-template-agent
+
+# Detect stack and suggest relevant agents
+npx github:dmicheneau/opencode-template-agent install
 
 # Quick CLI — install a pack in one command
 npx github:dmicheneau/opencode-template-agent install --pack backend
@@ -42,6 +45,7 @@ npx github:dmicheneau/opencode-template-agent tui
 **What it does:**
 
 - Auto-detects TTY and launches the interactive interface
+- **Suggestion screen on startup**: if a stack is detected in the current project, the most relevant agents appear pre-selected — press `Space` to deselect, `Enter` to install, `B` to browse the full catalog
 - Browse categories with tabs (`←` `→` / `Tab`)
 - Navigate lists with `↑` `↓`
 - Select agents with `Space`, install with `Enter`
@@ -54,6 +58,9 @@ For automation or quick installation without a graphical interface.
 **Commands:**
 
 ```bash
+# Detect stack and suggest relevant agents
+npx github:dmicheneau/opencode-template-agent install
+
 # Install a specific agent
 npx github:dmicheneau/opencode-template-agent install typescript-pro
 
@@ -83,8 +90,8 @@ npx github:dmicheneau/opencode-template-agent search "machine learning"
 
 | Option | Description |
 |--------|-------------|
-| `--force` | Overwrite existing files |
-| `--dry-run` | Preview without writing to disk |
+| `--force` | Overwrite existing files; with `install` (no args), re-suggests already-installed agents |
+| `--dry-run` | Preview without writing to disk (also works with the auto-suggest flow) |
 
 > **Note:** `--pack` and `--category` are mutually exclusive.
 
@@ -488,7 +495,7 @@ git push --tags
 
 ## 🧪 Tests
 
-**893 tests** (560 JS + 23 plugin TS + 310 Python).
+**814 tests** (504 JS + 310 Python).
 
 ```bash
 # All JS tests (CLI + TUI)
