@@ -49,6 +49,9 @@ export const Action = Object.freeze({
   BASH_ADD:       'BASH_ADD',
   BASH_DELETE:    'BASH_DELETE',
 
+  // Suggest mode
+  BROWSE:      'BROWSE',
+
   // Fallback
   NONE:        'NONE',
 });
@@ -102,6 +105,7 @@ const R_INSTALL_ALL = Object.freeze({ action: Action.INSTALL_ALL });
 const R_PERM_APPLY = Object.freeze({ action: Action.PERM_APPLY_ALL });
 const R_BASH_ADD   = Object.freeze({ action: Action.BASH_ADD });
 const R_BASH_DEL   = Object.freeze({ action: Action.BASH_DELETE });
+const R_BROWSE     = Object.freeze({ action: Action.BROWSE });
 const R_NONE       = Object.freeze({ action: Action.NONE });
 
 // Pre-allocated results for frequent ANSI escape sequences (avoid allocation per keypress)
@@ -233,6 +237,7 @@ export function parseKey(data, mode) {
   if (raw === '/')   return R_SEARCH;
   if (raw === 'q' || raw === 'Q') return R_QUIT;
   if (raw === 'a' || raw === 'A') return R_SELECT_ALL;
+  if (raw === 'b' || raw === 'B') return R_BROWSE;
   if (raw === 'i' || raw === 'I') return R_INSTALL_ALL;
   if (raw === 'x' || raw === 'X') return R_UNINSTALL;
 

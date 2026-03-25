@@ -486,7 +486,7 @@ describe('detectAgentStates', () => {
   it('should return "new" for agents not on disk', () => {
     const manifest = makeManifest([{ name: 'ghost-agent' }]);
     const states = detectAgentStates(manifest, tmp);
-    assert.equal(states.get('ghost-agent'), 'new');
+    assert.equal(states['ghost-agent'], 'new');
   });
 
   it('should return "unknown" for agents on disk but not in lock', () => {
@@ -494,7 +494,7 @@ describe('detectAgentStates', () => {
     const manifest = makeManifest([agent]);
     writeAgentFile(tmp, agent, '# Manually copied');
     const states = detectAgentStates(manifest, tmp);
-    assert.equal(states.get('manual-agent'), 'unknown');
+    assert.equal(states['manual-agent'], 'unknown');
   });
 
   it('should return "installed" for agents with matching hash', () => {
@@ -504,7 +504,7 @@ describe('detectAgentStates', () => {
     writeAgentFile(tmp, agent, content);
     recordInstall('matched-agent', content, tmp);
     const states = detectAgentStates(manifest, tmp);
-    assert.equal(states.get('matched-agent'), 'installed');
+    assert.equal(states['matched-agent'], 'installed');
   });
 
   it('should return "outdated" for agents with mismatched hash', () => {
@@ -513,7 +513,7 @@ describe('detectAgentStates', () => {
     writeAgentFile(tmp, agent, '# Version 2 (modified on disk)');
     recordInstall('stale-agent', '# Version 1 (original)', tmp);
     const states = detectAgentStates(manifest, tmp);
-    assert.equal(states.get('stale-agent'), 'outdated');
+    assert.equal(states['stale-agent'], 'outdated');
   });
 
   it('should handle mixed states in one manifest', () => {
@@ -537,11 +537,11 @@ describe('detectAgentStates', () => {
     recordInstall('outdated-one', '# Outdated v1', tmp);
 
     const states = detectAgentStates(manifest, tmp);
-    assert.equal(states.get('new-one'), 'new');
-    assert.equal(states.get('unknown-one'), 'unknown');
-    assert.equal(states.get('installed-one'), 'installed');
-    assert.equal(states.get('outdated-one'), 'outdated');
-    assert.equal(states.size, 4);
+    assert.equal(states['new-one'], 'new');
+    assert.equal(states['unknown-one'], 'unknown');
+    assert.equal(states['installed-one'], 'installed');
+    assert.equal(states['outdated-one'], 'outdated');
+    assert.equal(Object.keys(states).length, 4);
   });
 
   it('should handle primary agents at root agents dir', () => {
@@ -549,7 +549,7 @@ describe('detectAgentStates', () => {
     const manifest = makeManifest([agent]);
     writeAgentFile(tmp, agent, '# Primary');
     const states = detectAgentStates(manifest, tmp);
-    assert.equal(states.get('primary-agent'), 'unknown');
+    assert.equal(states['primary-agent'], 'unknown');
     // Verify file is at the correct path (root, not in category subdir)
     const expectedPath = join(tmp, '.opencode', 'agents', 'primary-agent.md');
     assert.ok(existsSync(expectedPath));
@@ -558,7 +558,7 @@ describe('detectAgentStates', () => {
   it('should return empty map for empty manifest', () => {
     const manifest = makeManifest([]);
     const states = detectAgentStates(manifest, tmp);
-    assert.equal(states.size, 0);
+    assert.equal(Object.keys(states).length, 0);
   });
 });
 
@@ -1149,7 +1149,7 @@ describe('detectAgentStates — mode "all"', () => {
     writeFileSync(primaryPath, '# PRD Agent', 'utf-8');
 
     const states = detectAgentStates(manifest, tmp);
-    assert.equal(states.get('prd'), 'unknown',
+    assert.equal(states['prd'], 'unknown',
       'mode "all" agent at primary path should be detected');
   });
 
@@ -1163,7 +1163,7 @@ describe('detectAgentStates — mode "all"', () => {
     writeFileSync(subPath, '# PRD Agent', 'utf-8');
 
     const states = detectAgentStates(manifest, tmp);
-    assert.equal(states.get('prd'), 'unknown',
+    assert.equal(states['prd'], 'unknown',
       'mode "all" agent at subagent path should be detected');
   });
 
@@ -1183,7 +1183,7 @@ describe('detectAgentStates — mode "all"', () => {
     recordInstall('prd', '# Primary version', tmp);
 
     const states = detectAgentStates(manifest, tmp);
-    assert.equal(states.get('prd'), 'installed',
+    assert.equal(states['prd'], 'installed',
       'should use primary path when both exist, and hash should match primary content');
   });
 
@@ -1192,7 +1192,7 @@ describe('detectAgentStates — mode "all"', () => {
     const manifest = makeManifest([agent]);
 
     const states = detectAgentStates(manifest, tmp);
-    assert.equal(states.get('prd'), 'new');
+    assert.equal(states['prd'], 'new');
   });
 });
 
@@ -1223,10 +1223,10 @@ describe('detectAgentStates — filesystem scan', () => {
     writeFileSync(localPath, '# Local custom agent', 'utf-8');
 
     const states = detectAgentStates(manifest, tmp);
-    assert.equal(states.get('known-agent'), 'unknown', 'manifest agent should be detected');
-    assert.equal(states.get('local-agent'), 'unknown',
+    assert.equal(states['known-agent'], 'unknown', 'manifest agent should be detected');
+    assert.equal(states['local-agent'], 'unknown',
       'local agent not in manifest should be discovered as "unknown"');
-    assert.ok(states.size >= 2, 'should have at least 2 agents');
+    assert.ok(Object.keys(states).length >= 2, 'should have at least 2 agents');
   });
 
   it('should not duplicate agents already in manifest', () => {
@@ -1237,7 +1237,7 @@ describe('detectAgentStates — filesystem scan', () => {
     const states = detectAgentStates(manifest, tmp);
     // Count entries — should be exactly 1, not duplicated by the scan
     let count = 0;
-    for (const [name] of states) {
+    for (const [name] of Object.entries(states)) {
       if (name === 'ai-engineer') count++;
     }
     assert.equal(count, 1, 'manifest agent should not be duplicated by filesystem scan');
@@ -1254,8 +1254,8 @@ describe('detectAgentStates — filesystem scan', () => {
     writeFileSync(join(basePath, 'legit-agent.md'), '# Agent', 'utf-8');
 
     const states = detectAgentStates(manifest, tmp);
-    assert.equal(states.size, 1, 'should only find .md files');
-    assert.equal(states.get('legit-agent'), 'unknown');
+    assert.equal(Object.keys(states).length, 1, 'should only find .md files');
+    assert.equal(states['legit-agent'], 'unknown');
   });
 });
 
@@ -1326,9 +1326,9 @@ describe('Acceptance: manually placed agent files are detected (Bug 2)', () => {
     const manifest = makeManifest([]); // empty manifest — no agents defined
     const states = detectAgentStates(manifest, tmp);
 
-    assert.ok(states.has('my-custom-agent'),
+    assert.ok('my-custom-agent' in states,
       'Manually placed agent should be detected by filesystem scan');
-    assert.equal(states.get('my-custom-agent'), 'unknown',
+    assert.equal(states['my-custom-agent'], 'unknown',
       'Agent without lock entry should have state "unknown"');
   });
 
@@ -1343,8 +1343,8 @@ describe('Acceptance: manually placed agent files are detected (Bug 2)', () => {
 
     const states = detectAgentStates(manifest, tmp);
 
-    assert.ok(states.has('prd'), 'mode "all" agent at root should be detected');
-    assert.equal(states.get('prd'), 'unknown',
+    assert.ok('prd' in states, 'mode "all" agent at root should be detected');
+    assert.equal(states['prd'], 'unknown',
       'Agent without lock entry should be "unknown" (not "new")');
   });
 
@@ -1359,8 +1359,8 @@ describe('Acceptance: manually placed agent files are detected (Bug 2)', () => {
 
     const states = detectAgentStates(manifest, tmp);
 
-    assert.ok(states.has('prd'), 'mode "all" agent in category subdir should be detected');
-    assert.equal(states.get('prd'), 'unknown',
+    assert.ok('prd' in states, 'mode "all" agent in category subdir should be detected');
+    assert.equal(states['prd'], 'unknown',
       'Agent found via fallback path without lock entry should be "unknown"');
   });
 
@@ -1394,18 +1394,18 @@ describe('Acceptance: manually placed agent files are detected (Bug 2)', () => {
     const states = detectAgentStates(manifest, tmp);
 
     // Manifest agent exists on disk without lock entry → unknown
-    assert.equal(states.get('ai-engineer'), 'unknown',
+    assert.equal(states['ai-engineer'], 'unknown',
       'Manifest agent without lock entry should be "unknown"');
 
     // Local agent not in manifest → also unknown
-    assert.ok(states.has('my-local-tool'),
+    assert.ok('my-local-tool' in states,
       'Local agent should be detected alongside manifest agents');
-    assert.equal(states.get('my-local-tool'), 'unknown',
+    assert.equal(states['my-local-tool'], 'unknown',
       'Local agent without lock entry should be "unknown"');
 
     // No duplication: total entries = 2 (one manifest + one local)
-    assert.equal(states.size, 2,
-      `Expected exactly 2 entries (manifest + local), got ${states.size}`);
+    assert.equal(Object.keys(states).length, 2,
+      `Expected exactly 2 entries (manifest + local), got ${Object.keys(states).length}`);
   });
 });
 
@@ -1440,9 +1440,9 @@ describe('Security: symlinks in agents dir are skipped by scanLocalAgents', () =
 
     const states = detectAgentStates(manifest, tmp);
 
-    assert.ok(!states.has('evil-agent'),
+    assert.ok(!('evil-agent' in states),
       'Symlinked agent file should NOT appear in detected states');
-    assert.ok(states.has('legit-agent'),
+    assert.ok('legit-agent' in states,
       'Non-symlink agent should still be detected');
   });
 
@@ -1458,7 +1458,7 @@ describe('Security: symlinks in agents dir are skipped by scanLocalAgents', () =
 
     const states = detectAgentStates(manifest, tmp);
 
-    assert.ok(!states.has('sneaky'),
+    assert.ok(!('sneaky' in states),
       'Symlink in subdirectory should be silently skipped');
   });
 

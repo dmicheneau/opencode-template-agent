@@ -15,7 +15,7 @@ const MIN_VIEWPORT = 5;
 // ─── Types (JSDoc) ───────────────────────────────────────────────────────────
 
 /**
- * @typedef {'browse'|'search'|'confirm'|'installing'|'pack_detail'|'done'|'uninstall_confirm'|'uninstalling'|'quit'|'preset-select'|'permission-edit'|'bash-edit'|'bash-input'} TuiMode
+ * @typedef {'browse'|'search'|'confirm'|'installing'|'pack_detail'|'done'|'uninstall_confirm'|'uninstalling'|'quit'|'preset-select'|'permission-edit'|'bash-edit'|'bash-input'|'suggest'} TuiMode
  */
 
 /**
@@ -43,7 +43,10 @@ const MIN_VIEWPORT = 5;
  * @property {{ type: string, label?: string, count: number }|null} confirmContext
  * @property {{ agent: AgentEntry, name: string }|null} uninstallTarget
  * @property {PermState|null} perm
- * @property {Map<string, string>} [agentStates] — Set by orchestrator after state detection
+ * @property {Record<string, string>} [agentStates] — Set by orchestrator after state detection
+ * @property {Array<{ agent: AgentEntry, score: number, reasons: string[] }>} suggestions
+ * @property {number} suggestCursor
+ * @property {Set<string>} suggestSelected
  */
 
 /**
@@ -119,7 +122,11 @@ export function createInitialState(manifest, terminal) {
     manifest,
     allAgents,
     // Populated by detectAgentStates() in orchestrator (index.mjs)
-    agentStates: new Map(),
+    agentStates: {},
+    // Populated by launchTUI() when suggestions are available
+    suggestions: [],
+    suggestCursor: 0,
+    suggestSelected: new Set(),
   };
 }
 
@@ -131,6 +138,7 @@ export function createInitialState(manifest, terminal) {
  */
 export function update(state, parsed) {
   switch (state.mode) {
+    case 'suggest':         return updateSuggest(state, parsed);
     case 'browse':      return updateBrowse(state, parsed);
     case 'search':      return updateSearch(state, parsed);
     case 'confirm':     return updateConfirm(state, parsed);
@@ -186,6 +194,69 @@ export function getViewportHeight(state) {
 }
 
 // ─── Reducers (internal) ─────────────────────────────────────────────────────
+
+/** @param {TuiState} state @param {{ action: string, char?: string }} parsed */
+function updateSuggest(state, { action }) {
+  const suggestions = state.suggestions || [];
+  const max = suggestions.length - 1;
+
+  switch (action) {
+    case Action.UP: {
+      const cursor = Math.max(0, state.suggestCursor - 1);
+      return { ...state, suggestCursor: cursor };
+    }
+    case Action.DOWN: {
+      const cursor = Math.min(max < 0 ? 0 : max, state.suggestCursor + 1);
+      return { ...state, suggestCursor: cursor };
+    }
+    case Action.SELECT: {
+      if (max < 0) return state;
+      const name = suggestions[state.suggestCursor]?.agent?.name;
+      if (!name) return state;
+      const suggestSelected = new Set(state.suggestSelected);
+      if (suggestSelected.has(name)) {
+        suggestSelected.delete(name);
+      } else {
+        suggestSelected.add(name);
+      }
+      return { ...state, suggestSelected };
+    }
+    case Action.SELECT_ALL: {
+      if (suggestions.length === 0) return state;
+      const allSelected = suggestions.every(s => state.suggestSelected.has(s.agent.name));
+      const suggestSelected = new Set();
+      if (!allSelected) {
+        for (const s of suggestions) suggestSelected.add(s.agent.name);
+      }
+      return { ...state, suggestSelected };
+    }
+    case Action.CONFIRM: {
+      if (state.suggestSelected.size === 0) {
+        // Nothing selected → skip to browse
+        return { ...state, mode: 'browse', suggestions: [], suggestCursor: 0, suggestSelected: new Set() };
+      }
+      // Merge suggest selections ON TOP of existing agentStates (plain object, don't wipe)
+      const newStates = { ...state.agentStates };
+      for (const name of state.suggestSelected) newStates[name] = 'selected';
+      return {
+        ...state,
+        mode: 'browse',
+        agentStates: newStates,
+        suggestions: [],
+        suggestCursor: 0,
+        suggestSelected: new Set(),
+      };
+    }
+    case Action.BROWSE:
+    case Action.ESCAPE: {
+      return { ...state, mode: 'browse', suggestions: [], suggestCursor: 0, suggestSelected: new Set() };
+    }
+    case Action.QUIT:
+      return { ...state, mode: 'quit' };
+    default:
+      return state;
+  }
+}
 
 /** @param {TuiState} state @param {{ action: string, char?: string }} parsed */
 function updateBrowse(state, { action }) {

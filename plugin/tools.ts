@@ -284,3 +284,60 @@ export const check_health = tool({
     }
   },
 });
+
+// ─── suggest_agents ─────────────────────────────────────────────────────────
+
+import {
+  detectProjectProfile,
+  analyzeQuery,
+  scoreAgents,
+} from "../src/recommender.mjs";
+import { detectInstalledSet } from "../src/lock.mjs";
+
+export const suggest_agents = tool({
+  description:
+    "Suggest the most relevant agents for the current project and/or user intent. Scans the project stack (languages, frameworks, tooling) and optionally analyzes a query to rank agents by relevance. Returns up to 10 agents with scores and reasons. Use when the user asks which agents to install, or when no suitable agent is obviously known.",
+  args: {
+    query: tool.schema
+      .string()
+      .optional()
+      .describe(
+        "Optional user intent or task description (e.g. 'I need to write tests for my React app'). Improves relevance when provided.",
+      ),
+  },
+  async execute(args, ctx) {
+    try {
+      const manifest = getManifest();
+      const profile = detectProjectProfile(ctx.directory);
+      const query = args.query ? analyzeQuery(args.query) : null;
+      const installed = detectInstalledSet(manifest, ctx.directory);
+
+      const suggestions = scoreAgents({ profile, query, installed, manifest });
+
+      if (suggestions.length === 0) {
+        return "No agent suggestions found for this project. Try providing a query describing what you want to do, or use list_agents to browse the full registry.";
+      }
+
+      const stackDesc =
+        profile.languages.length > 0
+          ? `Detected stack: ${[...profile.languages, ...profile.frameworks].join(", ")}`
+          : "No stack detected (prompt-only mode)";
+
+      const lines = suggestions.map((s, i) => {
+        const pct = Math.round(s.score * 100);
+        const badge = s.sources.includes("stack")
+          ? "[stack]"
+          : s.sources.includes("intent")
+            ? "[intent]"
+            : "[general]";
+        const reason =
+          s.reasons.length > 0 ? `\n  → ${s.reasons.slice(0, 2).join("; ")}` : "";
+        return `${i + 1}. ${s.agent.name} — score ${pct}% ${badge}\n  ${s.agent.description}${reason}`;
+      });
+
+      return `${stackDesc}\n\nSuggested agents (${suggestions.length}):\n\n${lines.join("\n\n")}`;
+    } catch (err) {
+      return `Error: ${sanitizeError(err)}`;
+    }
+  },
+});

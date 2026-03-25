@@ -44,7 +44,8 @@ function bdr(content, W, bg) {
 }
 
 function topBorder(W, state) {
-  const title = ' OPENCODE AGENTS ';
+  const isSuggest = state.mode === 'suggest';
+  const title = isSuggest ? ' OPENCODE AGENTS — SUGGESTIONS ' : ' OPENCODE AGENTS ';
   const instCount = state.installed?.size || 0;
   const totalCount = state.allAgents?.length || 0;
   const counterTxt = `✔ ${instCount}/${totalCount} `;
@@ -113,7 +114,7 @@ function renderAgentList(state, out, W) {
       const idx = scrollOffset + i;
       if (idx >= items.length) { out.push(bdr('', W)); continue; }
       const a = items[idx], cur = idx === cursor, sel = state.selection.has(a.name);
-      const agentState = state.agentStates?.get(a.name);
+      const agentState = state.agentStates?.[a.name];
       // See ansi.mjs for EAW width considerations on marker characters
       const mk = cur ? bold(brightCyan('▸'))
         : sel ? bold(brightGreen('✓'))
@@ -180,7 +181,7 @@ function renderPackDetail(state, out, W) {
     const idx = scrollOffset + i;
     if (idx >= agents.length) { out.push(bdr('', W)); continue; }
     const a = agents[idx], cur = idx === cursor, sel = state.selection.has(a.name);
-    const agentState = state.agentStates?.get(a.name);
+    const agentState = state.agentStates?.[a.name];
     const mk = sel && cur ? bold(brightGreen('✓')) + bold(brightCyan('▸'))
       : cur ? ' ' + bold(brightCyan('▸'))
       : sel ? bold(brightGreen('✓')) + ' '
@@ -379,6 +380,59 @@ function renderDone(state, out, W) {
   } else {
     out.push(bdr(brightCyan('  Press any key to continue...'), W));
   }
+}
+
+// ─── Suggest Screen ──────────────────────────────────────────────────────────
+
+function renderSuggest(state, out, W) {
+  const suggestions = state.suggestions || [];
+  const suggestCursor = state.suggestCursor || 0;
+  const suggestSelected = state.suggestSelected || new Set();
+  const innerWidth = W - 4;
+
+  // Detected stack summary
+  const profile = state._suggestProfile;
+  const langs = profile?.languages?.join(' · ') || '';
+  const tools = profile?.tools?.join(' · ') || '';
+  const stackParts = [langs, tools].filter(Boolean).join(' · ');
+  const stackLine = stackParts ? `  Detected stack: ${white(stackParts)}` : `  Stack detected`;
+
+  out.push(bdr(stackLine, W));
+  out.push(bdr('', W));
+
+  if (suggestions.length === 0) {
+    out.push(bdr(dim('  No suggestions for this project.'), W));
+  } else {
+    const descWidth = Math.max(10, innerWidth - 34);
+    for (let i = 0; i < suggestions.length; i++) {
+      const { agent, score, reasons } = suggestions[i];
+      const cur = i === suggestCursor;
+      const sel = suggestSelected.has(agent.name);
+      const pct = `${Math.round(score * 100)}%`;
+
+      const ptr = cur ? bold(brightCyan('▸')) : ' ';
+      const checkmark = sel ? bold(brightGreen('✓')) : ' ';
+      const nameStr = nameStyle(padEndAscii(agent.name, 24), cur, sel);
+      const pctStr = cur ? bold(brightCyan(padEnd(pct, 5))) : dim(padEnd(pct, 5));
+      const desc = truncate(agent.description, descWidth);
+      const descStr = cur ? dim(white(desc)) : dim(desc);
+
+      const row = ` ${ptr} ${checkmark} ${nameStr}${pctStr}`;
+      out.push(bdr(row, W, cur ? bgRow : undefined));
+
+      if (cur) {
+        const reason = reasons[0] ? truncate(reasons[0], innerWidth - 6) : '';
+        out.push(bdr(`      ${dim(reason)}  ${descStr}`, W));
+      }
+    }
+  }
+
+  out.push(bdr('', W));
+
+  // Footer hints
+  const enterLabel = suggestSelected.size > 0 ? 'Install selected' : 'Browse all agents';
+  out.push(bdr(`  ${cyan('[Space]')} ${white('Toggle')}  ${cyan('[A]')} ${white('All')}  ${cyan('[Enter]')} ${white(enterLabel)}`, W));
+  out.push(bdr(`  ${cyan('[B]')} ${white('Browse all agents')}  ${cyan('[Q]')} ${white('Quit')}`, W));
 }
 
 // ─── Uninstall Confirm Dialog ────────────────────────────────────────────────
@@ -714,6 +768,7 @@ export function render(state) {
 
   // Mode-specific content
   switch (state.mode) {
+    case 'suggest':               renderSuggest(state, out, cols);   break;
     case 'browse': case 'search': renderAgentList(state, out, cols); break;
     case 'confirm':               renderConfirm(state, out, cols);   break;
     case 'installing':            renderProgress(state, out, cols);  break;

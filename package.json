@@ -37,7 +37,7 @@
     "code-templates"
   ],
   "scripts": {
-    "test": "node --test tests/cli.test.mjs tests/tui.test.mjs tests/lock.test.mjs",
+    "test": "node --test tests/recommender.test.mjs tests/tui.test.mjs tests/cli.test.mjs",
     "lint": "node --check bin/cli.mjs src/*.mjs src/tui/*.mjs",
     "prepublishOnly": "npm test",
     "test:plugin": "bun test tests/plugin/",

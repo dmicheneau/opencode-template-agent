@@ -84,3 +84,40 @@ declare module "../src/lock.mjs" {
     cwd?: string
   ): { ok: string[]; mismatch: string[]; missing: string[] };
 }
+
+// ─── src/recommender.mjs ──────────────────────────────────────────────────
+
+interface OcProjectProfile {
+  languages: string[];
+  frameworks: string[];
+  tools: string[];
+  hasTests: boolean;
+  hasCi: boolean;
+  hasDocker: boolean;
+  hasKubernetes: boolean;
+  hasTerraform: boolean;
+}
+
+interface OcQuerySignals {
+  keywords: string[];
+  detectedIntents: string[];
+  detectedTech: string[];
+}
+
+interface OcSuggestion {
+  agent: OcAgentEntry;
+  score: number;
+  reasons: string[];
+  sources: Array<"stack" | "intent" | "pack" | "related">;
+}
+
+declare module "../src/recommender.mjs" {
+  export function detectProjectProfile(directory: string): OcProjectProfile;
+  export function analyzeQuery(prompt: string): OcQuerySignals;
+  export function scoreAgents(opts: {
+    profile: OcProjectProfile | null;
+    query: OcQuerySignals | null;
+    installed: Set<string>;
+    manifest: OcManifest;
+  }): OcSuggestion[];
+}

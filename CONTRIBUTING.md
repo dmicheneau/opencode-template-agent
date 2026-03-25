@@ -1,6 +1,6 @@
 # Contribuer à OpenCode Agent Template
 
-Ce projet est un registre curé de **67 agents IA** pour [OpenCode](https://opencode.ai). Tous les agents sont manuellement évalués et maintenus — il n'y a pas de synchronisation automatique. Les scripts de sync existent encore comme outils de découverte, rien de plus.
+Ce projet est un registre curé de **69 agents IA** pour [OpenCode](https://opencode.ai). Tous les agents sont manuellement évalués et maintenus — il n'y a pas de synchronisation automatique. Les scripts de sync existent encore comme outils de découverte, rien de plus.
 
 ## Comment contribuer
 
@@ -25,7 +25,7 @@ Modifiez le prompt, ajustez les permissions, ou corrigez un problème. Consultez
 Deux sources d'inspiration :
 
 - **Upstream** : `python3 scripts/sync-agents.py --list --tier=extended` pour voir ce qui existe sur [aitmpl.com](https://www.aitmpl.com/agents)
-- **Observation** : vous identifiez un gap dans les 67 agents existants
+- **Observation** : vous identifiez un gap dans les 69 agents existants
 
 ### 2 — Évaluation
 
