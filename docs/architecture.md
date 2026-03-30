@@ -322,3 +322,9 @@ flowchart TB
 - **Livraison** : Si execute hors dry_run, le pipeline commettrait sur la branche
   `sync/agents-latest`, force-push vers origin, et creerait ou mettrait a jour une Pull Request
   avec une description detaillee des changements.
+
+---
+
+## Voir aussi
+
+- [`docs/recommender.md`](recommender.md) — Moteur de suggestion intelligente (détection de stack, scoring, boosts)
