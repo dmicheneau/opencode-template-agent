@@ -5,7 +5,9 @@ scripts/
 tests/
 docs/
 .opencode/
-agents/
+agents/manifest.json
+agents/.manifest-lock.json
+agents/.sync-cache.json
 
 # Config and meta
 .gitignore
