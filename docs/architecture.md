@@ -30,7 +30,7 @@ flowchart TB
 
     subgraph Data["Couche de donnees"]
         Registry["registry.mjs<br/>Chargeur de manifest<br/>(validation, getAgent,<br/>getCategory, searchAgents,<br/>resolvePackAgents)"]
-        Manifest["manifest.json<br/>67 agents | 10 categories<br/>15 packs"]
+        Manifest["manifest.json<br/>69 agents | 10 categories<br/>15 packs"]
         Installer["installer.mjs<br/>Telechargement GitHub raw<br/>→ .opencode/agents/"]
     end
 
@@ -90,7 +90,7 @@ flowchart TB
 - **TUI** : Interface interactive construite sur une boucle `input → state → render → screen`.
   L'orchestrateur (`index.mjs`) gere le cycle de vie, les signaux (SIGINT, SIGWINCH) et la boucle
   d'installation. Chaque module a une responsabilite unique.
-- **Registre** : `registry.mjs` charge et valide `manifest.json` (67 agents, 10 categories, 15 packs)
+- **Registre** : `registry.mjs` charge et valide `manifest.json` (69 agents, 10 categories, 15 packs)
   et expose des helpers de requete.
 - **Installeur** : `installer.mjs` telecharge les fichiers depuis GitHub raw et les ecrit dans
   `.opencode/agents/`.
@@ -110,6 +110,10 @@ de la machine a etats.
 ```mermaid
 flowchart LR
     Launch["Lancement<br/>opencode-agents tui"]
+
+    subgraph Suggest["Mode suggest"]
+        SuggestList["Agents recommandes<br/>pre-selectionnes<br/>Space = toggle<br/>Enter = installer<br/>B / Esc = browse"]
+    end
 
     subgraph Navigation["Navigation par onglets"]
         Tabs["← → / Tab<br/>Agents | Packs | Categories"]
@@ -142,7 +146,10 @@ flowchart LR
         Summary["Resume<br/>agents installes<br/>agents ignores<br/>q / Esc = quitter"]
     end
 
-    Launch --> Tabs
+    Launch -->|"stack detectee"| SuggestList
+    Launch -->|"aucune stack"| Tabs
+    SuggestList -->|"B / Esc"| Tabs
+    SuggestList -->|"Enter<br/>(selection > 0)"| ConfirmPrompt
     Tabs --> AgentList
     Tabs --> PackList
     Tabs --> CatList
@@ -165,6 +172,7 @@ flowchart LR
 
     classDef start fill:#4a90d9,stroke:#2c5f8a,color:#fff
     classDef nav fill:#1abc9c,stroke:#148f77,color:#fff
+    classDef suggest fill:#8e44ad,stroke:#5b2c6f,color:#fff
     classDef browse fill:#6ab04c,stroke:#3d7a28,color:#fff
     classDef search fill:#f39c12,stroke:#c0741e,color:#fff
     classDef confirm fill:#e67e22,stroke:#b35e1a,color:#fff
@@ -174,6 +182,7 @@ flowchart LR
 
     class Launch start
     class Tabs nav
+    class SuggestList suggest
     class AgentList,PackList,CatList,PackInfo browse
     class SearchInput,SearchResults search
     class ConfirmPrompt confirm
@@ -186,6 +195,10 @@ flowchart LR
 
 - **Navigation par onglets** : Les fleches gauche/droite ou Tab permettent de basculer entre les
   onglets Agents, Packs et Categories.
+- **Mode suggest** : Etat initial conditionnel. Si une stack est detectee (`profile.languages.length > 0`
+  ou `profile.tools.length > 0`), le TUI demarre directement en mode `suggest` et affiche les agents
+  recommandes pré-selectionnes. `Space` toggle la selection, `Enter` lance l'installation, `B` ou `Esc`
+  bascule en mode `browse`.
 - **Mode browse** : L'utilisateur parcourt les listes avec les fleches haut/bas. `Space` selectionne
   un agent, `Enter` ouvre le detail d'un pack ou filtre par categorie.
 - **Mode search** : Active avec `/`, la recherche filtre en temps reel. `Esc` annule, `Enter` valide.

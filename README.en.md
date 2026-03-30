@@ -255,7 +255,7 @@ flowchart TB
 
 Two additional diagrams are available in [`docs/architecture.md`](docs/architecture.md):
 
-- **TUI user flow** — complete state machine (browse, search, confirm, installing, done)
+- **TUI user flow** — complete state machine (suggest, browse, search, confirm, installing, done)
 - **Agent update pipeline** — upstream monitoring scripts and discovery/evaluation workflow (manual dispatch only)
 
 ---
