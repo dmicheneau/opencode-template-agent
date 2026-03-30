@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [8.3.0] - 2026-03-30
+### ✨ Nouveautés
+- feat: add intelligent agent suggestion engine([9c72ea4](https://github.com/dmicheneau/opencode-template-agent/commit/9c72ea41be6f0b53b3efe608f7fdf402623ceb57))
+### 🐛 Corrections
+- fix: handle suggest flow edge cases in CLI([0e257de](https://github.com/dmicheneau/opencode-template-agent/commit/0e257def753fb77ae55ccfbf5c7cb8ec3a954fb1))- fix(tests): update lock.test.mjs for agentStates Map→object migration([8808cd2](https://github.com/dmicheneau/opencode-template-agent/commit/8808cd2257071a2ee9e552a576ae8426a07e783e))
+### 📝 Documentation
+- docs: update README and gitignore for v8.3.0 suggest feature([204c97d](https://github.com/dmicheneau/opencode-template-agent/commit/204c97dd5ed5f43770436ce80edfa98ebd127ee6))- docs: add recommender.md — technical documentation for the suggestion engine
+### 🔧 Maintenance
+- chore: remove OpenCode plugin — replaced by MCP server([ad31c05](https://github.com/dmicheneau/opencode-template-agent/commit/ad31c05d7f69cc88fd39bef7b5b79d39938b45b2))
+
 ## [8.2.0] - 2026-03-03
 ### ✨ Nouveautés
 - add OpenCode plugin for global agent registry discovery([e364913](https://github.com/dmicheneau/opencode-template-agent/commit/e3649137a4315ed57542fcfba9770a03ac1afdc6))

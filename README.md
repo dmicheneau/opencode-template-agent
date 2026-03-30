@@ -255,7 +255,7 @@ flowchart TB
 
 Deux diagrammes supplémentaires sont disponibles dans [`docs/architecture.md`](docs/architecture.md) :
 
-- **Flux utilisateur TUI** — machine à états complète (browse, search, confirm, installing, done)
+- **Flux utilisateur TUI** — machine à états complète (suggest, browse, search, confirm, installing, done)
 - **Pipeline de mise à jour des agents** — scripts de veille upstream et workflow de découverte/évaluation (manual dispatch uniquement)
 
 ---
