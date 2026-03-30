@@ -40,7 +40,7 @@ const MIN_VIEWPORT = 5;
  * @property {Set<string>} installed
  * @property {AgentEntry[]} allAgents
  * @property {{ message: string, ts: number }|null} flash
- * @property {{ type: string, label?: string, count: number }|null} confirmContext
+ * @property {{ type: string, label?: string }|null} confirmContext
  * @property {{ agent: AgentEntry, name: string }|null} uninstallTarget
  * @property {PermState|null} perm
  * @property {Record<string, string>} [agentStates] — Set by orchestrator after state detection
@@ -232,16 +232,22 @@ function updateSuggest(state, { action }) {
     }
     case Action.CONFIRM: {
       if (state.suggestSelected.size === 0) {
-        // Nothing selected → skip to browse
-        return { ...state, mode: 'browse', suggestions: [], suggestCursor: 0, suggestSelected: new Set() };
+        // Nothing selected → skip to browse with feedback
+        return { ...state, mode: 'browse', suggestions: [], suggestCursor: 0, suggestSelected: new Set(), flash: { message: 'No agents selected', ts: Date.now() } };
       }
-      // Merge suggest selections ON TOP of existing agentStates (plain object, don't wipe)
-      const newStates = { ...state.agentStates };
-      for (const name of state.suggestSelected) newStates[name] = 'selected';
+      // Resolve selected agent objects from suggestions list
+      const agents = state.suggestions
+        .filter(s => state.suggestSelected.has(s.agent.name))
+        .map(s => s.agent);
+      if (agents.length === 0) {
+        // Selected names no longer present in suggestions — clear and notify
+        return { ...state, mode: 'browse', suggestions: [], suggestCursor: 0, suggestSelected: new Set(), flash: { message: 'No matching agents found', ts: Date.now() } };
+      }
       return {
         ...state,
-        mode: 'browse',
-        agentStates: newStates,
+        mode: 'confirm',
+        install: { agents, progress: 0, current: 0, results: [], error: null, doneCursor: 0, doneScrollOffset: 0, forceSelection: new Set() },
+        confirmContext: { type: 'agents' },
         suggestions: [],
         suggestCursor: 0,
         suggestSelected: new Set(),
@@ -308,7 +314,7 @@ function updateBrowse(state, { action }) {
         mode: 'confirm',
         selection: sel,
         install: { agents, progress: 0, current: 0, results: [], error: null, doneCursor: 0, doneScrollOffset: 0, forceSelection: new Set() },
-        confirmContext: { type: 'agents', count: agents.length },
+        confirmContext: { type: 'agents' },
       };
     }
     case Action.QUIT:
@@ -357,7 +363,8 @@ function updateConfirm(state, { action }) {
     }
     case Action.NO:
     case Action.ESCAPE:
-      return { ...state, mode: 'browse', selection: new Set() };
+      // Preserve selection so the user can adjust and re-confirm without re-selecting
+      return { ...state, mode: 'browse', install: null, confirmContext: null };
     default: return state;
   }
 }
@@ -441,7 +448,7 @@ function updatePackDetail(state, { action }) {
         mode: 'confirm',
         selection: sel,
         install: { agents, progress: 0, current: 0, results: [], error: null, doneCursor: 0, doneScrollOffset: 0, forceSelection: new Set() },
-        confirmContext: { type: 'pack', label: state.packDetail.packLabel, count: agents.length },
+        confirmContext: { type: 'pack', label: state.packDetail.packLabel },
       };
     }
     case Action.ESCAPE:
@@ -1139,7 +1146,7 @@ function handleConfirm(state) {
     ...state,
     mode: 'confirm',
     install: { agents, progress: 0, current: 0, results: [], error: null, doneCursor: 0, doneScrollOffset: 0, forceSelection: new Set() },
-    confirmContext: { type: 'agents', count: agents.length },
+    confirmContext: { type: 'agents' },
   };
 }
 
