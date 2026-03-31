@@ -49,3 +49,8 @@ tag_pattern = "v[0-9].*"
 sort_commits = "oldest"
 skip_tags = ""
 
+[remote.github]
+owner = "dmicheneau"
+repo = "opencode-template-agent"
+offline = true
+
