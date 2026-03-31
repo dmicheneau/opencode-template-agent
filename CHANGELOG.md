@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [8.3.1] - 2026-03-31
+### ✨ Nouveautés
+- (languages) add targeted bash permissions to all 11 languages/ agents — bun/pnpm/tsc for TS, go * for Go, rustup for Rust, ninja/ctest for C++, java/javac for Java
+### 📝 Documentation
+- add DeepWiki badge to README.md and README.en.md
+### 🔧 Maintenance
+- (golang-pro) remove redundant go test*/build*/run*/vet*/mod* entries — covered by go *
+- (languages) add full POSIX read shell baseline to all 11 agents — grep, rg, find, fd, cat, bat, head, tail, ls, wc, which, type, pwd, env, printenv, echo, file
 ## [8.3.0] - 2026-03-30
 ### ✨ Nouveautés
 - intelligent agent suggestion engine (v8.3.0) (#7)([63a987b](https://github.com/dmicheneau/opencode-template-agent/commit/63a987bff972a521ab2c2e3be8358f0eba3c101c))- add intelligent agent suggestion engine([9c72ea4](https://github.com/dmicheneau/opencode-template-agent/commit/9c72ea41be6f0b53b3efe608f7fdf402623ceb57))

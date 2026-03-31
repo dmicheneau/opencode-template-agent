@@ -19,6 +19,26 @@ permission:
     "cargo check*": allow
     "cargo doc*": allow
     "make*": allow
+    "rustup *": allow
+    "grep *": allow
+    "rg *": allow
+    "find *": allow
+    "fd *": allow
+    "cat *": allow
+    "bat *": allow
+    "head *": allow
+    "tail *": allow
+    "ls*": allow
+    "exa*": allow
+    "lsd*": allow
+    "wc *": allow
+    "which *": allow
+    "type *": allow
+    "pwd": allow
+    "env": allow
+    "printenv*": allow
+    "echo *": allow
+    "file *": allow
   task:
     "*": allow
 ---

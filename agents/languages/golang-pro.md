@@ -11,14 +11,29 @@ permission:
     git status: allow
     "git diff*": allow
     "git log*": allow
-    "go test*": allow
-    "go build*": allow
-    "go run*": allow
-    "go vet*": allow
-    "go mod*": allow
+    "go *": allow
     "golangci-lint*": allow
     "staticcheck*": allow
     "make*": allow
+    "grep *": allow
+    "rg *": allow
+    "find *": allow
+    "fd *": allow
+    "cat *": allow
+    "bat *": allow
+    "head *": allow
+    "tail *": allow
+    "ls*": allow
+    "exa*": allow
+    "lsd*": allow
+    "wc *": allow
+    "which *": allow
+    "type *": allow
+    "pwd": allow
+    "env": allow
+    "printenv*": allow
+    "echo *": allow
+    "file *": allow
   task:
     "*": allow
 ---

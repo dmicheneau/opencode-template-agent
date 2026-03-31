@@ -8,6 +8,7 @@
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Node](https://img.shields.io/badge/node-20%2B-green)
 ![npm](https://img.shields.io/npm/v/opencode-agents?label=npm&color=cb3837)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/dmicheneau/opencode-template-agent)
 
 Registre curé de **69 agents IA** pour [OpenCode](https://opencode.ai), distribué via un CLI zero-dependency et un TUI interactif. Les agents sont des fichiers `.md` contenant des system prompts pour configurer des assistants IA spécialisés.
 
