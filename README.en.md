@@ -10,7 +10,7 @@
 ![npm](https://img.shields.io/npm/v/opencode-agents?label=npm&color=cb3837)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/dmicheneau/opencode-template-agent)
 
-<video src="docs/assets/howtouse.mov" autoplay loop muted playsinline width="100%"></video>
+![Demo](docs/assets/howtouse.gif)
 
 Curated registry of **69 AI agents** for [OpenCode](https://opencode.ai), distributed via a zero-dependency CLI and interactive TUI. Agents are `.md` files containing system prompts that configure specialized AI assistants.
 
