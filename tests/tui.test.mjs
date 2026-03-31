@@ -640,14 +640,14 @@ describe('update — confirm mode', () => {
     const state = confirmState();
     const s1 = update(state, { action: Action.NO });
     assert.equal(s1.mode, 'browse');
-    assert.equal(s1.selection.size, 0);
+    assert.equal(s1.selection.size, 1);
   });
 
   it('ESCAPE returns to browse with empty selection', () => {
     const state = confirmState();
     const s1 = update(state, { action: Action.ESCAPE });
     assert.equal(s1.mode, 'browse');
-    assert.equal(s1.selection.size, 0);
+    assert.equal(s1.selection.size, 1);
   });
 
   it('unknown action is ignored', () => {
@@ -1023,7 +1023,7 @@ describe('S5 — pack auto-select and flash messages', () => {
     const empty = { ...state, installed: new Set() };
     const result = update(empty, { action: Action.CONFIRM });
     assert.equal(result.confirmContext.label, state.packDetail.packLabel);
-    assert.equal(result.confirmContext.count, result.install.agents.length);
+    assert.equal(result.install.agents.length, 2);
   });
 
   it('resetToBrowse clears flash and confirmContext', () => {
@@ -3021,7 +3021,7 @@ describe('update — INSTALL_ALL action', () => {
     const s1 = update(state, { action: Action.INSTALL_ALL });
     assert.ok(s1.confirmContext);
     assert.equal(s1.confirmContext.type, 'agents');
-    assert.equal(s1.confirmContext.count, 3);
+    assert.equal(s1.install.agents.length, 3);
   });
 
   it('respects active search filter — only selects matched agents', () => {
@@ -3054,9 +3054,9 @@ describe('update — INSTALL_ALL action', () => {
     // Cancel with NO
     const s1 = update(state, { action: Action.NO });
     assert.equal(s1.mode, 'browse');
-    assert.equal(s1.selection.size, 0);
-    // install stays as-is (confirm cancel doesn't call resetToBrowse)
-    assert.ok(s1.install, 'install object is preserved — confirm cancel does not clear it');
+    assert.equal(s1.selection.size, 3);   // selection preserved so user can adjust
+    assert.equal(s1.install, null);       // install cleared on cancel
+    assert.equal(s1.confirmContext, null); // confirmContext also cleared
   });
 });
 
@@ -3335,23 +3335,24 @@ describe('update — suggest mode (updateSuggest reducer)', () => {
     assert.equal(next.suggestCursor, 2);
   });
 
-  it('CONFIRM with selections transitions to browse mode', () => {
+  it('CONFIRM with selections transitions to confirm mode', () => {
     const state = makeSuggestReducerState({
       suggestSelected: new Set(['ai-engineer']),
     });
     const next = update(state, { action: Action.CONFIRM });
-    assert.equal(next.mode, 'browse');
+    assert.equal(next.mode, 'confirm');
   });
 
-  it('CONFIRM merges suggestSelected into agentStates (plain object, not replace)', () => {
+  it('CONFIRM with selections populates install.agents and clears suggestSelected', () => {
     const state = makeSuggestReducerState({
       suggestSelected: new Set(['ai-engineer']),
       agentStates: { 'postgres-pro': 'installed' },
     });
     const next = update(state, { action: Action.CONFIRM });
-    // New selection merged in
-    assert.equal(next.agentStates['ai-engineer'], 'selected');
-    // Pre-existing entry preserved
+    // install.agents populated with the matching agent objects
+    assert.deepEqual(next.install.agents, [{ name: 'ai-engineer' }]);
+    // agentStates is NOT mutated
+    assert.equal(next.agentStates['ai-engineer'], undefined);
     assert.equal(next.agentStates['postgres-pro'], 'installed');
   });
 
