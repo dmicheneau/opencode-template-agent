@@ -3,13 +3,10 @@
 All notable changes to this project will be documented in this file.
 
 ## [8.3.1] - 2026-03-31
-### ✨ Nouveautés
-- (languages) add targeted bash permissions to all 11 languages/ agents — bun/pnpm/tsc for TS, go * for Go, rustup for Rust, ninja/ctest for C++, java/javac for Java
+### 🐛 Corrections
+- (tui) trigger install flow when confirming auto-suggest selection([f19a535](https://github.com/dmicheneau/opencode-template-agent/commit/f19a535e282c97c587aaf1dbf38ab8f85f9712b5))- (languages) patch bash permissions on all 11 language agents([04eadf0](https://github.com/dmicheneau/opencode-template-agent/commit/04eadf0a8c3b5246ac60f8dcf95ca8e1b2b8fd72))- (ci) remove remote.github from cliff.toml — causes git-cliff panic on metadata fetch([3e2e666](https://github.com/dmicheneau/opencode-template-agent/commit/3e2e6663572b643a2a963577de8df5e573899e7a))
 ### 📝 Documentation
-- add DeepWiki badge to README.md and README.en.md
-### 🔧 Maintenance
-- (golang-pro) remove redundant go test*/build*/run*/vet*/mod* entries — covered by go *
-- (languages) add full POSIX read shell baseline to all 11 agents — grep, rg, find, fd, cat, bat, head, tail, ls, wc, which, type, pwd, env, printenv, echo, file
+- update CHANGELOG.md for v8.3.0([3f6345f](https://github.com/dmicheneau/opencode-template-agent/commit/3f6345f97694c1513ef58adf6da05eb4c32b5c67))
 ## [8.3.0] - 2026-03-30
 ### ✨ Nouveautés
 - intelligent agent suggestion engine (v8.3.0) (#7)([63a987b](https://github.com/dmicheneau/opencode-template-agent/commit/63a987bff972a521ab2c2e3be8358f0eba3c101c))- add intelligent agent suggestion engine([9c72ea4](https://github.com/dmicheneau/opencode-template-agent/commit/9c72ea41be6f0b53b3efe608f7fdf402623ceb57))
@@ -87,6 +84,7 @@ All notable changes to this project will be documented in this file.
 - sprint 0 — security + quality fixes from agent reviews([26c7cb2](https://github.com/dmicheneau/opencode-template-agent/commit/26c7cb2090352369df1d479b3c6c278307030916))- sprint 1 — stabilisation code + documentation([55f3a7c](https://github.com/dmicheneau/opencode-template-agent/commit/55f3a7c39df8fdaeb66316c469487afc835dd605))- sprint corrections — address review findings from session 5([e9cabff](https://github.com/dmicheneau/opencode-template-agent/commit/e9cabff02cf01c4922080536a348795e71aa7c78))- security hardening — path traversal guard, redirect limit, response cap([1052113](https://github.com/dmicheneau/opencode-template-agent/commit/105211323a3450efe45e7dca3c02ec6f3b2c8631))
 ### 📝 Documentation
 - phase 3 — CODE_OF_CONDUCT, README polish, progression update([8047b41](https://github.com/dmicheneau/opencode-template-agent/commit/8047b41b8233aa7b7e1b6ce5e7f3d81a4e571eea))- close phase 2 — update roadmap and progression journal([3632c83](https://github.com/dmicheneau/opencode-template-agent/commit/3632c83fa9465d1b5ac37c028fc27c4d6e6af711))- update progression journal (sessions 7-8) and roadmap phase 3([8d444f0](https://github.com/dmicheneau/opencode-template-agent/commit/8d444f0bce73d64e56b95e11e34d3b5616a4b298))- add CLI npm section to README (FR + EN)([a45888a](https://github.com/dmicheneau/opencode-template-agent/commit/a45888a3e29331618ba56a84627459ebb9a3e794))
+**Full Changelog**: [v8.3.0...v8.3.1](https://github.com/dmicheneau/opencode-template-agent/compare/v8.3.0...v8.3.1)
 **Full Changelog**: [v8.2.0...v8.3.0](https://github.com/dmicheneau/opencode-template-agent/compare/v8.2.0...v8.3.0)
 **Full Changelog**: [v8.1.0...v8.2.0](https://github.com/dmicheneau/opencode-template-agent/compare/v8.1.0...v8.2.0)
 **Full Changelog**: [v8.0.0...v8.1.0](https://github.com/dmicheneau/opencode-template-agent/compare/v8.0.0...v8.1.0)
