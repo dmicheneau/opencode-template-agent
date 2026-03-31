@@ -4,9 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [8.3.1] - 2026-03-31
 ### 🐛 Corrections
-- (tui) trigger install flow when confirming auto-suggest selection([f19a535](https://github.com/dmicheneau/opencode-template-agent/commit/f19a535e282c97c587aaf1dbf38ab8f85f9712b5))- (languages) patch bash permissions on all 11 language agents([04eadf0](https://github.com/dmicheneau/opencode-template-agent/commit/04eadf0a8c3b5246ac60f8dcf95ca8e1b2b8fd72))- (ci) remove remote.github from cliff.toml — causes git-cliff panic on metadata fetch([3e2e666](https://github.com/dmicheneau/opencode-template-agent/commit/3e2e6663572b643a2a963577de8df5e573899e7a))
+- (tui) trigger install flow when confirming auto-suggest selection([f19a535](https://github.com/dmicheneau/opencode-template-agent/commit/f19a535e282c97c587aaf1dbf38ab8f85f9712b5))- (languages) patch bash permissions on all 11 language agents([04eadf0](https://github.com/dmicheneau/opencode-template-agent/commit/04eadf0a8c3b5246ac60f8dcf95ca8e1b2b8fd72))- (ci) remove remote.github from cliff.toml — causes git-cliff panic on metadata fetch([3e2e666](https://github.com/dmicheneau/opencode-template-agent/commit/3e2e6663572b643a2a963577de8df5e573899e7a))- (ci) add offline=true to cliff.toml remote.github — workaround git-cliff v2.12.0 regression (#1336)([66223c8](https://github.com/dmicheneau/opencode-template-agent/commit/66223c8da1c42e1ac7de7f5887d941752da16f35))
 ### 📝 Documentation
-- update CHANGELOG.md for v8.3.0([3f6345f](https://github.com/dmicheneau/opencode-template-agent/commit/3f6345f97694c1513ef58adf6da05eb4c32b5c67))
+- update CHANGELOG.md for v8.3.0([3f6345f](https://github.com/dmicheneau/opencode-template-agent/commit/3f6345f97694c1513ef58adf6da05eb4c32b5c67))- update CHANGELOG.md for v8.3.1([6331a6e](https://github.com/dmicheneau/opencode-template-agent/commit/6331a6e9eae38661ecf21d60b2f999aca8555d4b))
 ## [8.3.0] - 2026-03-30
 ### ✨ Nouveautés
 - intelligent agent suggestion engine (v8.3.0) (#7)([63a987b](https://github.com/dmicheneau/opencode-template-agent/commit/63a987bff972a521ab2c2e3be8358f0eba3c101c))- add intelligent agent suggestion engine([9c72ea4](https://github.com/dmicheneau/opencode-template-agent/commit/9c72ea41be6f0b53b3efe608f7fdf402623ceb57))
