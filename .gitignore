@@ -33,4 +33,4 @@ node_modules/
 bun.lock
 
 # OpenCode working files
-.opencode/*
+.opencode/agents/
