@@ -466,8 +466,9 @@ Le changelog est généré automatiquement à partir de l'historique Git via [gi
 ### Fonctionnement
 
 1. **Tag push** — pousser un tag `v*` (ex: `git tag v8.0.0 && git push --tags`)
-2. **Génération du changelog** — git-cliff analyse les commits depuis le dernier tag et génère un changelog structuré
-3. **GitHub Release** — une release est créée automatiquement avec le changelog comme corps
+2. **CI obligatoire** — le workflow de release attend que lint, tests et validate-agents passent (`ci.yml` via `workflow_call`) avant de continuer
+3. **Génération du changelog** — git-cliff analyse les commits depuis le dernier tag et génère un changelog structuré
+4. **GitHub Release** — une release est créée automatiquement avec le changelog comme corps
 
 ### Catégories du changelog
 

@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [8.3.2] - 2026-04-01
+
+### Fixed
+
+- Release workflow now enforces CI checks (lint, tests, validate-agents) before creating a release — pushing a `v*` tag previously bypassed all CI verification
+
 ## [8.3.1] - 2026-03-31
 ### 🐛 Corrections
 - (tui) trigger install flow when confirming auto-suggest selection([f19a535](https://github.com/dmicheneau/opencode-template-agent/commit/f19a535e282c97c587aaf1dbf38ab8f85f9712b5))- (languages) patch bash permissions on all 11 language agents([04eadf0](https://github.com/dmicheneau/opencode-template-agent/commit/04eadf0a8c3b5246ac60f8dcf95ca8e1b2b8fd72))- (ci) remove remote.github from cliff.toml — causes git-cliff panic on metadata fetch([3e2e666](https://github.com/dmicheneau/opencode-template-agent/commit/3e2e6663572b643a2a963577de8df5e573899e7a))- (ci) add offline=true to cliff.toml remote.github — workaround git-cliff v2.12.0 regression (#1336)([66223c8](https://github.com/dmicheneau/opencode-template-agent/commit/66223c8da1c42e1ac7de7f5887d941752da16f35))

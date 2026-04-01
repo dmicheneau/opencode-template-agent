@@ -12,7 +12,15 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
+    # Note: rapid successive v* tag pushes may cancel each other's CI run
+    # due to ci.yml's concurrency cancel-in-progress setting. This is a known
+    # edge case and acceptable given the rarity of double-tag pushes.
+
   release:
+    needs: ci
     runs-on: ubuntu-latest
     timeout-minutes: 10
     defaults:
