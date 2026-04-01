@@ -3,11 +3,10 @@
 All notable changes to this project will be documented in this file.
 
 ## [8.3.2] - 2026-04-01
-
-### Fixed
-
-- Release workflow now enforces CI checks (lint, tests, validate-agents) before creating a release — pushing a `v*` tag previously bypassed all CI verification
-
+### 🐛 Corrections
+- (tests) update tui tests to match new confirm/suggest flow([7a8d150](https://github.com/dmicheneau/opencode-template-agent/commit/7a8d1506d513490a17f0b1bbc6453bdf255a8f1b))- enforce CI checks before release on tag push([d261cdf](https://github.com/dmicheneau/opencode-template-agent/commit/d261cdfcdb661c4b1bd07b82bb55d34c85c39fd3))
+### 📝 Documentation
+- update CHANGELOG.md for v8.3.1([938f8de](https://github.com/dmicheneau/opencode-template-agent/commit/938f8de1d2e85ab82a5b8aba82212e467c6c2cc1))- add demo video to README and move to docs/assets([d3354c1](https://github.com/dmicheneau/opencode-template-agent/commit/d3354c12a8eb6d9fa5acc24a2a77130ed33d0ef1))- regenerate README scores for updated language agents([9ed54e1](https://github.com/dmicheneau/opencode-template-agent/commit/9ed54e1e4d0e51410b3376a1520f6d7b640e09cf))- replace video tag with animated GIF demo in README([232e4e5](https://github.com/dmicheneau/opencode-template-agent/commit/232e4e55cf47d5a0f1d47ae3c29f250395a3fa64))- improve GIF readability — crop empty space and scale to 900px([c4c6300](https://github.com/dmicheneau/opencode-template-agent/commit/c4c63008067fc54b0c457df488aaa1f6713c5a89))- crop GIF to 70% width centered and remove empty vertical space([13bd609](https://github.com/dmicheneau/opencode-template-agent/commit/13bd609ed05371f8087cd474d761f3edc2369940))- fix GIF crop — include full header and tighten to content bounds([0ea9d46](https://github.com/dmicheneau/opencode-template-agent/commit/0ea9d46171641a861a615d1f1a9cb575117bf603))
 ## [8.3.1] - 2026-03-31
 ### 🐛 Corrections
 - (tui) trigger install flow when confirming auto-suggest selection([f19a535](https://github.com/dmicheneau/opencode-template-agent/commit/f19a535e282c97c587aaf1dbf38ab8f85f9712b5))- (languages) patch bash permissions on all 11 language agents([04eadf0](https://github.com/dmicheneau/opencode-template-agent/commit/04eadf0a8c3b5246ac60f8dcf95ca8e1b2b8fd72))- (ci) remove remote.github from cliff.toml — causes git-cliff panic on metadata fetch([3e2e666](https://github.com/dmicheneau/opencode-template-agent/commit/3e2e6663572b643a2a963577de8df5e573899e7a))- (ci) add offline=true to cliff.toml remote.github — workaround git-cliff v2.12.0 regression (#1336)([66223c8](https://github.com/dmicheneau/opencode-template-agent/commit/66223c8da1c42e1ac7de7f5887d941752da16f35))
@@ -90,6 +89,7 @@ All notable changes to this project will be documented in this file.
 - sprint 0 — security + quality fixes from agent reviews([26c7cb2](https://github.com/dmicheneau/opencode-template-agent/commit/26c7cb2090352369df1d479b3c6c278307030916))- sprint 1 — stabilisation code + documentation([55f3a7c](https://github.com/dmicheneau/opencode-template-agent/commit/55f3a7c39df8fdaeb66316c469487afc835dd605))- sprint corrections — address review findings from session 5([e9cabff](https://github.com/dmicheneau/opencode-template-agent/commit/e9cabff02cf01c4922080536a348795e71aa7c78))- security hardening — path traversal guard, redirect limit, response cap([1052113](https://github.com/dmicheneau/opencode-template-agent/commit/105211323a3450efe45e7dca3c02ec6f3b2c8631))
 ### 📝 Documentation
 - phase 3 — CODE_OF_CONDUCT, README polish, progression update([8047b41](https://github.com/dmicheneau/opencode-template-agent/commit/8047b41b8233aa7b7e1b6ce5e7f3d81a4e571eea))- close phase 2 — update roadmap and progression journal([3632c83](https://github.com/dmicheneau/opencode-template-agent/commit/3632c83fa9465d1b5ac37c028fc27c4d6e6af711))- update progression journal (sessions 7-8) and roadmap phase 3([8d444f0](https://github.com/dmicheneau/opencode-template-agent/commit/8d444f0bce73d64e56b95e11e34d3b5616a4b298))- add CLI npm section to README (FR + EN)([a45888a](https://github.com/dmicheneau/opencode-template-agent/commit/a45888a3e29331618ba56a84627459ebb9a3e794))
+**Full Changelog**: [v8.3.1...v8.3.2](https://github.com/dmicheneau/opencode-template-agent/compare/v8.3.1...v8.3.2)
 **Full Changelog**: [v8.3.0...v8.3.1](https://github.com/dmicheneau/opencode-template-agent/compare/v8.3.0...v8.3.1)
 **Full Changelog**: [v8.2.0...v8.3.0](https://github.com/dmicheneau/opencode-template-agent/compare/v8.2.0...v8.3.0)
 **Full Changelog**: [v8.1.0...v8.2.0](https://github.com/dmicheneau/opencode-template-agent/compare/v8.1.0...v8.2.0)
